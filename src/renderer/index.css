@@ -1,62 +1,39 @@
 @import "tailwindcss";
 
-@theme {
-  --color-last-canvas: #f5efe4;
-  --color-last-canvas-deep: #ddd2c1;
-  --color-last-ink: #201a14;
-  --color-last-muted: #665d52;
-  --color-last-accent: #a6481f;
-  --font-sans: 'Aptos', 'Segoe UI Variable', 'Segoe UI', sans-serif;
-  --font-mono: 'Cascadia Code', 'Consolas', monospace;
-}
-
-:root {
-  color: var(--color-last-ink);
-  font-family: var(--font-sans);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
 html,
 body,
 #root {
-  min-height: 100%;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(250, 211, 163, 0.7), transparent 30%),
-    radial-gradient(circle at top right, rgba(92, 138, 166, 0.16), transparent 24%),
-    linear-gradient(180deg, var(--color-last-canvas), var(--color-last-canvas-deep));
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0a0a0a;
+  color: #e5e5e5;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image: linear-gradient(rgba(32, 26, 20, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(32, 26, 20, 0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
-  -webkit-mask-image: radial-gradient(circle at center, black, transparent 85%);
-  mask-image: radial-gradient(circle at center, black, transparent 85%);
+.titlebar-drag {
+  -webkit-app-region: drag;
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-
-::selection {
-  background: rgba(166, 72, 31, 0.18);
+.titlebar-no-drag {
+  -webkit-app-region: no-drag;
 }

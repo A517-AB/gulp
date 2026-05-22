@@ -7,7 +7,12 @@
     "types": ["node"],
     "skipLibCheck": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@renderer": ["./src/renderer/index.ts"],
+      "@renderer/*": ["./src/renderer/*"],
+      "@shared": ["./src/shared/index.ts"],
+      "@shared/*": ["./src/shared/*"],
+      "@electron/*": ["./src/electron/*"]
     },
 
     /* Bundler mode */
