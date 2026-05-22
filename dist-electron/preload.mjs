@@ -1,0 +1,1 @@
+let e=require("electron");console.info(`[electron:preload] exposing lastBridge`),e.contextBridge.exposeInMainWorld(`lastBridge`,{getShellSnapshot:()=>e.ipcRenderer.invoke(`last:get-shell-snapshot`),getDiagnostics:(t=!1)=>e.ipcRenderer.invoke(`last:get-diagnostics`,t),savePreferences:t=>e.ipcRenderer.invoke(`last:save-preferences`,t)});
