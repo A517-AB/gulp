@@ -12,7 +12,11 @@
       "@renderer/*": ["./src/renderer/*"],
       "@shared": ["./src/shared/index.ts"],
       "@shared/*": ["./src/shared/*"],
-      "@electron/*": ["./src/electron/*"]
+      "@electron/*": ["./src/electron/*"],
+      "@renderer/shell": ["./src/renderer/shell/index.ts"],
+      "@renderer/shell/*": ["./src/renderer/shell/*"],
+      "@renderer/core": ["./src/renderer/core/index.ts"],
+      "@renderer/core/*": ["./src/renderer/core/*"]
     },
 
     /* Bundler mode */

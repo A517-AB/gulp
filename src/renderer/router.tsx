@@ -2,7 +2,7 @@ import type { RouteObject } from 'react-router';
 import { createHashRouter } from 'react-router';
 import { isElectron, isWeb } from '@shared';
 import { RootLayout } from '@renderer/layouts';
-import { ErrorBoundary } from '@renderer/components';
+import { ErrorBoundary } from '@renderer/core';
 import { HomePage, ProjectsPage, SettingsPage } from '@renderer/pages';
 
 /** Available on both electron and web. */

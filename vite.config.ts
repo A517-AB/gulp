@@ -16,6 +16,8 @@ export default defineConfig({
       '@renderer': fileURLToPath(new URL('./src/renderer', import.meta.url)),
       '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
       '@electron': fileURLToPath(new URL('./src/electron', import.meta.url)),
+      '@renderer/shell': fileURLToPath(new URL('./src/renderer/shell', import.meta.url)),
+      '@renderer/core': fileURLToPath(new URL('./src/renderer/core', import.meta.url)),
     },
   },
   server: {

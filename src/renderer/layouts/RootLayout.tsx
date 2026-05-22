@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Outlet } from 'react-router';
-import { TitleBar, TopBar } from '@renderer/components';
+import { TitleBar, TopBar } from '@renderer/shell';
 
 export default function RootLayout(): ReactNode {
   return (
