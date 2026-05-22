@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { registerSdkHandlers } from './jules/handlers.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,10 +10,10 @@ console.log('[Electron Main] Starting Electron process...');
 
 let mainWindow: BrowserWindow | null = null;
 
-const createWindow = async (): Promise<void> => {
-  mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+const createWindow = async (): Promise<BrowserWindow> => {
+  const win = new BrowserWindow({
+    width: 1280,
+    height: 800,
     frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
@@ -25,21 +26,23 @@ const createWindow = async (): Promise<void> => {
 
   try {
     if (devUrl) {
-      await mainWindow.loadURL(devUrl);
+      await win.loadURL(devUrl);
     } else {
-      await mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+      await win.loadFile(path.join(__dirname, '../dist/index.html'));
     }
   } catch (error: unknown) {
     console.error('Failed to load app:', error instanceof Error ? error.message : error);
   }
 
-  mainWindow.on('closed', () => {
+  win.on('closed', () => {
     mainWindow = null;
   });
+
+  return win;
 };
 
 app.whenReady()
-  .then(() => {
+  .then(async () => {
     ipcMain.handle('ping', () => 'pong');
 
     ipcMain.on('window-minimize', () => mainWindow?.minimize());
@@ -54,7 +57,8 @@ app.whenReady()
 
     ipcMain.on('window-close', () => mainWindow?.close());
 
-    void createWindow();
+    mainWindow = await createWindow();
+    registerSdkHandlers();
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {

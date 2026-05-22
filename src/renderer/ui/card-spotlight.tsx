@@ -1,6 +1,6 @@
 
 import { useMotionValue, motion, useMotionTemplate } from "framer-motion";
-import { MouseEvent } from "react";
+import type { MouseEvent } from "react";
 import { cn } from "@/utils";
 
 interface CardSpotlightProps {

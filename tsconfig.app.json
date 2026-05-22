@@ -16,7 +16,11 @@
       "@renderer/shell": ["./src/renderer/shell/index.ts"],
       "@renderer/shell/*": ["./src/renderer/shell/*"],
       "@renderer/core": ["./src/renderer/core/index.ts"],
-      "@renderer/core/*": ["./src/renderer/core/*"]
+      "@renderer/core/*": ["./src/renderer/core/*"],
+      "@/ui": ["./src/renderer/ui"],
+      "@/ui/*": ["./src/renderer/ui/*"],
+      "@/utils": ["./src/renderer/utils/index.ts"],
+      "@/utils/*": ["./src/renderer/utils/*"]
     },
 
     /* Bundler mode */
@@ -47,5 +51,11 @@
     "strictPropertyInitialization": true,
     "noImplicitAny": true,
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/electron/jules/advanced-session.ts",
+    "src/electron/jules/agent.ts",
+    "src/electron/jules/basic-session.ts",
+    "src/electron/jules/file-system-events.ts"
+  ]
 }

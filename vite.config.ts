@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+﻿import { defineConfig } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
@@ -12,18 +12,23 @@ export default defineConfig({
   clearScreen: false,
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@/ui': fileURLToPath(new URL('./src/renderer/ui', import.meta.url)),
+      '@/utils': fileURLToPath(new URL('./src/renderer/utils', import.meta.url)),
+      '@renderer/shell': fileURLToPath(new URL('./src/renderer/shell', import.meta.url)),
+      '@renderer/core': fileURLToPath(new URL('./src/renderer/core', import.meta.url)),
       '@renderer': fileURLToPath(new URL('./src/renderer', import.meta.url)),
       '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
       '@electron': fileURLToPath(new URL('./src/electron', import.meta.url)),
-      '@renderer/shell': fileURLToPath(new URL('./src/renderer/shell', import.meta.url)),
-      '@renderer/core': fileURLToPath(new URL('./src/renderer/core', import.meta.url)),
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   server: {
     host: '127.0.0.1',
     port: 5173,
     strictPort: true,
+    hmr: {
+      overlay: false
+    }
   },
   preview: {
     host: '127.0.0.1',

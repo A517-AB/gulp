@@ -4,7 +4,7 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "esnext",
-    "types": ["node"],
+    "types": ["node", "vite/client"],
     "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"],
@@ -16,7 +16,9 @@
       "@renderer/shell": ["./src/renderer/shell/index.ts"],
       "@renderer/shell/*": ["./src/renderer/shell/*"],
       "@renderer/core": ["./src/renderer/core/index.ts"],
-      "@renderer/core/*": ["./src/renderer/core/*"]
+      "@renderer/core/*": ["./src/renderer/core/*"],
+      "@/utils": ["./src/renderer/utils/index.ts"],
+      "@/utils/*": ["./src/renderer/utils/*"]
     },
 
     /* Bundler mode */
@@ -39,5 +41,11 @@
     "noUncheckedIndexedAccess": true,
     "useUnknownInCatchVariables": true
   },
-  "include": ["src/electron/**/*.ts", "src/electron/**/*.mts", "vite.config.ts", "src/shared/bridge.ts"]
+  "include": ["src/electron/**/*.ts", "src/electron/**/*.mts", "vite.config.ts", "src/shared/bridge.ts"],
+  "exclude": [
+    "src/electron/jules/advanced-session.ts",
+    "src/electron/jules/agent.ts",
+    "src/electron/jules/basic-session.ts",
+    "src/electron/jules/file-system-events.ts"
+  ]
 }

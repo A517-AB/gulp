@@ -13,6 +13,7 @@ interface NavItem {
 const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Home', to: '/', platform: 'shared' },
   { label: 'Projects', to: '/projects', platform: 'electron' },
+  { label: 'Workbench', to: '/workbench', platform: 'electron' },
   { label: 'Settings', to: '/settings', platform: 'shared' },
 ] as const;
 

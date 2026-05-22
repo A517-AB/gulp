@@ -3,7 +3,7 @@ import { createHashRouter } from 'react-router';
 import { isElectron, isWeb } from '@shared';
 import { RootLayout } from '@renderer/layouts';
 import { ErrorBoundary } from '@renderer/core';
-import { HomePage, ProjectsPage, SettingsPage } from '@renderer/pages';
+import { HomePage, ProjectsPage, SettingsPage, WorkbenchPage } from '@renderer/pages';
 
 /** Available on both electron and web. */
 const sharedRoutes: readonly RouteObject[] = [
@@ -24,6 +24,11 @@ const electronRoutes: readonly RouteObject[] = [
   {
     path: 'projects',
     element: <ProjectsPage />,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: 'workbench',
+    element: <WorkbenchPage />,
     errorElement: <ErrorBoundary />,
   },
 ];
