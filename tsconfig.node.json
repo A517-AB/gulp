@@ -5,8 +5,8 @@
     "lib": ["ES2022"],
     "module": "esnext",
     "types": ["node", "vite/client"],
-    "skipLibCheck": true,
     "paths": {
+      "@google/jules-sdk": ["./references/jules-sdk typed.ts"],
       "@/*": ["./src/*"],
       "@renderer": ["./src/renderer/index.ts"],
       "@renderer/*": ["./src/renderer/*"],

@@ -5,8 +5,8 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "esnext",
     "types": ["vite/client"],
-    "skipLibCheck": true,
     "paths": {
+      "@google/jules-sdk": ["./references/jules-sdk typed.ts"],
       "@/*": ["./src/*"],
       "@renderer": ["./src/renderer/index.ts"],
       "@renderer/*": ["./src/renderer/*"],
