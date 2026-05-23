@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { jules } from '@google/jules-sdk'
+import { jules, validateQuery } from '@google/jules-sdk'
 import { registerRepolessHandlers } from './repoless/index.js'
 import type {
   ListSessionsOptions,
@@ -10,7 +10,9 @@ import type {
   SessionState,
   SessionClient,
   JulesClient,
+  Source,
 } from '@google/jules-sdk'
+import type { BatchOptions, FullSessionResult } from '../../shared/types.js'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 
@@ -25,7 +27,7 @@ type Sender = Electron.WebContents
 
 function serialize<T>(data: T): T {
   if (data === undefined || data === null) return data
-  return JSON.parse(JSON.stringify(data))
+  return JSON.parse(JSON.stringify(data)) as T
 }
 
 function send(sender: Sender, ch: string, payload?: unknown) {
@@ -54,7 +56,7 @@ function wrapHandler<Args extends unknown[], R>(
         // can differentiate between network errors, auth errors, etc.
         for (const key of ['status', 'code'] as const) {
           if (key in err) {
-            (wrapped as Record<string, unknown>)[key] = (err as Record<string, unknown>)[key]
+            (wrapped as unknown as Record<string, unknown>)[key] = (err as unknown as Record<string, unknown>)[key]
           }
         }
       }
@@ -63,6 +65,16 @@ function wrapHandler<Args extends unknown[], R>(
   }
 }
 
+// ── mutable client reference ──────────────────────────────────────────────────
+// `jules.with()` returns a NEW client; we store the active one so that
+// reconfiguration (e.g. switching API key) actually takes effect.
+
+let activeClient: JulesClient = jules
+
+// ── sync abort support ────────────────────────────────────────────────────────
+
+let syncAbortController: AbortController | null = null
+
 // ── registration ──────────────────────────────────────────────────────────────
 
 export function registerSdkHandlers() {
@@ -70,97 +82,147 @@ export function registerSdkHandlers() {
   // ── client ──────────────────────────────────────────────────────────────────
 
   ipcMain.handle('sdk:client.sessions', wrapHandler(async (_, options?: ListSessionsOptions) => {
-    const sessions = await jules.sessions(options).all()
+    const sessions = await activeClient.sessions(options).all()
     return serialize(sessions)
   }))
 
   ipcMain.handle('sdk:client.sessions.stream.start', wrapHandler(async (event, options?: ListSessionsOptions) => {
-    for await (const item of jules.sessions(options)) {
+    for await (const item of activeClient.sessions(options)) {
       if (event.sender.isDestroyed()) break
       send(event.sender, 'sdk:client.sessions.item', item)
     }
     send(event.sender, 'sdk:client.sessions.done')
   }))
 
-  ipcMain.handle('sdk:client.sync', wrapHandler(async (event, options?: SyncOptions) =>
-    serialize(await jules.sync({
-      ...options,
-      onProgress: (p) => send(event.sender, 'sdk:client.sync.progress', p),
-    }))
-  ))
+  ipcMain.handle('sdk:client.sync', wrapHandler(async (event, options?: SyncOptions) => {
+    syncAbortController = new AbortController()
+    try {
+      return serialize(await activeClient.sync({
+        ...options,
+        signal: syncAbortController.signal,
+        onProgress: (p) => send(event.sender, 'sdk:client.sync.progress', p),
+      }))
+    } finally {
+      syncAbortController = null
+    }
+  }))
+
+  ipcMain.handle('sdk:client.sync.abort', wrapHandler(async () => {
+    syncAbortController?.abort()
+    syncAbortController = null
+  }))
 
   ipcMain.handle('sdk:client.select', wrapHandler(async (_, query: JulesQuery<JulesDomain>) =>
-    serialize(await jules.select(query))
+    serialize(await activeClient.select(query))
   ))
 
   ipcMain.handle('sdk:client.getSessionResource', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).info())
+    serialize(await activeClient.session(id).info())
   ))
 
   ipcMain.handle('sdk:client.run', wrapHandler(async (_, config: SessionConfig) =>
-    serialize(await jules.run(config))
+    serialize(await activeClient.run(config))
   ))
 
-  ipcMain.handle('sdk:client.with', wrapHandler(async (_, options: JulesOptions) =>
-    serialize(await jules.with(options))
+  ipcMain.handle('sdk:client.all', wrapHandler(async (event, configs: SessionConfig[], options?: BatchOptions) => {
+    const batchOpts: { concurrency?: number; stopOnError?: boolean; delayMs?: number } = {}
+    if (options?.concurrency !== undefined) batchOpts.concurrency = options.concurrency
+    if (options?.stopOnError !== undefined) batchOpts.stopOnError = options.stopOnError
+    if (options?.delayMs !== undefined) batchOpts.delayMs = options.delayMs
+
+    const sessions = await activeClient.all(
+      configs,
+      (config) => config,
+      batchOpts,
+    )
+    // Emit per-session IDs as they become available
+    const results = sessions.map(s => {
+      send(event.sender, 'sdk:client.all.session', { id: s.id })
+      return { id: s.id }
+    })
+    return serialize(results)
+  }))
+
+  ipcMain.handle('sdk:client.with', wrapHandler(async (_, options: JulesOptions) => {
+    activeClient = activeClient.with(options)
+  }))
+
+  ipcMain.handle('sdk:client.validate', wrapHandler(async (_, query: unknown) =>
+    serialize(validateQuery(query))
   ))
 
   // ── session ──────────────────────────────────────────────────────────────────
-  // NOTE: jules.session(id) is called fresh on every request. This is intentional
-  // — the SDK returns a lightweight, stateless client handle (no caching needed).
+  // NOTE: activeClient.session(id) is called fresh on every request. This is
+  // intentional — the SDK returns a lightweight, stateless client handle.
 
   ipcMain.handle('sdk:session.send', wrapHandler(async (_, id: string, prompt: string) =>
-    serialize(await jules.session(id).send(prompt))
+    serialize(await activeClient.session(id).send(prompt))
   ))
 
   ipcMain.handle('sdk:session.ask', wrapHandler(async (_, id: string, prompt: string) =>
-    serialize(await jules.session(id).ask(prompt))
+    serialize(await activeClient.session(id).ask(prompt))
   ))
 
   ipcMain.handle('sdk:session.approve', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).approve())
+    serialize(await activeClient.session(id).approve())
   ))
 
   ipcMain.handle('sdk:session.info', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).info())
+    serialize(await activeClient.session(id).info())
   ))
 
   ipcMain.handle('sdk:session.result', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).result())
+    serialize(await activeClient.session(id).result())
   ))
+
+  ipcMain.handle('sdk:session.result.full', wrapHandler(async (_, id: string) => {
+    const outcome = await activeClient.session(id).result()
+    const cs = outcome.changeSet()
+    const result: FullSessionResult = {
+      state: outcome.state,
+      generatedFiles: outcome.generatedFiles().all(),
+    }
+    if (outcome.pullRequest) {
+      result.pullRequest = outcome.pullRequest
+    }
+    if (cs) {
+      result.changeSet = {
+        source: cs.source,
+        gitPatch: cs.gitPatch,
+        parsed: cs.parsed(),
+      }
+    }
+    return serialize(result)
+  }))
 
   ipcMain.handle('sdk:session.waitFor', wrapHandler(async (_, id: string, state: SessionState) =>
-    serialize(await jules.session(id).waitFor(state))
+    serialize(await activeClient.session(id).waitFor(state))
   ))
 
-  ipcMain.handle('sdk:session.snapshot', wrapHandler(async (_, id: string, options?: { activities?: boolean }) =>
-    serialize(await jules.session(id).snapshot(options))
-  ))
+  ipcMain.handle('sdk:session.snapshot', wrapHandler(async (_, id: string, options?: { activities?: boolean }) => {
+    const snapshot = await activeClient.session(id).snapshot(options)
+    // Call .toJSON() to get a fully serializable form with all derived data
+    return serialize(snapshot.toJSON())
+  }))
 
   ipcMain.handle('sdk:session.archive', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).archive())
+    serialize(await activeClient.session(id).archive())
   ))
 
   ipcMain.handle('sdk:session.unarchive', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).unarchive())
+    serialize(await activeClient.session(id).unarchive())
   ))
 
   ipcMain.handle('sdk:session.select', wrapHandler(async (_, id: string, options?: SelectOptions) =>
-    serialize(await jules.session(id).select(options))
+    serialize(await activeClient.session(id).select(options))
   ))
 
   ipcMain.handle('sdk:session.hydrate', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).activities.hydrate())
+    serialize(await activeClient.session(id).activities.hydrate())
   ))
 
   ipcMain.handle('sdk:session.stream.start', wrapHandler(async (event, id: string, options?: StreamActivitiesOptions) => {
-    const streamOpts: StreamActivitiesOptions = {
-      ...options,
-      // Fresh sessions (especially repoless) may not be available for activity
-      // polling immediately after creation — bump retries to avoid 404 race.
-      initialRetries: Math.max(options?.initialRetries ?? 0, 20),
-    }
-    for await (const item of jules.session(id).stream(streamOpts)) {
+    for await (const item of activeClient.session(id).stream(options)) {
       if (event.sender.isDestroyed()) break
       send(event.sender, `sdk:session.stream:${id}`, item)
     }
@@ -168,7 +230,7 @@ export function registerSdkHandlers() {
   }))
 
   ipcMain.handle('sdk:session.history.start', wrapHandler(async (event, id: string) => {
-    for await (const item of jules.session(id).history()) {
+    for await (const item of activeClient.session(id).history()) {
       if (event.sender.isDestroyed()) break
       send(event.sender, `sdk:session.history:${id}`, item)
     }
@@ -176,7 +238,7 @@ export function registerSdkHandlers() {
   }))
 
   ipcMain.handle('sdk:session.updates.start', wrapHandler(async (event, id: string) => {
-    for await (const item of jules.session(id).updates()) {
+    for await (const item of activeClient.session(id).updates()) {
       if (event.sender.isDestroyed()) break
       send(event.sender, `sdk:session.updates:${id}`, item)
     }
@@ -184,27 +246,25 @@ export function registerSdkHandlers() {
   }))
 
   // ── activities ────────────────────────────────────────────────────────────────
-  // NOTE: jules.session(id) is called fresh on every request. This is intentional
-  // — the SDK returns a lightweight, stateless client handle (no caching needed).
 
   ipcMain.handle('sdk:activities.hydrate', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).activities.hydrate())
+    serialize(await activeClient.session(id).activities.hydrate())
   ))
 
   ipcMain.handle('sdk:activities.select', wrapHandler(async (_, id: string, options?: SelectOptions) =>
-    serialize(await jules.session(id).activities.select(options))
+    serialize(await activeClient.session(id).activities.select(options))
   ))
 
   ipcMain.handle('sdk:activities.list', wrapHandler(async (_, id: string, options?: ListOptions) =>
-    serialize(await jules.session(id).activities.list(options))
+    serialize(await activeClient.session(id).activities.list(options))
   ))
 
   ipcMain.handle('sdk:activities.get', wrapHandler(async (_, id: string, activityId: string) =>
-    serialize(await jules.session(id).activities.get(activityId))
+    serialize(await activeClient.session(id).activities.get(activityId))
   ))
 
   ipcMain.handle('sdk:activities.history.start', wrapHandler(async (event, id: string) => {
-    for await (const item of jules.session(id).activities.history()) {
+    for await (const item of activeClient.session(id).activities.history()) {
       if (event.sender.isDestroyed()) break
       send(event.sender, `sdk:activities.history:${id}`, item)
     }
@@ -212,7 +272,7 @@ export function registerSdkHandlers() {
   }))
 
   ipcMain.handle('sdk:activities.updates.start', wrapHandler(async (event, id: string) => {
-    for await (const item of jules.session(id).activities.updates()) {
+    for await (const item of activeClient.session(id).activities.updates()) {
       if (event.sender.isDestroyed()) break
       send(event.sender, `sdk:activities.updates:${id}`, item)
     }
@@ -220,7 +280,7 @@ export function registerSdkHandlers() {
   }))
 
   ipcMain.handle('sdk:activities.stream.start', wrapHandler(async (event, id: string) => {
-    for await (const item of jules.session(id).activities.stream()) {
+    for await (const item of activeClient.session(id).activities.stream()) {
       if (event.sender.isDestroyed()) break
       send(event.sender, `sdk:activities.stream:${id}`, item)
     }
@@ -229,8 +289,16 @@ export function registerSdkHandlers() {
 
   // ── sources ───────────────────────────────────────────────────────────────────
 
+  ipcMain.handle('sdk:sources.list', wrapHandler(async () => {
+    const sources: Source[] = []
+    for await (const source of activeClient.sources()) {
+      sources.push(source)
+    }
+    return serialize(sources)
+  }))
+
   ipcMain.handle('sdk:sources.get', wrapHandler(async (_, filter: { github: string }) =>
-    serialize(await jules.sources.get(filter))
+    serialize(await activeClient.sources.get(filter))
   ))
 
   // ── repoless ──────────────────────────────────────────────────────────────────

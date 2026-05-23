@@ -15,8 +15,9 @@ import type {
   ListSessionsOptions,
   JulesClient,
   SessionClient,
-  Outcome,
+  ValidationResult,
 } from '@google/jules-sdk'
+import type { BatchOptions, FullSessionResult } from '../../shared/types.js'
 
 type Unsubscribe = () => void
 
@@ -27,7 +28,7 @@ type SyncOptions = Omit<_SyncOpts, 'onProgress' | 'signal'>
 type SelectOptions = Parameters<SessionClient['activities']['select']>[0]
 type ListOptions = Parameters<SessionClient['activities']['list']>[0]
 type StreamActivitiesOptions = Parameters<SessionClient['stream']>[0]
-type IpcSessionOutcome = Omit<Outcome, 'generatedFiles' | 'changeSet'>
+type IpcSessionOutcome = Omit<Awaited<ReturnType<SessionClient['result']>>, 'generatedFiles' | 'changeSet'>
 
 // ── stream helper ─────────────────────────────────────────────────────────────
 
@@ -68,6 +69,9 @@ export const sdk = {
     sync: (options?: SyncOptions): Promise<SyncStats> =>
       ipcRenderer.invoke('sdk:client.sync', options),
 
+    syncAbort: (): Promise<void> =>
+      ipcRenderer.invoke('sdk:client.sync.abort'),
+
     onSyncProgress: (cb: (p: SyncProgress) => void): Unsubscribe => {
       const handler = (_: IpcRendererEvent, p: SyncProgress) => cb(p)
       ipcRenderer.on('sdk:client.sync.progress', handler)
@@ -80,11 +84,17 @@ export const sdk = {
     getSessionResource: (id: string): Promise<SessionResource> =>
       ipcRenderer.invoke('sdk:client.getSessionResource', id),
 
-    run: (config: SessionConfig): Promise<Pick<Awaited<ReturnType<JulesClient['run']>>, 'id'>> =>
+    run: (config: SessionConfig): Promise<{ id: string }> =>
       ipcRenderer.invoke('sdk:client.run', config),
+
+    all: (configs: SessionConfig[], options?: BatchOptions): Promise<{ id: string }[]> =>
+      ipcRenderer.invoke('sdk:client.all', configs, options),
 
     with: (options: JulesOptions): Promise<void> =>
       ipcRenderer.invoke('sdk:client.with', options),
+
+    validate: (query: unknown): Promise<ValidationResult> =>
+      ipcRenderer.invoke('sdk:client.validate', query),
   },
 
   // ── session ──────────────────────────────────────────────────────────────────
@@ -104,6 +114,9 @@ export const sdk = {
 
     result: (id: string): Promise<IpcSessionOutcome> =>
       ipcRenderer.invoke('sdk:session.result', id),
+
+    resultFull: (id: string): Promise<FullSessionResult> =>
+      ipcRenderer.invoke('sdk:session.result.full', id),
 
     waitFor: (id: string, state: SessionState): Promise<void> =>
       ipcRenderer.invoke('sdk:session.waitFor', id, state),
@@ -173,6 +186,9 @@ export const sdk = {
   // ── sources ───────────────────────────────────────────────────────────────────
 
   sources: {
+    list: (): Promise<Source[]> =>
+      ipcRenderer.invoke('sdk:sources.list'),
+
     get: (filter: { github: string }): Promise<Source | undefined> =>
       ipcRenderer.invoke('sdk:sources.get', filter),
   },
