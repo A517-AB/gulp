@@ -6,7 +6,6 @@
     "module": "esnext",
     "types": ["node", "vite/client"],
     "paths": {
-      "@google/jules-sdk": ["./references/jules-sdk typed.ts"],
       "@/*": ["./src/*"],
       "@renderer": ["./src/renderer/index.ts"],
       "@renderer/*": ["./src/renderer/*"],
