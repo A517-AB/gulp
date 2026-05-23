@@ -203,18 +203,18 @@ export default function WorkbenchPage(): ReactNode {
 
   if (phase === 'idle') {
     return (
-      <div className="flex h-full items-center justify-center bg-[#0a0a0a]">
+      <div className="flex h-full items-center justify-center bg-base">
         <div className="w-full max-w-xl px-6 space-y-4">
           <div className="space-y-1">
-            <p className="text-xs font-mono text-neutral-500 uppercase tracking-widest">Workbench</p>
-            <h2 className="text-lg font-mono text-neutral-200">What should Jules do?</h2>
+            <p className="text-xs font-mono text-fg-muted uppercase tracking-widest">Workbench</p>
+            <h2 className="text-lg font-mono text-fg-primary">What should Jules do?</h2>
           </div>
 
           <Textarea
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
             placeholder="Describe the task…"
-            className="min-h-[120px] font-mono text-sm resize-none bg-[#111] border-white/8 text-neutral-200 placeholder:text-neutral-600 focus-visible:ring-purple-500/30"
+            className="min-h-[120px] font-mono text-sm resize-none bg-surface border-hair text-fg-primary placeholder:text-fg-ghost focus-visible:ring-purple-500/30"
             onKeyDown={e => {
               if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void handleRun() }
             }}
@@ -226,10 +226,10 @@ export default function WorkbenchPage(): ReactNode {
                 value={repoPath}
                 onChange={e => setRepoPath(e.target.value)}
                 placeholder="/path/to/repo (optional)"
-                className="font-mono text-xs bg-[#111] border-white/8 text-neutral-300 placeholder:text-neutral-600"
+                className="font-mono text-xs bg-surface border-hair text-fg-secondary placeholder:text-fg-ghost"
               />
-              <Button size="icon-sm" variant="outline" onClick={handleBrowse} className="border-white/8 bg-[#111] hover:bg-white/5">
-                <FolderOpen className="size-3.5 text-neutral-400" />
+              <Button size="icon-sm" variant="outline" onClick={handleBrowse} className="border-hair bg-surface hover:bg-hover">
+                <FolderOpen className="size-3.5 text-fg-dim" />
               </Button>
             </div>
             <Button
@@ -242,7 +242,7 @@ export default function WorkbenchPage(): ReactNode {
             </Button>
           </div>
 
-          <p className="text-[11px] font-mono text-neutral-700">⌘ Enter to run</p>
+          <p className="text-[11px] font-mono text-fg-ghost">⌘ Enter to run</p>
         </div>
       </div>
     )
@@ -255,15 +255,15 @@ export default function WorkbenchPage(): ReactNode {
   // ── active / done ─────────────────────────────────────────────────────────
 
   return (
-    <div className="flex h-full overflow-hidden bg-[#0a0a0a]">
+    <div className="flex h-full overflow-hidden bg-base">
 
       {/* ── LEFT: session meta + plan ───────────────────────────────────── */}
-      <div className="w-[260px] shrink-0 flex flex-col border-r border-white/5">
+      <div className="w-[260px] shrink-0 flex flex-col border-r border-hair">
 
         {/* status bar */}
-        <div className="px-4 py-3 border-b border-white/5 space-y-3">
+        <div className="px-4 py-3 border-b border-hair space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-neutral-500 uppercase tracking-widest">Session</span>
+            <span className="text-[11px] font-mono text-fg-muted uppercase tracking-widest">Session</span>
             <div className="flex items-center gap-1.5">
               <span className={cn(
                 'size-1.5 rounded-full',
@@ -285,7 +285,7 @@ export default function WorkbenchPage(): ReactNode {
           </div>
 
           {progressTitle && (
-            <p className="text-[11px] font-mono text-neutral-500 leading-relaxed line-clamp-2">
+            <p className="text-[11px] font-mono text-fg-muted leading-relaxed line-clamp-2">
               {progressTitle}
             </p>
           )}
@@ -295,7 +295,7 @@ export default function WorkbenchPage(): ReactNode {
               size="sm"
               variant="outline"
               onClick={reset}
-              className="flex-1 text-[11px] font-mono border-white/8 bg-transparent hover:bg-white/5 text-neutral-400"
+              className="flex-1 text-[11px] font-mono border-hair bg-transparent hover:bg-hover text-fg-dim"
             >
               <RotateCcw className="size-3" />
               New
@@ -321,7 +321,7 @@ export default function WorkbenchPage(): ReactNode {
         <ScrollArea className="flex-1">
           {planSteps.length > 0 ? (
             <div className="p-4 space-y-1">
-              <p className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+              <p className="text-[10px] font-mono text-fg-ghost uppercase tracking-widest mb-3 flex items-center gap-1.5">
                 <ListChecks className="size-3" /> Plan
               </p>
               {planSteps.map((step, i) => (
@@ -333,7 +333,7 @@ export default function WorkbenchPage(): ReactNode {
                         ? 'text-green-400'
                         : phase === 'awaiting_approval'
                         ? 'text-amber-400'
-                        : 'text-neutral-600',
+                        : 'text-fg-ghost',
                     )}>
                       {phase === 'done'
                         ? <CheckCircle2 className="size-3.5" />
@@ -341,13 +341,13 @@ export default function WorkbenchPage(): ReactNode {
                       }
                     </div>
                     {i < planSteps.length - 1 && (
-                      <div className="w-px flex-1 bg-white/5 mt-1" />
+                      <div className="w-px flex-1 bg-raised mt-1" />
                     )}
                   </div>
                   <div className="pb-3 flex-1 min-w-0">
-                    <p className="text-[12px] font-mono text-neutral-300 leading-snug">{step.title}</p>
+                    <p className="text-[12px] font-mono text-fg-secondary leading-snug">{step.title}</p>
                     {step.description && (
-                      <p className="text-[11px] text-neutral-600 mt-0.5 leading-relaxed">{step.description}</p>
+                      <p className="text-[11px] text-fg-ghost mt-0.5 leading-relaxed">{step.description}</p>
                     )}
                   </div>
                 </div>
@@ -355,7 +355,7 @@ export default function WorkbenchPage(): ReactNode {
             </div>
           ) : (
             <div className="flex items-center justify-center h-24">
-              <p className="text-[11px] font-mono text-neutral-700">
+              <p className="text-[11px] font-mono text-fg-ghost">
                 {isActive ? 'Building plan…' : ''}
               </p>
             </div>
@@ -363,14 +363,14 @@ export default function WorkbenchPage(): ReactNode {
 
           {/* apply panel — shown when done and repo is set */}
           {phase === 'done' && repoPath.trim() && (
-            <div className="mx-4 mb-4 p-3 rounded-lg border border-white/5 bg-white/[0.02] space-y-2">
-              <p className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest flex items-center gap-1.5">
+            <div className="mx-4 mb-4 p-3 rounded-lg border border-hair bg-raised space-y-2">
+              <p className="text-[10px] font-mono text-fg-ghost uppercase tracking-widest flex items-center gap-1.5">
                 <GitBranch className="size-3" /> Apply
               </p>
               <Input
                 value={branchName}
                 onChange={e => setBranchName(e.target.value)}
-                className="font-mono text-[11px] bg-transparent border-white/8 text-neutral-300 h-7"
+                className="font-mono text-[11px] bg-transparent border-hair text-fg-secondary h-7"
               />
               <Button
                 size="sm"
@@ -403,7 +403,7 @@ export default function WorkbenchPage(): ReactNode {
                 {[80, 60, 72, 45].map((w, i) => (
                   <div
                     key={i}
-                    className="h-2 rounded-full bg-white/5 animate-pulse"
+                    className="h-2 rounded-full bg-raised animate-pulse"
                     style={{ width: `${w}%`, animationDelay: `${i * 150}ms` }}
                   />
                 ))}
@@ -413,7 +413,7 @@ export default function WorkbenchPage(): ReactNode {
             {/* diff */}
             {diffPatch && (
               <section className="space-y-2">
-                <p className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest flex items-center gap-1.5">
+                <p className="text-[10px] font-mono text-fg-ghost uppercase tracking-widest flex items-center gap-1.5">
                   <FileCode className="size-3" /> Code Changes
                 </p>
                 <DiffViewer diff={diffPatch} branch={branchName} />
@@ -423,19 +423,19 @@ export default function WorkbenchPage(): ReactNode {
             {/* generated files */}
             {generatedFiles.length > 0 && (
               <section className="space-y-2">
-                <p className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest">
+                <p className="text-[10px] font-mono text-fg-ghost uppercase tracking-widest">
                   Files · {generatedFiles.length}
                 </p>
-                <div className="rounded-lg border border-white/5 overflow-hidden">
+                <div className="rounded-lg border border-hair overflow-hidden">
                   {generatedFiles.map(file => (
                     <button
                       key={file.path}
                       type="button"
                       onClick={() => setSelectedFile(prev => prev === file.path ? null : file.path)}
                       className={cn(
-                        'w-full text-left px-3 py-2 flex items-center gap-3 border-b border-white/5 last:border-0',
-                        'hover:bg-white/[0.03] transition-colors',
-                        selectedFile === file.path && 'bg-white/[0.05]',
+                        'w-full text-left px-3 py-2 flex items-center gap-3 border-b border-hair last:border-0',
+                        'hover:bg-hover transition-colors',
+                        selectedFile === file.path && 'bg-active',
                       )}
                     >
                       <span className={cn(
@@ -446,8 +446,8 @@ export default function WorkbenchPage(): ReactNode {
                       )}>
                         {file.changeType === 'created' ? 'A' : file.changeType === 'deleted' ? 'D' : 'M'}
                       </span>
-                      <span className="text-[12px] font-mono text-neutral-300 truncate flex-1">{file.path}</span>
-                      <span className="text-[10px] font-mono text-neutral-700 shrink-0">
+                      <span className="text-[12px] font-mono text-fg-secondary truncate flex-1">{file.path}</span>
+                      <span className="text-[10px] font-mono text-fg-ghost shrink-0">
                         +{file.additions} -{file.deletions}
                       </span>
                     </button>
@@ -462,15 +462,15 @@ export default function WorkbenchPage(): ReactNode {
             {/* terminal */}
             {bashEntries.length > 0 && (
               <section className="space-y-2">
-                <p className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest flex items-center gap-1.5">
+                <p className="text-[10px] font-mono text-fg-ghost uppercase tracking-widest flex items-center gap-1.5">
                   <Terminal className="size-3" /> Terminal · {bashEntries.length}
                 </p>
                 <div className="space-y-2">
                   {bashEntries.map(entry => (
-                    <div key={entry.id} className="rounded-lg border border-white/5 overflow-hidden">
-                      <div className="px-3 py-2 bg-white/[0.03] border-b border-white/5 flex items-center gap-2">
-                        <span className="text-[11px] font-mono text-neutral-600">$</span>
-                        <span className="text-[12px] font-mono text-neutral-300">{entry.command}</span>
+                    <div key={entry.id} className="rounded-lg border border-hair overflow-hidden">
+                      <div className="px-3 py-2 bg-raised border-b border-hair flex items-center gap-2">
+                        <span className="text-[11px] font-mono text-fg-ghost">$</span>
+                        <span className="text-[12px] font-mono text-fg-secondary">{entry.command}</span>
                         {entry.exitCode !== null && entry.exitCode !== 0 && (
                           <span className="ml-auto text-[10px] font-mono text-red-400">exit {entry.exitCode}</span>
                         )}
@@ -498,7 +498,7 @@ export default function WorkbenchPage(): ReactNode {
 
         {/* inline reply bar — only when there's an active session to message */}
         {sessionId && isActive && (
-          <div className="border-t border-white/5 px-4 py-3">
+          <div className="border-t border-hair px-4 py-3">
             <ReplyBar sessionId={sessionId} onSend={handleSendChat} />
           </div>
         )}
@@ -536,7 +536,7 @@ function ReplyBar({ sessionId, onSend }: { sessionId: string; onSend: (msg: stri
         value={value}
         onChange={e => setValue(e.target.value)}
         placeholder="Reply to Jules…"
-        className="font-mono text-[12px] bg-transparent border-white/8 text-neutral-300 placeholder:text-neutral-700 h-8"
+        className="font-mono text-[12px] bg-transparent border-hair text-fg-secondary placeholder:text-fg-ghost h-8"
         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}
       />
       <Button size="icon-sm" onClick={submit} disabled={!value.trim()} className="shrink-0 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/20">

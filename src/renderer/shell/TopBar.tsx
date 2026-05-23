@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router';
 import { isElectron, isWeb } from '@shared';
+import { ThemeToggle } from '@/ui/theme-toggle';
 
 type Platform = 'shared' | 'electron' | 'web';
 
@@ -23,33 +24,35 @@ function isVisible(platform: Platform): boolean {
   return isWeb;
 }
 
-function getNavLinkClass(isActive: boolean): string {
-  const base = 'relative px-3 py-1.5 text-[12px] font-medium rounded-md transition-colors';
-
+function navLinkClass(isActive: boolean): string {
+  const base = 'relative px-3 py-1.5 text-xxs font-mono rounded-md transition-colors';
   return isActive
-    ? `${base} text-neutral-100 bg-white/8`
-    : `${base} text-neutral-500 hover:text-neutral-300 hover:bg-white/4`;
+    ? `${base} text-fg-primary bg-active`
+    : `${base} text-fg-ghost hover:text-fg-secondary hover:bg-hover`;
 }
 
 export default function TopBar(): ReactNode {
   return (
-    <nav className="flex items-center gap-1 h-10 px-3 bg-[#0f0f0f] border-b border-white/5 shrink-0">
-      {NAV_ITEMS.filter((item) => isVisible(item.platform)).map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          className={({ isActive }) => getNavLinkClass(isActive)}
-        >
-          {({ isActive }) => (
-            <>
-              {item.label}
-              {isActive && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-px bg-neutral-400 rounded-full" />
-              )}
-            </>
-          )}
-        </NavLink>
-      ))}
+    <nav className="flex items-center h-10 px-3 bg-surface border-b border-hair shrink-0">
+      <div className="flex items-center gap-1 flex-1">
+        {NAV_ITEMS.filter(item => isVisible(item.platform)).map(item => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) => navLinkClass(isActive)}
+          >
+            {({ isActive }) => (
+              <>
+                {item.label}
+                {isActive && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-px bg-fg-dim rounded-full" />
+                )}
+              </>
+            )}
+          </NavLink>
+        ))}
+      </div>
+      <ThemeToggle />
     </nav>
   );
 }

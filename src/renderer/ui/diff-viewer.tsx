@@ -158,23 +158,23 @@ function FileDiff({
   const removedCount = file.lines.filter((l) => l.type === "remove").length;
 
   return (
-    <div className="border border-white/[0.08] bg-zinc-950/50 rounded-lg overflow-hidden">
+    <div className="border border-hair bg-surface rounded-lg overflow-hidden">
       {/* File header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.08] bg-black/50">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-hair bg-raised">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <button
             type="button"
             onClick={() => setIsExpanded(!isExpanded)}
             aria-expanded={isExpanded}
             aria-controls={contentId}
-            className="flex items-center gap-2 text-left hover:bg-white/5 rounded px-2 py-1 -ml-2 transition-colors truncate"
+            className="flex items-center gap-2 text-left hover:bg-hover rounded px-2 py-1 -ml-2 transition-colors truncate"
           >
             {isExpanded ? (
-              <ChevronDown className="h-3.5 w-3.5 text-white/60" />
+              <ChevronDown className="h-3.5 w-3.5 text-fg-dim" />
             ) : (
-              <ChevronRight className="h-3.5 w-3.5 text-white/60" />
+              <ChevronRight className="h-3.5 w-3.5 text-fg-dim" />
             )}
-            <span className="text-[11px] font-mono text-white font-bold">
+            <span className="text-xxs font-mono text-fg-primary font-bold">
               {file.filename}
             </span>
           </button>
@@ -183,7 +183,7 @@ function FileDiff({
               href={`${repoUrl}/blob/${branch}/${file.filename}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/40 hover:text-white transition-colors"
+              className="text-fg-ghost hover:text-fg-primary transition-colors"
               title="View on GitHub"
             >
               <ExternalLink className="h-3 w-3" />
@@ -191,15 +191,15 @@ function FileDiff({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 text-[9px] font-mono">
+          <div className="flex items-center gap-1.5 text-3xs font-mono">
             <span className="text-green-400">+{addedCount}</span>
-            <span className="text-white/30">/</span>
+            <span className="text-fg-ghost">/</span>
             <span className="text-red-400">-{removedCount}</span>
           </div>
           <motion.button
             onClick={handleCopy}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-1 px-2 py-1 text-[9px] font-mono uppercase tracking-wider rounded bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white/80 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 text-3xs font-mono uppercase tracking-wider rounded bg-hover hover:bg-active border border-hair text-fg-dim hover:text-fg-secondary transition-colors"
           >
             {copyState === "copied" ? (
               <Check className="h-3 w-3" />
@@ -243,7 +243,7 @@ function FileDiff({
                     )}
                   >
                     {/* Line Numbers */}
-                    <div className="flex w-24 shrink-0 select-none border-r border-white/5 bg-white/[0.02] text-right text-white/30">
+                    <div className="flex w-24 shrink-0 select-none border-r border-hair bg-raised text-right text-fg-ghost">
                       <span className="w-10 pr-2">
                         {line.originalLineNumber || ""}
                       </span>
@@ -257,7 +257,7 @@ function FileDiff({
                         "px-4 flex-1 min-w-0 whitespace-pre-wrap break-all",
                         line.type === "add" && "text-green-400",
                         line.type === "remove" && "text-red-400",
-                        line.type === "context" && "text-white/60",
+                        line.type === "context" && "text-fg-muted",
                         line.type === "header" && "text-purple-400 font-bold",
                       )}
                     >
@@ -285,7 +285,7 @@ export function DiffViewer({
   if (files.length === 0) {
     return (
       <div className={cn("p-4 text-center", className)}>
-        <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">
+        <p className="label-mono text-fg-ghost">
           No diff data available
         </p>
       </div>
@@ -295,7 +295,7 @@ export function DiffViewer({
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-2 mb-2">
-        <div className="text-[9px] font-mono uppercase tracking-widest text-white/40">
+        <div className="label-mono text-fg-ghost">
           {files.length} {files.length === 1 ? "file" : "files"} changed
         </div>
       </div>

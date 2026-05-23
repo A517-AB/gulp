@@ -44,6 +44,33 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
+  /* ── TOKEN CHEAT SHEET ───────────────────────────────────────────────────
+     Surfaces (darkest → lightest in dark mode, lightest → darkest in light):
+       bg-base     — page background
+       bg-surface  — panels, sidebars, nav bars
+       bg-raised   — cards, code blocks, subtle insets
+       bg-overlay  — dropdowns, tooltips, modals
+
+     Borders (thinnest → strongest):
+       border-hair     — hairline dividers (use for almost everything)
+       border-subtle   — slightly more visible
+       border-moderate — prominent outlines
+
+     Text (most prominent → least):
+       text-fg-primary   — headings, active labels
+       text-fg-secondary — body text, field values
+       text-fg-muted     — secondary descriptions
+       text-fg-dim       — placeholder hints, timestamps
+       text-fg-ghost     — disabled, empty states
+
+     Interactive backgrounds:
+       bg-hover    — hover state
+       bg-active   — pressed / active state
+       bg-selected — selected row/item
+
+     DO NOT use: bg-[#hex], text-neutral-*, text-white/*, border-white/*
+  ── ──────────────────────────────────────────────────────────────────────── */
+
   /* ── surfaces (bg-base, bg-surface, bg-raised, bg-overlay) ──────────────── */
   --color-base:    var(--surface-base);
   --color-surface: var(--surface-mid);
