@@ -3,7 +3,6 @@ import type { Activity, ApplyResult, IpcSessionOutcome } from '@shared/types'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
 import { Textarea } from '@/ui/textarea'
-import { Label } from '@/ui/label'
 import { ScrollArea } from '@/ui/scroll-area'
 import { DiffViewer } from '@/ui/diff-viewer'
 import { CodeBlock } from '@/ui/code-block'
@@ -21,6 +20,8 @@ type Phase = 'idle' | 'running' | 'awaiting_approval' | 'done' | 'failed'
 interface PlanStep { id: string; title: string; description?: string; index: number }
 interface BashEntry { id: string; command: string; stdout: string; stderr: string; exitCode: number | null }
 interface FileEntry { path: string; changeType: 'created' | 'modified' | 'deleted'; content: string; additions: number; deletions: number }
+
+const toStr = (v: unknown, fallback = ''): string => typeof v === 'string' ? v : fallback
 
 // ── component ─────────────────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ export default function WorkbenchPage(): ReactNode {
 
   const isActive = phase === 'running' || phase === 'awaiting_approval'
   const hasChat = chatLog.length > 0
-  const hasOutput = diffPatch || bashEntries.length > 0 || generatedFiles.length > 0
+  const hasOutput = !!diffPatch || bashEntries.length > 0 || generatedFiles.length > 0
 
   // ── reset ─────────────────────────────────────────────────────────────────
 
@@ -79,14 +80,14 @@ export default function WorkbenchPage(): ReactNode {
     for (const raw of artifacts) {
       const a = raw as Record<string, unknown>
       if (a['type'] === 'changeSet') {
-        const patch = (a['gitPatch'] as Record<string, unknown>)?.['unidiffPatch']
+        const patch = (a['gitPatch'] as Record<string, unknown> | undefined)?.['unidiffPatch']
         if (typeof patch === 'string') setDiffPatch(patch)
       } else if (a['type'] === 'bashOutput') {
         setBashEntries(prev => [...prev, {
           id: nextId(),
-          command: String(a['command'] ?? ''),
-          stdout: String(a['stdout'] ?? a['output'] ?? ''),
-          stderr: String(a['stderr'] ?? ''),
+          command: toStr(a['command']),
+          stdout: toStr(a['stdout']) || toStr(a['output']),
+          stderr: toStr(a['stderr']),
           exitCode: typeof a['exitCode'] === 'number' ? a['exitCode'] : null,
         }])
       }
@@ -97,24 +98,24 @@ export default function WorkbenchPage(): ReactNode {
     const a = item as unknown as Record<string, unknown>
     switch (item.type) {
       case 'planGenerated':
-        setPlanSteps((a['plan'] as { steps: PlanStep[] })?.steps ?? [])
+        setPlanSteps(((a['plan'] as { steps?: PlanStep[] } | undefined)?.steps) ?? [])
         setPhase('awaiting_approval')
         break
       case 'progressUpdated':
-        setProgressTitle(String(a['title'] ?? a['description'] ?? ''))
+        setProgressTitle(toStr(a['title']) || toStr(a['description']))
         processArtifacts(a['artifacts'] as unknown[])
         break
       case 'agentMessaged':
-        setChatLog(prev => [...prev, { id: nextId(), origin: 'agent', message: String(a['message'] ?? ''), time: new Date() }])
+        setChatLog(prev => [...prev, { id: nextId(), origin: 'agent', message: toStr(a['message']), time: new Date() }])
         break
       case 'userMessaged':
-        setChatLog(prev => [...prev, { id: nextId(), origin: 'user', message: String(a['message'] ?? ''), time: new Date() }])
+        setChatLog(prev => [...prev, { id: nextId(), origin: 'user', message: toStr(a['message']), time: new Date() }])
         break
       case 'sessionCompleted':
         setPhase('done')
         break
       case 'sessionFailed':
-        setErrorMessage(String(a['reason'] ?? 'Session failed'))
+        setErrorMessage(toStr(a['reason']) || 'Session failed')
         setPhase('failed')
         break
     }
@@ -140,7 +141,9 @@ export default function WorkbenchPage(): ReactNode {
         for (const out of outputs) {
           const o = out as Record<string, unknown>
           if (o['type'] === 'changeSet') {
-            const patch = ((o['changeSet'] as Record<string, unknown>)?.['gitPatch'] as Record<string, unknown>)?.['unidiffPatch']
+            const changeSet = o['changeSet'] as Record<string, unknown> | undefined
+            const gitPatch = changeSet?.['gitPatch'] as Record<string, unknown> | undefined
+            const patch = gitPatch?.['unidiffPatch']
             if (typeof patch === 'string') setDiffPatch(patch)
           }
         }
@@ -212,7 +215,7 @@ export default function WorkbenchPage(): ReactNode {
 
           <Textarea
             value={prompt}
-            onChange={e => setPrompt(e.target.value)}
+            onChange={e => { setPrompt(e.target.value) }}
             placeholder="Describe the task…"
             className="min-h-[120px] font-mono text-sm resize-none bg-surface border-hair text-fg-primary placeholder:text-fg-ghost focus-visible:ring-purple-500/30"
             onKeyDown={e => {
@@ -224,16 +227,16 @@ export default function WorkbenchPage(): ReactNode {
             <div className="flex gap-1.5 flex-1">
               <Input
                 value={repoPath}
-                onChange={e => setRepoPath(e.target.value)}
+                onChange={e => { setRepoPath(e.target.value) }}
                 placeholder="/path/to/repo (optional)"
                 className="font-mono text-xs bg-surface border-hair text-fg-secondary placeholder:text-fg-ghost"
               />
-              <Button size="icon-sm" variant="outline" onClick={handleBrowse} className="border-hair bg-surface hover:bg-hover">
+              <Button size="icon-sm" variant="outline" onClick={() => { void handleBrowse() }} className="border-hair bg-surface hover:bg-hover">
                 <FolderOpen className="size-3.5 text-fg-dim" />
               </Button>
             </div>
             <Button
-              onClick={handleRun}
+              onClick={() => { void handleRun() }}
               disabled={!prompt.trim()}
               className="bg-purple-600 hover:bg-purple-500 text-white gap-1.5 px-4"
             >
@@ -303,7 +306,7 @@ export default function WorkbenchPage(): ReactNode {
             {phase === 'awaiting_approval' && (
               <Button
                 size="sm"
-                onClick={handleApprove}
+                onClick={() => { void handleApprove() }}
                 className="flex-1 text-[11px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20"
               >
                 <Check className="size-3" />
@@ -369,12 +372,12 @@ export default function WorkbenchPage(): ReactNode {
               </p>
               <Input
                 value={branchName}
-                onChange={e => setBranchName(e.target.value)}
+                onChange={e => { setBranchName(e.target.value) }}
                 className="font-mono text-[11px] bg-transparent border-hair text-fg-secondary h-7"
               />
               <Button
                 size="sm"
-                onClick={handleApply}
+                onClick={() => { void handleApply() }}
                 disabled={applyLoading || !branchName.trim()}
                 className="w-full text-[11px] bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/20"
               >
@@ -404,7 +407,7 @@ export default function WorkbenchPage(): ReactNode {
                   <div
                     key={i}
                     className="h-2 rounded-full bg-raised animate-pulse"
-                    style={{ width: `${w}%`, animationDelay: `${i * 150}ms` }}
+                    style={{ width: `${String(w)}%`, animationDelay: `${String(i * 150)}ms` }}
                   />
                 ))}
               </div>
@@ -431,7 +434,7 @@ export default function WorkbenchPage(): ReactNode {
                     <button
                       key={file.path}
                       type="button"
-                      onClick={() => setSelectedFile(prev => prev === file.path ? null : file.path)}
+                      onClick={() => { setSelectedFile(prev => prev === file.path ? null : file.path) }}
                       className={cn(
                         'w-full text-left px-3 py-2 flex items-center gap-3 border-b border-hair last:border-0',
                         'hover:bg-hover transition-colors',
@@ -499,7 +502,7 @@ export default function WorkbenchPage(): ReactNode {
         {/* inline reply bar — only when there's an active session to message */}
         {sessionId && isActive && (
           <div className="border-t border-hair px-4 py-3">
-            <ReplyBar sessionId={sessionId} onSend={handleSendChat} />
+            <ReplyBar sessionId={sessionId} onSend={msg => { void handleSendChat(msg) }} />
           </div>
         )}
       </div>
@@ -508,7 +511,7 @@ export default function WorkbenchPage(): ReactNode {
       {hasChat && (
         <ChatPanel
           messages={chatLog}
-          onSend={handleSendChat}
+          onSend={msg => { void handleSendChat(msg) }}
           isActive={isActive}
           canSend={!!sessionId}
           agentLabel="Jules"
@@ -520,7 +523,7 @@ export default function WorkbenchPage(): ReactNode {
 
 // ── inline reply bar ──────────────────────────────────────────────────────────
 
-function ReplyBar({ sessionId, onSend }: { sessionId: string; onSend: (msg: string) => void }) {
+function ReplyBar({ onSend }: { sessionId: string; onSend: (msg: string) => void }) {
   const [value, setValue] = useState('')
 
   const submit = () => {
@@ -534,7 +537,7 @@ function ReplyBar({ sessionId, onSend }: { sessionId: string; onSend: (msg: stri
     <div className="flex gap-2 items-center">
       <Input
         value={value}
-        onChange={e => setValue(e.target.value)}
+        onChange={e => { setValue(e.target.value) }}
         placeholder="Reply to Jules…"
         className="font-mono text-[12px] bg-transparent border-hair text-fg-secondary placeholder:text-fg-ghost h-8"
         onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() } }}

@@ -21,10 +21,10 @@ function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
   const m = Math.floor(diff / 60_000)
   if (m < 1) return 'just now'
-  if (m < 60) return `${m}m ago`
+  if (m < 60) return `${m.toString()}m ago`
   const h = Math.floor(m / 60)
-  if (h < 24) return `${h}h ago`
-  return `${Math.floor(h / 24)}d ago`
+  if (h < 24) return `${h.toString()}h ago`
+  return `${Math.floor(h / 24).toString()}d ago`
 }
 
 const STATE_META: Record<SessionState, { icon: typeof Circle; color: string; label: string }> = {
@@ -76,6 +76,7 @@ export function SessionList({ onSelect, selectedId, className }: SessionListProp
     }
   }
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void load() }, [load])
 
   const active = sessions.filter(s => ACTIVE_STATES.includes(s.state))
@@ -86,10 +87,10 @@ export function SessionList({ onSelect, selectedId, className }: SessionListProp
       <div className="flex items-center justify-between px-3 h-toolbar border-b border-hair shrink-0">
         <span className="label-mono text-fg-ghost">Sessions</span>
         <div className="flex gap-1">
-          <Button size="icon-sm" variant="ghost" onClick={sync} disabled={syncing} title="Sync from Jules">
+          <Button size="icon-sm" variant="ghost" onClick={() => { void sync() }} disabled={syncing} title="Sync from Jules">
             <RefreshCw className={cn('size-3.5', syncing && 'animate-spin')} />
           </Button>
-          <Button size="icon-sm" variant="ghost" onClick={load} disabled={loading} title="Refresh">
+          <Button size="icon-sm" variant="ghost" onClick={() => { void load() }} disabled={loading} title="Refresh">
             <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
           </Button>
         </div>
@@ -136,14 +137,14 @@ function SessionRow({
   selected: boolean
   onSelect: (id: string) => void
 }) {
-  const meta = STATE_META[session.state] ?? STATE_META.unspecified
+  const meta = STATE_META[session.state]
   const Icon = meta.icon
   const isSpinning = session.state === 'planning' || session.state === 'inProgress'
 
   return (
     <button
       type="button"
-      onClick={() => onSelect(session.id)}
+      onClick={() => { onSelect(session.id) }}
       className={cn(
         'w-full text-left px-3 py-2.5 flex items-start gap-2.5 hover:bg-hover transition-colors border-b border-hair last:border-0',
         selected && 'bg-selected',

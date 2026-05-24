@@ -28,7 +28,7 @@ export function BackgroundBeams({ className }: { className?: string }) {
           <motion.path
             key={index}
             d={path}
-            stroke={`url(#gradient-${index})`}
+            stroke={`url(#gradient-${index.toString()})`}
             strokeWidth="1"
             initial={{
               pathLength: 0,
@@ -49,7 +49,7 @@ export function BackgroundBeams({ className }: { className?: string }) {
           {paths.map((_, index) => (
             <linearGradient
               key={index}
-              id={`gradient-${index}`}
+              id={`gradient-${index.toString()}`}
               x1="0%"
               y1="0%"
               x2="100%"

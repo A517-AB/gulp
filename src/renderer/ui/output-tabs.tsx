@@ -259,7 +259,7 @@ export function OutputTabs({
                 <button
                   key={file.path}
                   type="button"
-                  onClick={() => onSelectFile(file.path)}
+                  onClick={() => { onSelectFile(file.path) }}
                   className={cn(
                     'w-full text-left px-3 py-1.5 flex items-center gap-2 transition-colors hover:bg-hover',
                     selectedFile === file.path && 'bg-selected',

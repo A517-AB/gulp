@@ -7,7 +7,7 @@ import type { ApplyResult } from '../../../shared/types.js'
 
 function serialize<T>(data: T): T {
   if (data === undefined || data === null) return data
-  return JSON.parse(JSON.stringify(data))
+  return JSON.parse(JSON.stringify(data)) as T
 }
 
 function buildRepoContext(repoPath: string): string {
@@ -60,10 +60,10 @@ function validateBranchName(name: string): void {
     throw new Error('Branch name must not be empty')
   }
   // Reject any character outside the safe set for git branch names
-  const unsafePattern = /[^a-zA-Z0-9_\-.\/]/
+  const unsafePattern = /[^a-zA-Z0-9_\-./]/
   if (unsafePattern.test(name)) {
     throw new Error(
-      `Invalid branch name "${name.replace(/[^a-zA-Z0-9_\-.\/]/g, '?')}": ` +
+      `Invalid branch name "${name.replace(/[^a-zA-Z0-9_\-./]/g, '?')}": ` +
       'contains disallowed characters. Use only alphanumerics, hyphens, underscores, dots, and slashes.'
     )
   }
@@ -108,26 +108,26 @@ export function registerRepolessHandlers(): void {
     try {
       execFileSync('git', ['-C', repoPath, 'checkout', '-b', branchName], { encoding: 'utf-8' })
     } catch (err) {
-      throw new Error(`Failed to create branch "${branchName}": ${err instanceof Error ? err.message : err}`)
+      throw new Error(`Failed to create branch "${branchName}": ${err instanceof Error ? err.message : String(err)}`, { cause: err })
     }
 
     const applied: string[] = []
     const changeSet = outcome.changeSet()
 
     if (changeSet) {
-      console.log(`[repoless] applying changeSet patch (${changeSet.gitPatch.unidiffPatch.length} chars)`)
+      console.log(`[repoless] applying changeSet patch (${String(changeSet.gitPatch.unidiffPatch.length)} chars)`)
       const patchPath = path.join(repoPath, '.jules-patch.tmp')
       fs.writeFileSync(patchPath, changeSet.gitPatch.unidiffPatch, 'utf-8')
       try {
         execFileSync('git', ['-C', repoPath, 'apply', patchPath], { encoding: 'utf-8' })
       } catch (err) {
-        throw new Error(`Failed to apply patch: ${err instanceof Error ? err.message : err}`)
+        throw new Error(`Failed to apply patch: ${err instanceof Error ? err.message : String(err)}`, { cause: err })
       } finally {
         fs.unlinkSync(patchPath)
       }
       for (const f of changeSet.parsed().files) {
         applied.push(f.path)
-        console.log(`[repoless] patched: ${f.path} (+${f.additions} -${f.deletions})`)
+        console.log(`[repoless] patched: ${f.path} (+${String(f.additions)} -${String(f.deletions)})`)
       }
     } else {
       for (const file of outcome.generatedFiles().all()) {
@@ -135,24 +135,24 @@ export function registerRepolessHandlers(): void {
         await fs.promises.mkdir(path.dirname(fullPath), { recursive: true })
         await fs.promises.writeFile(fullPath, file.content, 'utf-8')
         applied.push(file.path)
-        console.log(`[repoless] wrote: ${file.path} (${file.content.length} chars)`)
+        console.log(`[repoless] wrote: ${file.path} (${String(file.content.length)} chars)`)
       }
     }
 
     try {
       execFileSync('git', ['-C', repoPath, 'add', '-A'], { encoding: 'utf-8' })
     } catch (err) {
-      throw new Error(`Failed to stage files: ${err instanceof Error ? err.message : err}`)
+      throw new Error(`Failed to stage files: ${err instanceof Error ? err.message : String(err)}`, { cause: err })
     }
 
     let diff: string
     try {
       diff = execFileSync('git', ['-C', repoPath, 'diff', '--cached'], { encoding: 'utf-8' })
     } catch (err) {
-      throw new Error(`Failed to read staged diff: ${err instanceof Error ? err.message : err}`)
+      throw new Error(`Failed to read staged diff: ${err instanceof Error ? err.message : String(err)}`, { cause: err })
     }
 
-    console.log(`[repoless] applied ${applied.length} file(s) to branch "${branchName}"`)
+    console.log(`[repoless] applied ${String(applied.length)} file(s) to branch "${branchName}"`)
 
     const result: ApplyResult = { branch: branchName, diff, applied }
     return serialize(result)

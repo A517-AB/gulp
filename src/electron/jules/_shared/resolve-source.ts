@@ -14,7 +14,7 @@ function detectGitRemote(): string | null {
   try {
     const url = execSync('git remote get-url origin', { encoding: 'utf-8' }).trim();
     // Parse: git@github.com:owner/repo.git or https://github.com/owner/repo.git
-    const match = url.match(/github\.com[:/](.+?)(?:\.git)?$/);
+    const match = /github\.com[:/](.+?)(?:\.git)?$/.exec(url);
     return match?.[1] ?? null;
   } catch {
     return null;

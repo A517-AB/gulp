@@ -25,7 +25,7 @@ type Sender = Electron.WebContents
 
 function serialize<T>(data: T): T {
   if (data === undefined || data === null) return data
-  return JSON.parse(JSON.stringify(data))
+  return JSON.parse(JSON.stringify(data)) as T
 }
 
 function send(sender: Sender, ch: string, payload?: unknown) {
@@ -54,7 +54,7 @@ function wrapHandler<Args extends unknown[], R>(
         // can differentiate between network errors, auth errors, etc.
         for (const key of ['status', 'code'] as const) {
           if (key in err) {
-            (wrapped as Record<string, unknown>)[key] = (err as Record<string, unknown>)[key]
+            (wrapped as unknown as Record<string, unknown>)[key] = (err as unknown as Record<string, unknown>)[key]
           }
         }
       }
@@ -85,7 +85,7 @@ export function registerSdkHandlers() {
   ipcMain.handle('sdk:client.sync', wrapHandler(async (event, options?: SyncOptions) =>
     serialize(await jules.sync({
       ...options,
-      onProgress: (p) => send(event.sender, 'sdk:client.sync.progress', p),
+      onProgress: (p) => { send(event.sender, 'sdk:client.sync.progress', p) },
     }))
   ))
 
@@ -101,25 +101,26 @@ export function registerSdkHandlers() {
     serialize(await jules.run(config))
   ))
 
-  ipcMain.handle('sdk:client.with', wrapHandler(async (_, options: JulesOptions) =>
-    serialize(await jules.with(options))
+  ipcMain.handle('sdk:client.with', wrapHandler(
+    // eslint-disable-next-line @typescript-eslint/require-await
+    async (_, options: JulesOptions) => { jules.with(options) }
   ))
 
   // ── session ──────────────────────────────────────────────────────────────────
   // NOTE: jules.session(id) is called fresh on every request. This is intentional
   // — the SDK returns a lightweight, stateless client handle (no caching needed).
 
-  ipcMain.handle('sdk:session.send', wrapHandler(async (_, id: string, prompt: string) =>
-    serialize(await jules.session(id).send(prompt))
-  ))
+  ipcMain.handle('sdk:session.send', wrapHandler(async (_, id: string, prompt: string) => {
+    await jules.session(id).send(prompt)
+  }))
 
   ipcMain.handle('sdk:session.ask', wrapHandler(async (_, id: string, prompt: string) =>
     serialize(await jules.session(id).ask(prompt))
   ))
 
-  ipcMain.handle('sdk:session.approve', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).approve())
-  ))
+  ipcMain.handle('sdk:session.approve', wrapHandler(async (_, id: string) => {
+    await jules.session(id).approve()
+  }))
 
   ipcMain.handle('sdk:session.info', wrapHandler(async (_, id: string) =>
     serialize(await jules.session(id).info())
@@ -129,24 +130,24 @@ export function registerSdkHandlers() {
     serialize(await jules.session(id).result())
   ))
 
-  ipcMain.handle('sdk:session.waitFor', wrapHandler(async (_, id: string, state: SessionState) =>
-    serialize(await jules.session(id).waitFor(state))
-  ))
+  ipcMain.handle('sdk:session.waitFor', wrapHandler(async (_, id: string, state: SessionState) => {
+    await jules.session(id).waitFor(state)
+  }))
 
   ipcMain.handle('sdk:session.snapshot', wrapHandler(async (_, id: string, options?: { activities?: boolean }) =>
     serialize(await jules.session(id).snapshot(options))
   ))
 
-  ipcMain.handle('sdk:session.archive', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).archive())
-  ))
+  ipcMain.handle('sdk:session.archive', wrapHandler(async (_, id: string) => {
+    await jules.session(id).archive()
+  }))
 
-  ipcMain.handle('sdk:session.unarchive', wrapHandler(async (_, id: string) =>
-    serialize(await jules.session(id).unarchive())
-  ))
+  ipcMain.handle('sdk:session.unarchive', wrapHandler(async (_, id: string) => {
+    await jules.session(id).unarchive()
+  }))
 
   ipcMain.handle('sdk:session.select', wrapHandler(async (_, id: string, options?: SelectOptions) =>
-    serialize(await jules.session(id).select(options))
+    serialize(await jules.session(id).activities.select(options))
   ))
 
   ipcMain.handle('sdk:session.hydrate', wrapHandler(async (_, id: string) =>
@@ -154,12 +155,7 @@ export function registerSdkHandlers() {
   ))
 
   ipcMain.handle('sdk:session.stream.start', wrapHandler(async (event, id: string, options?: StreamActivitiesOptions) => {
-    const streamOpts: StreamActivitiesOptions = {
-      ...options,
-      // Fresh sessions (especially repoless) may not be available for activity
-      // polling immediately after creation — bump retries to avoid 404 race.
-      initialRetries: Math.max(options?.initialRetries ?? 0, 20),
-    }
+    const streamOpts: StreamActivitiesOptions = { ...options }
     for await (const item of jules.session(id).stream(streamOpts)) {
       if (event.sender.isDestroyed()) break
       send(event.sender, `sdk:session.stream:${id}`, item)

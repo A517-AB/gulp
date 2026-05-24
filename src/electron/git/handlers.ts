@@ -18,7 +18,7 @@ export function registerGitHandlers() {
     const sep = '\x1f'
     const { stdout } = await git(repoPath, [
       'log',
-      `--max-count=${maxCount}`,
+      `--max-count=${String(maxCount)}`,
       `--pretty=format:%H${sep}%h${sep}%s${sep}%an${sep}%ar`,
     ])
     return stdout.split('\n').filter(Boolean).map(line => {

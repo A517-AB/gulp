@@ -45,7 +45,7 @@ export function ChatPanel({
   if (collapsed) {
     return (
       <div className="w-10 shrink-0 flex flex-col items-center border-l border-hair bg-base pt-3">
-        <Button size="icon-sm" variant="ghost" onClick={() => setCollapsed(false)} title="Open chat">
+        <Button size="icon-sm" variant="ghost" onClick={() => { setCollapsed(false) }} title="Open chat">
           <ChevronLeft className="size-3.5" />
         </Button>
         <div className="mt-2 flex flex-col items-center">
@@ -65,7 +65,7 @@ export function ChatPanel({
           <MessageSquare className="size-3.5 text-fg-dim" />
           <span className="label-mono text-fg-ghost">{agentLabel}</span>
         </div>
-        <Button size="icon-sm" variant="ghost" onClick={() => setCollapsed(true)} title="Collapse chat">
+        <Button size="icon-sm" variant="ghost" onClick={() => { setCollapsed(true) }} title="Collapse chat">
           <ChevronRight className="size-3.5" />
         </Button>
       </div>
@@ -112,7 +112,7 @@ export function ChatPanel({
           <div className="flex gap-1.5">
             <Input
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={e => { setInput(e.target.value) }}
               placeholder={`Message ${agentLabel}…`}
               className="font-mono text-2xs"
               onKeyDown={e => {

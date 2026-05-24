@@ -31,13 +31,14 @@ type IpcSessionOutcome = Omit<Outcome, 'generatedFiles' | 'changeSet'>
 
 // ── stream helper ─────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 function onStream<T>(
   itemChannel: string,
   doneChannel: string,
   onItem: (item: T) => void,
   onDone?: () => void,
 ): Unsubscribe {
-  const itemHandler = (_: IpcRendererEvent, item: T) => onItem(item)
+  const itemHandler = (_: IpcRendererEvent, item: T) => { onItem(item) }
   const doneHandler = () => {
     ipcRenderer.removeListener(itemChannel, itemHandler)
     onDone?.()
@@ -69,7 +70,7 @@ export const sdk = {
       ipcRenderer.invoke('sdk:client.sync', options),
 
     onSyncProgress: (cb: (p: SyncProgress) => void): Unsubscribe => {
-      const handler = (_: IpcRendererEvent, p: SyncProgress) => cb(p)
+      const handler = (_: IpcRendererEvent, p: SyncProgress) => { cb(p) }
       ipcRenderer.on('sdk:client.sync.progress', handler)
       return () => ipcRenderer.removeListener('sdk:client.sync.progress', handler)
     },

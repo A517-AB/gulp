@@ -49,12 +49,11 @@ export function RepoPicker({
 
   useEffect(() => {
     if (!open) return
-    setHistory(loadHistory())
     const close = (e: MouseEvent) => {
       if (!containerRef.current?.contains(e.target as Node)) setOpen(false)
     }
     document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
+    return () => { document.removeEventListener('mousedown', close) }
   }, [open])
 
   const select = (path: string) => {
@@ -91,7 +90,7 @@ export function RepoPicker({
       <div className="flex flex-1">
         <Input
           value={value}
-          onChange={e => onChange(e.target.value)}
+          onChange={e => { onChange(e.target.value) }}
           onBlur={commit}
           onKeyDown={e => { if (e.key === 'Enter') commit() }}
           placeholder={placeholder}
@@ -100,7 +99,7 @@ export function RepoPicker({
         <Button
           size="icon-sm"
           variant="outline"
-          onClick={() => setOpen(o => !o)}
+          onClick={() => { setOpen(o => !o) }}
           disabled={currentHistory.length === 0}
           className="rounded-none border-l-0 shrink-0"
         >
@@ -110,7 +109,7 @@ export function RepoPicker({
       <Button
         size="icon-sm"
         variant="outline"
-        onClick={browse}
+        onClick={() => { void browse() }}
         className="shrink-0"
         title="Browse…"
       >
@@ -130,14 +129,14 @@ export function RepoPicker({
             >
               <button
                 type="button"
-                onClick={() => select(p)}
+                onClick={() => { select(p) }}
                 className="flex-1 text-left text-xs font-mono text-fg-secondary group-hover:text-fg-primary truncate"
               >
                 {p}
               </button>
               <button
                 type="button"
-                onClick={e => remove(e, p)}
+                onClick={e => { remove(e, p) }}
                 className="shrink-0 opacity-0 group-hover:opacity-100 text-fg-ghost hover:text-fg-dim transition-opacity"
               >
                 <X className="size-3" />

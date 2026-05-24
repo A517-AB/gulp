@@ -45,7 +45,7 @@ export function GitPanel({ repoPath }: GitPanelProps): ReactNode {
   }, [git, repoPath])
 
   useEffect(() => {
-    if (repoPath.trim()) void refresh()
+    if (repoPath.trim()) queueMicrotask(() => { void refresh() })
   }, [refresh, repoPath])
 
   const handleRebase = async () => {
@@ -98,7 +98,7 @@ export function GitPanel({ repoPath }: GitPanelProps): ReactNode {
             <span className="text-2xs font-mono text-purple-400">{currentBranch}</span>
           )}
         </div>
-        <Button size="icon-sm" variant="ghost" onClick={refresh} disabled={loading} title="Refresh">
+        <Button size="icon-sm" variant="ghost" onClick={() => { void refresh() }} disabled={loading} title="Refresh">
           <RefreshCw className={cn('size-3.5', loading && 'animate-spin')} />
         </Button>
       </div>
@@ -132,7 +132,7 @@ export function GitPanel({ repoPath }: GitPanelProps): ReactNode {
               </Select>
               <Button
                 size="sm"
-                onClick={handleRebase}
+                onClick={() => { void handleRebase() }}
                 disabled={!rebaseTarget || rebaseState === 'rebasing'}
               >
                 {rebaseState === 'rebasing'
@@ -145,10 +145,10 @@ export function GitPanel({ repoPath }: GitPanelProps): ReactNode {
 
             {rebaseState === 'conflict' && (
               <div className="flex gap-1.5">
-                <Button size="sm" variant="outline" onClick={handleAbort} className="flex-1 text-red-400 border-red-400/30">
+                <Button size="sm" variant="outline" onClick={() => { void handleAbort() }} className="flex-1 text-red-400 border-red-400/30">
                   Abort
                 </Button>
-                <Button size="sm" onClick={handleContinue} className="flex-1">
+                <Button size="sm" onClick={() => { void handleContinue() }} className="flex-1">
                   Continue
                 </Button>
               </div>

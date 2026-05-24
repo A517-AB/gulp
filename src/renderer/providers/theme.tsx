@@ -25,11 +25,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('gulp:theme', theme)
   }, [theme])
 
-  const toggle = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'))
+  const toggle = () => { setTheme(t => (t === 'dark' ? 'light' : 'dark')) }
 
   return <Ctx.Provider value={{ theme, toggle, set: setTheme }}>{children}</Ctx.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTheme(): ThemeCtx {
   const ctx = useContext(Ctx)
   if (!ctx) throw new Error('useTheme requires ThemeProvider')

@@ -19,7 +19,7 @@ export function GridBackground({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundSize: `${gridSize}px ${gridSize}px`,
+          backgroundSize: `${String(gridSize)}px ${String(gridSize)}px`,
           backgroundImage:
             "linear-gradient(to right, rgba(168, 85, 247, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(168, 85, 247, 0.05) 1px, transparent 1px)",
         }}
@@ -29,7 +29,7 @@ export function GridBackground({
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse at center, transparent ${fadeIntensity}%, var(--background) 100%)`,
+          background: `radial-gradient(ellipse at center, transparent ${String(fadeIntensity)}%, var(--background) 100%)`,
         }}
       />
 
