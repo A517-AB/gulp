@@ -63,11 +63,4 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
     },
   },
-  {
-    // shadcn/ui generated files use React.ElementRef which is intentionally deprecated upstream
-    files: ['src/renderer/ui/combobox.tsx', 'src/renderer/ui/command.tsx', 'src/renderer/ui/tooltip.tsx', 'src/renderer/ui/popover.tsx'],
-    rules: {
-      '@typescript-eslint/no-deprecated': 'off',
-    },
-  },
 ])
