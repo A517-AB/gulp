@@ -88,12 +88,36 @@ export interface SdkIpc {
   }
 }
 
+export interface GitLogEntry {
+  hash: string
+  short: string
+  subject: string
+  author: string
+  relDate: string
+}
+
+export interface GitBranch {
+  name: string
+  current: boolean
+}
+
+export interface GitIpc {
+  status: (repoPath: string) => Promise<string>
+  log: (repoPath: string, maxCount?: number) => Promise<GitLogEntry[]>
+  branches: (repoPath: string) => Promise<GitBranch[]>
+  checkout: (repoPath: string, branch: string, create?: boolean) => Promise<void>
+  rebase: (repoPath: string, onto: string) => Promise<string>
+  rebaseAbort: (repoPath: string) => Promise<void>
+  rebaseContinue: (repoPath: string) => Promise<string>
+}
+
 export interface ElectronAPI {
   ping: () => Promise<unknown>
   minimize: () => void
   maximize: () => void
   close: () => void
   sdk: SdkIpc
+  git: GitIpc
 }
 
 declare global {

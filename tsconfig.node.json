@@ -5,7 +5,6 @@
     "lib": ["ES2022"],
     "module": "esnext",
     "types": ["node", "vite/client"],
-    "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"],
       "@renderer": ["./src/renderer/index.ts"],
@@ -28,6 +27,7 @@
     "moduleDetection": "force",
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
+    "skipLibCheck": true,
     "strict": true,
 
     /* Linting */

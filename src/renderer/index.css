@@ -9,7 +9,27 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: 'JetBrainsMono NF', 'JetBrains Mono', 'CaskaydiaCove NF', 'Cascadia Code', 'Fira Code', ui-monospace, monospace;
+
+  /* ── code syntax colors ──────────────────────────────────────────────────── */
+  --color-code-keyword:    var(--code-keyword);
+  --color-code-string:     var(--code-string);
+  --color-code-type:       var(--code-type);
+  --color-code-fn:         var(--code-fn);
+  --color-code-number:     var(--code-number);
+  --color-code-comment:    var(--code-comment);
+  --color-code-variable:   var(--code-variable);
+  --color-code-operator:   var(--code-operator);
+  --color-code-constant:   var(--code-constant);
+  --color-code-punctuation: var(--code-punctuation);
+
+  /* ── diff semantic colors ────────────────────────────────────────────────── */
+  --color-diff-add-bg:      var(--diff-add-bg);
+  --color-diff-add-text:    var(--diff-add-text);
+  --color-diff-remove-bg:   var(--diff-remove-bg);
+  --color-diff-remove-text: var(--diff-remove-text);
+  --color-diff-chunk-bg:    var(--diff-chunk-bg);
+  --color-diff-chunk-text:  var(--diff-chunk-text);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -43,6 +63,33 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* ── TOKEN CHEAT SHEET ───────────────────────────────────────────────────
+     Surfaces (darkest → lightest in dark mode, lightest → darkest in light):
+       bg-base     — page background
+       bg-surface  — panels, sidebars, nav bars
+       bg-raised   — cards, code blocks, subtle insets
+       bg-overlay  — dropdowns, tooltips, modals
+
+     Borders (thinnest → strongest):
+       border-hair     — hairline dividers (use for almost everything)
+       border-subtle   — slightly more visible
+       border-moderate — prominent outlines
+
+     Text (most prominent → least):
+       text-fg-primary   — headings, active labels
+       text-fg-secondary — body text, field values
+       text-fg-muted     — secondary descriptions
+       text-fg-dim       — placeholder hints, timestamps
+       text-fg-ghost     — disabled, empty states
+
+     Interactive backgrounds:
+       bg-hover    — hover state
+       bg-active   — pressed / active state
+       bg-selected — selected row/item
+
+     DO NOT use: bg-[#hex], text-neutral-*, text-white/*, border-white/*
+  ── ──────────────────────────────────────────────────────────────────────── */
 
   /* ── surfaces (bg-base, bg-surface, bg-raised, bg-overlay) ──────────────── */
   --color-base:    var(--surface-base);
@@ -123,31 +170,51 @@
   --card-foreground: oklch(0.18 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0 0);
-  --primary: oklch(0.55 0.25 285);
-  --primary-foreground: oklch(1 0 0);
+  --primary: oklch(0.51 0.18 247);
+  --primary-foreground: oklch(0.99 0 0);
   --secondary: oklch(0.95 0 0);
   --secondary-foreground: oklch(0.18 0 0);
   --muted: oklch(0.96 0 0);
   --muted-foreground: oklch(0.45 0 0);
-  --accent: oklch(0.6 0.2 285);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.6 0.25 25);
+  --accent: oklch(0.58 0.14 247);
+  --accent-foreground: oklch(0.99 0 0);
+  --destructive: oklch(0.58 0.22 25);
   --border: oklch(0.9 0 0);
   --input: oklch(0.92 0 0);
-  --ring: oklch(0.55 0.25 285);
-  --chart-1: oklch(0.6 0.25 285);
-  --chart-2: oklch(0.65 0.2 310);
-  --chart-3: oklch(0.55 0.15 260);
-  --chart-4: oklch(0.7 0.18 270);
-  --chart-5: oklch(0.5 0.22 300);
+  --ring: oklch(0.51 0.18 247);
+  --chart-1: oklch(0.58 0.18 247);
+  --chart-2: oklch(0.62 0.14 185);
+  --chart-3: oklch(0.58 0.12 145);
+  --chart-4: oklch(0.62 0.14 215);
+  --chart-5: oklch(0.52 0.17 260);
   --sidebar: oklch(0.98 0 0);
   --sidebar-foreground: oklch(0.18 0 0);
-  --sidebar-primary: oklch(0.55 0.25 285);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.96 0.02 285);
+  --sidebar-primary: oklch(0.51 0.18 247);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.94 0.03 247);
   --sidebar-accent-foreground: oklch(0.18 0 0);
   --sidebar-border: oklch(0.9 0 0);
-  --sidebar-ring: oklch(0.55 0.25 285);
+  --sidebar-ring: oklch(0.51 0.18 247);
+
+  /* code syntax — light (VSCode Light+ inspired) */
+  --code-keyword:    oklch(0.42 0.20 262);
+  --code-string:     oklch(0.43 0.18 30);
+  --code-type:       oklch(0.51 0.10 213);
+  --code-fn:         oklch(0.48 0.10 81);
+  --code-number:     oklch(0.50 0.12 160);
+  --code-comment:    oklch(0.50 0.08 148);
+  --code-variable:   oklch(0.32 0.10 240);
+  --code-operator:   oklch(0.25 0 0);
+  --code-constant:   oklch(0.40 0.18 266);
+  --code-punctuation: oklch(0.42 0 0);
+
+  /* diff — light */
+  --diff-add-bg:      oklch(0.90 0.07 145 / 0.4);
+  --diff-add-text:    oklch(0.38 0.15 145);
+  --diff-remove-bg:   oklch(0.90 0.07 20 / 0.4);
+  --diff-remove-text: oklch(0.40 0.18 20);
+  --diff-chunk-bg:    oklch(0.90 0.05 247 / 0.3);
+  --diff-chunk-text:  oklch(0.42 0.15 247);
 }
 
 .dark {
@@ -180,31 +247,51 @@
   --card-foreground: oklch(0.92 0 0);
   --popover: oklch(0.14 0 0);
   --popover-foreground: oklch(0.92 0 0);
-  --primary: oklch(0.65 0.25 285);
-  --primary-foreground: oklch(0.12 0 0);
+  --primary: oklch(0.68 0.17 247);
+  --primary-foreground: oklch(0.07 0 0);
   --secondary: oklch(0.18 0 0);
   --secondary-foreground: oklch(0.92 0 0);
   --muted: oklch(0.2 0 0);
   --muted-foreground: oklch(0.7 0 0);
-  --accent: oklch(0.25 0.1 285);
+  --accent: oklch(0.22 0.08 247);
   --accent-foreground: oklch(0.92 0 0);
-  --destructive: oklch(0.65 0.25 25);
+  --destructive: oklch(0.65 0.22 25);
   --border: oklch(0.25 0 0);
   --input: oklch(0.2 0 0);
-  --ring: oklch(0.65 0.25 285);
-  --chart-1: oklch(0.65 0.25 285);
-  --chart-2: oklch(0.7 0.2 310);
-  --chart-3: oklch(0.6 0.15 260);
-  --chart-4: oklch(0.75 0.18 270);
-  --chart-5: oklch(0.55 0.22 300);
+  --ring: oklch(0.68 0.17 247);
+  --chart-1: oklch(0.65 0.17 247);
+  --chart-2: oklch(0.68 0.14 185);
+  --chart-3: oklch(0.64 0.12 145);
+  --chart-4: oklch(0.68 0.13 215);
+  --chart-5: oklch(0.60 0.17 260);
   --sidebar: oklch(0.1 0 0);
   --sidebar-foreground: oklch(0.85 0 0);
-  --sidebar-primary: oklch(0.65 0.25 285);
-  --sidebar-primary-foreground: oklch(0.12 0 0);
-  --sidebar-accent: oklch(0.16 0.05 285);
+  --sidebar-primary: oklch(0.68 0.17 247);
+  --sidebar-primary-foreground: oklch(0.07 0 0);
+  --sidebar-accent: oklch(0.16 0.05 247);
   --sidebar-accent-foreground: oklch(0.92 0 0);
   --sidebar-border: oklch(0.22 0 0);
-  --sidebar-ring: oklch(0.65 0.25 285);
+  --sidebar-ring: oklch(0.68 0.17 247);
+
+  /* code syntax — dark (VSCode Dark+ inspired) */
+  --code-keyword:    oklch(0.67 0.14 248);
+  --code-string:     oklch(0.73 0.12 42);
+  --code-type:       oklch(0.75 0.12 184);
+  --code-fn:         oklch(0.88 0.10 96);
+  --code-number:     oklch(0.82 0.07 148);
+  --code-comment:    oklch(0.58 0.08 146);
+  --code-variable:   oklch(0.87 0.07 224);
+  --code-operator:   oklch(0.85 0 0);
+  --code-constant:   oklch(0.74 0.14 236);
+  --code-punctuation: oklch(0.55 0 0);
+
+  /* diff — dark */
+  --diff-add-bg:      oklch(0.25 0.08 145 / 0.3);
+  --diff-add-text:    oklch(0.72 0.15 145);
+  --diff-remove-bg:   oklch(0.25 0.09 20 / 0.3);
+  --diff-remove-text: oklch(0.70 0.18 20);
+  --diff-chunk-bg:    oklch(0.20 0.06 280 / 0.25);
+  --diff-chunk-text:  oklch(0.68 0.12 280);
 }
 @layer base {
   * {

@@ -44,7 +44,7 @@ export async function runRepolessSession(
     return files;
   }).catch((err: unknown) => {
     outcomeError = err;
-    return {} as Record<string, string>;
+    return {};
   });
 
   // Stream progress and capture the last agent message
@@ -54,7 +54,7 @@ export async function runRepolessSession(
       agentMessage = a.message;
       console.error(`Agent: ${a.message.slice(0, 120)}`);
     },
-    progressUpdated: (a) => console.error(`Progress: ${a.title}`),
+    progressUpdated: (a) => { console.error(`Progress: ${a.title}`) },
   });
 
   const files = await outcomePromise;
