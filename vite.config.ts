@@ -4,6 +4,9 @@ import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
 import { fileURLToPath, URL } from 'node:url'
+import { builtinModules } from 'node:module'
+
+const nodeExternal = ['electron', ...builtinModules, ...builtinModules.map(m => `node:${m}`)]
 
 const isWeb = process.env.VITE_TARGET === 'web';
 
@@ -20,6 +23,7 @@ export default defineConfig({
       '@shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
       '@electron': fileURLToPath(new URL('./src/electron', import.meta.url)),
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@api/sdk': fileURLToPath(new URL('./src/renderer/api/sdk', import.meta.url)),
     },
   },
   server: {
@@ -38,6 +42,7 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     react(),
+
     babel({ presets: [reactCompilerPreset()] }),
     ...isWeb ? [] : [
       electron({
@@ -45,7 +50,8 @@ export default defineConfig({
           entry: 'src/electron/main.mts',
           vite: {
             build: {
-              rollupOptions: {
+              rolldownOptions: {
+                external: nodeExternal,
                 output: {
                   entryFileNames: '[name].mjs',
                 },
@@ -57,7 +63,8 @@ export default defineConfig({
           input: 'src/electron/preload.mts',
           vite: {
             build: {
-              rollupOptions: {
+              rolldownOptions: {
+                external: nodeExternal,
                 output: {
                   entryFileNames: '[name].mjs',
                 },

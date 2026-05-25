@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { isElectron } from '@shared';
+import { isElectron, windowControls } from '@shared/bridge';
+import { ThemeToggle } from '@/ui/theme-toggle';
 
 export default function TitleBar(): ReactNode {
   if (!isElectron) return null;
@@ -10,10 +11,12 @@ export default function TitleBar(): ReactNode {
         Last
       </span>
 
-      <div className="titlebar-no-drag flex items-center gap-0.5">
+      <div className="titlebar-no-drag flex items-center gap-1">
+        <ThemeToggle />
+        
         <button
           type="button"
-          onClick={() => { window.electronAPI?.minimize(); }}
+          onClick={() => { windowControls?.minimize(); }}
           className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-hover transition-colors"
           aria-label="Minimize"
         >
@@ -24,7 +27,7 @@ export default function TitleBar(): ReactNode {
 
         <button
           type="button"
-          onClick={() => { window.electronAPI?.maximize(); }}
+          onClick={() => { windowControls?.maximize(); }}
           className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-hover transition-colors"
           aria-label="Maximize"
         >
@@ -35,7 +38,7 @@ export default function TitleBar(): ReactNode {
 
         <button
           type="button"
-          onClick={() => { window.electronAPI?.close(); }}
+          onClick={() => { windowControls?.close(); }}
           className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-500/10 transition-colors"
           aria-label="Close"
         >
