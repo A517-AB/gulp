@@ -1,15 +1,46 @@
-import type { ReactNode } from 'react';
-import { Outlet } from 'react-router';
-import { TitleBar, TopBar } from '@renderer/shell';
+import type { ReactNode } from 'react'
+import { Outlet, useLocation, NavLink } from 'react-router'
+import { TitleBar, TopBar } from '@renderer/shell'
+import { ThemeProvider } from '@renderer/providers/theme'
+import { navRoutes } from '@renderer/router'
 
 export default function RootLayout(): ReactNode {
-  return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-base">
-      <TitleBar />
-      <TopBar />
-      <main className="flex-1 overflow-auto">
-        <Outlet />
-      </main>
-    </div>
-  );
+    const location = useLocation()
+
+    if (import.meta.env.DEV) {
+        console.log('[router] →', location.pathname)
+    }
+
+    const navLinks = navRoutes
+        .filter(route => route.handle?.inNav)
+        .map((route) => {
+            const path = route.index ? '/' : `/${route.path ?? ''}`
+            return (
+                <NavLink 
+                    key={path} 
+                    to={path}
+                    className={({ isActive }) => 
+                        `px-3 py-1 text-sm rounded-md transition-colors ${
+                            isActive 
+                                ? 'bg-active text-fg-primary' 
+                                : 'text-fg-secondary hover:text-fg-primary hover:bg-hover'
+                        }`
+                    }
+                >
+                    {route.handle?.title}
+                </NavLink>
+            )
+        })
+
+    return (
+        <ThemeProvider>
+            <div className="flex flex-col h-screen w-screen overflow-hidden bg-base">
+                <TitleBar />
+                <TopBar center={navLinks} />
+                <main className="flex-1 overflow-auto">
+                    <Outlet />
+                </main>
+            </div>
+        </ThemeProvider>
+    )
 }

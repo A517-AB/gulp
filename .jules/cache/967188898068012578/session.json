@@ -1,0 +1,19 @@
+{
+  "resource": {
+    "name": "sessions/967188898068012578",
+    "prompt": "# Repository: scripts\n\n## File Structure\n```\n  audit_tools_unified.ps1\n/ branchy\n  check_wt.ps1\n```\n\n---\n\nyo yo, i'm just testing the api, can you telll me waht you see, try to respond in a file back to me, to see if uploade work with my jules api. i made a folder upload, just tree... don'tt ink there's files upload. my next trick would be to uplaod files as text attachements below my pages, next time. now feel free to respnd\n",
+    "url": "https://jules.google.com/session/967188898068012578",
+    "requirePlanApproval": true,
+    "id": "967188898068012578",
+    "automationMode": "AUTO_CREATE_PR",
+    "archived": false,
+    "state": "unspecified",
+    "outputs": [],
+    "outcome": {
+      "sessionId": "967188898068012578",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779585296970
+}

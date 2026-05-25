@@ -1,0 +1,632 @@
+
+> last@0.1.0 typecheck
+> tsc -b --pretty false
+
+src/renderer/api/client.ts(4,44): error TS4111: Property 'VITE_JULES_SERVER_URL' comes from an index signature, so it must be accessed with ['VITE_JULES_SERVER_URL'].
+src/renderer/components/chat-interface.tsx(3,30): error TS2307: Cannot find module '@/components/activity-feed' or its corresponding type declarations.
+src/renderer/components/chat-interface.tsx(4,35): error TS2307: Cannot find module '@/components/generated-file-list' or its corresponding type declarations.
+src/renderer/components/chat-interface.tsx(5,30): error TS2307: Cannot find module '@/components/preset-picker' or its corresponding type declarations.
+src/renderer/components/chat-interface.tsx(98,25): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/renderer/components/generated-file-list.tsx(6,50): error TS2537: Type '() => GeneratedFiles' has no matching index signature for type 'number'.
+src/renderer/components/new-session-hero.tsx(3,30): error TS2307: Cannot find module '@/components/preset-picker' or its corresponding type declarations.
+src/renderer/components/new-session-hero.tsx(47,23): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/renderer/components/plan-approval-banner.tsx(2,23): error TS6133: 'XCircle' is declared but its value is never read.
+src/renderer/components/plan-approval-banner.tsx(3,32): error TS2307: Cannot find module '@/api/sdk' or its corresponding type declarations.
+src/renderer/components/plan-approval-banner.tsx(16,31): error TS2339: Property 'plan' does not exist on type 'Activity'.
+  Property 'plan' does not exist on type 'ActivityAgentMessaged'.
+src/renderer/components/plan-approval-banner.tsx(39,27): error TS7006: Parameter 'step' implicitly has an 'any' type.
+src/renderer/components/plan-approval-banner.tsx(39,33): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/renderer/lib/todos.ts(23,3): error TS2375: Type '{ id: `${string}-${string}-${string}-${string}-${string}`; text: string; done: false; sessionId: string | undefined; }' is not assignable to type 'Todo' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'sessionId' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/renderer/pages/electron/ReposPage.tsx(3,41): error TS2307: Cannot find module '@/api/sdk' or its corresponding type declarations.
+src/renderer/pages/electron/ReposPage.tsx(4,52): error TS2307: Cannot find module '@' or its corresponding type declarations.
+src/renderer/router.tsx(75,9): error TS2322: Type 'AppRoute[]' is not assignable to type 'RouteObject[]'.
+  Type 'AppRoute' is not assignable to type 'RouteObject' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Type 'AppRoute' is not assignable to type 'NonIndexRouteObject' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+      Type 'AppRoute' is not assignable to type '{ children?: RouteObject[]; index?: false; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+        Types of property 'children' are incompatible.
+          Type 'RouteObject[] | undefined' is not assignable to type 'RouteObject[]'.
+            Type 'undefined' is not assignable to type 'RouteObject[]'.
+src/renderer/store/app.ts(22,23): error TS6133: 'unsubscribers' is declared but its value is never read.
+src/renderer/store/app.ts(44,9): error TS6133: 'isDone' is declared but its value is never read.
+
+> last@0.1.0 lint
+> eslint .
+
+
+D:\LAST\server\app.ts
+  0:0  error  Parsing error: D:\LAST\server\app.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\artifacts.ts
+  0:0  error  Parsing error: D:\LAST\server\artifacts.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\cache.ts
+  0:0  error  Parsing error: D:\LAST\server\cache.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\client.ts
+  0:0  error  Parsing error: D:\LAST\server\client.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\connection.ts
+  0:0  error  Parsing error: D:\LAST\server\connection.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\helpers.ts
+  0:0  error  Parsing error: D:\LAST\server\helpers.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\index.ts
+  0:0  error  Parsing error: D:\LAST\server\index.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\query.ts
+  0:0  error  Parsing error: D:\LAST\server\query.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\runs.ts
+  0:0  error  Parsing error: D:\LAST\server\runs.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\sessions.ts
+  0:0  error  Parsing error: D:\LAST\server\sessions.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\sources.ts
+  0:0  error  Parsing error: D:\LAST\server\sources.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\streams.ts
+  0:0  error  Parsing error: D:\LAST\server\streams.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\sync.ts
+  0:0  error  Parsing error: D:\LAST\server\sync.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\types.ts
+  0:0  error  Parsing error: D:\LAST\server\types.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\utils.ts
+  0:0  error  Parsing error: D:\LAST\server\utils.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server\ws.ts
+  0:0  error  Parsing error: D:\LAST\server\ws.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\src\electron\Terminal.ts
+  47:22  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+D:\LAST\src\electron\ipc\bridge.ts
+  33:19  error  Type parameter T is used only once in the function signature                                                        @typescript-eslint/no-unnecessary-type-parameters
+  39:59  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  71:71  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\src\electron\ipc\handlers.ts
+   27:5   error  Unsafe return of a value of type `any`                                                                  @typescript-eslint/no-unsafe-return
+   73:19  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                              @typescript-eslint/await-thenable
+   79:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+   87:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+   99:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+  107:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+  111:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+  115:43  error  `select` is deprecated. Use `session.activities.select()` instead                                       @typescript-eslint/no-deprecated
+
+D:\LAST\src\electron\main.mts
+   59:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   63:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   74:18  error  Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
+  108:1   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  129:46  error  Unnecessary optional chain on a non-nullish value                                                                                                                   @typescript-eslint/no-unnecessary-condition
+  153:44  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+
+D:\LAST\src\electron\popup.ts
+  61:26  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  68:3   error  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read      @typescript-eslint/prefer-nullish-coalescing
+  90:34  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\src\electron\preload.mts
+  10:5   error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  13:5   error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  16:5   error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  19:5   error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  22:65  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  29:7   error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  46:19  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  47:19  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  48:19  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  56:27  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  61:27  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  70:16  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  71:16  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  72:16  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  75:5   error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  78:76  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\src\electron\queues.ts
+  38:38  error  '_event' is defined but never used     @typescript-eslint/no-unused-vars
+  38:46  error  '_jsonPath' is defined but never used  @typescript-eslint/no-unused-vars
+  42:38  error  '_event' is defined but never used     @typescript-eslint/no-unused-vars
+  42:46  error  '_jsonPath' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\LAST\src\renderer\api\jules-api.ts
+    25:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+    72:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+    81:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+    90:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+    99:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   108:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   117:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   126:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   135:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   144:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   153:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   188:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   221:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   258:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   269:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   278:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   287:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   296:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   305:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   314:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   323:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   332:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   341:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   379:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   383:79  error  'unknown' is overridden by other types in this intersection type  @typescript-eslint/no-redundant-type-constituents
+   388:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   397:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   406:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   415:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   424:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   433:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   442:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   451:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   460:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   501:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   512:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   521:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   530:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   539:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   548:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   557:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   566:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   575:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   584:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   609:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   623:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   632:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   641:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   650:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   659:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   668:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   677:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   686:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   695:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   730:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   739:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   748:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   757:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   766:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   775:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   784:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   793:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   802:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   811:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   856:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   865:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   874:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   883:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   892:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   901:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   910:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   919:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   928:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   937:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   980:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   989:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+   998:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1007:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1016:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1025:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1034:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1043:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1052:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1061:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1098:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1107:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1116:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1125:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1134:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1143:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1152:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1161:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1170:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1179:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1224:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1233:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1242:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1251:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1260:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1269:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1278:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1287:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1296:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1305:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1340:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1349:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1358:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1367:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1376:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1385:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1394:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1403:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1412:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1421:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1460:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1469:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1478:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1487:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1496:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1505:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1514:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1523:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1532:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1541:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1578:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1587:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1596:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1605:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1614:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1623:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1632:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1641:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1650:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1659:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1697:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1706:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1715:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1724:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1733:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1742:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1751:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1760:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1769:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1778:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1818:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1829:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1838:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1847:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1856:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1865:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1874:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1883:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1892:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1901:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1944:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1955:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1964:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1973:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1982:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  1991:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2000:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2009:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2018:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2027:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2062:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2073:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2082:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2091:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2100:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2109:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2118:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2127:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2136:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2145:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2183:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2192:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2201:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2210:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2219:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2228:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2237:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2246:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2255:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2264:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2303:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2312:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2321:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2330:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2339:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2348:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2357:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2366:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2375:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2384:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2421:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2432:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2441:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2450:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2459:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2468:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2477:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2486:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2495:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2504:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2542:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2551:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2560:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2569:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2578:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2587:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2596:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2605:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2614:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2623:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2664:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2675:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2684:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2693:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2702:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2711:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2720:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2729:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2738:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2747:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2791:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2804:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2813:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2822:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2831:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2840:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2849:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2858:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2867:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2876:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2915:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2926:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2935:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2944:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2953:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2962:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2971:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2980:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2989:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  2998:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3037:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3051:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3060:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3069:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3078:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3087:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3096:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3105:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3114:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3123:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3162:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3171:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3180:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3189:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3198:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3207:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3216:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3225:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3234:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3243:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3276:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3318:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3362:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3371:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3380:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3389:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3398:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3407:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3416:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3425:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3434:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3443:30  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3478:17  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3493:13  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+  3514:13  error  A record is preferred over an index signature                     @typescript-eslint/consistent-indexed-object-style
+
+D:\LAST\src\renderer\api\sdk.ts
+   4:35  error  Type number trivially inferred from a number literal, remove type annotation       @typescript-eslint/no-inferrable-types
+   6:16  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+   6:16  error  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
+  11:16  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  11:16  error  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
+  16:9   error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  16:9   error  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
+  21:9   error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  21:9   error  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
+  36:37  error  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
+
+D:\LAST\src\renderer\components\activity-feed.tsx
+   41:46   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined         @typescript-eslint/no-unnecessary-condition
+   41:51   error  Unnecessary optional chain on a non-nullish value                                                          @typescript-eslint/no-unnecessary-condition
+   56:28   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined         @typescript-eslint/no-unnecessary-condition
+   96:50   error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+   96:55   error  Unsafe member access .message on an `any` value                                                            @typescript-eslint/no-unsafe-member-access
+  108:109  error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  108:114  error  Unsafe member access .message on an `any` value                                                            @typescript-eslint/no-unsafe-member-access
+  118:9    error  Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  118:52   error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  118:57   error  Unsafe member access .plan on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  118:71   error  Unsafe member access .steps on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  121:109  error  Unsafe member access .length on an `any` value                                                             @typescript-eslint/no-unsafe-member-access
+  123:10   error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  123:16   error  Unsafe member access .map on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  123:27   error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  128:25   error  Unsafe member access .title on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  137:21   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined         @typescript-eslint/no-unnecessary-condition
+  145:97   error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  145:102  error  Unsafe member access .title on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  145:114  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  153:24   error  Unnecessary conditional, value is always truthy                                                            @typescript-eslint/no-unnecessary-condition
+  154:40   error  Unnecessary optional chain on a non-nullish value                                                          @typescript-eslint/no-unnecessary-condition
+  175:72   error  Invalid type "number" of template literal expression                                                       @typescript-eslint/restrict-template-expressions
+  177:13   error  Unnecessary conditional, comparison is always true, since `"bashOutput" === "bashOutput"` is true          @typescript-eslint/no-unnecessary-condition
+  177:46   error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  177:59   error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  177:64   error  Unsafe member access .text on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  182:16   error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  182:17   error  Unnecessary conditional, comparison is always true, since `"bashOutput" === "bashOutput"` is true          @typescript-eslint/no-unnecessary-condition
+  182:50   error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  182:63   error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  182:68   error  Unsafe member access .text on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  182:81   error  Unsafe member access .slice on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  182:98   error  Unnecessary conditional, comparison is always true, since `"bashOutput" === "bashOutput"` is true          @typescript-eslint/no-unnecessary-condition
+  182:131  error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  182:144  error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  182:149  error  Unsafe member access .text on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  182:162  error  Unsafe member access .length on an `any` value                                                             @typescript-eslint/no-unsafe-member-access
+  206:9    error  Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  206:30   error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  206:36   error  Unsafe member access .generatedFiles on an `any` value                                                     @typescript-eslint/no-unsafe-member-access
+  206:53   error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  206:53   error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  206:65   error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  206:71   error  Unsafe member access .generatedFiles on an `any` value                                                     @typescript-eslint/no-unsafe-member-access
+  206:88   error  Unsafe member access .all on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  209:13   error  Unsafe member access .length on an `any` value                                                             @typescript-eslint/no-unsafe-member-access
+  224:14   error  Unsafe member access .length on an `any` value                                                             @typescript-eslint/no-unsafe-member-access
+  226:12   error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  226:18   error  Unsafe member access .map on an `any` value                                                                @typescript-eslint/no-unsafe-member-access
+  226:26   error  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  230:19   error  Unsafe member access .changeType on an `any` value                                                         @typescript-eslint/no-unsafe-member-access
+  230:69   error  Unsafe member access .changeType on an `any` value                                                         @typescript-eslint/no-unsafe-member-access
+  232:20   error  Unsafe member access .changeType on an `any` value                                                         @typescript-eslint/no-unsafe-member-access
+  234:45   error  Unsafe member access .path on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  235:63   error  Unsafe member access .additions on an `any` value                                                          @typescript-eslint/no-unsafe-member-access
+  236:59   error  Unsafe member access .deletions on an `any` value                                                          @typescript-eslint/no-unsafe-member-access
+
+D:\LAST\src\renderer\components\chat-interface.tsx
+   44:45  error  Invalid type "number" of template literal expression                                                                                                                                                                                                                                                                                        @typescript-eslint/restrict-template-expressions
+   79:35  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+   87:28  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function                                                                                                                                                                                                                          @typescript-eslint/no-confusing-void-expression
+   93:20  error  This assertion is unnecessary since the receiver accepts the original type of the expression                                                                                                                                                                                                                                                @typescript-eslint/no-unnecessary-type-assertion
+   98:30  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function                                                                                                                                                                                                                          @typescript-eslint/no-confusing-void-expression
+   98:51  error  Unsafe argument of type `any` assigned to a parameter of type `Preset`                                                                                                                                                                                                                                                                      @typescript-eslint/no-unsafe-argument
+  102:23  error  Promise-returning function provided to attribute where a void return was expected                                                                                                                                                                                                                                                           @typescript-eslint/no-misused-promises
+
+D:\LAST\src\renderer\components\file-browser.tsx
+    6:6   error  Use an `interface` instead of a `type`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/consistent-type-definitions
+   44:31  error  Forbidden non-null assertion                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-non-null-assertion
+   58:17  error  Promise-returning function provided to attribute where a void return was expected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-misused-promises
+   59:34  error  Invalid type "number" of template literal expression                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/restrict-template-expressions
+  101:36  error  Invalid type "number" of template literal expression                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/restrict-template-expressions
+  125:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\components\file-browser.tsx:125:5
+  123 |   useEffect(() => {
+  124 |     if (!rootDir || !filesystem) return
+> 125 |     setRootEntries(null)
+      |     ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  126 |     setFsError(null)
+  127 |     setSelected(null)
+  128 |     setFileContent(null)  react-hooks/set-state-in-effect
+  130:24  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-confusing-void-expression
+  131:14  error  Prefer the safe `: unknown` for a `catch` callback variable                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/use-unknown-in-catch-callback-variable
+  131:21  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-confusing-void-expression
+  140:29  error  Forbidden non-null assertion                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-non-null-assertion
+  153:22  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-confusing-void-expression
+  179:22  error  Promise-returning function provided to attribute where a void return was expected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-misused-promises
+  198:25  error  Promise-returning function provided to attribute where a void return was expected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-misused-promises
+
+D:\LAST\src\renderer\components\generated-file-list.tsx
+  24:34  error  Unsafe assignment of an error typed value                                                                           @typescript-eslint/no-unsafe-assignment
+  36:15  error  Unsafe member access .content on a type that cannot be resolved                                                     @typescript-eslint/no-unsafe-member-access
+  37:41  error  Unsafe argument of type error typed assigned to a parameter of type `string`                                        @typescript-eslint/no-unsafe-argument
+  37:46  error  Unsafe member access .content on a type that cannot be resolved                                                     @typescript-eslint/no-unsafe-member-access
+  39:22  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  47:26  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  50:17  error  Unsafe member access .content on a type that cannot be resolved                                                     @typescript-eslint/no-unsafe-member-access
+  57:18  error  Unsafe member access .changeType on a type that cannot be resolved                                                  @typescript-eslint/no-unsafe-member-access
+  58:18  error  Unsafe member access .changeType on a type that cannot be resolved                                                  @typescript-eslint/no-unsafe-member-access
+  59:18  error  Unsafe member access .changeType on a type that cannot be resolved                                                  @typescript-eslint/no-unsafe-member-access
+  61:14  error  Unsafe call of a type that could not be resolved                                                                    @typescript-eslint/no-unsafe-call
+  61:19  error  Unsafe member access .changeType on a type that cannot be resolved                                                  @typescript-eslint/no-unsafe-member-access
+  63:82  error  Unsafe member access .path on a type that cannot be resolved                                                        @typescript-eslint/no-unsafe-member-access
+  64:74  error  Unsafe member access .additions on a type that cannot be resolved                                                   @typescript-eslint/no-unsafe-member-access
+  65:70  error  Unsafe member access .deletions on a type that cannot be resolved                                                   @typescript-eslint/no-unsafe-member-access
+  68:15  error  Unsafe member access .content on a type that cannot be resolved                                                     @typescript-eslint/no-unsafe-member-access
+  71:21  error  Promise-returning function provided to attribute where a void return was expected                                   @typescript-eslint/no-misused-promises
+  79:25  error  Unsafe member access .content on a type that cannot be resolved                                                     @typescript-eslint/no-unsafe-member-access
+  81:17  error  Unsafe member access .content on a type that cannot be resolved                                                     @typescript-eslint/no-unsafe-member-access
+
+D:\LAST\src\renderer\components\new-session-hero.tsx
+  31:28  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  47:28  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  47:49  error  Unsafe argument of type `any` assigned to a parameter of type `Preset`                                              @typescript-eslint/no-unsafe-argument
+
+D:\LAST\src\renderer\components\plan-approval-banner.tsx
+   2:23  error  'XCircle' is defined but never used                                                       @typescript-eslint/no-unused-vars
+  16:9   error  Unsafe assignment of an error typed value                                                 @typescript-eslint/no-unsafe-assignment
+  16:37  error  Unsafe member access .steps on a type that cannot be resolved                             @typescript-eslint/no-unsafe-member-access
+  22:13  error  Unsafe call of a type that could not be resolved                                          @typescript-eslint/no-unsafe-call
+  37:18  error  Unsafe member access .length on a type that cannot be resolved                            @typescript-eslint/no-unsafe-member-access
+  39:16  error  Unsafe call of a type that could not be resolved                                          @typescript-eslint/no-unsafe-call
+  39:22  error  Unsafe member access .map on a type that cannot be resolved                               @typescript-eslint/no-unsafe-member-access
+  40:26  error  Unsafe assignment of an `any` value                                                       @typescript-eslint/no-unsafe-assignment
+  41:59  error  Invalid operand for a '+' operation. Operands must each be a number or string. Got `any`  @typescript-eslint/restrict-plus-operands
+  42:31  error  Unsafe member access .title on an `any` value                                             @typescript-eslint/no-unsafe-member-access
+  52:21  error  Promise-returning function provided to attribute where a void return was expected         @typescript-eslint/no-misused-promises
+
+D:\LAST\src\renderer\components\preset-picker.tsx
+  21:18  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  30:24  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\src\renderer\components\session-row.tsx
+  69:25  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  71:25  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  73:25  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  74:13  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
+
+D:\LAST\src\renderer\hooks\use-presets.ts
+  20:12  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+D:\LAST\src\renderer\pages\electron\ReposPage.tsx
+   26:8    error  Async function 'loader' has no 'await' expression                                                                               @typescript-eslint/require-await
+   26:23   error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+   41:27   error  Unsafe assignment of an error typed value                                                                                       @typescript-eslint/no-unsafe-assignment
+   41:39   error  Unsafe call of a type that could not be resolved                                                                                @typescript-eslint/no-unsafe-call
+   41:52   error  Unsafe member access .getTasks on a type that cannot be resolved                                                                @typescript-eslint/no-unsafe-member-access
+   65:19   error  Unsafe assignment of an error typed value                                                                                       @typescript-eslint/no-unsafe-assignment
+   65:34   error  Unsafe call of a type that could not be resolved                                                                                @typescript-eslint/no-unsafe-call
+   70:45   error  Invalid type "any" of template literal expression                                                                               @typescript-eslint/restrict-template-expressions
+   71:46   error  Unsafe assignment of an error typed value                                                                                       @typescript-eslint/no-unsafe-assignment
+   81:71   error  Invalid type "number" of template literal expression                                                                            @typescript-eslint/restrict-template-expressions
+   81:105  error  Invalid type "number" of template literal expression                                                                            @typescript-eslint/restrict-template-expressions
+   86:54   error  This assertion is unnecessary since it does not change the type of the expression                                               @typescript-eslint/no-unnecessary-type-assertion
+   86:54   error  Forbidden non-null assertion                                                                                                    @typescript-eslint/no-non-null-assertion
+   88:19   error  Unsafe assignment of an error typed value                                                                                       @typescript-eslint/no-unsafe-assignment
+   88:36   error  Unsafe call of a type that could not be resolved                                                                                @typescript-eslint/no-unsafe-call
+   89:52   error  Invalid type "any" of template literal expression                                                                               @typescript-eslint/restrict-template-expressions
+   89:61   error  Unsafe member access .length on a type that cannot be resolved                                                                  @typescript-eslint/no-unsafe-member-access
+  129:40   error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+  154:56   error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\src\renderer\provider\index.tsx
+  41:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\LAST\src\renderer\store\app.ts
+  22:23  error  'unsubscribers' is assigned a value but never used                                          @typescript-eslint/no-unused-vars
+  23:9   error  Prefer using an optional chain expression instead, as it's more concise and easier to read  @typescript-eslint/prefer-optional-chain
+  24:20  error  Unexpected empty arrow function                                                             @typescript-eslint/no-empty-function
+  41:20  error  Unexpected empty arrow function                                                             @typescript-eslint/no-empty-function
+  44:9   error  'isDone' is assigned a value but never used                                                 @typescript-eslint/no-unused-vars
+  45:19  error  This assertion is unnecessary since it does not change the type of the expression           @typescript-eslint/no-unnecessary-type-assertion
+  45:19  error  Forbidden non-null assertion                                                                @typescript-eslint/no-non-null-assertion
+  82:9   error  Forbidden non-null assertion                                                                @typescript-eslint/no-non-null-assertion
+  93:18  error  Prefer the safe `: unknown` for a `catch` callback variable                                 @typescript-eslint/use-unknown-in-catch-callback-variable
+
+D:\LAST\src\shared\bridge.ts
+  1:1   error  Do not use a triple slash reference for ../types/electron.d.ts, use `import` style instead  @typescript-eslint/triple-slash-reference
+  5:14  error  Type boolean trivially inferred from a boolean literal, remove type annotation              @typescript-eslint/no-inferrable-types
+  6:14  error  Type boolean trivially inferred from a boolean literal, remove type annotation              @typescript-eslint/no-inferrable-types
+
+D:\LAST\src\types\electron.d.ts
+  119:49  error  Array type using 'Array<T>' is forbidden. Use 'T[]' instead  @typescript-eslint/array-type
+
+✖ 496 problems (496 errors, 0 warnings)
+  325 errors and 0 warnings potentially fixable with the `--fix` option.
+

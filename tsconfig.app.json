@@ -16,10 +16,21 @@
       "@renderer/shell/*": ["./src/renderer/shell/*"],
       "@renderer/core": ["./src/renderer/core/index.ts"],
       "@renderer/core/*": ["./src/renderer/core/*"],
+      "@/components": ["./src/renderer/components"],
+      "@/components/*": ["./src/renderer/components/*"],
       "@/ui": ["./src/renderer/ui"],
       "@/ui/*": ["./src/renderer/ui/*"],
+      "@/store": ["./src/renderer/store"],
+      "@/store/*": ["./src/renderer/store/*"],
+      "@/hooks": ["./src/renderer/hooks"],
+      "@/hooks/*": ["./src/renderer/hooks/*"],
+      "@/lib": ["./src/renderer/lib"],
+      "@/lib/*": ["./src/renderer/lib/*"],
       "@/utils": ["./src/renderer/utils/index.ts"],
-      "@/utils/*": ["./src/renderer/utils/*"]
+      "@/utils/*": ["./src/renderer/utils/*"],
+      "@api": ["./src/renderer/api"],
+      "@api/index": ["./src/renderer/api/index.ts"],
+      "@api/*": ["./src/renderer/api/*"]
     },
 
     /* Bundler mode */
@@ -52,10 +63,5 @@
     "noImplicitAny": true,
   },
   "include": ["src"],
-  "exclude": [
-    "src/electron/jules/advanced-session.ts",
-    "src/electron/jules/agent.ts",
-    "src/electron/jules/basic-session.ts",
-    "src/electron/jules/file-system-events.ts"
-  ]
+  "exclude": ["src/electron"]
 }

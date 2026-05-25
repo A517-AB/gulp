@@ -1,4 +1,5 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from "electron";
+import type { IpcRendererEvent } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import type { ShellType, PopupNotification, ElectronAPI } from "../types/electron";
 import { sdk } from "./ipc/bridge";
 

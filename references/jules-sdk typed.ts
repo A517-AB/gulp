@@ -1,5 +1,5 @@
-// jules-sdk.ts — auto-generated
-// @google/jules-sdk  v0.2.0
+// ipc-sdk.ts — auto-generated
+// @google/ipc-sdk  v0.2.0
 // generated: 2026-05-17T15:10:44.377Z
 // 33 .d.ts files scanned  |  184 declarations
 
@@ -386,7 +386,7 @@ export class JulesClientImpl implements JulesClient {
      * @throws {JulesApiError} If the session creation fails (e.g., 401 Unauthorized).
      *
      * @example
-     * const run = await jules.run({
+     * const run = await ipc.run({
      *   prompt: "Fix the login bug",
      *   source: { github: "my-org/repo", baseBranch: "main" }
      * });
@@ -408,7 +408,7 @@ export class JulesClientImpl implements JulesClient {
      * @throws {SourceNotFoundError} If the source cannot be found.
      *
      * @example
-     * const session = await jules.session({
+     * const session = await ipc.session({
      *   prompt: "Let's explore the codebase",
      *   source: { github: "owner/repo", baseBranch: "main" }
      * });
@@ -427,7 +427,7 @@ export class JulesClientImpl implements JulesClient {
      * @returns The interactive `SessionClient`.
      *
      * @example
-     * const session = jules.session("12345");
+     * const session = ipc.session("12345");
      * const info = await session.info(); // Now makes a request
      */
     session(sessionId: string): SessionClient;
@@ -1024,7 +1024,7 @@ export class SessionCursor implements PromiseLike<ListSessionsResponse>, AsyncIt
     constructor(apiClient: ApiClient, storage: SessionStorage, platform: any, options?: ListSessionsOptions);
     /**
      * DX Feature: Promise Compatibility.
-     * Allows `const page = await jules.sessions()` to just get the first page.
+     * Allows `const page = await ipc.sessions()` to just get the first page.
      * This is great for UIs that render a list and a "Load More" button.
      */
     then<TResult1 = ListSessionsResponse, TResult2 = never>(onfulfilled?: ((value: ListSessionsResponse) => TResult1 | PromiseLike<TResult1>) | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null): PromiseLike<TResult1 | TResult2>;
@@ -1163,7 +1163,7 @@ export class NodeFileStorage implements ActivityStorage {
      * Initializes the storage by ensuring the cache directory exists.
      *
      * **Side Effects:**
-     * - Creates the `.jules/cache/<sessionId>` directory if it does not exist.
+     * - Creates the `.ipc/cache/<sessionId>` directory if it does not exist.
      * - Sets the internal `initialized` flag.
      */
     init(): Promise<void>;
@@ -1254,8 +1254,8 @@ export interface SessionStorage {
     init(): Promise<void>;
     /**
      * Persists a session state.
-     * 1. Writes the full resource to atomic storage (.jules/cache/<id>/session.json).
-     * 2. Appends metadata to the high-speed index (.jules/cache/sessions.jsonl).
+     * 1. Writes the full resource to atomic storage (.ipc/cache/<id>/session.json).
+     * 2. Appends metadata to the high-speed index (.ipc/cache/sessions.jsonl).
      */
     upsert(session: SessionResource): Promise<void>;
     /**
@@ -1445,8 +1445,8 @@ export interface SessionConfig {
      * If true, the agent will pause and wait for explicit approval (via `session.approve()`)
      * before executing any generated plan.
      *
-     * @default false for `jules.run()`
-     * @default true for `jules.session()`
+     * @default false for `ipc.run()`
+     * @default true for `ipc.session()`
      */
     requireApproval?: boolean;
     /**
@@ -1454,7 +1454,7 @@ export interface SessionConfig {
      * Maps to `automationMode: AUTO_CREATE_PR` in the REST API.
      * If false, maps to `AUTOMATION_MODE_UNSPECIFIED`.
      *
-     * @default true for `jules.run()`
+     * @default true for `ipc.run()`
      */
     autoPr?: boolean;
 }
@@ -1607,7 +1607,7 @@ export interface SessionResource {
     outputs: SessionOutput[];
     /**
      * The activities associated with the session.
-     * Only populated when `include: { activities: true }` is used in `jules.select()`.
+     * Only populated when `include: { activities: true }` is used in `ipc.select()`.
      */
     activities?: Activity[];
     outcome: SessionOutcome;
@@ -1854,7 +1854,7 @@ export interface AutomatedSession {
      * This uses an Async Iterator, making it easy to consume events as they happen.
      *
      * @example
-     * const run = await jules.run({ ... });
+     * const run = await ipc.run({ ... });
      * for await (const activity of run.stream()) {
      *   console.log(`[${activity.type}]`);
      * }
@@ -1864,7 +1864,7 @@ export interface AutomatedSession {
      * Waits for the session to complete and returns the final outcome.
      *
      * @example
-     * const run = await jules.run({ ... });
+     * const run = await ipc.run({ ... });
      * const outcome = await run.result();
      */
     result(): Promise<SessionOutcome>;
@@ -2154,7 +2154,7 @@ export interface SourceManager {
      * @param filter The filter criteria (e.g., { github: 'owner/repo' }).
      * @returns The matching Source or undefined if not found.
      * @example
-     * const myRepo = await jules.sources.get({ github: 'my-org/my-project' });
+     * const myRepo = await ipc.sources.get({ github: 'my-org/my-project' });
      */
     get(filter: {
         github: string;
@@ -2170,7 +2170,7 @@ export interface JulesClient {
      * @returns A `AutomatedSession` object, which is an enhanced Promise that resolves to the final outcome.
      *
      * @example
-     * const run = await jules.run({
+     * const run = await ipc.run({
      *   prompt: "Fix the bug described in issue #123",
      *   source: { github: 'my-org/my-project', baseBranch: 'main' }
      * });
@@ -2186,7 +2186,7 @@ export interface JulesClient {
      * @returns A Promise resolving to the interactive `SessionClient`.
      *
      * @example
-     * const session = await jules.session({
+     * const session = await ipc.session({
      *   prompt: "Let's refactor the authentication module.",
      *   source: { github: 'my-org/my-project', baseBranch: 'develop' }
      * });
@@ -2199,7 +2199,7 @@ export interface JulesClient {
      * @returns The interactive `SessionClient`.
      *
      * @example
-     * const session = jules.session('EXISTING_SESSION_ID');
+     * const session = ipc.session('EXISTING_SESSION_ID');
      * // now you can interact with it
      * const info = await session.info();
      */
@@ -2208,7 +2208,7 @@ export interface JulesClient {
      * Provides access to the Source Management interface.
      *
      * @example
-     * const sources = jules.sources;
+     * const sources = ipc.sources;
      * const allSources = await Array.fromAsync(sources());
      */
     sources: SourceManager;
@@ -2220,7 +2220,7 @@ export interface JulesClient {
      * @returns A new JulesClient instance with the updated configuration.
      *
      * @example
-     * const specialized = jules.with({ apiKey: 'NEW_KEY' });
+     * const specialized = ipc.with({ apiKey: 'NEW_KEY' });
      */
     with(options: JulesOptions): JulesClient;
     /**
@@ -2239,10 +2239,10 @@ export interface JulesClient {
      *
      * @example
      * // Get the first page
-     * const page = await jules.sessions({ pageSize: 10 });
+     * const page = await ipc.sessions({ pageSize: 10 });
      *
      * // Stream all sessions
-     * for await (const session of jules.sessions()) {
+     * for await (const session of ipc.sessions()) {
      *   console.log(session.id);
      * }
      */
@@ -2257,7 +2257,7 @@ export interface JulesClient {
      *
      * @example
      * const todos = ['Fix login', 'Add tests'];
-     * const sessions = await jules.all(todos, (task) => ({
+     * const sessions = await ipc.all(todos, (task) => ({
      *   prompt: task,
      *   source: { github: 'user/repo', baseBranch: 'main' }
      * }));
@@ -2353,7 +2353,7 @@ export interface SyncOptions {
     onProgress?: (progress: SyncProgress) => void;
     /**
      * If true, saves progress to disk and resumes from checkpoint on restart.
-     * Checkpoint stored at .jules/cache/sync-checkpoint.json
+     * Checkpoint stored at .ipc/cache/sync-checkpoint.json
      */
     checkpoint?: boolean;
     /**

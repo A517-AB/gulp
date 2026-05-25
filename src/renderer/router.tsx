@@ -1,56 +1,78 @@
-import type { RouteObject } from 'react-router';
-import { createHashRouter } from 'react-router';
-import { isElectron, isWeb } from '@shared';
-import { RootLayout } from '@renderer/layouts';
-import { ErrorBoundary } from '@renderer/core';
-import { HomePage, ProjectsPage, SettingsPage, WorkbenchPage } from '@renderer/pages';
+import { createHashRouter, type RouteObject } from 'react-router'
+// RouteObject cast needed: exactOptionalPropertyTypes makes children?: X[] incompatible with RouteObject[]
+import { isElectron, isWeb } from '@shared/bridge'
+import { RootLayout } from '@renderer/layouts'
+import { ErrorBoundary } from '@renderer/core'
+import {
+    HomePage, SettingsPage,
+} from '@renderer/pages/shared'
+import {
+    ProjectsPage, SessionsPage, WorkbenchPage,
+    ActivityPage, ReposPage, SnapshotPage,
+} from '@renderer/pages/electron'
+import {
+    OverviewPage,
+} from '@renderer/pages/web'
 
-/** Available on both electron and web. */
-const sharedRoutes: readonly RouteObject[] = [
-  {
-    index: true,
-    element: <HomePage />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: 'settings',
-    element: <SettingsPage />,
-    errorElement: <ErrorBoundary />,
-  },
-];
+// ── dev ───────────────────────────────────────────────────────────────────────
 
-/** Only available inside the electron shell. */
-const electronRoutes: readonly RouteObject[] = [
-  {
-    path: 'projects',
-    element: <ProjectsPage />,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: 'workbench',
-    element: <WorkbenchPage />,
-    errorElement: <ErrorBoundary />,
-  },
-];
+if (import.meta.env.DEV) {
+    console.log('[router] platform:', { isElectron, isWeb })
 
-/** Only available in a plain browser. */
-const webRoutes: readonly RouteObject[] = [];
+    if (!isElectron && !isWeb) {
+        console.warn('[router] neither isElectron nor isWeb is true — check @shared/bridge')
+    }
 
-function buildChildren(): RouteObject[] {
-  return [
-    ...sharedRoutes,
-    ...(isElectron ? electronRoutes : []),
-    ...(isWeb ? webRoutes : []),
-  ];
+    if (isElectron && isWeb) {
+        console.warn('[router] both isElectron and isWeb are true — this is probably wrong')
+    }
 }
 
-const routes: readonly RouteObject[] = [
-  {
-    path: '/',
-    element: <RootLayout />,
-    errorElement: <ErrorBoundary />,
-    children: buildChildren(),
-  },
-];
+// ── types ─────────────────────────────────────────────────────────────────────
 
-export const router = createHashRouter([...routes]);
+export type AppRoute = Omit<RouteObject, 'handle'> & {
+    handle?: { title: string; inNav?: boolean }
+}
+
+// ── shared ────────────────────────────────────────────────────────────────────
+
+const sharedRoutes: AppRoute[] = [
+    { index: true,       Component: HomePage,     handle: { title: 'Home', inNav: true } },
+    { path: 'settings', Component: SettingsPage, handle: { title: 'Settings', inNav: true } },
+]
+
+// ── electron ──────────────────────────────────────────────────────────────────
+
+const electronRoutes: AppRoute[] = [
+    { path: 'projects',     Component: ProjectsPage,  handle: { title: 'Projects', inNav: true } },
+    { path: 'sessions',     Component: SessionsPage,  handle: { title: 'Sessions', inNav: true } },
+    { path: 'workbench',    Component: WorkbenchPage, handle: { title: 'Workbench', inNav: true } },
+    { path: 'repos',        Component: ReposPage,     handle: { title: 'Repos', inNav: true } },
+    { path: 'activity/:id', Component: ActivityPage },
+    { path: 'snapshot/:id', Component: SnapshotPage },
+]
+
+// ── web ───────────────────────────────────────────────────────────────────────
+
+const webRoutes: AppRoute[] = [
+    { path: 'overview', Component: OverviewPage, handle: { title: 'Overview', inNav: true } },
+]
+
+// ── nav export ────────────────────────────────────────────────────────────────
+
+export const navRoutes: AppRoute[] = [
+    ...sharedRoutes,
+    ...(isElectron ? electronRoutes : []),
+    ...(isWeb      ? webRoutes      : []),
+]
+
+// ── router ────────────────────────────────────────────────────────────────────
+
+export const router = createHashRouter([
+    {
+        path: '/',
+        Component: RootLayout,
+        errorElement: <ErrorBoundary />,
+        children: navRoutes as RouteObject[],
+    },
+])

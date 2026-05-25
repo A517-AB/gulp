@@ -1,22 +1,16 @@
-import { ipcRenderer } from 'electron';
-import type { ElectronAPI } from './types.js';
-import { sdk } from '../electron/jules/sdk.js';
+/// <reference path="../types/electron.d.ts" />
 
-const git: ElectronAPI['git'] = {
-  status: (repoPath) => ipcRenderer.invoke('git:status', repoPath),
-  log: (repoPath, maxCount) => ipcRenderer.invoke('git:log', repoPath, maxCount),
-  branches: (repoPath) => ipcRenderer.invoke('git:branches', repoPath),
-  checkout: (repoPath, branch, create) => ipcRenderer.invoke('git:checkout', repoPath, branch, create),
-  rebase: (repoPath, onto) => ipcRenderer.invoke('git:rebase', repoPath, onto),
-  rebaseAbort: (repoPath) => ipcRenderer.invoke('git:rebase-abort', repoPath),
-  rebaseContinue: (repoPath) => ipcRenderer.invoke('git:rebase-continue', repoPath),
-};
+const el = typeof window !== "undefined" ? window.electron : undefined;
 
-export const bridge: ElectronAPI = {
-  ping: () => ipcRenderer.invoke('ping'),
-  minimize: () => { ipcRenderer.send('window-minimize'); },
-  maximize: () => { ipcRenderer.send('window-maximize'); },
-  close: () => { ipcRenderer.send('window-close'); },
-  sdk,
-  git,
-};
+export const isElectron: boolean = !!el?.sdkIpc;
+export const isWeb:      boolean = !isElectron;
+
+console.log(`[bridge] mode: ${isElectron ? "electron (IPC)" : "browser (HTTP)"}`);
+
+export const terminal       = el?.terminal   ?? null;
+export const queues         = el?.queues     ?? null;
+export const windowControls = el?.window     ?? null;
+export const power          = el?.power      ?? null;
+export const popup          = el?.popup      ?? null;
+export const filesystem     = el?.filesystem ?? null;
+export const sdkIpc         = el?.sdkIpc     ?? null;

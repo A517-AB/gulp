@@ -53,7 +53,7 @@ export function registerSdkHandlers() {
     ipcMain.handle('sdk:client.sync', async (event, options?: SyncOptions) =>
         serialize(await jules.sync({
             ...options,
-            onProgress: (p) => send(event.sender, 'sdk:client.sync.progress', p),
+            onProgress: (p) => { send(event.sender, 'sdk:client.sync.progress', p); },
         }))
     )
 
@@ -76,7 +76,7 @@ export function registerSdkHandlers() {
     // ── session ──────────────────────────────────────────────────────────────────
 
     ipcMain.handle('sdk:session.send', async (_, id: string, prompt: string) =>
-        serialize(await jules.session(id).send(prompt))
+        { serialize(await jules.session(id).send(prompt)); }
     )
 
     ipcMain.handle('sdk:session.ask', async (_, id: string, prompt: string) =>
@@ -84,7 +84,7 @@ export function registerSdkHandlers() {
     )
 
     ipcMain.handle('sdk:session.approve', async (_, id: string) =>
-        serialize(await jules.session(id).approve())
+        { serialize(await jules.session(id).approve()); }
     )
 
     ipcMain.handle('sdk:session.info', async (_, id: string) =>
@@ -96,7 +96,7 @@ export function registerSdkHandlers() {
     )
 
     ipcMain.handle('sdk:session.waitFor', async (_, id: string, state: SessionState) =>
-        serialize(await jules.session(id).waitFor(state))
+        { serialize(await jules.session(id).waitFor(state)); }
     )
 
     ipcMain.handle('sdk:session.snapshot', async (_, id: string, options?: { activities?: boolean }) =>
@@ -104,11 +104,11 @@ export function registerSdkHandlers() {
     )
 
     ipcMain.handle('sdk:session.archive', async (_, id: string) =>
-        serialize(await jules.session(id).archive())
+        { serialize(await jules.session(id).archive()); }
     )
 
     ipcMain.handle('sdk:session.unarchive', async (_, id: string) =>
-        serialize(await jules.session(id).unarchive())
+        { serialize(await jules.session(id).unarchive()); }
     )
 
     ipcMain.handle('sdk:session.select', async (_, id: string, options?: SelectOptions) =>

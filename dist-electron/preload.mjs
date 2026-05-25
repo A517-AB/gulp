@@ -1,12 +1,5 @@
 let electron = require("electron");
-//#region src/electron/jules/repoless/sdk.ts
-var repolessSdk = {
-	pickDir: () => electron.ipcRenderer.invoke("sdk:repoless.pickDir"),
-	start: (prompt, repoPath) => electron.ipcRenderer.invoke("sdk:repoless.start", prompt, repoPath),
-	apply: (id, repoPath, branchName) => electron.ipcRenderer.invoke("sdk:repoless.apply", id, repoPath, branchName)
-};
-//#endregion
-//#region src/electron/jules/sdk.ts
+//#region src/electron/ipc/bridge.ts
 function onStream(itemChannel, doneChannel, onItem, onDone) {
 	const itemHandler = (_, item) => onItem(item);
 	const doneHandler = () => {
@@ -20,20 +13,68 @@ function onStream(itemChannel, doneChannel, onItem, onDone) {
 		electron.ipcRenderer.removeListener(doneChannel, doneHandler);
 	};
 }
-//#endregion
-//#region src/shared/bridge.ts
-var bridge = {
-	ping: () => electron.ipcRenderer.invoke("ping"),
-	minimize: () => {
-		electron.ipcRenderer.send("window-minimize");
+electron.contextBridge.exposeInMainWorld("electron", {
+	terminal: {
+		start: (cwd, shellType) => electron.ipcRenderer.send("terminal.start", {
+			cwd,
+			shellType
+		}),
+		input: (data) => electron.ipcRenderer.send("terminal.input", data),
+		resize: (cols, rows) => electron.ipcRenderer.send("terminal.resize", {
+			cols,
+			rows
+		}),
+		kill: () => electron.ipcRenderer.send("terminal.kill"),
+		onOutput: (callback) => {
+			const handler = (_event, data) => callback(data);
+			electron.ipcRenderer.on("terminal.output", handler);
+			return () => electron.ipcRenderer.off("terminal.output", handler);
+		},
+		onExit: (callback) => {
+			const handler = (_event, { exitCode, signal }) => callback(exitCode, signal);
+			electron.ipcRenderer.on("terminal.exit", handler);
+			return () => electron.ipcRenderer.off("terminal.exit", handler);
+		}
 	},
-	maximize: () => {
-		electron.ipcRenderer.send("window-maximize");
+	queues: {
+		getTasks: (jsonPath) => electron.ipcRenderer.invoke("queues.getTasks", jsonPath),
+		getQueue: (jsonPath) => electron.ipcRenderer.invoke("queues.getQueue", jsonPath),
+		saveTasks: (data, jsonPath) => electron.ipcRenderer.invoke("queues.saveTasks", data, jsonPath)
 	},
-	close: () => {
-		electron.ipcRenderer.send("window-close");
+	window: {
+		minimize: () => electron.ipcRenderer.send("window.minimize"),
+		maximize: () => electron.ipcRenderer.send("window.maximize"),
+		close: () => electron.ipcRenderer.send("window.close")
 	},
-	sdk: {
+	power: {
+		onSuspend: (cb) => {
+			const handler = () => cb();
+			electron.ipcRenderer.on("power.suspend", handler);
+			return () => electron.ipcRenderer.off("power.suspend", handler);
+		},
+		onResume: (cb) => {
+			const handler = () => cb();
+			electron.ipcRenderer.on("power.resume", handler);
+			return () => electron.ipcRenderer.off("power.resume", handler);
+		}
+	},
+	popup: {
+		show: () => electron.ipcRenderer.send("popup.show"),
+		hide: () => electron.ipcRenderer.send("popup.hide"),
+		close: () => electron.ipcRenderer.send("popup.hide"),
+		notify: (payload) => electron.ipcRenderer.send("popup.notify", payload),
+		onNotification: (cb) => {
+			const handler = (_event, data) => cb(data);
+			electron.ipcRenderer.on("popup.notification", handler);
+			return () => electron.ipcRenderer.off("popup.notification", handler);
+		}
+	},
+	filesystem: {
+		readdir: (dir) => electron.ipcRenderer.invoke("fs.readdir", dir),
+		readFile: (filePath) => electron.ipcRenderer.invoke("fs.readFile", filePath),
+		showOpenDialog: () => electron.ipcRenderer.invoke("fs.showOpenDialog")
+	},
+	sdkIpc: {
 		client: {
 			sessions: (options) => electron.ipcRenderer.invoke("sdk:client.sessions", options),
 			streamSessions: (onItem, onDone, options) => {
@@ -95,12 +136,7 @@ var bridge = {
 			}
 		},
 		sources: { get: (filter) => electron.ipcRenderer.invoke("sdk:sources.get", filter) },
-		artifact: { save: (data, filepath) => electron.ipcRenderer.invoke("sdk:artifact.save", data, filepath) },
-		repoless: repolessSdk
+		artifact: { save: (data, filepath) => electron.ipcRenderer.invoke("sdk:artifact.save", data, filepath) }
 	}
-};
-//#endregion
-//#region src/electron/preload.mts
-console.log("[Electron Preload] Injecting Electron API bridge into window.electronAPI");
-electron.contextBridge.exposeInMainWorld("electronAPI", bridge);
+});
 //#endregion

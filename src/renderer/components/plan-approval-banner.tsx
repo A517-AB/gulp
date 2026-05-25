@@ -1,19 +1,19 @@
 import { useState } from 'react'
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
-import { approveSession } from '@/api/sdk'
+import { CheckCircle, Loader2 } from 'lucide-react'
+import { approveSession } from '@api/sdk'
 import { cn } from '@/utils'
-import type { WsActivity } from '@/hooks/use-session-ws'
+import type { ActivityPlanGenerated } from '@/types/jules-sdk'
 
 interface PlanApprovalBannerProps {
   sessionId: string
-  planActivity: WsActivity | undefined
+  planActivity: ActivityPlanGenerated | undefined
   onApproved: () => void
 }
 
 export function PlanApprovalBanner({ sessionId, planActivity, onApproved }: PlanApprovalBannerProps) {
   const [loading, setLoading] = useState<'approve' | 'reject' | null>(null)
 
-  const steps = planActivity?.plan?.steps ?? []
+  const steps = planActivity?.plan.steps ?? []
 
   async function approve() {
     setLoading('approve')
