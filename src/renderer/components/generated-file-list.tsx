@@ -1,9 +1,15 @@
 import { useState } from 'react'
 import { Copy, Check, ChevronDown, ChevronRight, FileText } from 'lucide-react'
 import { cn } from '@/utils'
-import type { WsOutcome } from '@/hooks/use-session-ws'
 
-type GeneratedFile = WsOutcome['generatedFiles'][number]
+
+export interface GeneratedFile {
+  path: string;
+  content?: string;
+  changeType: string;
+  additions: number;
+  deletions: number;
+}
 
 interface GeneratedFileListProps {
   files: GeneratedFile[]

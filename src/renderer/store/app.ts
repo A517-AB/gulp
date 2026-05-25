@@ -11,11 +11,13 @@ export interface SessionSlice {
 
 export interface AppStore {
   sessions: Record<string, SessionSlice>
+  unsubscribers: Record<string, () => void>
   watch: (id: string) => () => void
 }
 
 export const useStore = create<AppStore>((set, get) => ({
   sessions: {},
+  unsubscribers: {},
   watch: (id: string) => {
     const { sessions } = get()
     if (sessions[id]?.status === 'connected') {
@@ -65,7 +67,6 @@ export const useStore = create<AppStore>((set, get) => ({
         })
       },
       () => {
-        isDone = true
         set(state => {
           const s = state.sessions[id]
           if (!s) return state

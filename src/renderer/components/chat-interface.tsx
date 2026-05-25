@@ -11,7 +11,7 @@ interface ChatInterfaceProps {
   activities: WsActivity[]
   status: WsStatus
   outcome: WsOutcome | null
-  error: string | null
+  error: Error | null
   presets: Preset[]
   onSend: (prompt: string) => void | Promise<void>
   isTerminal?: boolean
@@ -75,8 +75,8 @@ export function ChatInterface({
         error={error}
       />
 
-      {outcome?.generatedFiles && outcome.generatedFiles.length > 0 && (
-        <GeneratedFileList files={outcome.generatedFiles} />
+      {typeof outcome?.generatedFiles === 'function' && outcome.generatedFiles().all().length > 0 && (
+        <GeneratedFileList files={outcome.generatedFiles().all()} />
       )}
 
       <div className="shrink-0 border-t border-hair p-3 bg-surface/30">

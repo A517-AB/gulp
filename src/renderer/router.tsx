@@ -2,7 +2,7 @@ import { createHashRouter, type RouteObject } from 'react-router'
 // RouteObject cast needed: exactOptionalPropertyTypes makes children?: X[] incompatible with RouteObject[]
 import { isElectron, isWeb } from '@shared/bridge'
 import { RootLayout } from '@renderer/layouts'
-import { ErrorBoundary } from '@renderer/core'
+import { RouteErrorBoundary } from '@renderer/core'
 import {
     HomePage, SettingsPage,
 } from '@renderer/pages/shared'
@@ -72,7 +72,7 @@ export const router = createHashRouter([
     {
         path: '/',
         Component: RootLayout,
-        errorElement: <ErrorBoundary />,
+        errorElement: <RouteErrorBoundary />,
         children: navRoutes as RouteObject[],
     },
 ])

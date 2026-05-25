@@ -1,10 +1,9 @@
-﻿import { defineConfig } from 'vite'
+import { defineConfig } from 'vite'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
 import { fileURLToPath, URL } from 'node:url'
-import { builtinModules } from 'node:module'
 import { isAbsolute } from 'node:path'
 
 const nodeExternal = (id: string) =>
