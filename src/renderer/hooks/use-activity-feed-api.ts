@@ -2,9 +2,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useJules } from "@/lib/jules/provider";
 import type { Activity, UseActivityFeedApiProps, UseActivityFeedApiReturn } from "@/types/activity-feed";
 
-const QUICK_REVIEW_PROMPT =
-  "Please perform a comprehensive code review of the repository. Look for bugs, security issues, and opportunities for refactoring. Provide a detailed summary of your findings.";
-
 export function useActivityFeedApi({
   session,
   onActivitiesChange,
@@ -86,10 +83,5 @@ export function useActivityFeedApi({
     }
   }, [client, session.id, sending, loadActivities]);
 
-  const handleQuickReview = useCallback(
-    () => handleSendMessage(QUICK_REVIEW_PROMPT),
-    [handleSendMessage],
-  );
-
-  return { activities, loading, error, sending, approvingPlan, newActivityIds, loadActivities, handleApprovePlan, handleSendMessage, handleQuickReview };
+  return { activities, loading, error, sending, approvingPlan, newActivityIds, loadActivities, handleApprovePlan, handleSendMessage };
 }

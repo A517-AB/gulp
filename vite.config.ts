@@ -21,7 +21,7 @@ if (!julesApiKey) {
       const content = readFileSync(userPath, 'utf-8').trim();
       const match = content.match(/JULES_API_KEY=(.+)/);
       if (match) {
-        julesApiKey = match[1].trim();
+        julesApiKey = match?.[1]?.trim() || "";
       } else {
         julesApiKey = content;
       }

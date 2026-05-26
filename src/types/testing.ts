@@ -254,4 +254,3 @@ export interface ListSourcesResponse {
   /** Token for the next page of results. */
   nextPageToken?: string;
 }
-```
