@@ -4,7 +4,7 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "esnext",
-    "types": ["node", "vite/client"],
+    "types": ["node", "bun-types", "vite/client"],
     "paths": {
       "@/*": ["./src/*"],
       "@renderer": ["./src/renderer/index.ts"],
@@ -33,9 +33,11 @@
     "noEmit": true,
     "skipLibCheck": true,
     "strict": true,
+    "isolatedModules": true,
 
     /* Linting */
     "noUnusedLocals": true,
+    "noImplicitAny": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "exactOptionalPropertyTypes": true,
@@ -45,6 +47,7 @@
     "noUncheckedIndexedAccess": true,
     "useUnknownInCatchVariables": true
   },
-  "include": ["src/electron/**/*.ts", "src/electron/**/*.mts", "vite.config.ts", "src/shared/types.ts", "src/shared/ipc.ts", "src/shared/index.ts"],
+  "include": ["src/electron/**/*.ts", "src/electron/**/*.mts", "vite.config.ts", "src/shared/types.ts", "src/shared/ipc.ts", "src/shared/index.ts",
+    "jules-server.ts", "jules-server.ts"],
   "exclude": []
 }

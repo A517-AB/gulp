@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { api, SERVER_URL } from '@api'
 import type { JulesApi } from '@api'
 import type { SdkIpc } from '@/types/electron'
-import { isElectron, sdkIpc } from '@/shared/bridge'
+import { sdkIpc } from '@/shared/bridge'
 
 interface JulesContextValue {
   api:       JulesApi
@@ -15,13 +15,11 @@ interface JulesContextValue {
 const JulesContext = createContext<JulesContextValue | undefined>(undefined)
 
 export function JulesProvider({ children }: { children: ReactNode }) {
-  const [connected,  setConnected]  = useState(isElectron)
-  const [isLoading,  setIsLoading]  = useState(!isElectron)
+  const [connected,  setConnected]  = useState(false)
+  const [isLoading,  setIsLoading]  = useState(true)
   const [tick, setTick] = useState(0)
 
   useEffect(() => {
-    if (isElectron) return
-
     let cancelled = false
     fetch(`${SERVER_URL}/connected`)
       .then(r => r.json() as Promise<{ connected?: boolean }>)

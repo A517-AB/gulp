@@ -1,0 +1,28 @@
+{
+  "resource": {
+    "name": "sessions/399943133912781076",
+    "title": "New Task (new/folder)",
+    "createTime": "2026-05-19T00:30:37.531377101Z",
+    "updateTime": "2026-05-19T00:37:45.150169Z",
+    "state": "awaitingUserFeedback",
+    "sourceContext": {
+      "source": "sources/github/A517-AB/jules",
+      "githubRepoContext": {
+        "startingBranch": "main"
+      },
+      "environmentVariablesEnabled": true
+    },
+    "prompt": "Description...",
+    "url": "https://jules.google.com/session/399943133912781076",
+    "id": "399943133912781076",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "399943133912781076",
+      "title": "New Task (new/folder)",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397354
+}

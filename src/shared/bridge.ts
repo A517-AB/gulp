@@ -2,8 +2,8 @@
 
 const el = typeof window !== "undefined" ? window.electron : undefined;
 
-export const isElectron: boolean = !!el?.sdkIpc;
-export const isWeb:      boolean = !isElectron;
+export const isElectron = !!el?.sdkIpc;
+export const isWeb = !isElectron;
 
 console.log(`[bridge] mode: ${isElectron ? "electron (IPC)" : "browser (HTTP)"}`);
 

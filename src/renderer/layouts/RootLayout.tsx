@@ -37,7 +37,7 @@ export default function RootLayout(): ReactNode {
             <div className="flex flex-col h-screen w-screen overflow-hidden bg-base">
                 <TitleBar />
                 <TopBar center={navLinks} />
-                <main className="flex-1 overflow-auto">
+                <main className="flex-1 overflow-hidden min-h-0 h-full">
                     <Outlet />
                 </main>
             </div>

@@ -4,12 +4,35 @@ import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
 import { fileURLToPath, URL } from 'node:url'
-import { isAbsolute } from 'node:path'
+import { isAbsolute, join } from 'node:path'
+import { existsSync, readFileSync } from 'node:fs'
+import { homedir } from 'node:os'
 
 const nodeExternal = (id: string) =>
   !id.startsWith('.') && !isAbsolute(id) && !id.startsWith('\0')
 
 const isWeb = process.env.VITE_TARGET === 'web';
+
+let julesApiKey = process.env.VITE_JULES_API_KEY || process.env.JULES_API_KEY;
+if (!julesApiKey) {
+  try {
+    const userPath = join(homedir(), '.jules');
+    if (existsSync(userPath)) {
+      const content = readFileSync(userPath, 'utf-8').trim();
+      const match = content.match(/JULES_API_KEY=(.+)/);
+      if (match) {
+        julesApiKey = match[1].trim();
+      } else {
+        julesApiKey = content;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to read .jules from userpath:', e);
+  }
+}
+if (julesApiKey) {
+  process.env.VITE_JULES_API_KEY = julesApiKey;
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -36,9 +59,19 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 5173,
     strictPort: true,
+    watch: {
+      ignored: ['**/.jules/**'],
+    },
     hmr: {
       overlay: false
-    }
+    },
+    proxy: {
+      '/api/jules': {
+        target: 'https://jules.googleapis.com/v1alpha',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/jules\?path=/, '/'),
+      },
+    },
   },
   preview: {
     host: '127.0.0.1',

@@ -89,6 +89,12 @@ const filesystem: ElectronAPI["filesystem"] = {
   showOpenDialog: ()         => ipcRenderer.invoke("fs.showOpenDialog"),
 };
 
+// ── env ────────────────────────────────────────────────────────────────────────
+
+const env: ElectronAPI["env"] = {
+  getApiKey: () => ipcRenderer.invoke("env.getApiKey"),
+};
+
 // ── expose ─────────────────────────────────────────────────────────────────────
 
 const api: ElectronAPI = {
@@ -98,6 +104,7 @@ const api: ElectronAPI = {
   power,
   popup,
   filesystem,
+  env,
   sdkIpc: sdk,
 };
 

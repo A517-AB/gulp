@@ -1,10 +1,9 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'
 
 export default function OverviewPage(): ReactNode {
-    console.info('[Page] Mounted OverviewPage')
   return (
     <div className="flex items-center justify-center h-full">
-      <p className="text-fg-ghost text-sm font-mono select-none">Overview</p>
+      <p className="text-sm text-zinc-500">Open in Electron for the full Workbench.</p>
     </div>
-  );
+  )
 }

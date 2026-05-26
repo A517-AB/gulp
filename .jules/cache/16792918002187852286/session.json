@@ -1,0 +1,28 @@
+{
+  "resource": {
+    "name": "sessions/16792918002187852286",
+    "title": "Jules API Functionality Test",
+    "createTime": "2026-05-19T15:06:55.840416897Z",
+    "updateTime": "2026-05-19T15:17:07.770781Z",
+    "state": "completed",
+    "sourceContext": {
+      "source": "sources/github/A517-AB/jules",
+      "githubRepoContext": {
+        "startingBranch": "main"
+      },
+      "environmentVariablesEnabled": true
+    },
+    "prompt": "run a test for me. see if you can run the jules api. i want to know beore i send tasks for fixing the routes, i need yo to see if you can test it, the agents tasks are not meant for you, buit od check the process of usage from there, \n",
+    "url": "https://jules.google.com/session/16792918002187852286",
+    "id": "16792918002187852286",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "16792918002187852286",
+      "title": "Jules API Functionality Test",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397349
+}

@@ -1,0 +1,28 @@
+{
+  "resource": {
+    "name": "sessions/1870603372618162945",
+    "title": "Refactor Recipe Page into a Reusable Component",
+    "createTime": "2026-05-19T15:11:40.356709359Z",
+    "updateTime": "2026-05-19T16:58:27.359674Z",
+    "state": "awaitingUserFeedback",
+    "sourceContext": {
+      "source": "sources/github/A517-AB/jojos",
+      "githubRepoContext": {
+        "startingBranch": "main"
+      },
+      "environmentVariablesEnabled": true
+    },
+    "prompt": "canm you find the recpie page int he root and make it a real resuable cmopenent? \nit's like a fake page i got from gemini\n",
+    "url": "https://jules.google.com/session/1870603372618162945",
+    "id": "1870603372618162945",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "1870603372618162945",
+      "title": "Refactor Recipe Page into a Reusable Component",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397347
+}

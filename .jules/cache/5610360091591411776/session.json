@@ -1,0 +1,52 @@
+{
+  "resource": {
+    "name": "sessions/5610360091591411776",
+    "title": "checking functionatiy of feelts,  (tests)",
+    "createTime": "2026-05-18T23:15:47.779118844Z",
+    "updateTime": "2026-05-18T23:23:52.480140Z",
+    "state": "completed",
+    "sourceContext": {
+      "source": "sources/github/A517-AB/jules",
+      "githubRepoContext": {
+        "startingBranch": "main"
+      },
+      "environmentVariablesEnabled": true
+    },
+    "prompt": "can you add  fa fucniton that remembers the repo next time? so if i send it from jules, it'll attach itself tot hat repo, and remmber it\n",
+    "url": "https://jules.google.com/session/5610360091591411776",
+    "id": "5610360091591411776",
+    "outputs": [
+      {
+        "type": "changeSet",
+        "changeSet": {
+          "source": "sources/github/A517-AB/jules",
+          "gitPatch": {
+            "unidiffPatch": "diff --git a/components/new-session-dialog.tsx b/components/new-session-dialog.tsx\nindex 9fc2f7f..59aedff 100644\n--- a/components/new-session-dialog.tsx\n+++ b/components/new-session-dialog.tsx\n@@ -73,9 +73,15 @@ export function NewSessionDialog({\n       const data = await client.listSources();\n       setSources(data);\n       if (data.length > 0) {\n+        const lastUsedRepo = localStorage.getItem(\"jules-last-repo\");\n+        const defaultSourceId =\n+          lastUsedRepo && data.some((source) => source.id === lastUsedRepo)\n+            ? lastUsedRepo\n+            : data[0].id;\n+\n         setFormData((prev) => ({\n           ...prev,\n-          sourceId: prev.sourceId || data[0].id,\n+          sourceId: prev.sourceId || defaultSourceId,\n         }));\n       } else if (data.length === 0) {\n         setError(\n@@ -133,6 +139,9 @@ export function NewSessionDialog({\n         startingBranch: formData.startingBranch || undefined,\n         autoCreatePr: formData.autoCreatePr,\n       });\n+\n+      localStorage.setItem(\"jules-last-repo\", formData.sourceId);\n+\n       setOpen(false);\n       setFormData({\n         sourceId: \"\",\n",
+            "baseCommitId": "3956e96ed64f84651147feb914b9b41211927f8f",
+            "suggestedCommitMessage": "feat: remember last used repository in new session dialog\n\nSave the last selected repository in localStorage during session creation and retrieve it when loading sources. Validates that the saved repository still exists in the user's available sources before using it as the default."
+          }
+        }
+      }
+    ],
+    "archived": false,
+    "outcome": {
+      "sessionId": "5610360091591411776",
+      "title": "checking functionatiy of feelts,  (tests)",
+      "state": "completed",
+      "outputs": [
+        {
+          "type": "changeSet",
+          "changeSet": {
+            "source": "sources/github/A517-AB/jules",
+            "gitPatch": {
+              "unidiffPatch": "diff --git a/components/new-session-dialog.tsx b/components/new-session-dialog.tsx\nindex 9fc2f7f..59aedff 100644\n--- a/components/new-session-dialog.tsx\n+++ b/components/new-session-dialog.tsx\n@@ -73,9 +73,15 @@ export function NewSessionDialog({\n       const data = await client.listSources();\n       setSources(data);\n       if (data.length > 0) {\n+        const lastUsedRepo = localStorage.getItem(\"jules-last-repo\");\n+        const defaultSourceId =\n+          lastUsedRepo && data.some((source) => source.id === lastUsedRepo)\n+            ? lastUsedRepo\n+            : data[0].id;\n+\n         setFormData((prev) => ({\n           ...prev,\n-          sourceId: prev.sourceId || data[0].id,\n+          sourceId: prev.sourceId || defaultSourceId,\n         }));\n       } else if (data.length === 0) {\n         setError(\n@@ -133,6 +139,9 @@ export function NewSessionDialog({\n         startingBranch: formData.startingBranch || undefined,\n         autoCreatePr: formData.autoCreatePr,\n       });\n+\n+      localStorage.setItem(\"jules-last-repo\", formData.sourceId);\n+\n       setOpen(false);\n       setFormData({\n         sourceId: \"\",\n",
+              "baseCommitId": "3956e96ed64f84651147feb914b9b41211927f8f",
+              "suggestedCommitMessage": "feat: remember last used repository in new session dialog\n\nSave the last selected repository in localStorage during session creation and retrieve it when loading sources. Validates that the saved repository still exists in the user's available sources before using it as the default."
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_lastSyncedAt": 1779778397355
+}

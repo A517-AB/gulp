@@ -1,0 +1,28 @@
+{
+  "resource": {
+    "name": "sessions/8079652412377683240",
+    "title": "Read Agents and Search Repository TODOs",
+    "createTime": "2026-05-19T15:10:42.427914151Z",
+    "updateTime": "2026-05-19T15:46:14.541264Z",
+    "state": "awaitingUserFeedback",
+    "sourceContext": {
+      "source": "sources/github/A517-AB/jules",
+      "githubRepoContext": {
+        "startingBranch": "main"
+      },
+      "environmentVariablesEnabled": true
+    },
+    "prompt": "read the agents for me and start ssearchign for hte todo in the repo\n",
+    "url": "https://jules.google.com/session/8079652412377683240",
+    "id": "8079652412377683240",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "8079652412377683240",
+      "title": "Read Agents and Search Repository TODOs",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397348
+}

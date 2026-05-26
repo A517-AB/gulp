@@ -74,6 +74,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
 		readFile: (filePath) => electron.ipcRenderer.invoke("fs.readFile", filePath),
 		showOpenDialog: () => electron.ipcRenderer.invoke("fs.showOpenDialog")
 	},
+	env: { getApiKey: () => electron.ipcRenderer.invoke("env.getApiKey") },
 	sdkIpc: {
 		client: {
 			sessions: (options) => electron.ipcRenderer.invoke("sdk:client.sessions", options),

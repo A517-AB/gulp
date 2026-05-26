@@ -121,6 +121,10 @@ export interface FilesystemAPI {
   showOpenDialog: ()                 => Promise<string | null>;
 }
 
+export interface EnvAPI {
+  getApiKey: () => Promise<string | null>;
+}
+
 // ── root ───────────────────────────────────────────────────────────────────────
 
 export interface ElectronAPI {
@@ -130,6 +134,7 @@ export interface ElectronAPI {
   power:      PowerAPI;
   popup:      PopupAPI;
   filesystem: FilesystemAPI;
+  env:        EnvAPI;
   sdkIpc:     SdkIpc;
 }
 

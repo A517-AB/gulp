@@ -1,0 +1,43 @@
+{
+  "resource": {
+    "name": "sessions/10430807043137036587",
+    "title": "hi hi again, testing api julesm if you see this message resopon with seen the propt box, if you see a file that's tsx, respond with seen that, if you see empty git say that too, if you see any of the above, let me know and respond by making a test file txt that says hi back and i'll download it",
+    "createTime": "2026-05-21T22:06:13.908140402Z",
+    "updateTime": "2026-05-21T22:22:18.830592Z",
+    "state": "completed",
+    "prompt": "hi hi again, testing api julesm if you see this message resopon with seen the propt box, if you see a file that's tsx, respond with seen that, if you see empty git say that too, if you see any of the above, let me know and respond by making a test file txt that says hi back and i'll download it",
+    "url": "https://jules.google.com/session/10430807043137036587",
+    "id": "10430807043137036587",
+    "outputs": [
+      {
+        "type": "changeSet",
+        "changeSet": {
+          "source": "sources/github/",
+          "gitPatch": {
+            "unidiffPatch": "diff --git a/test.txt b/test.txt\nnew file mode 100644\nindex 0000000..7041152\n--- /dev/null\n+++ b/test.txt\n@@ -0,0 +1 @@\n+hi back\n\\ No newline at end of file\n",
+            "suggestedCommitMessage": "Add test.txt file"
+          }
+        }
+      }
+    ],
+    "archived": false,
+    "outcome": {
+      "sessionId": "10430807043137036587",
+      "title": "hi hi again, testing api julesm if you see this message resopon with seen the propt box, if you see a file that's tsx, respond with seen that, if you see empty git say that too, if you see any of the above, let me know and respond by making a test file txt that says hi back and i'll download it",
+      "state": "completed",
+      "outputs": [
+        {
+          "type": "changeSet",
+          "changeSet": {
+            "source": "sources/github/",
+            "gitPatch": {
+              "unidiffPatch": "diff --git a/test.txt b/test.txt\nnew file mode 100644\nindex 0000000..7041152\n--- /dev/null\n+++ b/test.txt\n@@ -0,0 +1 @@\n+hi back\n\\ No newline at end of file\n",
+              "suggestedCommitMessage": "Add test.txt file"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "_lastSyncedAt": 1779778397341
+}

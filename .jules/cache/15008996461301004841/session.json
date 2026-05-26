@@ -1,0 +1,28 @@
+{
+  "resource": {
+    "name": "sessions/15008996461301004841",
+    "title": "Post-Build Validation and Continuous Quality Checks for Vite & Electron",
+    "createTime": "2026-05-25T01:59:31.087688479Z",
+    "updateTime": "2026-05-25T02:33:51.020456Z",
+    "state": "awaitingUserFeedback",
+    "sourceContext": {
+      "source": "sources/github/A517-AB/gulp",
+      "githubRepoContext": {
+        "startingBranch": "master"
+      },
+      "environmentVariablesEnabled": true
+    },
+    "prompt": "Yo yo, a big task run lint and type check after build, server, electron and vite. Keep doing till it's clean, run vite with server, check it with olauwer",
+    "url": "https://jules.google.com/session/15008996461301004841",
+    "id": "15008996461301004841",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "15008996461301004841",
+      "title": "Post-Build Validation and Continuous Quality Checks for Vite & Electron",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397336
+}
