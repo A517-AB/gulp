@@ -11,9 +11,11 @@ import { formatDate } from "@renderer/utils/activity";
 import { archiveSession } from "@/lib/archive";
 import { ActivityItem } from "./activity-item";
 import type { ActivityFeedProps } from "@/types/activity-feed";
+import { useSettingsStore } from "@renderer/store/settings";
 
 export function ActivityFeed({ session, onArchive, showCodeDiffs, onToggleCodeDiffs, onActivitiesChange }: ActivityFeedProps) {
   const api = useActivityFeedApi({ session, onActivitiesChange });
+  const { presets } = useSettingsStore();
   const { grouped, latest } = useActivityGroups(api.activities);
   const [message, setMessage] = useState("");
   const [expandedBash, setExpandedBash] = useState<Set<string>>(new Set());
@@ -60,11 +62,11 @@ export function ActivityFeed({ session, onArchive, showCodeDiffs, onToggleCodeDi
                 <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-white/5 text-white/60"><MoreVertical className="h-3.5 w-3.5" /></Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-zinc-950 border-white/10 text-white/80">
-                {session.status === "active" && (
-                  <DropdownMenuItem onClick={api.handleQuickReview} disabled={api.sending} className="focus:bg-white/10 text-xs cursor-pointer">
-                    <Play className="mr-2 h-3.5 w-3.5" /><span>Start Code Review</span>
+                {session.status === "active" && presets.map((preset) => (
+                  <DropdownMenuItem key={preset.id} onClick={() => api.handleSendMessage(preset.prompt)} disabled={api.sending} className="focus:bg-white/10 text-xs cursor-pointer">
+                    <Play className="mr-2 h-3.5 w-3.5" /><span>{preset.name}</span>
                   </DropdownMenuItem>
-                )}
+                ))}
                 <DropdownMenuItem onClick={() => { archiveSession(session.id); onArchive?.(); }} className="focus:bg-white/10 text-xs cursor-pointer text-red-400 focus:text-red-400">
                   <Archive className="mr-2 h-3.5 w-3.5" /><span>Archive Session</span>
                 </DropdownMenuItem>

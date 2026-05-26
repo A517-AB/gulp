@@ -112,5 +112,4 @@ export interface UseActivityFeedApiReturn {
   loadActivities: (isInitialLoad?: boolean) => Promise<void>;
   handleApprovePlan: () => Promise<void>;
   handleSendMessage: (message: string) => Promise<void>;
-  handleQuickReview: () => Promise<void>;
 }
