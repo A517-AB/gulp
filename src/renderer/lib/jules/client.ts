@@ -118,7 +118,6 @@ export class JulesClient {
     options: RequestInit = {},
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
-    console.log(`[JulesClient] ${options.method ?? "GET"} ${endpoint}`);
 
     try {
       const response = await fetch(url, {
@@ -173,7 +172,6 @@ export class JulesClient {
       }
 
       const data = await response.json() as T;
-      console.log(`[JulesClient] response ${endpoint}:`, data);
       return data;
     } catch (error) {
       if (error instanceof JulesAPIError) {

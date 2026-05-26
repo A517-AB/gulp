@@ -8,7 +8,7 @@ import {
 } from '@renderer/pages/shared'
 import {
     ProjectsPage, SessionsPage,
-    ActivityPage, ReposPage, SnapshotPage,
+    ActivityPage, ReposPage, SnapshotPage, QueuesPage, SnippetsPage,
 } from '@renderer/pages/electron'
 import {
     OverviewPage,
@@ -48,6 +48,8 @@ const electronRoutes: AppRoute[] = [
     { path: 'projects',     Component: ProjectsPage,  handle: { title: 'Projects', inNav: true } },
     { path: 'sessions',     Component: SessionsPage,  handle: { title: 'Sessions', inNav: true } },
     { path: 'repos',        Component: ReposPage,     handle: { title: 'Repos', inNav: true } },
+    { path: 'queues',        Component: QueuesPage,   handle: { title: 'Queues', inNav: true } },
+    { path: 'snippets',      Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },
     { path: 'activity/:id', Component: ActivityPage },
     { path: 'snapshot/:id', Component: SnapshotPage },
 ]

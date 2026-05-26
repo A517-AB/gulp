@@ -46,7 +46,7 @@ export default function SessionsPage() {
           <SessionList
             key={refreshKey}
             onSelectSession={setSelectedSession}
-            selectedSessionId={selectedSession?.id}
+            {...(selectedSession ? { selectedSessionId: selectedSession.id } : {})}
           />
         )}
       </aside>
@@ -103,7 +103,7 @@ export default function SessionsPage() {
       <NewSessionDialog
         open={newSessionOpen}
         onOpenChange={setNewSessionOpen}
-        initialValues={newSessionValues}
+        {...(newSessionValues ? { initialValues: newSessionValues } : {})}
         onSessionCreated={handleSessionCreated}
       />
     </div>

@@ -1,4 +1,4 @@
-import { SessionTemplate } from "@/types/jules";
+import type { SessionTemplate } from "@/types/jules";
 
 const TEMPLATES_KEY = "jules-session-templates";
 

@@ -26,8 +26,8 @@ export function JulesProvider({ children }: { children: ReactNode }) {
       console.log("[JulesProvider] stored api key:", stored ? "found" : "not found");
 
       // Check Vite environment variables (injected by vite.config.ts)
-      if (!stored && import.meta.env.VITE_JULES_API_KEY) {
-        const envKey = import.meta.env.VITE_JULES_API_KEY;
+      if (!stored && import.meta.env['VITE_JULES_API_KEY']) {
+        const envKey = import.meta.env['VITE_JULES_API_KEY'];
         console.log("[JulesProvider] env api key:", envKey ? "found" : "not found");
         if (envKey) {
           stored = envKey;

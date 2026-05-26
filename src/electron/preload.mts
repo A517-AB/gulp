@@ -1,8 +1,6 @@
 import type { IpcRendererEvent } from "electron";
 import { contextBridge, ipcRenderer } from "electron";
 import type { ShellType, PopupNotification, ElectronAPI } from "../types/electron";
-import { sdk } from "./ipc/bridge";
-
 // ── terminal ───────────────────────────────────────────────────────────────────
 
 const terminal: ElectronAPI["terminal"] = {
@@ -95,6 +93,13 @@ const env: ElectronAPI["env"] = {
   getApiKey: () => ipcRenderer.invoke("env.getApiKey"),
 };
 
+// ── snippets ───────────────────────────────────────────────────────────────────
+
+const snippets: ElectronAPI["snippets"] = {
+  get:  () => ipcRenderer.invoke("snippets.get"),
+  save: (data) => ipcRenderer.invoke("snippets.save", data),
+};
+
 // ── expose ─────────────────────────────────────────────────────────────────────
 
 const api: ElectronAPI = {
@@ -105,7 +110,7 @@ const api: ElectronAPI = {
   popup,
   filesystem,
   env,
-  sdkIpc: sdk,
+  snippets,
 };
 
 contextBridge.exposeInMainWorld("electron", api);

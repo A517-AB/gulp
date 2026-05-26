@@ -13,14 +13,14 @@ const nodeExternal = (id: string) =>
 
 const isWeb = process.env.VITE_TARGET === 'web';
 
-let julesApiKey = process.env.VITE_JULES_API_KEY || process.env.JULES_API_KEY;
+let julesApiKey = process.env.VITE_JULES_API_KEY ?? process.env.JULES_API_KEY;
 if (!julesApiKey) {
   try {
     const userPath = join(homedir(), '.jules');
     if (existsSync(userPath)) {
       const content = readFileSync(userPath, 'utf-8').trim();
-      const match = content.match(/JULES_API_KEY=(.+)/);
-      if (match) {
+      const match = /JULES_API_KEY=(.+)/.exec(content);
+      if (match?.[1]) {
         julesApiKey = match[1].trim();
       } else {
         julesApiKey = content;

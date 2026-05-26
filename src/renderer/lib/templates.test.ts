@@ -1,10 +1,11 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi as jest } from 'vitest';
 import {
   getTemplates,
   saveTemplate,
   deleteTemplate,
   // getTemplate, // Removed as it's unused
 } from "./templates";
-import { SessionTemplate } from "@/types/jules";
+import type { SessionTemplate } from "@/types/jules";
 
 // Mock localStorage
 const localStorageMock = (function () {

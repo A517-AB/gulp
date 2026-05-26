@@ -8,7 +8,7 @@ export function useActivityGroups(activities: Activity[]): UseActivityGroupsRetu
 
   const grouped = useMemo(() => groupActivities(filtered), [filtered]);
 
-  const latest = filtered.length > 0 ? filtered[filtered.length - 1] : null;
+  const latest = filtered.at(-1) ?? null;
 
   return { filtered, grouped, latest };
 }

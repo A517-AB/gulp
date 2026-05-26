@@ -63,8 +63,9 @@ function AgentCard({ children }: { children: React.ReactNode }) {
 
 function SingleActivity({ activity, expandedBash, onToggleBash, onApprovePlan, approvingPlan, isNew }: Omit<ActivityItemProps, "item"> & { activity: Activity }) {
   const isUser = activity.role === "user";
-  const isPlanPending = activity.type === "plan" && activity.metadata?.planGenerated &&
-    !(activity.metadata.planGenerated as { approved?: boolean })?.approved;
+  const isPlanPending = activity.type === "plan" &&
+    !!activity.metadata?.['planGenerated'] &&
+    !(activity.metadata['planGenerated'] as { approved?: boolean })?.approved;
 
   return (
     <div className={`flex gap-2.5 ${isUser ? "flex-row-reverse" : ""} ${isNew ? "animate-in fade-in slide-in-from-bottom-2 duration-500" : ""}`}>
@@ -107,7 +108,8 @@ function SingleActivity({ activity, expandedBash, onToggleBash, onApprovePlan, a
 
 export function ActivityItem({ item, expandedBash, onToggleBash, onApprovePlan, approvingPlan, isNew }: ActivityItemProps) {
   if (Array.isArray(item)) {
-    const first = item[0];
+    const first = item.at(0);
+    if (!first) return null;
     return (
       <div className="flex gap-2.5">
         <Av role={first.role} />

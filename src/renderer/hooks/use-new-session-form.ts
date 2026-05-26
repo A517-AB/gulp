@@ -31,7 +31,7 @@ export function useNewSessionForm({
       if (data.length === 0) {
         setError("No repositories found. Connect a GitHub repository in the Jules web app first.");
       } else {
-        setFormData((prev) => ({ ...prev, sourceId: prev.sourceId || data[0].id }));
+        setFormData((prev) => ({ ...prev, sourceId: prev.sourceId || data.at(0)?.id || "" }));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load repositories");
@@ -59,8 +59,8 @@ export function useNewSessionForm({
       await client.createSession({
         sourceId: formData.sourceId,
         prompt: formData.prompt,
-        title: formData.title || undefined,
-        startingBranch: formData.startingBranch || undefined,
+        ...(formData.title ? { title: formData.title } : {}),
+        ...(formData.startingBranch ? { startingBranch: formData.startingBranch } : {}),
         autoCreatePr: formData.autoCreatePr,
       });
       setFormData(DEFAULT_FORM);

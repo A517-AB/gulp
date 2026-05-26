@@ -12,11 +12,14 @@ import type { NewSessionDialogProps } from "@/types/activity-feed";
 export function NewSessionDialog({ onSessionCreated, initialValues, trigger, open: controlledOpen, onOpenChange }: NewSessionDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
-  const open = isControlled ? controlledOpen! : internalOpen;
-  const setOpen = isControlled ? onOpenChange! : setInternalOpen;
+  const open = isControlled ? (controlledOpen ?? false) : internalOpen;
+  const setOpen = isControlled ? (onOpenChange ?? setInternalOpen) : setInternalOpen;
 
   const { sources, formData, setFormData, loading, error, handleSubmit } = useNewSessionForm({
-    open, initialValues, onSessionCreated, onClose: () => setOpen(false),
+    open,
+    ...(initialValues ? { initialValues } : {}),
+    ...(onSessionCreated ? { onSessionCreated } : {}),
+    onClose: () => { setOpen(false); },
   });
 
   const set = (k: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>

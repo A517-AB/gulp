@@ -294,7 +294,7 @@
   --diff-chunk-text:  oklch(0.68 0.12 280);
 }
 @layer base {
-  * {
+  *:not(.monaco-editor):not(.monaco-editor *) {
     @apply border-border outline-ring/50;
   }
   body {
@@ -400,4 +400,12 @@
 .app-drag-region [role="menuitem"],
 .app-drag-region [role="tab"] {
   -webkit-app-region: no-drag;
+}
+
+/* ── MONACO EDITOR TAILWIND FIX ────────────────────────────────────────────── */
+.monaco-editor, .monaco-editor * {
+  border-style: none;
+}
+.monaco-editor canvas {
+  display: block;
 }

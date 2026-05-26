@@ -106,16 +106,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return { error }
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('[ErrorBoundary] render error:', error.message)
     if (import.meta.env.DEV) {
-      console.error(info.componentStack)
+      console.error(errorInfo.componentStack)
     }
   }
 
   reset = () => { this.setState({ error: null }) }
 
-  render() {
+  override render() {
     const { error } = this.state
     if (!error) return this.props.children
     if (this.props.fallback) return this.props.fallback

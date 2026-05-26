@@ -70,15 +70,15 @@ export function getOutputBranch(activities: Activity[], fallback = "main"): stri
   for (const activity of [...activities].reverse()) {
     if (activity.bashOutput) {
       const checkout = activity.bashOutput.match(/git checkout -b\s+([\w-./]+)/);
-      if (checkout) return checkout[1];
+      if (checkout?.[1]) return checkout[1];
       const push = activity.bashOutput.match(/git push\s+(?:-u\s+)?(?:origin\s+)?([\w-./]+)/);
-      if (push) return push[1];
+      if (push?.[1]) return push[1];
     }
     if (activity.role === "agent" && (activity.type === "message" || activity.type === "result")) {
       const match = (activity.content || "").match(
         /(?:created|pushed|on|switched to) branch ['"`]?([\w-./]+)['"`]?/i,
       );
-      if (match) return match[1];
+      if (match?.[1]) return match[1];
     }
   }
   return fallback;

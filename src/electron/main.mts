@@ -6,7 +6,7 @@ import { fileURLToPath } from "url";
 import { registerTerminalHandlers } from "./Terminal";
 import { registerQueuesHandlers } from "./queues";
 import { registerFilesystemHandlers } from "./filesystem";
-import { registerSdkHandlers } from "./ipc/handlers";
+import { registerSnippetsHandlers } from "./snippets";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -107,10 +107,10 @@ ipcMain.on("window.close", () => {
 // ── lifecycle ─────────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
   console.log("[main] app ready");
-  registerSdkHandlers();
   registerTerminalHandlers(() => mainWindow?.webContents ?? null);
   registerQueuesHandlers();
   registerFilesystemHandlers();
+  registerSnippetsHandlers();
   createWindow();
 
   tray = new Tray(buildTrayIcon());
