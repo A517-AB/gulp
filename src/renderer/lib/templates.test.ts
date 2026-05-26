@@ -54,9 +54,9 @@ describe("Templates Utility", () => {
   afterAll(() => {
     // Cleanup
     // @ts-expect-error: Deleting global properties for cleanup
-    delete global.window;
+    global.window = undefined as any;
     // @ts-expect-error: Deleting global properties for cleanup
-    delete global.localStorage;
+    global.localStorage = undefined as any;
     // @ts-expect-error: Deleting global properties for cleanup
     delete global.crypto;
   });
