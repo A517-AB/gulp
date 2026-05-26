@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi as jest } from 'vitest';
 import {
   getArchivedSessions,
   archiveSession,
@@ -10,7 +10,7 @@ import {
 const localStorageMock = (function () {
   let store: Record<string, string> = {};
   return {
-    getItem: jest.fn((key: string) => store[key] || null),
+    getItem: jest.fn((key: string) => store[key] ?? null),
     setItem: jest.fn((key: string, value: string) => {
       store[key] = value.toString();
     }),
@@ -28,7 +28,7 @@ describe("Archive Utility", () => {
 
   beforeAll(() => {
     // Define window.localStorage manually for Node environment
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       value: {
         localStorage: localStorageMock,
       },
@@ -36,7 +36,7 @@ describe("Archive Utility", () => {
     });
 
     // Define localStorage globally
-    Object.defineProperty(global, "localStorage", {
+    Object.defineProperty(globalThis, "localStorage", {
       value: localStorageMock,
       writable: true,
     });
@@ -44,10 +44,8 @@ describe("Archive Utility", () => {
 
   afterAll(() => {
     // Cleanup
-    // @ts-expect-error: Deleting global properties for cleanup
-    delete global.window;
-    // @ts-expect-error: Deleting global properties for cleanup
-    delete global.localStorage;
+    Reflect.deleteProperty(globalThis, "window");
+    Reflect.deleteProperty(globalThis, "localStorage");
   });
 
   beforeEach(() => {

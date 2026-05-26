@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import '@renderer/lib/monaco' // local Monaco workers — must run before any Editor mounts
 import App from '@renderer/App'
 import '@renderer/index.css'
 

@@ -1122,6 +1122,14 @@ export function saveTemplate(
 
   const templates = getTemplates();
   const now = new Date().toISOString();
+  const templateFields = {
+    name: template.name,
+    description: template.description,
+    prompt: template.prompt,
+    ...(template.title !== undefined ? { title: template.title } : {}),
+    ...(template.isFavorite !== undefined ? { isFavorite: template.isFavorite } : {}),
+    ...(template.tags !== undefined ? { tags: template.tags } : {}),
+  };
 
   let savedTemplate: SessionTemplate;
 
@@ -1132,7 +1140,7 @@ export function saveTemplate(
 
     savedTemplate = {
       ...templates[index],
-      ...template,
+      ...templateFields,
       id: template.id, // Ensure ID is preserved
       updatedAt: now,
     };
@@ -1140,8 +1148,8 @@ export function saveTemplate(
   } else {
     // Create new
     savedTemplate = {
-      ...template,
       id: crypto.randomUUID(),
+      ...templateFields,
       createdAt: now,
       updatedAt: now,
     };

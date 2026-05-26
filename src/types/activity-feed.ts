@@ -1,4 +1,4 @@
-import type { Dispatch, FormEvent, ReactNode, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction, SyntheticEvent } from "react";
 import type { Activity, Session, Source } from "./jules";
 
 export type { Activity, Session, Source };
@@ -54,7 +54,7 @@ export interface NewSessionDialogProps {
 }
 
 export interface PlanContentProps {
-  content: string | object;
+  content: unknown;
 }
 
 // ---- Session list hook ----
@@ -92,7 +92,7 @@ export interface UseNewSessionFormReturn {
   setFormData: Dispatch<SetStateAction<SessionFormData>>;
   loading: boolean;
   error: string | null;
-  handleSubmit: (e: FormEvent) => Promise<void>;
+  handleSubmit: (e: SyntheticEvent<HTMLFormElement>) => Promise<void>;
 }
 
 // ---- Activity feed hook contract ----

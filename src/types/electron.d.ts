@@ -3,6 +3,7 @@ import type {
   Activity, ActivityAgentMessaged, Source, JulesOptions, JulesQuery,
   JulesDomain, ListSessionsOptions, JulesClient, SessionClient, Outcome,
 } from '@google/jules-sdk'
+import type { Snippet } from './snippets'
 
 // ── sdk ipc types ──────────────────────────────────────────────────────────────
 
@@ -116,13 +117,18 @@ export interface PopupAPI {
 }
 
 export interface FilesystemAPI {
-  readdir:        (dir: string)      => Promise<Array<{ name: string; isDir: boolean }>>;
+  readdir:        (dir: string)      => Promise<{ name: string; isDir: boolean }[]>;
   readFile:       (path: string)     => Promise<string>;
   showOpenDialog: ()                 => Promise<string | null>;
 }
 
 export interface EnvAPI {
   getApiKey: () => Promise<string | null>;
+}
+
+export interface SnippetsAPI {
+  get: () => Promise<Snippet[]>;
+  save: (data: Snippet[]) => Promise<boolean>;
 }
 
 // ── root ───────────────────────────────────────────────────────────────────────
@@ -135,7 +141,8 @@ export interface ElectronAPI {
   popup:      PopupAPI;
   filesystem: FilesystemAPI;
   env:        EnvAPI;
-  sdkIpc:     SdkIpc;
+  snippets:   SnippetsAPI;
+  sdkIpc?:    SdkIpc;
 }
 
 // ── global augments ────────────────────────────────────────────────────────────

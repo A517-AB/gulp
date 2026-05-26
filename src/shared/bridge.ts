@@ -1,6 +1,6 @@
-/// <reference path="../types/electron.d.ts" />
+import type { ElectronAPI } from "../types/electron";
 
-const el = typeof window !== "undefined" ? window.electron : undefined;
+const el: ElectronAPI | undefined = typeof window !== "undefined" ? window.electron : undefined;
 
 export const isElectron = !!el?.window;
 export const isWeb = !isElectron;

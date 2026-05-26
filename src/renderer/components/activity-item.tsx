@@ -11,18 +11,46 @@ import { PlanContent } from "./plan-content";
 import { formatDate, getActivityTypeColor } from "@renderer/utils/activity";
 import type { Activity, ActivityGroup, ActivityRole } from "@/types/activity-feed";
 
-function ContentRenderer({ content }: { content: string }) {
+function parseJsonContent(content: string): { ok: true; value: unknown } | { ok: false } {
   try {
-    const parsed = JSON.parse(content);
-    if (Array.isArray(parsed) || parsed?.steps) return <PlanContent content={parsed} />;
-    return <pre className="text-[11px] overflow-x-auto font-mono bg-muted/50 p-2 rounded">{JSON.stringify(parsed, null, 2)}</pre>;
+    return { ok: true, value: JSON.parse(content) as unknown };
   } catch {
-    return (
-      <div className="prose prose-sm dark:prose-invert max-w-none break-words prose-p:text-xs prose-headings:text-xs prose-code:text-[11px] prose-pre:text-[11px]">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-      </div>
-    );
+    return { ok: false };
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isPlanContentData(value: unknown): value is { description?: string; steps: unknown[] } | unknown[] {
+  return Array.isArray(value) || (isRecord(value) && Array.isArray(value["steps"]));
+}
+
+function isPlanGeneratedMetadata(value: unknown): value is { approved?: boolean } {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return !("approved" in value) || typeof value["approved"] === "boolean";
+}
+
+function ContentRenderer({ content }: { content: string }) {
+  const parsed = parseJsonContent(content);
+
+  if (parsed.ok) {
+    if (isPlanContentData(parsed.value)) {
+      return <PlanContent content={parsed.value} />;
+    }
+
+    return <pre className="text-[11px] overflow-x-auto font-mono bg-muted/50 p-2 rounded">{JSON.stringify(parsed.value, null, 2)}</pre>;
+  }
+
+  return (
+    <div className="prose prose-sm dark:prose-invert max-w-none break-words prose-p:text-xs prose-headings:text-xs prose-code:text-[11px] prose-pre:text-[11px]">
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+    </div>
+  );
 }
 
 function Av({ role }: { role: ActivityRole }) {
@@ -37,7 +65,7 @@ function Av({ role }: { role: ActivityRole }) {
 
 function BashToggle({ id, expanded, onToggle }: { id: string; expanded: boolean; onToggle: (id: string) => void }) {
   return (
-    <button onClick={() => onToggle(id)} aria-expanded={expanded} className="flex items-center gap-2 text-[9px] font-mono uppercase tracking-wider text-green-400 hover:text-green-300 transition-colors mb-2">
+    <button onClick={() => { onToggle(id); }} aria-expanded={expanded} className="flex items-center gap-2 text-[9px] font-mono uppercase tracking-wider text-green-400 hover:text-green-300 transition-colors mb-2">
       {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
       <Terminal className="h-3 w-3" /><span>Command Output</span>
     </button>
@@ -63,9 +91,10 @@ function AgentCard({ children }: { children: React.ReactNode }) {
 
 function SingleActivity({ activity, expandedBash, onToggleBash, onApprovePlan, approvingPlan, isNew }: Omit<ActivityItemProps, "item"> & { activity: Activity }) {
   const isUser = activity.role === "user";
+  const planGenerated = activity.metadata?.["planGenerated"];
   const isPlanPending = activity.type === "plan" &&
-    !!activity.metadata?.['planGenerated'] &&
-    !(activity.metadata['planGenerated'] as { approved?: boolean })?.approved;
+    isPlanGeneratedMetadata(planGenerated) &&
+    planGenerated.approved !== true;
 
   return (
     <div className={`flex gap-2.5 ${isUser ? "flex-row-reverse" : ""} ${isNew ? "animate-in fade-in slide-in-from-bottom-2 duration-500" : ""}`}>

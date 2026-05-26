@@ -1,4 +1,4 @@
-import { Component, type ReactNode, type ErrorInfo } from 'react'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { useRouteError, isRouteErrorResponse, useNavigate } from 'react-router'
 
 // ── Shared display ────────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ function resolveRouteError(error: unknown): { status: number; title: string; mes
   if (isRouteErrorResponse(error)) {
     return {
       status:  error.status,
-      title:   error.status === 404 ? 'Page not found' : `Error ${error.status}`,
+      title:   error.status === 404 ? 'Page not found' : 'Error ' + String(error.status),
       message: error.status === 404
         ? "The page you're looking for doesn't exist."
         : (error.statusText || 'An unexpected error occurred.'),
@@ -100,13 +100,13 @@ interface ErrorBoundaryState {
 }
 
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { error: null }
+  override state: ErrorBoundaryState = { error: null }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { error }
   }
 
-  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('[ErrorBoundary] render error:', error.message)
     if (import.meta.env.DEV) {
       console.error(errorInfo.componentStack)

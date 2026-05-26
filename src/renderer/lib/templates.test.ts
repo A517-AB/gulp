@@ -33,12 +33,19 @@ Object.defineProperty(global, "crypto", {
   writable: true,
 });
 
+Object.defineProperty(globalThis, "crypto", {
+  value: {
+    randomUUID: randomUUIDMock,
+  },
+  writable: true,
+});
+
 describe("Templates Utility", () => {
   const TEMPLATES_KEY = "jules-session-templates";
 
   beforeAll(() => {
     // Define window.localStorage manually for Node environment
-    Object.defineProperty(global, "window", {
+    Object.defineProperty(globalThis, "window", {
       value: {
         localStorage: localStorageMock,
       },
@@ -46,7 +53,7 @@ describe("Templates Utility", () => {
     });
 
     // Define localStorage globally
-    Object.defineProperty(global, "localStorage", {
+    Object.defineProperty(globalThis, "localStorage", {
       value: localStorageMock,
       writable: true,
     });
@@ -54,12 +61,9 @@ describe("Templates Utility", () => {
 
   afterAll(() => {
     // Cleanup
-    // @ts-expect-error: Deleting global properties for cleanup
-    delete global.window;
-    // @ts-expect-error: Deleting global properties for cleanup
-    delete global.localStorage;
-    // @ts-expect-error: Deleting global properties for cleanup
-    delete global.crypto;
+    Reflect.deleteProperty(globalThis, "window");
+    Reflect.deleteProperty(globalThis, "localStorage");
+    Reflect.deleteProperty(globalThis, "crypto");
   });
 
   beforeEach(() => {
@@ -101,8 +105,8 @@ describe("Templates Utility", () => {
 
       const templates = getTemplates();
       expect(templates).toHaveLength(2);
-      expect(templates[0].id).toBe("2"); // Most recent first
-      expect(templates[1].id).toBe("1");
+      expect(templates[0]?.id).toBe("2"); // Most recent first
+      expect(templates[1]?.id).toBe("1");
     });
   });
 
@@ -164,7 +168,7 @@ describe("Templates Utility", () => {
 
       const stored = JSON.parse(localStorageMock.getItem(TEMPLATES_KEY)!);
       expect(stored).toHaveLength(1);
-      expect(stored[0].name).toBe("New Name");
+      expect(stored[0]?.name).toBe("New Name");
     });
   });
 
@@ -178,7 +182,7 @@ describe("Templates Utility", () => {
 
       const stored = JSON.parse(localStorageMock.getItem(TEMPLATES_KEY)!);
       expect(stored).toHaveLength(1);
-      expect(stored[0].id).toBe("2");
+      expect(stored[0]?.id).toBe("2");
     });
   });
 });

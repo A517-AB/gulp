@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/renderer/utils/utils";
 
 interface InlineEditProps {
   value: string;
@@ -14,10 +14,26 @@ interface InlineEditProps {
 export function InlineEdit({ value, onSave, multiline, className, placeholder }: InlineEditProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
-  const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
+  const ref = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
 
-  useEffect(() => { setDraft(value); }, [value]);
-  useEffect(() => { if (editing) ref.current?.focus(); }, [editing]);
+  useEffect(() => {
+    if (editing) {
+      ref.current?.focus();
+    }
+  }, [editing]);
+
+  const startEditing = () => {
+    setDraft(value);
+    setEditing(true);
+  };
+
+  const setInputRef = (element: HTMLInputElement | null) => {
+    ref.current = element;
+  };
+
+  const setTextareaRef = (element: HTMLTextAreaElement | null) => {
+    ref.current = element;
+  };
 
   const commit = () => {
     setEditing(false);
@@ -31,7 +47,9 @@ export function InlineEdit({ value, onSave, multiline, className, placeholder }:
 
   const sharedProps = {
     value: draft,
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setDraft(e.target.value),
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setDraft(e.target.value);
+    },
     onBlur: commit,
     onKeyDown: (e: React.KeyboardEvent) => {
       if (e.key === "Escape") cancel();
@@ -47,7 +65,7 @@ export function InlineEdit({ value, onSave, multiline, className, placeholder }:
   if (!editing) {
     return (
       <span
-        onClick={() => setEditing(true)}
+        onClick={startEditing}
         title="Click to edit"
         className={cn("cursor-text hover:bg-white/5 rounded px-1 -mx-1 transition-colors whitespace-pre-wrap", className)}
       >
@@ -57,6 +75,6 @@ export function InlineEdit({ value, onSave, multiline, className, placeholder }:
   }
 
   return multiline
-    ? <textarea ref={ref} {...sharedProps} rows={4} />
-    : <input ref={ref} {...sharedProps} />;
+    ? <textarea ref={setTextareaRef} {...sharedProps} rows={4} />
+    : <input ref={setInputRef} {...sharedProps} />;
 }

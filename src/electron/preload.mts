@@ -4,29 +4,40 @@ import type { ShellType, PopupNotification, ElectronAPI } from "../types/electro
 // ── terminal ───────────────────────────────────────────────────────────────────
 
 const terminal: ElectronAPI["terminal"] = {
-  start: (cwd: string, shellType?: ShellType) =>
-    ipcRenderer.send("terminal.start", { cwd, shellType }),
+  start: (cwd: string, shellType?: ShellType) => {
+    ipcRenderer.send("terminal.start", { cwd, shellType });
+  },
 
-  input: (data: string) =>
-    ipcRenderer.send("terminal.input", data),
+  input: (data: string) => {
+    ipcRenderer.send("terminal.input", data);
+  },
 
-  resize: (cols: number, rows: number) =>
-    ipcRenderer.send("terminal.resize", { cols, rows }),
+  resize: (cols: number, rows: number) => {
+    ipcRenderer.send("terminal.resize", { cols, rows });
+  },
 
-  kill: () =>
-    ipcRenderer.send("terminal.kill"),
+  kill: () => {
+    ipcRenderer.send("terminal.kill");
+  },
 
   onOutput: (callback: (data: string) => void) => {
-    const handler = (_event: IpcRendererEvent, data: string) => callback(data);
+    const handler = (_event: IpcRendererEvent, data: string) => {
+      callback(data);
+    };
     ipcRenderer.on("terminal.output", handler);
-    return () => ipcRenderer.off("terminal.output", handler);
+    return () => {
+      ipcRenderer.off("terminal.output", handler);
+    };
   },
 
   onExit: (callback: (exitCode: number, signal?: number) => void) => {
-    const handler = (_event: IpcRendererEvent, { exitCode, signal }: { exitCode: number; signal?: number }) =>
+    const handler = (_event: IpcRendererEvent, { exitCode, signal }: { exitCode: number; signal?: number }) => {
       callback(exitCode, signal);
+    };
     ipcRenderer.on("terminal.exit", handler);
-    return () => ipcRenderer.off("terminal.exit", handler);
+    return () => {
+      ipcRenderer.off("terminal.exit", handler);
+    };
   },
 };
 
@@ -41,9 +52,15 @@ const queues: ElectronAPI["queues"] = {
 // ── window controls ────────────────────────────────────────────────────────────
 
 const window_: ElectronAPI["window"] = {
-  minimize: () => ipcRenderer.send("window.minimize"),
-  maximize: () => ipcRenderer.send("window.maximize"),
-  close:    () => ipcRenderer.send("window.close"),
+  minimize: () => {
+    ipcRenderer.send("window.minimize");
+  },
+  maximize: () => {
+    ipcRenderer.send("window.maximize");
+  },
+  close:    () => {
+    ipcRenderer.send("window.close");
+  },
 };
 
 // ── power ──────────────────────────────────────────────────────────────────────
@@ -51,31 +68,50 @@ const window_: ElectronAPI["window"] = {
 
 const power: ElectronAPI["power"] = {
   onSuspend: (cb: () => void) => {
-    const handler = () => cb();
+    const handler = () => {
+      cb();
+    };
     ipcRenderer.on("power.suspend", handler);
-    return () => ipcRenderer.off("power.suspend", handler);
+    return () => {
+      ipcRenderer.off("power.suspend", handler);
+    };
   },
   onResume: (cb: () => void) => {
-    const handler = () => cb();
+    const handler = () => {
+      cb();
+    };
     ipcRenderer.on("power.resume", handler);
-    return () => ipcRenderer.off("power.resume", handler);
+    return () => {
+      ipcRenderer.off("power.resume", handler);
+    };
   },
 };
 
 // ── popup ──────────────────────────────────────────────────────────────────────
 
 const popup: ElectronAPI["popup"] = {
-  show:  () => ipcRenderer.send("popup.show"),
-  hide:  () => ipcRenderer.send("popup.hide"),
-  close: () => ipcRenderer.send("popup.hide"),
+  show:  () => {
+    ipcRenderer.send("popup.show");
+  },
+  hide:  () => {
+    ipcRenderer.send("popup.hide");
+  },
+  close: () => {
+    ipcRenderer.send("popup.hide");
+  },
 
-  notify: (payload: PopupNotification) =>
-    ipcRenderer.send("popup.notify", payload),
+  notify: (payload: PopupNotification) => {
+    ipcRenderer.send("popup.notify", payload);
+  },
 
   onNotification: (cb: (payload: PopupNotification) => void) => {
-    const handler = (_event: IpcRendererEvent, data: PopupNotification) => cb(data);
+    const handler = (_event: IpcRendererEvent, data: PopupNotification) => {
+      cb(data);
+    };
     ipcRenderer.on("popup.notification", handler);
-    return () => ipcRenderer.off("popup.notification", handler);
+    return () => {
+      ipcRenderer.off("popup.notification", handler);
+    };
   },
 };
 
