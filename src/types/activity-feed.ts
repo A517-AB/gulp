@@ -37,7 +37,7 @@ export interface ActivityFeedProps {
 
 export interface SessionListProps {
   onSelectSession: (session: Session) => void;
-  selectedSessionId?: string;
+  selectedSessionId?: string | undefined;
 }
 
 export interface CodeDiffSidebarProps {
@@ -47,7 +47,7 @@ export interface CodeDiffSidebarProps {
 
 export interface NewSessionDialogProps {
   onSessionCreated?: () => void;
-  initialValues?: SessionInitialValues;
+  initialValues?: SessionInitialValues | undefined;
   trigger?: ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -81,7 +81,7 @@ export interface SessionFormData {
 
 export interface UseNewSessionFormProps {
   open: boolean;
-  initialValues?: SessionInitialValues;
+  initialValues?: SessionInitialValues | undefined;
   onSessionCreated?: () => void;
   onClose: () => void;
 }
