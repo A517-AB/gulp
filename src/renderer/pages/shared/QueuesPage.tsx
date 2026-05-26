@@ -1,5 +1,36 @@
 import { useState, useEffect } from 'react';
-import type { FleetTaskGroup } from '@/types/app';
+import type { FleetTaskGroup, FleetTask } from '@/types/app';
+
+const CACHE_KEY = 'jules-queues-cache';
+
+function mergeTaskGroups(cached: FleetTaskGroup[], incoming: FleetTaskGroup[]): FleetTaskGroup[] {
+  const mergedMap = new Map<string, FleetTaskGroup>();
+
+  for (const group of cached) {
+    const key = `${group.group}::${group.repo}`;
+    mergedMap.set(key, { ...group, tasks: [...group.tasks] });
+  }
+
+  for (const inc of incoming) {
+    const key = `${inc.group}::${inc.repo}`;
+    if (mergedMap.has(key)) {
+      const existing = mergedMap.get(key)!;
+      // merge tasks based on topic & folder
+      const taskMap = new Map<string, FleetTask>();
+      for (const t of existing.tasks) {
+        taskMap.set(`${t.topic}::${t.folder}`, t);
+      }
+      for (const t of inc.tasks) {
+        taskMap.set(`${t.topic}::${t.folder}`, t); // incoming overrides matching cached tasks
+      }
+      existing.tasks = Array.from(taskMap.values());
+    } else {
+      mergedMap.set(key, { ...inc, tasks: [...inc.tasks] });
+    }
+  }
+
+  return Array.from(mergedMap.values());
+}
 
 export default function QueuesPage() {
   const [tasks, setTasks] = useState<FleetTaskGroup[]>([]);
@@ -8,9 +39,24 @@ export default function QueuesPage() {
 
   useEffect(() => {
     async function loadTasks() {
+      // 1. Load from cache immediately
+      let currentTasks: FleetTaskGroup[] = [];
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          currentTasks = JSON.parse(cached) as FleetTaskGroup[];
+          setTasks(currentTasks);
+        } catch (e) {
+          console.error("Failed to parse queues cache", e);
+        }
+      }
+
+      // 2. Fetch from IPC and merge
       if (window.electron && window.electron.queues) {
-        const loadedTasks = await window.electron.queues.getTasks();
-        setTasks(loadedTasks as FleetTaskGroup[]);
+        const loadedTasks = await window.electron.queues.getTasks() as FleetTaskGroup[];
+        const merged = mergeTaskGroups(currentTasks, loadedTasks);
+        setTasks(merged);
+        localStorage.setItem(CACHE_KEY, JSON.stringify(merged));
       }
     }
     loadTasks();
@@ -40,11 +86,18 @@ export default function QueuesPage() {
         ...group,
         tasks: newTasksArray
       };
-      setTasks(newTasks);
-      setEditingTask(null);
+
+      let finalTasks = newTasks;
+
       if (window.electron && window.electron.queues) {
-        await window.electron.queues.saveTasks(newTasks);
+        const latestFromIpc = await window.electron.queues.getTasks() as FleetTaskGroup[];
+        finalTasks = mergeTaskGroups(latestFromIpc, newTasks);
+        await window.electron.queues.saveTasks(finalTasks);
       }
+
+      setTasks(finalTasks);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(finalTasks));
+      setEditingTask(null);
     }
   };
 
