@@ -1,0 +1,142 @@
+# Sources
+
+Sources represent repositories connected to Jules. Currently, Jules supports GitHub repositories. Use the Sources API to list available repositories and get details about specific sources.
+
+<ApiNote>
+  Sources are created when you connect a GitHub repository to Jules through the web interface. The API currently only supports reading sources, not creating them.
+</ApiNote>
+
+## List Sources
+
+<ApiEndpoint method="GET" path="/v1alpha/sources" description="Lists all sources (repositories) connected to your account.">
+
+### Query Parameters
+
+### Example Request
+
+```bash
+curl -H "x-goog-api-key: $JULES_API_KEY" \
+  "https://jules.googleapis.com/v1alpha/sources?pageSize=10"
+```
+
+### Response
+
+```json
+{
+  "sources": [
+    {
+      "name": "sources/github-myorg-myrepo",
+      "id": "github-myorg-myrepo",
+      "githubRepo": {
+        "owner": "myorg",
+        "repo": "myrepo",
+        "isPrivate": false,
+        "defaultBranch": {
+          "displayName": "main"
+        },
+        "branches": [
+          { "displayName": "main" },
+          { "displayName": "develop" },
+          { "displayName": "feature/auth" }
+        ]
+      }
+    },
+    {
+      "name": "sources/github-myorg-another-repo",
+      "id": "github-myorg-another-repo",
+      "githubRepo": {
+        "owner": "myorg",
+        "repo": "another-repo",
+        "isPrivate": true,
+        "defaultBranch": {
+          "displayName": "main"
+        },
+        "branches": [
+          { "displayName": "main" }
+        ]
+      }
+    }
+  ],
+  "nextPageToken": "eyJvZmZzZXQiOjEwfQ=="
+}
+```
+
+### Filtering
+
+Use the `filter` parameter to retrieve specific sources:
+
+```bash
+# Get a specific source
+curl -H "x-goog-api-key: $JULES_API_KEY" \
+  "https://jules.googleapis.com/v1alpha/sources?filter=name%3Dsources%2Fgithub-myorg-myrepo"
+
+# Get multiple sources
+curl -H "x-goog-api-key: $JULES_API_KEY" \
+  "https://jules.googleapis.com/v1alpha/sources?filter=name%3Dsources%2Fsource1%20OR%20name%3Dsources%2Fsource2"
+```
+
+</ApiEndpoint>
+
+## Get a Source
+
+<ApiEndpoint method="GET" path="/v1alpha/sources/{sourceId}" description="Retrieves a single source by ID.">
+
+### Path Parameters
+
+### Example Request
+
+```bash
+curl -H "x-goog-api-key: $JULES_API_KEY" \
+  https://jules.googleapis.com/v1alpha/sources/github-myorg-myrepo
+```
+
+### Response
+
+Returns the full [Source](/docs/api/reference/types#source) object:
+
+```json
+{
+  "name": "sources/github-myorg-myrepo",
+  "id": "github-myorg-myrepo",
+  "githubRepo": {
+    "owner": "myorg",
+    "repo": "myrepo",
+    "isPrivate": false,
+    "defaultBranch": {
+      "displayName": "main"
+    },
+    "branches": [
+      { "displayName": "main" },
+      { "displayName": "develop" },
+      { "displayName": "feature/auth" },
+      { "displayName": "feature/tests" }
+    ]
+  }
+}
+```
+
+</ApiEndpoint>
+
+## Using Sources with Sessions
+
+When creating a session, reference a source using its resource name in the `sourceContext`:
+
+```bash
+curl -X POST \
+  -H "x-goog-api-key: $JULES_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Add unit tests for the auth module",
+    "sourceContext": {
+      "source": "sources/github-myorg-myrepo",
+      "githubRepoContext": {
+        "startingBranch": "develop"
+      }
+    }
+  }' \
+  https://jules.googleapis.com/v1alpha/sessions
+```
+
+<ApiNote>
+  Use the List Sources endpoint to discover available source names, then use the Get Source endpoint to see available branches before creating a session.
+</ApiNote>
