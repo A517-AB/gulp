@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, memo, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { Code2, Plus, Trash2, Search, Pencil, Copy, Check } from 'lucide-react'
 import { useSnippets } from '@renderer/hooks/use-snippets'
 import { InlineEdit } from '@renderer/ui/inline-edit'
@@ -7,21 +8,112 @@ import { DynamicDropdown } from '@renderer/components/shared/DynamicDropdown'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@renderer/ui/dialog'
-import { PythonIcon, JavascriptIcon, TypescriptIcon, ShellIcon, JsonIcon, MarkdownIcon } from '@renderer/icons/languages'
-import type { LanguagePreset, Snippet } from '../../../types/snippets'
+import { LANGUAGES, langFor } from '@renderer/lib/languages'
+import type { Snippet } from '../../../types/snippets'
 
-const LANGUAGES: LanguagePreset[] = [
-  { id: 'python',     name: 'Python',     icon: PythonIcon,     color: 'oklch(0.85 0.15 95)' },
-  { id: 'javascript', name: 'JavaScript', icon: JavascriptIcon, color: 'oklch(0.85 0.15 95)' },
-  { id: 'typescript', name: 'TypeScript', icon: TypescriptIcon, color: 'oklch(0.65 0.15 250)' },
-  { id: 'shell',      name: 'Shell',      icon: ShellIcon,      color: 'oklch(0.7 0.1 150)' },
-  { id: 'json',       name: 'JSON',       icon: JsonIcon,       color: 'oklch(0.7 0.1 30)' },
-  { id: 'markdown',   name: 'Markdown',   icon: MarkdownIcon,   color: 'oklch(0.75 0.08 220)' },
-]
+const LANGUAGE_ITEMS = LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))
 
-function langFor(id: string | null) {
-  return LANGUAGES.find(l => l.id === id)
+const TITLE_ADJ  = ['swift', 'async', 'clean', 'lazy', 'eager', 'raw', 'pure', 'silent', 'fuzzy', 'dark', 'sharp', 'wild']
+const TITLE_NOUN = ['handler', 'parser', 'runner', 'hook', 'util', 'patch', 'probe', 'loop', 'pipe', 'trap', 'drop', 'snap']
+
+function randomTitle() {
+  const a = TITLE_ADJ[Math.floor(Math.random() * TITLE_ADJ.length)]
+  const b = TITLE_NOUN[Math.floor(Math.random() * TITLE_NOUN.length)]
+  return `${a}-${b}`
 }
+
+function withAlpha(color: string, a: number) {
+  return color.replace(')', ` / ${a})`)
+}
+
+interface SnippetRowProps {
+  snippet: Snippet
+  isCopied: boolean
+  onOpen: (s: Snippet) => void
+  onCopy: (s: Snippet, e: React.MouseEvent) => void
+  onDelete: (id: string, e: React.MouseEvent) => void
+  onTitleSave: (s: Snippet, title: string) => void
+  onLangChange: (id: string, lang: string) => void
+}
+
+const SnippetRow = memo(function SnippetRow({
+  snippet, isCopied, onOpen, onCopy, onDelete, onTitleSave, onLangChange,
+}: SnippetRowProps) {
+  const lang = langFor(snippet.languageId)
+  const preview = snippet.script.split('\n').slice(0, 3).join('\n')
+  const gradientColor = lang?.color ? withAlpha(lang.color, 0.4) : null
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <div
+      className="group/snippet relative flex flex-col py-3 px-2 border-b border-hair last:border-0 rounded cursor-pointer hover:bg-hover transition-colors duration-200"
+      onClick={() => { onOpen(snippet) }}
+      onMouseEnter={() => { setHovered(true) }}
+      onMouseLeave={() => { setHovered(false) }}
+    >
+      {gradientColor && (
+        <motion.div
+          className="absolute inset-0 rounded pointer-events-none"
+          animate={{ opacity: hovered ? 1 : 0.4 }}
+          transition={{ duration: 0.2 }}
+          style={{ background: `linear-gradient(to top left, ${gradientColor} 0%, transparent 55%)` }}
+        />
+      )}
+
+      <div className="relative flex flex-col gap-1 min-w-0">
+        <div className="flex items-center gap-2" onClick={e => { e.stopPropagation() }}>
+          <InlineEdit
+            value={snippet.title ?? ''}
+            onSave={v => { onTitleSave(snippet, v) }}
+            className="text-sm font-semibold text-fg-primary"
+            placeholder="Untitled"
+          />
+          {snippet.category === 'jules' && (
+            <span className="shrink-0 text-[9px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/20 uppercase">
+              Jules
+            </span>
+          )}
+        </div>
+        <pre className="text-[10px] font-mono text-fg-dim leading-relaxed whitespace-pre-wrap truncate max-h-[3.6em] overflow-hidden bg-transparent border-0 p-0 m-0">
+          {preview}
+        </pre>
+      </div>
+
+      <div className="relative flex items-center justify-end gap-1 mt-2" onClick={e => { e.stopPropagation() }}>
+        <div className="flex items-center gap-1 opacity-0 group-hover/snippet:opacity-100 transition-opacity duration-200">
+          <button
+            onClick={e => { onCopy(snippet, e) }}
+            title="Copy to clipboard"
+            className="flex items-center justify-center h-7 w-7 rounded text-fg-muted hover:text-fg-primary hover:bg-hover transition-all"
+          >
+            {isCopied
+              ? <Check className="h-3 w-3 text-green-500" />
+              : <Copy className="h-3 w-3" />}
+          </button>
+          <button
+            onClick={e => { onOpen(snippet); e.stopPropagation() }}
+            title="Edit in editor"
+            className="flex items-center justify-center h-7 w-7 rounded text-fg-muted hover:text-fg-primary hover:bg-hover transition-all"
+          >
+            <Pencil className="h-3 w-3" />
+          </button>
+          <button
+            onClick={e => { onDelete(snippet.id, e) }}
+            title="Delete snippet"
+            className="flex items-center justify-center h-7 w-7 rounded text-fg-muted hover:text-red-500 hover:bg-hover transition-all"
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
+        <DynamicDropdown
+          items={LANGUAGE_ITEMS}
+          value={snippet.languageId}
+          onChange={v => { onLangChange(snippet.id, v) }}
+        />
+      </div>
+    </div>
+  )
+})
 
 export function SnippetsPage() {
   const { snippets, saveSnippet, deleteSnippet } = useSnippets()
@@ -44,7 +136,8 @@ export function SnippetsPage() {
     return snippets.filter(s =>
       (s.title?.toLowerCase().includes(q) ?? false) ||
       s.script.toLowerCase().includes(q) ||
-      (s.languageId?.toLowerCase().includes(q) ?? false)
+      (s.languageId?.toLowerCase().includes(q) ?? false) ||
+      (s.tags?.some(t => t.toLowerCase().includes(q)) ?? false)
     )
   }, [snippets, search])
 
@@ -62,7 +155,7 @@ export function SnippetsPage() {
   const openNewEditor = useCallback(() => {
     const newSnippet: Snippet = {
       id: crypto.randomUUID(),
-      title: null,
+      title: randomTitle(),
       languageId: 'python',
       script: '',
       createdAt: new Date().toISOString(),
@@ -100,8 +193,12 @@ export function SnippetsPage() {
     void saveSnippet({ ...snippet, title: newTitle || null })
   }, [saveSnippet])
 
-  const handleLangChange = useCallback((snippet: Snippet, newLang: string) => {
-    void saveSnippet({ ...snippet, languageId: newLang })
+  const snippetsRef = useRef<Snippet[]>([])
+  snippetsRef.current = snippets
+
+  const handleLangChange = useCallback((id: string, newLang: string) => {
+    const snippet = snippetsRef.current.find(s => s.id === id)
+    if (snippet) void saveSnippet({ ...snippet, languageId: newLang })
   }, [saveSnippet])
 
   // ── render ───────────────────────────────────────────────────────────────
@@ -149,83 +246,18 @@ export function SnippetsPage() {
 
       {/* List */}
       <div className="flex-1 overflow-auto pr-2 pb-12">
-        {filtered.map(snippet => {
-          const lang = langFor(snippet.languageId)
-          const LangIcon = lang?.icon ?? Code2
-          const isCopied = copiedId === snippet.id
-          const preview = snippet.script.split('\n').slice(0, 3).join('\n')
-
-          return (
-            <div
-              key={snippet.id}
-              className="group/snippet flex items-start justify-between py-3 px-2 border-b border-hair last:border-0 hover:bg-hover rounded transition-colors cursor-pointer"
-              onClick={() => { openEditor(snippet) }}
-            >
-              <div className="flex items-start gap-3 flex-1 min-w-0 pr-4">
-                {/* language icon */}
-                <div
-                  className="mt-0.5 p-1.5 rounded-sm bg-surface border border-subtle shrink-0"
-                  style={{ color: lang?.color ?? 'var(--fg-secondary)' }}
-                >
-                  <LangIcon className="h-3.5 w-3.5" />
-                </div>
-
-                <div className="flex flex-col gap-1 flex-1 min-w-0">
-                  {/* title row */}
-                  <div className="flex items-center gap-2">
-                    <div onClick={e => { e.stopPropagation() }}>
-                      <InlineEdit
-                        value={snippet.title ?? ''}
-                        onSave={v => { handleTitleSave(snippet, v) }}
-                        className="text-sm font-semibold text-fg-primary"
-                        placeholder="Untitled"
-                      />
-                    </div>
-                    <div onClick={e => { e.stopPropagation() }}>
-                      <DynamicDropdown
-                        items={LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))}
-                        value={snippet.languageId}
-                        onChange={v => { handleLangChange(snippet, v) }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* code preview */}
-                  <pre className="text-[10px] font-mono text-fg-dim leading-relaxed whitespace-pre-wrap truncate max-h-[3.6em] overflow-hidden bg-transparent border-0 p-0 m-0">
-                    {preview}
-                  </pre>
-                </div>
-              </div>
-
-              {/* actions */}
-              <div className="flex items-center gap-1 opacity-0 group-hover/snippet:opacity-100 transition-opacity shrink-0">
-                <button
-                  onClick={e => { handleCopy(snippet, e) }}
-                  title="Copy to clipboard"
-                  className="flex items-center justify-center h-8 w-8 rounded text-fg-muted hover:text-fg-primary hover:bg-hover transition-all"
-                >
-                  {isCopied
-                    ? <Check className="h-3.5 w-3.5 text-green-500" />
-                    : <Copy className="h-3.5 w-3.5" />}
-                </button>
-                <button
-                  onClick={e => { openEditor(snippet); e.stopPropagation() }}
-                  title="Edit in editor"
-                  className="flex items-center justify-center h-8 w-8 rounded text-fg-muted hover:text-fg-primary hover:bg-hover transition-all"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  onClick={e => { handleDelete(snippet.id, e) }}
-                  title="Delete snippet"
-                  className="flex items-center justify-center h-8 w-8 rounded text-fg-muted hover:text-red-500 hover:bg-hover transition-all"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          )
-        })}
+        {filtered.map(snippet => (
+          <SnippetRow
+            key={snippet.id}
+            snippet={snippet}
+            isCopied={copiedId === snippet.id}
+            onOpen={openEditor}
+            onCopy={handleCopy}
+            onDelete={handleDelete}
+            onTitleSave={handleTitleSave}
+            onLangChange={handleLangChange}
+          />
+        ))}
 
         {filtered.length === 0 && (
           <div className="rounded-lg border border-subtle bg-surface p-12 text-center border-dashed">
@@ -253,12 +285,17 @@ export function SnippetsPage() {
           <DialogHeader className="px-5 pt-5 pb-3 border-b border-hair">
             <div className="flex items-center gap-3">
               <DynamicDropdown
-                items={LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))}
+                items={LANGUAGE_ITEMS}
                 value={draftLang}
                 onChange={setDraftLang}
               />
-              <DialogTitle className="text-sm font-bold text-fg-primary uppercase tracking-wider">
-                {editingSnippet?.title ?? 'New Snippet'}
+              <DialogTitle asChild>
+                <InlineEdit
+                  value={editingSnippet?.title ?? ''}
+                  onSave={v => { setEditingSnippet(s => s ? { ...s, title: v || null } : s) }}
+                  className="text-sm font-bold text-fg-primary uppercase tracking-wider"
+                  placeholder="Untitled"
+                />
               </DialogTitle>
             </div>
           </DialogHeader>

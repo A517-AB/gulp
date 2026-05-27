@@ -35,7 +35,7 @@ export function useActivityFeedApi({
         const fresh = data.filter((a) => !prev.some((p) => p.id === a.id));
         if (!fresh.length) return prev;
         setNewActivityIds(new Set(fresh.map((a) => a.id)));
-        setTimeout(() => setNewActivityIds(new Set()), 500);
+        setTimeout(() => { setNewActivityIds(new Set()); }, 500);
         return [...prev, ...fresh];
       });
     } catch (err) {
@@ -54,7 +54,7 @@ export function useActivityFeedApi({
     loadActivities(true);
     if (session.status !== "active") return;
     const interval = setInterval(() => loadActivities(false), 5000);
-    return () => clearInterval(interval);
+    return () => { clearInterval(interval); };
   }, [session.id, session.status, loadActivities]);
 
   const handleApprovePlan = useCallback(async () => {

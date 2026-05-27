@@ -378,7 +378,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: --alpha(var(--muted-foreground) / 0.5);
+  background: color-mix(in srgb, var(--muted-foreground) 50%, transparent);
 }
 
 ::-webkit-scrollbar-corner {
@@ -400,6 +400,55 @@
 .app-drag-region [role="menuitem"],
 .app-drag-region [role="tab"] {
   -webkit-app-region: no-drag;
+}
+
+/* ── MARKDOWN PROSE OVERRIDES ──────────────────────────────────────────────── */
+.markdown-content.prose {
+  --tw-prose-body:        var(--fg-muted);
+  --tw-prose-headings:    var(--fg-primary);
+  --tw-prose-lead:        var(--fg-secondary);
+  --tw-prose-links:       var(--primary);
+  --tw-prose-bold:        var(--fg-primary);
+  --tw-prose-counters:    var(--fg-dim);
+  --tw-prose-bullets:     var(--fg-dim);
+  --tw-prose-hr:          var(--border-hair);
+  --tw-prose-quotes:      var(--fg-secondary);
+  --tw-prose-quote-borders: var(--border-subtle);
+  --tw-prose-captions:    var(--fg-ghost);
+  --tw-prose-code:        var(--fg-primary);
+  --tw-prose-pre-code:    var(--fg-primary);
+  --tw-prose-pre-bg:      var(--bg-raised);
+  --tw-prose-th-borders:  var(--border-hair);
+  --tw-prose-td-borders:  var(--border-hair);
+}
+
+.markdown-content.prose pre {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-hair);
+  border-radius: 6px;
+}
+
+.markdown-content.prose code:not(pre code) {
+  background: var(--bg-hover);
+  border: 1px solid var(--border-hair);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+  font-size: 0.8em;
+}
+
+.markdown-content.prose code:not(pre code)::before,
+.markdown-content.prose code:not(pre code)::after {
+  content: none;
+}
+
+.markdown-content.prose blockquote {
+  border-left-color: var(--border-subtle);
+  color: var(--fg-secondary);
+  font-style: normal;
+}
+
+.markdown-content.prose ul li input[type="checkbox"] {
+  margin-top: 0;
 }
 
 /* ── MONACO EDITOR TAILWIND FIX ────────────────────────────────────────────── */

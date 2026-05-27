@@ -44,7 +44,7 @@ export function registerTerminalHandlers(getWebContents: () => WebContents | nul
                 cols: 80,
                 rows: 30,
                 cwd: workingDir,
-                env: process.env as Record<string, string>,
+                env: process.env,
                 useConpty: true,
             });
 

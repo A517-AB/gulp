@@ -7,6 +7,8 @@ import { registerTerminalHandlers } from "./Terminal";
 import { registerQueuesHandlers } from "./queues";
 import { registerFilesystemHandlers } from "./filesystem";
 import { registerSnippetsHandlers } from "./snippets";
+import { registerGitHandlers } from "./git";
+import { registerGitHubHandlers } from "./github";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -111,6 +113,8 @@ app.whenReady().then(() => {
   registerQueuesHandlers();
   registerFilesystemHandlers();
   registerSnippetsHandlers();
+  registerGitHandlers();
+  registerGitHubHandlers();
   createWindow();
 
   tray = new Tray(buildTrayIcon());

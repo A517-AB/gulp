@@ -38,7 +38,7 @@ export default function SessionsPage() {
       <aside className={`hidden md:flex flex-col border-r border-white/[0.08] bg-zinc-950 transition-all duration-200 ${sidebarCollapsed ? "w-12" : "w-64"}`}>
         <div className="px-3 py-2 border-b border-white/[0.08] flex items-center justify-between">
           {!sidebarCollapsed && <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Sessions</span>}
-          <button onClick={() => setSidebarCollapsed((c) => !c)} className="ml-auto text-white/40 hover:text-white/80 text-xs px-1">
+          <button onClick={() => { setSidebarCollapsed((c) => !c); }} className="ml-auto text-white/40 hover:text-white/80 text-xs px-1">
             {sidebarCollapsed ? "›" : "‹"}
           </button>
         </div>
@@ -65,7 +65,7 @@ export default function SessionsPage() {
             <div className="text-center space-y-3">
               <p className="text-[10px] font-mono text-white/40 uppercase tracking-widest">No session selected</p>
               <button
-                onClick={() => openNewSession()}
+                onClick={() => { openNewSession(); }}
                 className="text-[10px] font-mono uppercase tracking-widest text-purple-400 hover:text-purple-300"
               >
                 + New Session
@@ -86,7 +86,7 @@ export default function SessionsPage() {
           >
             <div className="px-3 py-2 border-b border-white/[0.08] flex items-center justify-between">
               {!codeDiffCollapsed && <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Code Changes</span>}
-              <button onClick={() => setCodeDiffCollapsed((c) => !c)} className="ml-auto text-white/40 hover:text-white/80 text-xs px-1">
+              <button onClick={() => { setCodeDiffCollapsed((c) => !c); }} className="ml-auto text-white/40 hover:text-white/80 text-xs px-1">
                 {codeDiffCollapsed ? "‹" : "›"}
               </button>
             </div>

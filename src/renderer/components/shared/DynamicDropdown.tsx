@@ -29,14 +29,14 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
       <PopoverTrigger asChild>
         <button
           className={cn(
-            "flex items-center justify-center size-8 rounded-md transition-colors hover:bg-hover border border-subtle focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "flex items-center justify-center size-9 rounded-md transition-colors hover:bg-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             className
           )}
           style={{ color: selected?.color || 'var(--fg-secondary)' }}
           title={selected?.label || placeholder}
         >
           {TriggerIcon ? (
-            <TriggerIcon className="size-4" />
+            <TriggerIcon className="size-5" />
           ) : (
             <span className="text-xs font-medium px-2 truncate">
               {selected ? selected.label : placeholder}

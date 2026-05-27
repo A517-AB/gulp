@@ -228,14 +228,14 @@ export class JulesClient {
     const sources = allSources.map((source: ApiSource) => {
       // Extract repo name from source field (e.g., "sources/github/owner/repo")
       const sourcePath = source.source || source.name || "";
-      const match = sourcePath.match(/sources\/github\/(.+)/);
+      const match = /sources\/github\/(.+)/.exec(sourcePath);
       const repoPath = match ? match[1] : sourcePath;
 
       return {
         id: sourcePath, // Keep full path for API calls
         name: repoPath ?? '', // Use short name for display
         type: "github" as const,
-        metadata: source as Record<string, unknown>,
+        metadata: source,
       };
     });
 
@@ -476,12 +476,12 @@ export class JulesClient {
         type,
         role: (activity.originator === "agent"
           ? "agent"
-          : "user") as Activity["role"],
+          : "user"),
         content,
         ...(activity.diff ? { diff: activity.diff } : {}),
         ...(activity.bashOutput ? { bashOutput: activity.bashOutput } : {}),
         createdAt: activity.createTime,
-        metadata: activity as Record<string, unknown>,
+        metadata: activity,
       };
     });
   }
@@ -560,12 +560,12 @@ export class JulesClient {
       type,
       role: (response.originator === "agent"
         ? "agent"
-        : "user") as Activity["role"],
+        : "user"),
       content,
       ...(response.diff ? { diff: response.diff } : {}),
       ...(response.bashOutput ? { bashOutput: response.bashOutput } : {}),
       createdAt: response.createTime,
-      metadata: response as Record<string, unknown>,
+      metadata: response,
     };
   }
 

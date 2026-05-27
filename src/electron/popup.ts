@@ -58,7 +58,7 @@ function create(): BrowserWindow {
     void win.loadFile(prodFile);
   }
 
-  win.on("blur",   () => win.hide());
+  win.on("blur",   () => { win.hide(); });
   win.on("closed", () => { popupWindow = null; });
 
   return win;
@@ -87,7 +87,7 @@ export function registerPopupHandlers(
 ): void {
   config = { preloadPath, isDev, devUrl, distDir };
 
-  ipcMain.on("popup.show", () => show());
+  ipcMain.on("popup.show", () => { show(); });
 
   ipcMain.on("popup.hide", () => popupWindow?.hide());
 

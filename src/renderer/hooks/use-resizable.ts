@@ -5,8 +5,8 @@ export function useResizable({ defaultWidth = 600, min = 300, max = 1200 }: UseR
   const [width, setWidth] = useState(defaultWidth);
   const [isResizing, setIsResizing] = useState(false);
 
-  const startResizing = useCallback(() => setIsResizing(true), []);
-  const stopResizing = useCallback(() => setIsResizing(false), []);
+  const startResizing = useCallback(() => { setIsResizing(true); }, []);
+  const stopResizing = useCallback(() => { setIsResizing(false); }, []);
 
   const resize = useCallback((e: MouseEvent) => {
     if (!isResizing) return;

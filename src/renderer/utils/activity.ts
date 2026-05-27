@@ -69,15 +69,13 @@ export function groupActivities(filtered: Activity[]): ActivityGroup[] {
 export function getOutputBranch(activities: Activity[], fallback = "main"): string {
   for (const activity of [...activities].reverse()) {
     if (activity.bashOutput) {
-      const checkout = activity.bashOutput.match(/git checkout -b\s+([\w-./]+)/);
+      const checkout = /git checkout -b\s+([\w-./]+)/.exec(activity.bashOutput);
       if (checkout?.[1]) return checkout[1];
-      const push = activity.bashOutput.match(/git push\s+(?:-u\s+)?(?:origin\s+)?([\w-./]+)/);
+      const push = /git push\s+(?:-u\s+)?(?:origin\s+)?([\w-./]+)/.exec(activity.bashOutput);
       if (push?.[1]) return push[1];
     }
     if (activity.role === "agent" && (activity.type === "message" || activity.type === "result")) {
-      const match = (activity.content || "").match(
-        /(?:created|pushed|on|switched to) branch ['"`]?([\w-./]+)['"`]?/i,
-      );
+      const match = /(?:created|pushed|on|switched to) branch ['"`]?([\w-./]+)['"`]?/i.exec((activity.content || ""));
       if (match?.[1]) return match[1];
     }
   }
