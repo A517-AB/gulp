@@ -40,3 +40,12 @@ export function JsonIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
+
+export function MarkdownIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M2 4h20v16H2V4zm2 2v12h16V6H4zm2 2h2l2 3 2-3h2v8h-2v-4.5L8.5 14.5 7 12.5V16H6V8zm10 0h2l2.5 3.5V8H22v8h-2l-2.5-3.5V16H16V8z" />
+    </svg>
+  )
+}
+

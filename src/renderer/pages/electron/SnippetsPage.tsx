@@ -7,7 +7,7 @@ import { DynamicDropdown } from '@renderer/components/shared/DynamicDropdown'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@renderer/ui/dialog'
-import { PythonIcon, JavascriptIcon, TypescriptIcon, ShellIcon, JsonIcon } from '@renderer/icons/languages'
+import { PythonIcon, JavascriptIcon, TypescriptIcon, ShellIcon, JsonIcon, MarkdownIcon } from '@renderer/icons/languages'
 import type { LanguagePreset, Snippet } from '../../../types/snippets'
 
 const LANGUAGES: LanguagePreset[] = [
@@ -16,6 +16,7 @@ const LANGUAGES: LanguagePreset[] = [
   { id: 'typescript', name: 'TypeScript', icon: TypescriptIcon, colorHue: 'oklch(0.65 0.15 250)' },
   { id: 'shell',      name: 'Shell',      icon: ShellIcon,      colorHue: 'oklch(0.7 0.1 150)' },
   { id: 'json',       name: 'JSON',       icon: JsonIcon,       colorHue: 'oklch(0.7 0.1 30)' },
+  { id: 'markdown',   name: 'Markdown',   icon: MarkdownIcon,   colorHue: 'oklch(0.75 0.08 220)' },
 ]
 
 function langFor(id: string | null) {
