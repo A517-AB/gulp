@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Outlet, useLocation, NavLink } from 'react-router'
-import { TitleBar, TopBar } from '@renderer/shell'
+import { TopBar } from '@renderer/shell'
 import { ThemeProvider } from '@renderer/providers/theme'
 import { navRoutes } from '@renderer/router'
 
@@ -35,7 +35,6 @@ export default function RootLayout(): ReactNode {
     return (
         <ThemeProvider>
             <div className="flex flex-col h-screen w-screen overflow-hidden bg-base">
-                <TitleBar />
                 <TopBar center={navLinks} />
                 <main className="flex-1 overflow-hidden min-h-0 h-full">
                     <Outlet />
@@ -43,4 +42,4 @@ export default function RootLayout(): ReactNode {
             </div>
         </ThemeProvider>
     )
-}
+}
