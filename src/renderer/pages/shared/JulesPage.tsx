@@ -38,7 +38,7 @@ export default function JulesPage() {
       <aside className={`hidden md:flex flex-col border-r border-hair bg-surface transition-all duration-200 ${sidebarCollapsed ? "w-12" : "w-64"}`}>
         <div className="px-3 py-2 border-b border-hair flex items-center justify-between">
           {!sidebarCollapsed && <span className="text-[10px] font-bold text-fg-dim uppercase tracking-widest">Sessions</span>}
-          <button onClick={() => setSidebarCollapsed((c) => !c)} className="ml-auto text-fg-dim hover:text-fg-secondary text-xs px-1">
+          <button onClick={() => { setSidebarCollapsed((c) => !c); }} className="ml-auto text-fg-dim hover:text-fg-secondary text-xs px-1">
             {sidebarCollapsed ? "›" : "‹"}
           </button>
         </div>
@@ -60,7 +60,7 @@ export default function JulesPage() {
           <div className="flex h-full items-center justify-center">
             <div className="text-center space-y-3">
               <p className="text-[10px] font-mono text-fg-dim uppercase tracking-widest">No session selected</p>
-              <button onClick={() => openNewSession()} className="text-[10px] font-mono uppercase tracking-widest text-purple-400 hover:text-purple-300">
+              <button onClick={() => { openNewSession(); }} className="text-[10px] font-mono uppercase tracking-widest text-purple-400 hover:text-purple-300">
                 + New Session
               </button>
             </div>
@@ -79,7 +79,7 @@ export default function JulesPage() {
           >
             <div className="px-3 py-2 border-b border-hair flex items-center justify-between">
               {!codeDiffCollapsed && <span className="text-[10px] font-bold text-fg-dim uppercase tracking-widest">Code Changes</span>}
-              <button onClick={() => setCodeDiffCollapsed((c) => !c)} className="ml-auto text-fg-dim hover:text-fg-secondary text-xs px-1">
+              <button onClick={() => { setCodeDiffCollapsed((c) => !c); }} className="ml-auto text-fg-dim hover:text-fg-secondary text-xs px-1">
                 {codeDiffCollapsed ? "‹" : "›"}
               </button>
             </div>
