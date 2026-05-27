@@ -7,7 +7,7 @@ export interface DropdownItem {
   id: string
   label: string
   icon?: React.FC<React.SVGProps<SVGSVGElement>>
-  colorHue?: string
+  color?: string
 }
 
 export interface DynamicDropdownProps {
@@ -32,7 +32,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
             "flex items-center justify-center size-8 rounded-md transition-colors hover:bg-hover border border-subtle focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             className
           )}
-          style={{ color: selected?.colorHue || 'var(--fg-secondary)' }}
+          style={{ color: selected?.color || 'var(--fg-secondary)' }}
           title={selected?.label || placeholder}
         >
           {TriggerIcon ? (
@@ -80,7 +80,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
                       {ItemIcon && (
                         <ItemIcon 
                           className="size-4 shrink-0" 
-                          style={{ color: item.colorHue || 'currentColor' }} 
+                          style={{ color: item.color || 'currentColor' }} 
                         />
                       )}
                       <span className="truncate">{item.label}</span>

@@ -1,9 +1,9 @@
-import { ipcMain } from "electron"
+import { ipcMain, app } from "electron"
 import * as fs from "fs"
 import * as path from "path"
 import type { Snippet } from "../types/snippets"
 
-const BASE_DIR = "D:\\tired"
+const BASE_DIR = app.getAppPath()
 
 function ensureFile(filePath: string, defaultContent = "[]"): void {
   if (!fs.existsSync(filePath)) {

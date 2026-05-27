@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, SVGProps } from 'react'
 
 export interface LanguagePreset {
   id: string
   name: string
-  icon: (props: React.SVGProps<SVGSVGElement>) => ReactNode
-  colorHue: string
+  icon: (props: SVGProps<SVGSVGElement>) => ReactNode
+  color: string
 }
 
 export interface Snippet {

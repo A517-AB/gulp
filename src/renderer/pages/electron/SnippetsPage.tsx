@@ -11,12 +11,12 @@ import { PythonIcon, JavascriptIcon, TypescriptIcon, ShellIcon, JsonIcon, Markdo
 import type { LanguagePreset, Snippet } from '../../../types/snippets'
 
 const LANGUAGES: LanguagePreset[] = [
-  { id: 'python',     name: 'Python',     icon: PythonIcon,     colorHue: 'oklch(0.85 0.15 95)' },
-  { id: 'javascript', name: 'JavaScript', icon: JavascriptIcon, colorHue: 'oklch(0.85 0.15 95)' },
-  { id: 'typescript', name: 'TypeScript', icon: TypescriptIcon, colorHue: 'oklch(0.65 0.15 250)' },
-  { id: 'shell',      name: 'Shell',      icon: ShellIcon,      colorHue: 'oklch(0.7 0.1 150)' },
-  { id: 'json',       name: 'JSON',       icon: JsonIcon,       colorHue: 'oklch(0.7 0.1 30)' },
-  { id: 'markdown',   name: 'Markdown',   icon: MarkdownIcon,   colorHue: 'oklch(0.75 0.08 220)' },
+  { id: 'python',     name: 'Python',     icon: PythonIcon,     color: 'oklch(0.85 0.15 95)' },
+  { id: 'javascript', name: 'JavaScript', icon: JavascriptIcon, color: 'oklch(0.85 0.15 95)' },
+  { id: 'typescript', name: 'TypeScript', icon: TypescriptIcon, color: 'oklch(0.65 0.15 250)' },
+  { id: 'shell',      name: 'Shell',      icon: ShellIcon,      color: 'oklch(0.7 0.1 150)' },
+  { id: 'json',       name: 'JSON',       icon: JsonIcon,       color: 'oklch(0.7 0.1 30)' },
+  { id: 'markdown',   name: 'Markdown',   icon: MarkdownIcon,   color: 'oklch(0.75 0.08 220)' },
 ]
 
 function langFor(id: string | null) {
@@ -165,7 +165,7 @@ export function SnippetsPage() {
                 {/* language icon */}
                 <div
                   className="mt-0.5 p-1.5 rounded-sm bg-surface border border-subtle shrink-0"
-                  style={{ color: lang?.colorHue ?? 'var(--fg-secondary)' }}
+                  style={{ color: lang?.color ?? 'var(--fg-secondary)' }}
                 >
                   <LangIcon className="h-3.5 w-3.5" />
                 </div>
@@ -183,7 +183,7 @@ export function SnippetsPage() {
                     </div>
                     <div onClick={e => { e.stopPropagation() }}>
                       <DynamicDropdown
-                        items={LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, colorHue: l.colorHue }))}
+                        items={LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))}
                         value={snippet.languageId}
                         onChange={v => { handleLangChange(snippet, v) }}
                       />
@@ -253,7 +253,7 @@ export function SnippetsPage() {
           <DialogHeader className="px-5 pt-5 pb-3 border-b border-hair">
             <div className="flex items-center gap-3">
               <DynamicDropdown
-                items={LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, colorHue: l.colorHue }))}
+                items={LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))}
                 value={draftLang}
                 onChange={setDraftLang}
               />

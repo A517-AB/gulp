@@ -188,7 +188,7 @@ function registerFilesystemHandlers() {
 }
 //#endregion
 //#region src/electron/snippets.ts
-var BASE_DIR = "D:\\tired";
+var BASE_DIR = app.getAppPath();
 function ensureFile(filePath, defaultContent = "[]") {
 	if (!fs$1.existsSync(filePath)) try {
 		fs$1.mkdirSync(path.dirname(filePath), { recursive: true });
