@@ -13,11 +13,6 @@ export function TopBar({ left, center, right }: TopBarProps) {
         <header className="app-drag-region h-toolbar flex items-center gap-2 px-3 bg-surface border-b border-hair shrink-0">
 
             <div className="flex items-center gap-2 flex-1 min-w-0">
-                {isElectron && (
-                    <span className="text-xxs font-mono tracking-wide text-fg-dim uppercase select-none mr-1">
-                        Last
-                    </span>
-                )}
                 {left}
             </div>
 
@@ -36,7 +31,7 @@ export function TopBar({ left, center, right }: TopBarProps) {
                         <button
                             type="button"
                             onClick={() => { windowControls?.minimize(); }}
-                            className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-hover transition-colors"
+                            className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-purple-500/10 hover:shadow-[0_0_10px_rgba(168,85,247,0.25)] transition-all"
                             aria-label="Minimize"
                         >
                             <svg width="10" height="1" viewBox="0 0 10 1" className="text-fg-ghost group-hover:text-fg-secondary transition-colors">
@@ -47,7 +42,7 @@ export function TopBar({ left, center, right }: TopBarProps) {
                         <button
                             type="button"
                             onClick={() => { windowControls?.maximize(); }}
-                            className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-hover transition-colors"
+                            className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-purple-500/10 hover:shadow-[0_0_10px_rgba(168,85,247,0.25)] transition-all"
                             aria-label="Maximize"
                         >
                             <svg width="9" height="9" viewBox="0 0 9 9" className="text-fg-ghost group-hover:text-fg-secondary transition-colors">
@@ -58,7 +53,7 @@ export function TopBar({ left, center, right }: TopBarProps) {
                         <button
                             type="button"
                             onClick={() => { windowControls?.close(); }}
-                            className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-500/10 transition-colors"
+                            className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-red-500/10 hover:shadow-[0_0_10px_rgba(239,68,68,0.25)] transition-all"
                             aria-label="Close"
                         >
                             <svg width="10" height="10" viewBox="0 0 10 10" className="text-fg-ghost group-hover:text-red-400 transition-colors">
