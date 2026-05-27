@@ -37,15 +37,3 @@ self.MonacoEnvironment = {
 }
 
 loader.config({ monaco })
-
-// Define custom themes to match our Tailwind styling
-monaco.editor.defineTheme('gulp-dark', {
-  base: 'vs-dark',
-  inherit: true,
-  rules: [],
-  colors: {
-    'editor.background': '#00000000', // Transparent so it inherits Dialog/bg-zinc-950
-    'editor.lineHighlightBackground': '#ffffff0a',
-    'editorLineNumber.foreground': '#ffffff40',
-  }
-})

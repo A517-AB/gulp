@@ -107,16 +107,16 @@ export function SnippetsPage() {
   // ── render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full p-6 overflow-hidden max-w-7xl mx-auto w-full">
+    <div className="flex flex-col h-full p-6 overflow-hidden max-w-7xl mx-auto w-full bg-base text-fg-primary">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-md bg-white/5 border border-white/10 flex items-center justify-center">
-            <Code2 className="h-4 w-4 text-white/60" />
+          <div className="h-8 w-8 rounded-md bg-surface border border-subtle flex items-center justify-center">
+            <Code2 className="h-4 w-4 text-fg-muted" />
           </div>
           <div>
-            <h2 className="text-lg font-bold tracking-tight text-white uppercase">Snippets</h2>
-            <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest">
+            <h2 className="text-lg font-bold tracking-tight text-fg-primary uppercase">Snippets</h2>
+            <p className="text-[10px] text-fg-dim font-mono uppercase tracking-widest">
               snippets.json
             </p>
           </div>
@@ -124,23 +124,23 @@ export function SnippetsPage() {
 
         <div className="flex gap-2 items-center">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-white/30" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-fg-dim" />
             <input
               type="text"
               placeholder="SEARCH..."
               value={search}
               onChange={e => { setSearch(e.target.value) }}
-              className="h-8 pl-7 pr-3 rounded bg-white/5 border border-white/10 text-[10px] font-mono text-white/80 uppercase tracking-wider placeholder:text-white/20 focus:outline-none focus:border-white/20 transition-colors w-44"
+              className="h-8 pl-7 pr-3 rounded bg-surface border border-subtle text-[10px] font-mono text-fg-primary uppercase tracking-wider placeholder:text-fg-dim focus:outline-none focus:border-moderate transition-colors w-44"
             />
           </div>
           <button
             onClick={openNewEditor}
-            className="bg-white/5 border border-white/10 text-white/80 text-xs px-3 py-1.5 rounded flex items-center gap-2 hover:bg-white/10 hover:text-white transition-colors"
+            className="bg-surface border border-subtle text-fg-secondary text-xs px-3 py-1.5 rounded flex items-center gap-2 hover:bg-hover hover:text-fg-primary transition-colors"
           >
             <Plus className="h-3 w-3" />
             NEW SNIPPET
           </button>
-          <span className="bg-white/5 border border-white/10 text-white/60 text-[10px] px-2.5 py-1 rounded font-mono flex items-center gap-1.5">
+          <span className="bg-surface border border-subtle text-fg-muted text-[10px] px-2.5 py-1 rounded font-mono flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
             {totalSnippets} TOTAL
           </span>
@@ -158,13 +158,13 @@ export function SnippetsPage() {
           return (
             <div
               key={snippet.id}
-              className="group/snippet flex items-start justify-between py-3 px-2 border-b border-white/[0.08] last:border-0 hover:bg-white/[0.02] rounded transition-colors cursor-pointer"
+              className="group/snippet flex items-start justify-between py-3 px-2 border-b border-hair last:border-0 hover:bg-hover rounded transition-colors cursor-pointer"
               onClick={() => { openEditor(snippet) }}
             >
               <div className="flex items-start gap-3 flex-1 min-w-0 pr-4">
                 {/* language icon */}
                 <div
-                  className="mt-0.5 p-1.5 rounded-sm bg-white/5 border border-white/10 shrink-0"
+                  className="mt-0.5 p-1.5 rounded-sm bg-surface border border-subtle shrink-0"
                   style={{ color: lang?.colorHue ?? 'var(--fg-secondary)' }}
                 >
                   <LangIcon className="h-3.5 w-3.5" />
@@ -177,7 +177,7 @@ export function SnippetsPage() {
                       <InlineEdit
                         value={snippet.title ?? ''}
                         onSave={v => { handleTitleSave(snippet, v) }}
-                        className="text-sm font-semibold text-white/90"
+                        className="text-sm font-semibold text-fg-primary"
                         placeholder="Untitled"
                       />
                     </div>
@@ -191,7 +191,7 @@ export function SnippetsPage() {
                   </div>
 
                   {/* code preview */}
-                  <pre className="text-[10px] font-mono text-white/30 leading-relaxed whitespace-pre-wrap truncate max-h-[3.6em] overflow-hidden">
+                  <pre className="text-[10px] font-mono text-fg-dim leading-relaxed whitespace-pre-wrap truncate max-h-[3.6em] overflow-hidden bg-transparent border-0 p-0 m-0">
                     {preview}
                   </pre>
                 </div>
@@ -202,23 +202,23 @@ export function SnippetsPage() {
                 <button
                   onClick={e => { handleCopy(snippet, e) }}
                   title="Copy to clipboard"
-                  className="flex items-center justify-center h-8 w-8 rounded text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                  className="flex items-center justify-center h-8 w-8 rounded text-fg-muted hover:text-fg-primary hover:bg-hover transition-all"
                 >
                   {isCopied
-                    ? <Check className="h-3.5 w-3.5 text-green-400" />
+                    ? <Check className="h-3.5 w-3.5 text-green-500" />
                     : <Copy className="h-3.5 w-3.5" />}
                 </button>
                 <button
                   onClick={e => { openEditor(snippet); e.stopPropagation() }}
                   title="Edit in editor"
-                  className="flex items-center justify-center h-8 w-8 rounded text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                  className="flex items-center justify-center h-8 w-8 rounded text-fg-muted hover:text-fg-primary hover:bg-hover transition-all"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={e => { handleDelete(snippet.id, e) }}
                   title="Delete snippet"
-                  className="flex items-center justify-center h-8 w-8 rounded text-white/40 hover:text-red-400 hover:bg-white/5 transition-all"
+                  className="flex items-center justify-center h-8 w-8 rounded text-fg-muted hover:text-red-500 hover:bg-hover transition-all"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -228,15 +228,15 @@ export function SnippetsPage() {
         })}
 
         {filtered.length === 0 && (
-          <div className="rounded-lg border border-white/[0.08] bg-zinc-950 p-12 text-center border-dashed">
-            <Code2 className="h-6 w-6 text-white/20 mx-auto mb-3" />
-            <p className="text-xs text-white/30 uppercase tracking-widest font-mono">
+          <div className="rounded-lg border border-subtle bg-surface p-12 text-center border-dashed">
+            <Code2 className="h-6 w-6 text-fg-ghost mx-auto mb-3" />
+            <p className="text-xs text-fg-dim uppercase tracking-widest font-mono">
               {search ? 'No matching snippets.' : 'No snippets yet.'}
             </p>
             {!search && (
               <button
                 onClick={openNewEditor}
-                className="mt-3 text-[10px] font-mono text-white/40 hover:text-white transition-colors uppercase tracking-wider"
+                className="mt-3 text-[10px] font-mono text-fg-muted hover:text-fg-primary transition-colors uppercase tracking-wider"
               >
                 Create your first snippet
               </button>
@@ -249,21 +249,21 @@ export function SnippetsPage() {
       <Dialog open={editorOpen} onOpenChange={open => {
         if (!open) { setEditorOpen(false); setEditingSnippet(null) }
       }}>
-        <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-zinc-950 border-white/10">
-          <DialogHeader className="px-5 pt-5 pb-3 border-b border-white/[0.08]">
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-overlay border-subtle shadow-xl">
+          <DialogHeader className="px-5 pt-5 pb-3 border-b border-hair">
             <div className="flex items-center gap-3">
               <DynamicDropdown
                 items={LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, colorHue: l.colorHue }))}
                 value={draftLang}
                 onChange={setDraftLang}
               />
-              <DialogTitle className="text-sm font-bold text-white/90 uppercase tracking-wider">
+              <DialogTitle className="text-sm font-bold text-fg-primary uppercase tracking-wider">
                 {editingSnippet?.title ?? 'New Snippet'}
               </DialogTitle>
             </div>
           </DialogHeader>
 
-          <div className="h-[60vh] min-h-[400px] w-full p-4">
+          <div className="h-[60vh] min-h-[400px] w-full p-4 bg-base">
             <CodeEditor
               value={draftScript}
               onChange={val => { setDraftScript(val ?? '') }}
@@ -272,17 +272,17 @@ export function SnippetsPage() {
             />
           </div>
 
-          <DialogFooter className="px-5 py-3 border-t border-white/[0.08]">
+          <DialogFooter className="px-5 py-3 border-t border-hair bg-surface">
             <button
               onClick={() => { setEditorOpen(false); setEditingSnippet(null) }}
-              className="px-3 py-1.5 rounded text-xs font-mono text-white/40 hover:text-white transition-colors uppercase tracking-wider"
+              className="px-3 py-1.5 rounded text-xs font-mono text-fg-muted hover:text-fg-primary transition-colors uppercase tracking-wider"
             >
               Cancel
             </button>
             <button
               onClick={handleEditorSave}
               disabled={!draftScript.trim()}
-              className="bg-white/10 border border-white/20 text-white text-xs px-4 py-1.5 rounded flex items-center gap-2 hover:bg-white/20 transition-colors disabled:opacity-50 uppercase font-mono tracking-wider"
+              className="bg-raised border border-subtle text-fg-primary text-xs px-4 py-1.5 rounded flex items-center gap-2 hover:bg-hover transition-colors disabled:opacity-50 uppercase font-mono tracking-wider"
             >
               Save
             </button>
