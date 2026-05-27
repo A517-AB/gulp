@@ -23,7 +23,7 @@ export function CodeEditor({
     <div className={cn("relative overflow-hidden rounded-md border border-subtle bg-base w-full h-full", containerClassName)}>
       <Editor
         height={height}
-        theme={isDark ? 'vs-dark' : 'light'}
+        theme={isDark ? 'gulp-dark' : 'vs'}
         loading={
           <div className="flex h-full w-full items-center justify-center text-fg-muted">
             <Loader2 className="size-5 animate-spin" />
