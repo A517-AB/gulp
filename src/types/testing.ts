@@ -1,3 +1,4 @@
+// WARNING: Do not import from this file. It is a verbatim copy of the API type definitions kept for reference and testing only.
 import { GitHubBranch } from "./github";
 import { jules } from "@google/jules-sdk";
 
