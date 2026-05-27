@@ -263,7 +263,7 @@ export function SnippetsPage() {
             </div>
           </DialogHeader>
 
-          <div className="flex-1 min-h-[400px] max-h-[60vh]">
+          <div className="h-[60vh] min-h-[400px] w-full p-4">
             <CodeEditor
               value={draftScript}
               onChange={val => { setDraftScript(val ?? '') }}
