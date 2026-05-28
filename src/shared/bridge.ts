@@ -14,3 +14,6 @@ export const power          = el?.power      ?? null;
 export const popup          = el?.popup      ?? null;
 export const filesystem     = el?.filesystem ?? null;
 export const snippets       = el?.snippets   ?? null;
+export const sdkIpc         = el?.sdkIpc     ?? null;
+export const git            = el?.git        ?? null;
+export const repos          = el?.repos      ?? null;

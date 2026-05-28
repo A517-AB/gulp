@@ -25,3 +25,4 @@ dist-ssr
 
 # GitHub workflows (OAuth token lacks workflow scope)
 .github/workflows/
+.jules/cache/

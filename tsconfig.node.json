@@ -49,5 +49,11 @@
   },
   "include": ["src/electron/**/*.ts", "src/electron/**/*.mts", "vite.config.ts", "src/shared/types.ts", "src/shared/ipc.ts", "src/shared/index.ts",
     "jules-server.ts", "jules-server.ts"],
-  "exclude": []
+  "exclude": [
+    "src/electron/jules/advanced-session.ts",
+    "src/electron/jules/agent.ts",
+    "src/electron/jules/basic-session.ts",
+    "src/electron/jules/file-system-events.ts",
+    "src/electron/jules/_shared/check-env.ts"
+  ]
 }

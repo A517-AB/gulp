@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage, powerMonitor } from "electron";
+import { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage } from "electron";
 import * as path from "path";
 import * as fs from "fs";
 import { fileURLToPath } from "url";
@@ -9,6 +9,9 @@ import { registerFilesystemHandlers } from "./filesystem";
 import { registerSnippetsHandlers } from "./snippets";
 import { registerGitHandlers } from "./git";
 import { registerGitHubHandlers } from "./github";
+import { registerSdkHandlers } from "./jules/handlers";
+import { registerReposHandlers } from "./repos";
+import { registerPowerMonitor } from "./power";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,20 +27,30 @@ let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let forceQuit = false;
 
-function buildTrayIcon(): ReturnType<typeof nativeImage.createFromBuffer> {
-  const size = 16
-  const buf = Buffer.alloc(size * size * 4, 0)
+// --- Tray Icon Logic ---
+export type TrayState = 'active' | 'idle' | 'low-power';
+
+const TRAY_COLORS: Record<TrayState, [number, number, number]> = {
+  'active':    [139, 92, 246], // Purple
+  'idle':      [59, 130, 246], // Blue
+  'low-power': [107, 114, 128], // Grey
+};
+
+export function buildTrayIcon(state: TrayState): ReturnType<typeof nativeImage.createFromBuffer> {
+  const color = TRAY_COLORS[state];
+  const size = 16;
+  const buf = Buffer.alloc(size * size * 4, 0);
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      const dx = x - size / 2 + 0.5
-      const dy = y - size / 2 + 0.5
-      const idx = (y * size + x) * 4
+      const dx = x - size / 2 + 0.5;
+      const dy = y - size / 2 + 0.5;
+      const idx = (y * size + x) * 4;
       if (Math.sqrt(dx * dx + dy * dy) <= size / 2 - 1) {
-        buf[idx] = 139; buf[idx + 1] = 92; buf[idx + 2] = 246; buf[idx + 3] = 255
+        buf[idx] = color[0]; buf[idx + 1] = color[1]; buf[idx + 2] = color[2]; buf[idx + 3] = 255;
       }
     }
   }
-  return nativeImage.createFromBuffer(buf, { width: size, height: size })
+  return nativeImage.createFromBuffer(buf, { width: size, height: size });
 }
 
 // ── window ────────────────────────────────────────────────────────────────────
@@ -75,6 +88,15 @@ function createWindow() {
       console.log("[main] retrying in 1s — is 'npm run dev' running?");
       setTimeout(() => mainWindow?.loadURL(DEV_URL), 1000);
     }
+  });
+
+  // Add listeners for window show/hide to update tray state
+  mainWindow.on('show', () => {
+    tray?.setImage(buildTrayIcon('active'));
+  });
+
+  mainWindow.on('hide', () => {
+    tray?.setImage(buildTrayIcon('idle'));
   });
 
   mainWindow.on("close", (e) => {
@@ -115,9 +137,11 @@ app.whenReady().then(() => {
   registerSnippetsHandlers();
   registerGitHandlers();
   registerGitHubHandlers();
+  registerSdkHandlers();
+  registerReposHandlers();
   createWindow();
 
-  tray = new Tray(buildTrayIcon());
+  tray = new Tray(buildTrayIcon('active')); // Initial state is active
   tray.setToolTip("Last");
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: "Show", click: () => { mainWindow?.show(); mainWindow?.focus(); } },
@@ -134,10 +158,12 @@ app.whenReady().then(() => {
     else { mainWindow?.show(); mainWindow?.focus(); }
   });
 
-  powerMonitor.on("suspend", () => mainWindow?.webContents.send("power.suspend"));
-  powerMonitor.on("resume",  () => mainWindow?.webContents.send("power.resume"));
-  powerMonitor.on("lock-screen",   () => mainWindow?.webContents.send("power.suspend"));
-  powerMonitor.on("unlock-screen", () => mainWindow?.webContents.send("power.resume"));
+  // Register the new power monitor
+  registerPowerMonitor({
+    getWindow: () => mainWindow,
+    getTray: () => tray,
+    buildTrayIcon,
+  });
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

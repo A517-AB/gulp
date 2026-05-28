@@ -122,10 +122,10 @@ export function registerFilesystemHandlers(): void {
   })
 
   ipcMain.handle('fs.showSaveDialog', async (_e, defaultName?: string): Promise<string | null> => {
-    const result = await dialog.showSaveDialog({
-      defaultPath: defaultName,
-    })
-    return result.canceled ? null : (result.filePath ?? null)
+    const result = await dialog.showSaveDialog(
+      defaultName !== undefined ? { defaultPath: defaultName } : {},
+    )
+    return result.canceled ? null : result.filePath
   })
 
 }
