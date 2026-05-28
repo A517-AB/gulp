@@ -56,7 +56,7 @@ export function InlineEdit({ value, onSave, multiline, className, placeholder }:
       if (!multiline && e.key === "Enter") { e.preventDefault(); commit(); }
     },
     className: cn(
-      "bg-white/5 border border-white/20 rounded px-1 -mx-1 outline-none focus:border-white/40 w-full",
+      "bg-hover border border-subtle rounded px-1 -mx-1 outline-none focus:border-moderate w-full",
       multiline ? "resize-none" : "",
       className
     ),
@@ -67,9 +67,9 @@ export function InlineEdit({ value, onSave, multiline, className, placeholder }:
       <span
         onClick={startEditing}
         title="Click to edit"
-        className={cn("cursor-text hover:bg-white/5 rounded px-1 -mx-1 transition-colors whitespace-pre-wrap", className)}
+        className={cn("cursor-text hover:bg-hover rounded px-1 -mx-1 transition-colors whitespace-pre-wrap", className)}
       >
-        {value || <span className="text-white/20 italic">{placeholder}</span>}
+        {value || <span className="text-fg-ghost italic">{placeholder}</span>}
       </span>
     );
   }

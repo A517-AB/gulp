@@ -37,6 +37,9 @@ if (julesApiKey) {
 // https://vite.dev/config/
 export default defineConfig({
   clearScreen: false,
+  optimizeDeps: {
+    include: ['monaco-editor'],
+  },
   resolve: {
     alias: {
       '@/components': fileURLToPath(new URL('./src/renderer/components', import.meta.url)),

@@ -74,7 +74,7 @@ const SnippetRow = memo(function SnippetRow({
             </span>
           )}
         </div>
-        <pre className="text-[10px] font-mono text-fg-dim leading-relaxed whitespace-pre-wrap truncate max-h-[3.6em] overflow-hidden bg-transparent border-0 p-0 m-0">
+        <pre className="text-xs font-mono text-fg-muted leading-relaxed whitespace-pre-wrap truncate max-h-[4.5em] overflow-hidden bg-transparent border-0 p-0 m-0 antialiased">
           {preview}
         </pre>
       </div>
@@ -281,49 +281,73 @@ export function SnippetsPage() {
       <Dialog open={editorOpen} onOpenChange={open => {
         if (!open) { setEditorOpen(false); setEditingSnippet(null) }
       }}>
-        <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-overlay border-subtle shadow-xl">
-          <DialogHeader className="px-5 pt-5 pb-3 border-b border-hair">
-            <div className="flex items-center gap-3">
-              <DynamicDropdown
-                items={LANGUAGE_ITEMS}
-                value={draftLang}
-                onChange={setDraftLang}
-              />
-              <DialogTitle asChild>
-                <InlineEdit
-                  value={editingSnippet?.title ?? ''}
-                  onSave={v => { setEditingSnippet(s => s ? { ...s, title: v || null } : s) }}
-                  className="text-sm font-bold text-fg-primary uppercase tracking-wider"
-                  placeholder="Untitled"
-                />
-              </DialogTitle>
-            </div>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col gap-0 p-0 overflow-hidden bg-overlay/90 backdrop-blur-2xl border border-subtle shadow-2xl !duration-0 data-[state=closed]:!animate-none data-[state=open]:!animate-none">
+          <AnimatePresence>
+            {editorOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.98, filter: "blur(4px)" }}
+                animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                exit={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
+                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                className="flex flex-col h-full w-full"
+              >
+                <DialogHeader className="px-5 py-4 border-b border-subtle/50 bg-surface/50">
+                  <div className="flex items-center gap-3">
+                    <DynamicDropdown
+                      items={LANGUAGE_ITEMS}
+                      value={draftLang}
+                      onChange={setDraftLang}
+                    />
+                    <DialogTitle asChild>
+                      <InlineEdit
+                        value={editingSnippet?.title ?? ''}
+                        onSave={v => { setEditingSnippet(s => s ? { ...s, title: v || null } : s) }}
+                        className="text-lg font-bold text-fg-primary tracking-wide bg-transparent"
+                        placeholder="Untitled Snippet"
+                      />
+                    </DialogTitle>
+                  </div>
+                </DialogHeader>
 
-          <div className="h-[60vh] min-h-[400px] w-full p-4 bg-base">
-            <CodeEditor
-              value={draftScript}
-              onChange={val => { setDraftScript(val ?? '') }}
-              language={langFor(draftLang)?.id ?? 'javascript'}
-              options={{ minimap: { enabled: false }, lineNumbers: 'on' }}
-            />
-          </div>
+                <div className="flex-1 w-full relative bg-base/50">
+                  <div className="absolute inset-0 pt-2">
+                    <CodeEditor
+                      value={draftScript}
+                      onChange={val => { setDraftScript(val ?? '') }}
+                      language={langFor(draftLang)?.id ?? 'javascript'}
+                      options={{ 
+                        minimap: { enabled: false }, 
+                        lineNumbers: 'on',
+                        renderLineHighlight: 'none',
+                        guides: { indentation: false },
+                        scrollBeyondLastLine: false,
+                        wordWrap: 'on',
+                        padding: { top: 16, bottom: 16 },
+                        automaticLayout: true,
+                        fontFamily: 'var(--font-mono)'
+                      }}
+                    />
+                  </div>
+                </div>
 
-          <DialogFooter className="px-5 py-3 border-t border-hair bg-surface">
-            <button
-              onClick={() => { setEditorOpen(false); setEditingSnippet(null) }}
-              className="px-3 py-1.5 rounded text-xs font-mono text-fg-muted hover:text-fg-primary transition-colors uppercase tracking-wider"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleEditorSave}
-              disabled={!draftScript.trim()}
-              className="bg-raised border border-subtle text-fg-primary text-xs px-4 py-1.5 rounded flex items-center gap-2 hover:bg-hover transition-colors disabled:opacity-50 uppercase font-mono tracking-wider"
-            >
-              Save
-            </button>
-          </DialogFooter>
+                <DialogFooter className="px-5 py-3 border-t border-subtle/50 bg-surface/50">
+                  <button
+                    onClick={() => { setEditorOpen(false); setEditingSnippet(null) }}
+                    className="px-4 py-2 rounded-lg text-sm font-medium text-fg-muted hover:text-fg-primary hover:bg-hover transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleEditorSave}
+                    disabled={!draftScript.trim()}
+                    className="bg-primary/90 text-primary-foreground border border-primary text-sm px-6 py-2 rounded-lg font-medium hover:bg-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95"
+                  >
+                    Save Snippet
+                  </button>
+                </DialogFooter>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
     </div>

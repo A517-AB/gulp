@@ -1061,11 +1061,13 @@ function registerPowerMonitor({ getWindow, getTray, buildTrayIcon }) {
 	function goLow() {
 		getTray()?.setImage(buildTrayIcon("low-power"));
 		getWindow()?.webContents.send("power.low");
+		getWindow()?.webContents.send("lowPower.enter");
 	}
 	function goActive() {
 		const isVisible = getWindow()?.isVisible() ?? false;
 		getTray()?.setImage(buildTrayIcon(isVisible ? "active" : "idle"));
 		getWindow()?.webContents.send("power.active");
+		getWindow()?.webContents.send("lowPower.exit");
 	}
 	powerMonitor.on("suspend", goLow);
 	powerMonitor.on("lock-screen", goLow);
@@ -1074,6 +1076,10 @@ function registerPowerMonitor({ getWindow, getTray, buildTrayIcon }) {
 }
 //#endregion
 //#region src/electron/main.mts
+app.commandLine.appendSwitch("force-color-profile", "srgb");
+app.commandLine.appendSwitch("enable-gpu-rasterization");
+app.commandLine.appendSwitch("enable-zero-copy");
+app.commandLine.appendSwitch("enable-hardware-overlays");
 var __filename = fileURLToPath(import.meta.url);
 var __dirname = path$1.dirname(__filename);
 var isDev = process.env.NODE_ENV === "development";
@@ -1127,7 +1133,8 @@ function createWindow() {
 	mainWindow = new BrowserWindow({
 		width: 1200,
 		height: 800,
-		titleBarStyle: "hidden",
+		frame: false,
+		transparent: true,
 		webPreferences: {
 			preload: preloadPath,
 			contextIsolation: true,
@@ -1178,6 +1185,22 @@ ipcMain.on("window.maximize", () => {
 ipcMain.on("window.close", () => {
 	mainWindow?.close();
 });
+ipcMain.on("lowPower.manualEnter", () => {
+	tray?.setImage(buildTrayIcon("low-power"));
+	mainWindow?.webContents.send("lowPower.enter");
+});
+ipcMain.on("lowPower.manualExit", () => {
+	const isVisible = mainWindow?.isVisible() ?? false;
+	tray?.setImage(buildTrayIcon(isVisible ? "active" : "idle"));
+	mainWindow?.webContents.send("lowPower.exit");
+});
+ipcMain.on("lowPower.toggleAlwaysOnTop", () => {
+	if (mainWindow) {
+		const next = !mainWindow.isAlwaysOnTop();
+		mainWindow.setAlwaysOnTop(next);
+		mainWindow.webContents.send("lowPower.alwaysOnTop", next);
+	}
+});
 app.whenReady().then(() => {
 	console.log("[main] app ready");
 	registerTerminalHandlers(() => mainWindow?.webContents ?? null);
@@ -1220,6 +1243,22 @@ app.whenReady().then(() => {
 		else {
 			mainWindow?.show();
 			mainWindow?.focus();
+		}
+	});
+	globalShortcut.register("Ctrl+Shift+4", () => {
+		tray?.setImage(buildTrayIcon("low-power"));
+		mainWindow?.webContents.send("lowPower.enter");
+	});
+	globalShortcut.register("Ctrl+Shift+6", () => {
+		const isVisible = mainWindow?.isVisible() ?? false;
+		tray?.setImage(buildTrayIcon(isVisible ? "active" : "idle"));
+		mainWindow?.webContents.send("lowPower.exit");
+	});
+	globalShortcut.register("Ctrl+Shift+5", () => {
+		if (mainWindow) {
+			const next = !mainWindow.isAlwaysOnTop();
+			mainWindow.setAlwaysOnTop(next);
+			mainWindow.webContents.send("lowPower.alwaysOnTop", next);
 		}
 	});
 	registerPowerMonitor({

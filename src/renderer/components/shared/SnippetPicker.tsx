@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@renderer/ui/popover'
 import { cn } from '@/utils'
 import { Paperclip, Check } from 'lucide-react'
 import type { Snippet } from '@/types/snippets'
+import { langFor } from '@/lib/languages'
 
 export interface SnippetPickerProps {
   snippets: Snippet[]

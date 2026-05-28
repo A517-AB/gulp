@@ -10,12 +10,14 @@ type PowerDeps = {
 export function registerPowerMonitor({ getWindow, getTray, buildTrayIcon }: PowerDeps): void {
   function goLow() {
     getTray()?.setImage(buildTrayIcon('low-power'));
-    getWindow()?.webContents.send("power.low"); // Keep existing event name or change to suspend
+    getWindow()?.webContents.send("power.low");
+    getWindow()?.webContents.send("lowPower.enter");
   }
   function goActive() {
     const isVisible = getWindow()?.isVisible() ?? false;
     getTray()?.setImage(buildTrayIcon(isVisible ? 'active' : 'idle'));
-    getWindow()?.webContents.send("power.active"); // Keep existing event name or change to resume
+    getWindow()?.webContents.send("power.active");
+    getWindow()?.webContents.send("lowPower.exit");
   }
 
   powerMonitor.on("suspend",       goLow);

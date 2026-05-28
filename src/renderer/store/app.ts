@@ -6,9 +6,19 @@ export interface SessionSlice {
 }
 
 export interface AppStore {
-  sessions: Record<string, SessionSlice>
+  sessions:      Record<string, SessionSlice>
+  isLowPower:    boolean
+  isAlwaysOnTop: boolean
+  enterLowPower:    () => void
+  exitLowPower:     () => void
+  setAlwaysOnTop:   (val: boolean) => void
 }
 
-export const useStore = create<AppStore>(() => ({
-  sessions: {},
+export const useStore = create<AppStore>((set) => ({
+  sessions:      {},
+  isLowPower:    false,
+  isAlwaysOnTop: false,
+  enterLowPower:  () => { set({ isLowPower: true }) },
+  exitLowPower:   () => { set({ isLowPower: false, isAlwaysOnTop: false }) },
+  setAlwaysOnTop: (val) => { set({ isAlwaysOnTop: val }) },
 }))

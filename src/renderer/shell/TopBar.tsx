@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { isElectron, windowControls } from '@shared/bridge';
+import { isElectron, windowControls, lowPower as lowPowerBridge } from '@shared/bridge';
 import { ThemeToggle } from '@/ui/theme-toggle';
+import { useStore } from '@/store/app';
 
 interface TopBarProps {
     left?:   ReactNode
@@ -9,20 +10,34 @@ interface TopBarProps {
 }
 
 export function TopBar({ left, center, right }: TopBarProps) {
+    const { enterLowPower, isLowPower, exitLowPower } = useStore()
+    const handleLowPowerToggle = isLowPower
+        ? () => { lowPowerBridge ? lowPowerBridge.exit() : exitLowPower() }
+        : () => { lowPowerBridge ? lowPowerBridge.enter() : enterLowPower() }
+
     return (
-        <header className="app-drag-region h-toolbar flex items-center gap-2 px-3 bg-surface border-b border-hair shrink-0">
+        <header className="group/bar app-drag-region relative h-toolbar flex items-center gap-2 px-3 bg-base shrink-0">
 
             <div className="flex items-center gap-2 flex-1 min-w-0">
                 {left}
             </div>
 
+            {/* Hidden low-power trigger — double-click only, no visual hint */}
+            <button
+                type="button"
+                onDoubleClick={handleLowPowerToggle}
+                className="absolute left-1/2 -translate-x-1/2 w-16 h-full opacity-0 cursor-default"
+                aria-hidden="true"
+                tabIndex={-1}
+            />
+
             {center != null && (
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 opacity-0 delay-[2000ms] transition-opacity duration-300 group-hover/bar:opacity-100 group-hover/bar:delay-0">
                     {center}
                 </div>
             )}
 
-            <div className="flex items-center gap-2 flex-1 justify-end">
+            <div className="flex items-center gap-2 flex-1 justify-end opacity-0 delay-[2000ms] transition-opacity duration-300 group-hover/bar:opacity-100 group-hover/bar:delay-0">
                 {right}
                 <ThemeToggle />
 

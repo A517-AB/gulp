@@ -172,6 +172,15 @@ export interface PowerAPI {
   onResume:  (cb: () => void) => () => void;
 }
 
+export interface LowPowerAPI {
+  enter:             () => void;
+  exit:              () => void;
+  toggleAlwaysOnTop: () => void;
+  onEnter:           (cb: () => void) => () => void;
+  onExit:            (cb: () => void) => () => void;
+  onAlwaysOnTop:     (cb: (val: boolean) => void) => () => void;
+}
+
 export interface PopupNotification {
   id:        string;
   type:      "completed" | "failed" | "pr_created" | "info";
@@ -192,6 +201,8 @@ export interface PopupAPI {
 export interface FilesystemAPI {
   readdir:        (dir: string)      => Promise<{ name: string; isDir: boolean }[]>;
   readFile:       (path: string)     => Promise<string>;
+  writeFile:      (path: string, content: string) => Promise<void>;
+  exists:         (path: string)     => Promise<boolean>;
   showOpenDialog: ()                 => Promise<string | null>;
 }
 
@@ -211,6 +222,7 @@ export interface ElectronAPI {
   queues:     QueuesAPI;
   window:     WindowAPI;
   power:      PowerAPI;
+  lowPower:   LowPowerAPI;
   popup:      PopupAPI;
   filesystem: FilesystemAPI;
   env:        EnvAPI;

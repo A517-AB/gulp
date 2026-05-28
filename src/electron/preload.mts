@@ -88,6 +88,29 @@ const power: ElectronAPI["power"] = {
   },
 };
 
+// ── low power ──────────────────────────────────────────────────────────────────
+
+const lowPower: ElectronAPI["lowPower"] = {
+  enter:             () => { ipcRenderer.send("lowPower.manualEnter") },
+  exit:              () => { ipcRenderer.send("lowPower.manualExit") },
+  toggleAlwaysOnTop: () => { ipcRenderer.send("lowPower.toggleAlwaysOnTop") },
+  onEnter: (cb) => {
+    const handler = () => { cb() }
+    ipcRenderer.on("lowPower.enter", handler)
+    return () => { ipcRenderer.off("lowPower.enter", handler) }
+  },
+  onExit: (cb) => {
+    const handler = () => { cb() }
+    ipcRenderer.on("lowPower.exit", handler)
+    return () => { ipcRenderer.off("lowPower.exit", handler) }
+  },
+  onAlwaysOnTop: (cb) => {
+    const handler = (_event: IpcRendererEvent, val: boolean) => { cb(val) }
+    ipcRenderer.on("lowPower.alwaysOnTop", handler)
+    return () => { ipcRenderer.off("lowPower.alwaysOnTop", handler) }
+  },
+}
+
 // ── popup ──────────────────────────────────────────────────────────────────────
 
 const popup: ElectronAPI["popup"] = {
@@ -121,6 +144,8 @@ const popup: ElectronAPI["popup"] = {
 const filesystem: ElectronAPI["filesystem"] = {
   readdir:        (dir)      => ipcRenderer.invoke("fs.readdir", dir),
   readFile:       (filePath) => ipcRenderer.invoke("fs.readFile", filePath),
+  writeFile:      (filePath, content) => ipcRenderer.invoke("fs.writeFile", filePath, content),
+  exists:         (filePath) => ipcRenderer.invoke("fs.exists", filePath),
   showOpenDialog: ()         => ipcRenderer.invoke("fs.showOpenDialog"),
 };
 
@@ -188,8 +213,9 @@ const repos: ElectronAPI["repos"] = {
 const api: ElectronAPI = {
   terminal,
   queues,
-  window:  window_,
+  window:   window_,
   power,
+  lowPower,
   popup,
   filesystem,
   env,

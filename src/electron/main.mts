@@ -13,6 +13,13 @@ import { registerSdkHandlers } from "./jules/handlers";
 import { registerReposHandlers } from "./repos";
 import { registerPowerMonitor } from "./power";
 
+// --- Chromium Hardware & Rendering Optimizations ---
+app.commandLine.appendSwitch('force-color-profile', 'srgb');
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+app.commandLine.appendSwitch('enable-zero-copy');
+app.commandLine.appendSwitch('enable-hardware-overlays');
+// ---------------------------------------------------
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -61,7 +68,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    titleBarStyle: "hidden",
+    frame: false,
+    transparent: true,
     webPreferences: {
       preload: preloadPath,
       contextIsolation: true,
@@ -128,6 +136,25 @@ ipcMain.on("window.close", () => {
   mainWindow?.close();
 });
 
+ipcMain.on("lowPower.manualEnter", () => {
+  tray?.setImage(buildTrayIcon('low-power'));
+  mainWindow?.webContents.send("lowPower.enter");
+});
+
+ipcMain.on("lowPower.manualExit", () => {
+  const isVisible = mainWindow?.isVisible() ?? false;
+  tray?.setImage(buildTrayIcon(isVisible ? 'active' : 'idle'));
+  mainWindow?.webContents.send("lowPower.exit");
+});
+
+ipcMain.on("lowPower.toggleAlwaysOnTop", () => {
+  if (mainWindow) {
+    const next = !mainWindow.isAlwaysOnTop();
+    mainWindow.setAlwaysOnTop(next);
+    mainWindow.webContents.send("lowPower.alwaysOnTop", next);
+  }
+});
+
 // ── lifecycle ─────────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
   console.log("[main] app ready");
@@ -156,6 +183,23 @@ app.whenReady().then(() => {
   globalShortcut.register("Ctrl+Shift+Space", () => {
     if (mainWindow?.isVisible() && mainWindow?.isFocused()) mainWindow.hide();
     else { mainWindow?.show(); mainWindow?.focus(); }
+  });
+
+  globalShortcut.register("Ctrl+Shift+4", () => {
+    tray?.setImage(buildTrayIcon('low-power'));
+    mainWindow?.webContents.send("lowPower.enter");
+  });
+  globalShortcut.register("Ctrl+Shift+6", () => {
+    const isVisible = mainWindow?.isVisible() ?? false;
+    tray?.setImage(buildTrayIcon(isVisible ? 'active' : 'idle'));
+    mainWindow?.webContents.send("lowPower.exit");
+  });
+  globalShortcut.register("Ctrl+Shift+5", () => {
+    if (mainWindow) {
+      const next = !mainWindow.isAlwaysOnTop();
+      mainWindow.setAlwaysOnTop(next);
+      mainWindow.webContents.send("lowPower.alwaysOnTop", next);
+    }
   });
 
   // Register the new power monitor

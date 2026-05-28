@@ -111,6 +111,44 @@ var api = {
 			};
 		}
 	},
+	lowPower: {
+		enter: () => {
+			electron.ipcRenderer.send("lowPower.manualEnter");
+		},
+		exit: () => {
+			electron.ipcRenderer.send("lowPower.manualExit");
+		},
+		toggleAlwaysOnTop: () => {
+			electron.ipcRenderer.send("lowPower.toggleAlwaysOnTop");
+		},
+		onEnter: (cb) => {
+			const handler = () => {
+				cb();
+			};
+			electron.ipcRenderer.on("lowPower.enter", handler);
+			return () => {
+				electron.ipcRenderer.off("lowPower.enter", handler);
+			};
+		},
+		onExit: (cb) => {
+			const handler = () => {
+				cb();
+			};
+			electron.ipcRenderer.on("lowPower.exit", handler);
+			return () => {
+				electron.ipcRenderer.off("lowPower.exit", handler);
+			};
+		},
+		onAlwaysOnTop: (cb) => {
+			const handler = (_event, val) => {
+				cb(val);
+			};
+			electron.ipcRenderer.on("lowPower.alwaysOnTop", handler);
+			return () => {
+				electron.ipcRenderer.off("lowPower.alwaysOnTop", handler);
+			};
+		}
+	},
 	popup: {
 		show: () => {
 			electron.ipcRenderer.send("popup.show");
@@ -137,6 +175,8 @@ var api = {
 	filesystem: {
 		readdir: (dir) => electron.ipcRenderer.invoke("fs.readdir", dir),
 		readFile: (filePath) => electron.ipcRenderer.invoke("fs.readFile", filePath),
+		writeFile: (filePath, content) => electron.ipcRenderer.invoke("fs.writeFile", filePath, content),
+		exists: (filePath) => electron.ipcRenderer.invoke("fs.exists", filePath),
 		showOpenDialog: () => electron.ipcRenderer.invoke("fs.showOpenDialog")
 	},
 	env: { getApiKey: () => electron.ipcRenderer.invoke("env.getApiKey") },
