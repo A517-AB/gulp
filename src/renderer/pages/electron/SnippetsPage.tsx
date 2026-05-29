@@ -285,17 +285,17 @@ export function SnippetsPage() {
       <Dialog open={editorOpen} onOpenChange={open => {
         if (!open) { setEditorOpen(false); setEditingSnippet(null) }
       }}>
-        <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col gap-0 p-0 overflow-hidden bg-overlay/90 backdrop-blur-2xl border border-subtle shadow-2xl !duration-0 data-[state=closed]:!animate-none data-[state=open]:!animate-none">
+        <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col gap-0 p-0 overflow-hidden bg-base border border-subtle shadow-2xl !duration-0 data-[state=closed]:!animate-none data-[state=open]:!animate-none">
           <AnimatePresence>
             {editorOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.98, filter: "blur(4px)" }}
-                animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                exit={{ opacity: 0, scale: 0.98, filter: "blur(4px)" }}
-                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 15 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className="flex flex-col h-full w-full"
               >
-                <DialogHeader className="px-5 py-4 border-b border-subtle/50 bg-surface/50">
+                <DialogHeader className="px-5 py-4 border-b border-hair">
                   <div className="flex items-center gap-3">
                     <DynamicDropdown
                       items={LANGUAGE_ITEMS}
@@ -313,7 +313,7 @@ export function SnippetsPage() {
                   </div>
                 </DialogHeader>
 
-                <div className="flex-1 w-full relative bg-base/50">
+                <div className="flex-1 w-full relative">
                   <div className="absolute inset-0 pt-2">
                     <CodeEditor
                       value={draftScript}
@@ -334,7 +334,7 @@ export function SnippetsPage() {
                   </div>
                 </div>
 
-                <DialogFooter className="px-5 py-3 border-t border-subtle/50 bg-surface/50">
+                <DialogFooter className="px-5 py-3 border-t border-hair">
                   <button
                     onClick={() => { setEditorOpen(false); setEditingSnippet(null) }}
                     className="px-4 py-2 rounded-lg text-sm font-medium text-fg-muted hover:text-fg-primary hover:bg-hover transition-colors"

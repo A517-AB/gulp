@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import { isElectron, windowControls, lowPower as lowPowerBridge } from '@/shared/bridge';
 import { ThemeToggle } from '@/ui/theme-toggle';
 import { useStore } from '@/store/app';
@@ -35,11 +36,12 @@ export function TopBar({ left, center, right }: TopBarProps) {
                 {left}
             </div>
 
-            {/* Hidden low-power trigger — double-click only, no visual hint */}
-            <button
+            {/* NOTE: Hidden low-power trigger on the far left. It is invisible by design and only appears as a very faint 3% opacity indentation on press. */}
+            <motion.button
                 type="button"
                 onDoubleClick={handleLowPowerToggle}
-                className="absolute left-1/2 -translate-x-1/2 w-16 h-full opacity-0 cursor-default"
+                whileTap={{ scale: 0.95, opacity: 0.03 }}
+                className="absolute left-0 top-0 w-16 h-full bg-fg-primary opacity-0 cursor-default z-50 rounded-md"
                 aria-hidden="true"
                 tabIndex={-1}
             />

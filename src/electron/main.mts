@@ -13,12 +13,6 @@ import { registerSdkHandlers } from "./jules/handlers";
 import { registerReposHandlers } from "./repos";
 import { registerPowerMonitor } from "./power";
 
-// --- Chromium Hardware & Rendering Optimizations ---
-app.commandLine.appendSwitch('force-color-profile', 'srgb');
-app.commandLine.appendSwitch('enable-gpu-rasterization');
-app.commandLine.appendSwitch('enable-zero-copy');
-app.commandLine.appendSwitch('enable-hardware-overlays'); // TODO: no-op on Windows with transparent:true (DWM owns compositing) — revisit if we ever go opaque or ship on macOS/Linux
-// ---------------------------------------------------
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -92,12 +86,6 @@ function createWindow() {
 
   mainWindow.webContents.on("did-fail-load", (_e, code, desc, url) => {
     console.error("[main] renderer failed to load:", url, code, desc);
-    if (isDev) {
-      console.log("[main] retrying in 1s — is 'npm run dev' running?");
-      setTimeout(() => {
-        void mainWindow?.loadURL(DEV_URL);
-      }, 1000);
-    }
   });
 
   // Add listeners for window show/hide to update tray state

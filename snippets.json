@@ -2,8 +2,8 @@
   {
     "id": "b0070028-ebc5-4f30-b2f1-36267d63af11",
     "title": "lazy-trap",
-    "languageId": "python",
-    "script": "vd sbhjvdbnsjikn",
+    "languageId": "javascript",
+    "script": "const  = object('ObjectID');\r\naddToTimeline(\r\n  objectName.animate(\r\n    [\r\n      { transform: 'translateX(0px)' },\r\n      { transform: 'translateX(200px) rotate(45deg)', filter: 'blur(4px)' }\r\n    ],\r\n    {\r\n      duration: 1000, // Animation duration in milliseconds<\r\n      easing: 'ease-in-out', // Easing function\r\n      fill: 'forwards' // Keep the final state after animation\r\n    }\r\n  )\r\n); \r\n",
     "createdAt": "2026-05-27T08:00:38.239Z"
   },
   {

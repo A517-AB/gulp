@@ -1,8 +1,9 @@
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView, lightDefaultTheme, darkDefaultTheme } from "@blocknote/mantine";
 import "@blocknote/mantine/style.css";
+import { codeBlockOptions } from "@blocknote/code-block";
 import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/providers/theme";
 
 export interface BlockEditorProps {
   initialContent?: string;
@@ -17,13 +18,13 @@ export function BlockEditor({
   className = "",
   readOnly = false,
 }: BlockEditorProps) {
-  const editor = useCreateBlockNote();
+  const editor = useCreateBlockNote(codeBlockOptions);
   const [isLoaded, setIsLoaded] = useState(false);
-  const { resolvedTheme } = useTheme();
+  const { theme } = useTheme();
 
   useEffect(() => {
     async function load() {
-      const blocks = await Promise.resolve(editor.tryParseMarkdownToBlocks(initialContent));
+      const blocks = await editor.tryParseMarkdownToBlocks(initialContent);
       editor.replaceBlocks(editor.document, blocks);
       setIsLoaded(true);
     }
@@ -34,16 +35,15 @@ export function BlockEditor({
     <div className={`relative w-full ${className}`}>
       {isLoaded ? (
         <BlockNoteView
-          editor={editor as any}
+          editor={editor}
           editable={!readOnly}
-          theme={resolvedTheme === 'dark'
+          theme={theme === 'dark'
             ? { ...darkDefaultTheme, fontFamily: "Roboto, sans-serif" }
             : { ...lightDefaultTheme, fontFamily: "Roboto, sans-serif" }
           }
-          onChange={async () => {
+          onChange={() => {
             if (!onChange) return;
-            const md = await Promise.resolve(editor.blocksToMarkdownLossy(editor.document));
-            onChange(md);
+            void editor.blocksToMarkdownLossy(editor.document).then(onChange);
           }}
         />
       ) : (
