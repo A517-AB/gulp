@@ -120,7 +120,9 @@ function createWindow() {
     if (isCrash && crashReloadCount < MAX_CRASH_RELOADS) {
       crashReloadCount++;
       console.log(`[main] reloading renderer after crash (${String(crashReloadCount)}/${String(MAX_CRASH_RELOADS)})…`);
-      mainWindow?.reload();
+      // render-process-gone can fire during teardown when the window is
+      // already destroyed; reload() on a destroyed window throws.
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.reload();
     } else if (isCrash) {
       console.error("[main] renderer crashed too many times — leaving it; check logs above");
     }
