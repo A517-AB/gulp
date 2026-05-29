@@ -23,7 +23,7 @@ function looksLikeMarkdown(content: string): boolean {
 
 function extractZip(content: string): string | null {
   const match = /(\w[\w.-]+\.zip)/i.exec(content)
-  return match ? match[1] : null
+  return match?.[1] ?? null
 }
 
 export default function OverviewPage(): ReactNode {
@@ -155,8 +155,10 @@ export default function OverviewPage(): ReactNode {
   const zipName = markdownEntry ? extractZip(markdownEntry.content) : null
 
   return (
-    <div className="flex flex-col h-full w-full overflow-hidden">
-      {/* Editor — full height */}
+    <div className="flex flex-row h-full w-full overflow-hidden">
+      {/* Left half */}
+      <div className="flex flex-col w-1/2 h-full border-r border-transparent overflow-hidden">
+      {/* Editor */}
       <div className="flex-1 overflow-y-auto relative group/md" style={{ scrollbarWidth: 'none' }}>
         {markdownEntry ? (
           <>
@@ -227,6 +229,10 @@ export default function OverviewPage(): ReactNode {
           className="w-full resize-none bg-transparent border-none outline-none ring-0 text-sm text-fg-primary placeholder:text-fg-ghost opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-300"
         />
       </div>
+      </div>{/* end left half */}
+
+      {/* Right half — empty, reserved */}
+      <div className="flex-1 h-full" />
     </div>
   )
 }
