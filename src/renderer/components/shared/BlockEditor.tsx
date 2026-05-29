@@ -34,15 +34,16 @@ export function BlockEditor({
     <div className={`relative w-full ${className}`}>
       {isLoaded ? (
         <BlockNoteView
-          editor={editor}
+          editor={editor as any}
           editable={!readOnly}
           theme={resolvedTheme === 'dark'
             ? { ...darkDefaultTheme, fontFamily: "Roboto, sans-serif" }
             : { ...lightDefaultTheme, fontFamily: "Roboto, sans-serif" }
           }
-          onChange={() => {
+          onChange={async () => {
             if (!onChange) return;
-            void editor.blocksToMarkdownLossy(editor.document).then(onChange);
+            const md = await Promise.resolve(editor.blocksToMarkdownLossy(editor.document));
+            onChange(md);
           }}
         />
       ) : (
