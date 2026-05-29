@@ -2,19 +2,17 @@ import { type ComponentType } from 'react'
 import { type RouteObject } from 'react-router'
 import { isElectron, isWeb } from '@/shared/bridge'
 
-import HomePage     from '@/pages/shared/HomePage'
-import SettingsPage from '@/pages/shared/SettingsPage'
-import JulesPage    from '@/pages/shared/JulesPage'
-
-import ProjectsPage from '@/pages/electron/ProjectsPage'
-import ActivityPage from '@/pages/electron/ActivityPage'
-import ReposPage    from '@/pages/electron/ReposPage'
-import SnapshotPage from '@/pages/electron/SnapshotPage'
-import QueuesPage   from '@/pages/electron/QueuesPage'
-import SnippetsPage from '@/pages/electron/SnippetsPage'
-import NotesPage    from '@/pages/electron/NotesPage'
-
-import OverviewPage from '@/pages/electron/OverviewPage'
+import { HomePage, SettingsPage, JulesPage } from '@/pages/shared'
+import {
+    ActivityPage,
+    NotesPage,
+    OverviewPage,
+    ProjectsPage,
+    QueuesPage,
+    ReposPage,
+    SnapshotPage,
+    SnippetsPage,
+} from '@/pages/electron'
 
 // ── dev ───────────────────────────────────────────────────────────────────────
 
