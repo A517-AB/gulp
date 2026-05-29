@@ -12,7 +12,7 @@ import type { NewSessionDialogProps } from "@/types/activity-feed";
 export function NewSessionDialog({ onSessionCreated, initialValues, trigger, open: controlledOpen, onOpenChange }: NewSessionDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isControlled = controlledOpen !== undefined;
-  const open = isControlled ? (controlledOpen ?? false) : internalOpen;
+  const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? (onOpenChange ?? setInternalOpen) : setInternalOpen;
 
   const { sources, formData, setFormData, loading, error, handleSubmit } = useNewSessionForm({
@@ -35,7 +35,7 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
           <DialogTitle>Create New Session</DialogTitle>
           <DialogDescription className="text-xs">Select a repository and describe what Jules should do.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={(event) => { void handleSubmit(event); }} className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Source Repository *</Label>
             <Combobox options={sources.map((s) => ({ value: s.id, label: s.name }))} value={formData.sourceId} onValueChange={(v) => { setFormData((p) => ({ ...p, sourceId: v })); }} placeholder={sources.length === 0 ? "No repositories available" : "Select a repository"} searchPlaceholder="Search repositories..." emptyMessage="No repositories found." className="text-xs" />

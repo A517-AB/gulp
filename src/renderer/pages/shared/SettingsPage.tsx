@@ -130,7 +130,7 @@ function AlarmSection() {
     <div className="mb-8">
       <SectionHeader title="Alarms" />
 
-      <Row label="Focus timer" hint={`${alarms.focusTimer.workMinutes} min work / ${alarms.focusTimer.breakMinutes} min break`}>
+      <Row label="Focus timer" hint={`${String(alarms.focusTimer.workMinutes)} min work / ${String(alarms.focusTimer.breakMinutes)} min break`}>
         <NumberInput value={alarms.focusTimer.workMinutes} min={1} suffix="work"
           onChange={(v) => { setAlarms({ focusTimer: { ...alarms.focusTimer, workMinutes: v } }) }} />
         <NumberInput value={alarms.focusTimer.breakMinutes} min={1} suffix="break"

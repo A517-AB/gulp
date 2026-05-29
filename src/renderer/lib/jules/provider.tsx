@@ -1,20 +1,11 @@
 import {
-  createContext,
-  useContext,
   useState,
   useEffect,
   type ReactNode,
 } from "react";
+import { env } from "@shared/bridge";
 import { JulesClient } from "./client";
-
-interface JulesContextType {
-  client: JulesClient | null;
-  apiKey: string | null;
-  setApiKey: (key: string) => void;
-  clearApiKey: () => void;
-}
-
-const JulesContext = createContext<JulesContextType | undefined>(undefined);
+import { JulesContext } from "./context";
 
 export function JulesProvider({ children }: { children: ReactNode }) {
   const [apiKey, setApiKeyState] = useState<string | null>(null);
@@ -23,24 +14,10 @@ export function JulesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function init() {
       let stored = localStorage.getItem("jules-api-key");
-      console.log("[JulesProvider] stored api key:", stored ? "found" : "not found");
 
-      // Check Vite environment variables (injected by vite.config.ts)
-      if (!stored && import.meta.env['VITE_JULES_API_KEY']) {
-        const envKey = import.meta.env['VITE_JULES_API_KEY'];
-        console.log("[JulesProvider] env api key:", envKey ? "found" : "not found");
-        if (envKey) {
-          stored = envKey;
-        }
-      }
-
-      // Fallback to electron environment variable
-      if (!stored && window.electron?.env?.getApiKey) {
-        const envKey = await window.electron.env.getApiKey();
-        console.log("[JulesProvider] electron api key:", envKey ? "found" : "not found");
-        if (envKey) {
-          stored = envKey;
-        }
+      if (!stored && env?.getApiKey) {
+        const envKey = await env.getApiKey();
+        if (envKey) stored = envKey;
       }
 
       if (stored) {
@@ -72,12 +49,4 @@ export function JulesProvider({ children }: { children: ReactNode }) {
       {children}
     </JulesContext.Provider>
   );
-}
-
-export function useJules() {
-  const context = useContext(JulesContext);
-  if (context === undefined) {
-    throw new Error("useJules must be used within a JulesProvider");
-  }
-  return context;
 }

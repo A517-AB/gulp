@@ -1,5 +1,5 @@
 import { useSettingsStore } from '@/store/settings'
-import type { AppSettings, PowerSettings, AlarmSettings, NotificationSettings } from '@/types/settings'
+import type { AppSettings, PowerSettings, AlarmSettings, NotificationSettings, ChatAlias } from '@/types/settings'
 
 // The one hook everything uses. Never import useSettingsStore directly in components.
 export function useSettings(): AppSettings {
@@ -22,4 +22,10 @@ export function useNotificationSettings(): [NotificationSettings, (patch: Partia
   const notifications    = useSettingsStore((s) => s.settings.notifications)
   const setNotifications = useSettingsStore((s) => s.setNotifications)
   return [notifications, setNotifications]
+}
+
+export function useChatAliases(): [ChatAlias[], (aliases: ChatAlias[]) => void] {
+  const chatAliases    = useSettingsStore((s) => s.settings.chatAliases)
+  const setChatAliases = useSettingsStore((s) => s.setChatAliases)
+  return [chatAliases, setChatAliases]
 }

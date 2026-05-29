@@ -13,11 +13,12 @@ export function usePresets() {
   const [presets, setPresets] = useState<Preset[]>(() => getPresets())
 
   const add = useCallback((p: Omit<Preset, 'id'>) => {
-    const next = [...getPresets(), createPreset(p)]
+    const preset = createPreset(p)
+    const next = [...getPresets(), preset]
     savePresets(next)
     setPresets(next)
     console.log('[presets] added', p.name)
-    return next[next.length - 1]!
+    return preset
   }, [])
 
   const update = useCallback((updated: Preset) => {

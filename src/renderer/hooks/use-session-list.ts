@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useJules } from "@/lib/jules/provider";
+import { useJules } from "@/lib/jules/context";
 import { getArchivedSessions } from "@/lib/archive";
 import type { Session, UseSessionListReturn } from "@/types/activity-feed";
 
@@ -9,9 +9,7 @@ export function useSessionList(): UseSessionListReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [archivedIds, setArchivedIds] = useState<Set<string>>(new Set());
-
-  useEffect(() => { setArchivedIds(getArchivedSessions()); }, []);
+  const [archivedIds] = useState<Set<string>>(() => getArchivedSessions());
 
   const loadSessions = useCallback(async () => {
     if (!client) { setLoading(false); return; }
@@ -31,7 +29,15 @@ export function useSessionList(): UseSessionListReturn {
     }
   }, [client]);
 
-  useEffect(() => { loadSessions(); }, [loadSessions]);
+  useEffect(() => {
+    const initialLoad = window.setTimeout(() => {
+      void loadSessions();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
+  }, [loadSessions]);
 
   const visibleSessions = useMemo(() =>
     sessions

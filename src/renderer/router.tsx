@@ -5,10 +5,10 @@ import { isElectron, isWeb } from '@shared/bridge'
 import { RootLayout } from '@renderer/layouts'
 import { RouteErrorBoundary } from '@renderer/core'
 import {
-    HomePage, SettingsPage, JulesPage, NotesPage,
+    HomePage, SettingsPage, JulesPage,
 } from '@renderer/pages/shared'
 import {
-    ProjectsPage,
+    ProjectsPage, NotesPage,
     ActivityPage, ReposPage, SnapshotPage, QueuesPage, SnippetsPage,
 } from '@renderer/pages/electron'
 import {
@@ -39,7 +39,6 @@ export type AppRoute = Omit<RouteObject, 'handle'> & {
 
 const sharedRoutes: AppRoute[] = [
     { index: true,        Component: HomePage,      handle: { title: 'Home',      inNav: true } },
-    { path: 'notes', Component: NotesPage, handle: { title: 'Notes', inNav: true } },
     { path: 'settings',  Component: SettingsPage,  handle: { title: 'Settings',  inNav: true } },
     { path: 'jules', Component: JulesPage, handle: { title: 'Sessions', inNav: true } },
 ]
@@ -47,6 +46,7 @@ const sharedRoutes: AppRoute[] = [
 // ── electron ──────────────────────────────────────────────────────────────────
 
 const electronRoutes: AppRoute[] = [
+    { path: 'notes',         Component: NotesPage,    handle: { title: 'Notes',    inNav: true } },
     { path: 'projects',     Component: ProjectsPage,  handle: { title: 'Projects', inNav: true } },
     { path: 'repos',        Component: ReposPage,     handle: { title: 'Repos', inNav: true } },
     { path: 'queues',        Component: QueuesPage,   handle: { title: 'Queues', inNav: true } },

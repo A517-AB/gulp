@@ -1,11 +1,11 @@
 import { powerMonitor, type BrowserWindow, type Tray } from "electron";
 import { type TrayState } from "./main.mts";
 
-type PowerDeps = {
+interface PowerDeps {
   getWindow: () => BrowserWindow | null;
   getTray: () => Tray | null;
   buildTrayIcon: (state: TrayState) => Electron.NativeImage;
-};
+}
 
 export function registerPowerMonitor({ getWindow, getTray, buildTrayIcon }: PowerDeps): void {
   function goLow() {

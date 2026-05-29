@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useJules } from "@renderer/lib/jules/provider";
+import { useJules } from "@renderer/lib/jules/context";
 import { queues } from "@shared/bridge";
 import type { FleetTaskGroup, FleetTask } from "@/types/jules";
 
@@ -27,7 +27,15 @@ export function useQueues() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const initialLoad = window.setTimeout(() => {
+      void load();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
+  }, [load]);
 
   const sendTask = useCallback(async (group: FleetTaskGroup, task: FleetTask) => {
     if (!client) { setError("Jules client not ready"); return; }

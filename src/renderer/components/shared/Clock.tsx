@@ -1,9 +1,11 @@
 import { motion, useAnimationFrame, useMotionValue, useTransform } from 'framer-motion';
+import { useState } from 'react';
 import { cn } from '@/utils';
 
 export function Clock({ size = 240, className }: { size?: number; className?: string }) {
   // Use motion values to update time without triggering React re-renders every frame
-  const time = useMotionValue(Date.now());
+  const [initialTime] = useState(() => Date.now());
+  const time = useMotionValue(initialTime);
 
   useAnimationFrame(() => {
     time.set(Date.now());
@@ -26,6 +28,8 @@ export function Clock({ size = 240, className }: { size?: number; className?: st
     return (d.getHours() + m / 60) * 30;
   });
 
+  const rotation = (degrees: number) => `rotate(${String(degrees)} 50 50)`;
+
   return (
     <div
       className={cn(
@@ -47,7 +51,7 @@ export function Clock({ size = 240, className }: { size?: number; className?: st
             className="text-primary/30"
             strokeWidth="1.5"
             strokeLinecap="round"
-            transform={`rotate(${i * 30} 50 50)`}
+            transform={rotation(i * 30)}
           />
         ))}
 
@@ -55,7 +59,7 @@ export function Clock({ size = 240, className }: { size?: number; className?: st
         {Array.from({ length: 60 }).map((_, i) => (
           i % 5 !== 0 && (
             <line
-              key={`min-${i}`}
+              key={`min-${String(i)}`}
               x1="50"
               y1="10"
               x2="50"
@@ -64,7 +68,7 @@ export function Clock({ size = 240, className }: { size?: number; className?: st
               className="text-primary/10"
               strokeWidth="0.75"
               strokeLinecap="round"
-              transform={`rotate(${i * 6} 50 50)`}
+              transform={rotation(i * 6)}
             />
           )
         ))}

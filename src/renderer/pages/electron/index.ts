@@ -1,3 +1,4 @@
+export { default as NotesPage } from './NotesPage';
 export { default as ActivityPage } from './ActivityPage';
 export { default as SessionsPage } from './SessionsPage';
 export { default as ProjectsPage } from './ProjectsPage';

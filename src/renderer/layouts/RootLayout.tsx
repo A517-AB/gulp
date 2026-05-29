@@ -9,6 +9,7 @@ import { lowPower as lowPowerBridge, popup as popupBridge } from '@shared/bridge
 import { notify } from '@/store/notifications'
 import { Clock } from '@renderer/components/shared/Clock'
 import { Notifications } from '@renderer/components/shared/Notifications'
+import { useAlarmEngine } from '@renderer/lib/alarms'
 
 export default function RootLayout(): ReactNode {
     const location = useLocation()
@@ -36,6 +37,8 @@ export default function RootLayout(): ReactNode {
             })
         })
     }, [])
+
+    useAlarmEngine()
 
     const currentHandle = matches[matches.length - 1]?.handle as AppRoute['handle']
     const LowPowerView  = currentHandle?.lowPowerView

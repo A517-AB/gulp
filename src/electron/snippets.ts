@@ -24,11 +24,11 @@ function resolve(filename: string): string {
 }
 
 export function registerSnippetsHandlers(): void {
-  ipcMain.handle("snippets.get", (_event): Snippet[] => {
+  ipcMain.handle("snippets.get", (): Snippet[] => {
     const filePath = resolve("snippets.json")
     try {
       const raw = fs.readFileSync(filePath, "utf-8")
-      const parsed = JSON.parse(raw)
+      const parsed: unknown = JSON.parse(raw)
       return Array.isArray(parsed) ? parsed : []
     } catch (err) {
       console.log(`[snippets] failed to read ${filePath}:`, err)
@@ -36,7 +36,8 @@ export function registerSnippetsHandlers(): void {
     }
   })
 
-  ipcMain.handle("snippets.save", (_event, data: Snippet[]) => {
+  ipcMain.handle("snippets.save", (...args) => {
+    const [, data] = args as [unknown, Snippet[]]
     const filePath = resolve("snippets.json")
     try {
       fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8")

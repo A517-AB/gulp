@@ -18,3 +18,4 @@ export const snippets       = el?.snippets   ?? null;
 export const sdkIpc         = el?.sdkIpc     ?? null;
 export const git            = el?.git        ?? null;
 export const repos          = el?.repos      ?? null;
+export const env            = el?.env        ?? null;

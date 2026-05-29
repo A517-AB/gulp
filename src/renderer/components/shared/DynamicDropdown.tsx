@@ -6,7 +6,7 @@ import { cn } from '@/utils'
 export interface DropdownItem {
   id: string
   label: string
-  icon?: React.FC<React.SVGProps<SVGSVGElement>>
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>
   color?: string
 }
 
@@ -33,8 +33,8 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
             "flex items-center justify-center size-9 rounded-lg transition-all hover:bg-hover active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring relative",
             className
           )}
-          style={{ color: selected?.color || 'var(--fg-secondary)' }}
-          title={selected?.label || placeholder}
+          style={{ color: selected?.color ?? 'var(--fg-secondary)' }}
+          title={selected?.label ?? placeholder}
         >
           {TriggerIcon ? (
             <TriggerIcon className="size-5" />
@@ -61,7 +61,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
               exit={{ opacity: 0, y: -4, scale: 0.98, filter: "blur(2px)" }}
               transition={{ type: "spring", bounce: 0, duration: 0.3 }}
               className="z-50 bg-overlay/90 backdrop-blur-xl border border-subtle rounded-xl shadow-xl overflow-hidden"
-              onMouseLeave={() => setHoveredId(null)}
+              onMouseLeave={() => { setHoveredId(null) }}
             >
               <div className="flex flex-col p-1.5 relative z-10">
                 {items.map((item, i) => {
@@ -77,7 +77,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
                         onChange(item.id)
                         setOpen(false)
                       }}
-                      onMouseEnter={() => setHoveredId(item.id)}
+                      onMouseEnter={() => { setHoveredId(item.id) }}
                       className={cn(
                         "relative flex items-center gap-2.5 px-2.5 py-2 text-sm rounded-lg transition-colors w-full text-left outline-none",
                         isSelected ? "text-fg-primary font-medium" : "text-fg-secondary"
@@ -96,7 +96,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
                         <ItemIcon 
                           className="size-4 shrink-0 transition-transform duration-200" 
                           style={{ 
-                            color: item.color || 'currentColor',
+                            color: item.color ?? 'currentColor',
                             transform: hoveredId === item.id ? "scale(1.15)" : "scale(1)"
                           }} 
                         />
@@ -107,7 +107,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
                         <motion.div 
                           layoutId="dropdown-active-dot"
                           className="absolute right-3 size-1.5 rounded-full" 
-                          style={{ backgroundColor: item.color || 'var(--color-primary, currentColor)' }}
+                          style={{ backgroundColor: item.color ?? 'var(--color-primary, currentColor)' }}
                         />
                       )}
                     </motion.button>

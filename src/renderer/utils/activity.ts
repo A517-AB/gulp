@@ -20,19 +20,19 @@ export function getActivityTypeColor(type: ActivityType): string {
     result: "bg-green-500",
     error: "bg-red-500",
   };
-  return map[type] ?? "bg-gray-500";
+  return map[type];
 }
 
 export function filterActivities(activities: Activity[]): Activity[] {
   return activities.filter((activity) => {
     if (activity.bashOutput || activity.diff) return true;
-    const content = activity.content?.trim();
+    const content = activity.content.trim();
     if (!content) return false;
     if (content === "{}" || content === "[]") return false;
     if (/^\[[\w,\s]+\]$/.test(content)) return false;
     try {
-      const parsed = JSON.parse(content);
-      if (typeof parsed === "object" && Object.keys(parsed).length === 0) return false;
+      const parsed: unknown = JSON.parse(content);
+      if (parsed != null && typeof parsed === "object" && !Array.isArray(parsed) && Object.keys(parsed).length === 0) return false;
       if (Array.isArray(parsed) && parsed.length === 0) return false;
     } catch {
       // not JSON, keep it
@@ -48,7 +48,7 @@ export function groupActivities(filtered: Activity[]): ActivityGroup[] {
   filtered.forEach((activity, index) => {
     const shouldGroup = activity.type === "progress" && activity.role === "agent";
     const prev = index > 0 ? filtered[index - 1] : null;
-    const prevShouldGroup = prev?.type === "progress" && prev?.role === "agent";
+    const prevShouldGroup = prev?.type === "progress" && prev.role === "agent";
 
     if (shouldGroup) {
       if (prevShouldGroup && currentGroup) {
@@ -75,7 +75,7 @@ export function getOutputBranch(activities: Activity[], fallback = "main"): stri
       if (push?.[1]) return push[1];
     }
     if (activity.role === "agent" && (activity.type === "message" || activity.type === "result")) {
-      const match = /(?:created|pushed|on|switched to) branch ['"`]?([\w-./]+)['"`]?/i.exec((activity.content || ""));
+      const match = /(?:created|pushed|on|switched to) branch ['"`]?([\w-./]+)['"`]?/i.exec(activity.content);
       if (match?.[1]) return match[1];
     }
   }

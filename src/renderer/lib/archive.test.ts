@@ -6,26 +6,35 @@ import {
   isSessionArchived,
 } from "./archive";
 
+const LOCAL_STORAGE_KEY = "jules-archived-sessions";
+
+function parseStoredSessions(stored: string | null): string[] {
+  if (stored === null) return [];
+
+  const parsed: unknown = JSON.parse(stored);
+  if (!Array.isArray(parsed)) return [];
+
+  return parsed.filter((item): item is string => typeof item === "string");
+}
+
 // Mock localStorage
 const localStorageMock = (function () {
   let store: Record<string, string> = {};
   return {
     getItem: jest.fn((key: string) => store[key] ?? null),
     setItem: jest.fn((key: string, value: string) => {
-      store[key] = value.toString();
+      store[key] = value;
     }),
     clear: jest.fn(() => {
       store = {};
     }),
     removeItem: jest.fn((key: string) => {
-      delete store[key];
+      Reflect.deleteProperty(store, key);
     }),
   };
 })();
 
 describe("Archive Utility", () => {
-  const LOCAL_STORAGE_KEY = "jules-archived-sessions";
-
   beforeAll(() => {
     // Define window.localStorage manually for Node environment
     Object.defineProperty(globalThis, "window", {
@@ -86,7 +95,7 @@ describe("Archive Utility", () => {
 
       const stored = localStorageMock.getItem(LOCAL_STORAGE_KEY);
       expect(stored).toBeTruthy();
-      const parsed = JSON.parse(stored!);
+      const parsed = parseStoredSessions(stored);
       expect(parsed).toContain("new-session");
     });
 
@@ -95,7 +104,7 @@ describe("Archive Utility", () => {
       archiveSession("session-1");
 
       const stored = localStorageMock.getItem(LOCAL_STORAGE_KEY);
-      const parsed = JSON.parse(stored!);
+      const parsed = parseStoredSessions(stored);
       expect(parsed.length).toBe(1);
       expect(parsed).toContain("session-1");
     });
@@ -105,7 +114,7 @@ describe("Archive Utility", () => {
       archiveSession("new-session");
 
       const stored = localStorageMock.getItem(LOCAL_STORAGE_KEY);
-      const parsed = JSON.parse(stored!);
+      const parsed = parseStoredSessions(stored);
       expect(parsed).toContain("existing");
       expect(parsed).toContain("new-session");
     });
@@ -120,7 +129,7 @@ describe("Archive Utility", () => {
       unarchiveSession("session-1");
 
       const stored = localStorageMock.getItem(LOCAL_STORAGE_KEY);
-      const parsed = JSON.parse(stored!);
+      const parsed = parseStoredSessions(stored);
       expect(parsed).not.toContain("session-1");
       expect(parsed).toContain("session-2");
     });
@@ -133,7 +142,7 @@ describe("Archive Utility", () => {
       unarchiveSession("non-existent");
 
       const stored = localStorageMock.getItem(LOCAL_STORAGE_KEY);
-      const parsed = JSON.parse(stored!);
+      const parsed = parseStoredSessions(stored);
       expect(parsed).toEqual(["session-1"]);
     });
   });

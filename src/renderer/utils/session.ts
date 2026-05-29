@@ -21,7 +21,7 @@ export function getStatusInfo(status: SessionStatus): SessionStatusInfo {
     failed:    { color: "text-red-400",     bgColor: "bg-red-500/15",     label: "Failed",    icon: "✕" },
     paused:    { color: "text-zinc-400",    bgColor: "bg-zinc-500/15",    label: "Paused",    icon: "⏸" },
   };
-  return map[status] ?? { color: "text-gray-500", bgColor: "bg-gray-500/10", label: status, icon: "○" };
+  return map[status];
 }
 
 export function getSessionDuration(createdAt: string): number {

@@ -1,4 +1,4 @@
-import type { Dispatch, FC, ReactNode, SetStateAction, SVGProps, SyntheticEvent } from "react";
+import type { ComponentType, Dispatch, ReactNode, SetStateAction, SVGProps, SyntheticEvent } from "react";
 import type { Activity, Session, Source } from "./jules";
 
 export type { Activity, Session, Source };
@@ -33,7 +33,7 @@ export interface QuickActionTemplate {
   id: string;
   label: string;
   description?: string;
-  icon?: FC<SVGProps<SVGSVGElement>>;
+  icon?: ComponentType<SVGProps<SVGSVGElement>>;
   defaultPrompt: string;
   allowedDestinations: ActionDestination[];
   /** If true, this action is only available when the session is completely finished */

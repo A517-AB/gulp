@@ -94,6 +94,23 @@ interface ApiActivity {
   [key: string]: unknown;
 }
 
+interface ApiErrorResponse {
+  message?: string;
+}
+
+function firstNonEmptyString(...values: (string | undefined)[]): string | undefined {
+  return values.find((value) => value !== undefined && value !== "");
+}
+
+function getErrorMessage(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("message" in error)) {
+    return undefined;
+  }
+
+  const { message } = error as ApiErrorResponse;
+  return typeof message === "string" ? message : undefined;
+}
+
 export class JulesAPIError extends Error {
   status?: number
   response?: unknown
@@ -118,20 +135,19 @@ export class JulesClient {
     options: RequestInit = {},
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    const headers = new Headers(options.headers);
+    headers.set("Content-Type", "application/json");
+    headers.set("x-goog-api-key", this.apiKey);
 
     try {
       const response = await fetch(url, {
         ...options,
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": this.apiKey,
-          ...options.headers,
-        },
+        headers,
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        console.error(`[JulesClient] error ${response.status} on ${endpoint}:`, error);
+        const error = (await response.json().catch(() => null)) as unknown;
+        console.error(`[JulesClient] error ${String(response.status)} on ${endpoint}:`, error);
 
         // Handle common HTTP errors with helpful messages
         if (response.status === 401) {
@@ -154,7 +170,7 @@ export class JulesClient {
           // For activities endpoint, 404 just means no activities yet (new session)
           // Return empty array instead of throwing error
           if (endpoint.includes("/activities")) {
-            return { activities: [] } as T;
+            return { activities: [] as ApiActivity[] } as T;
           }
 
           throw new JulesAPIError(
@@ -165,7 +181,7 @@ export class JulesClient {
         }
 
         throw new JulesAPIError(
-          error.message || `Request failed with status ${response.status}`,
+          getErrorMessage(error) ?? `Request failed with status ${String(response.status)}`,
           response.status,
           error,
         );
@@ -227,7 +243,7 @@ export class JulesClient {
     // Transform API response to extract repository info
     const sources = allSources.map((source: ApiSource) => {
       // Extract repo name from source field (e.g., "sources/github/owner/repo")
-      const sourcePath = source.source || source.name || "";
+      const sourcePath = firstNonEmptyString(source.source, source.name) ?? "";
       const match = /sources\/github\/(.+)/.exec(sourcePath);
       const repoPath = match ? match[1] : sourcePath;
 
@@ -260,21 +276,22 @@ export class JulesClient {
 
       for (const session of allSessions) {
         const sourceId = `sources/github/${session.sourceId}`;
-        const activityTime =
-          session.lastActivityAt || session.updatedAt || session.createdAt;
+        const activityTime = firstNonEmptyString(
+          session.lastActivityAt,
+          session.updatedAt,
+          session.createdAt,
+        ) ?? session.createdAt;
+        const previousActivityTime = latestActivityMap.get(sourceId);
 
-        if (
-          !latestActivityMap.has(sourceId) ||
-          (activityTime && activityTime > latestActivityMap.get(sourceId)!)
-        ) {
+        if (previousActivityTime === undefined || activityTime > previousActivityTime) {
           latestActivityMap.set(sourceId, activityTime);
         }
       }
 
       // Sort sources by latest activity (most recent first)
       sources.sort((a, b) => {
-        const aTime = latestActivityMap.get(a.id) || "";
-        const bTime = latestActivityMap.get(b.id) || "";
+        const aTime = latestActivityMap.get(a.id) ?? "";
+        const bTime = latestActivityMap.get(b.id) ?? "";
 
         // Sources with activity come before those without
         if (aTime && !bTime) return -1;
@@ -312,17 +329,15 @@ export class JulesClient {
     );
 
     // Transform API response to match our Session type
-    return (response.sessions || []).map((session: ApiSession) => ({
+    return response.sessions.map((session: ApiSession) => ({
       id: session.id,
-      sourceId:
-        session.sourceContext?.source?.replace("sources/github/", "") || "",
-      title: session.title || "",
-      status: this.mapState(session.state || ""),
+      sourceId: session.sourceContext?.source?.replace("sources/github/", "") ?? "",
+      title: session.title ?? "",
+      status: this.mapState(session.state ?? ""),
       createdAt: session.createTime,
       updatedAt: session.updateTime,
       ...(session.lastActivityAt ? { lastActivityAt: session.lastActivityAt } : {}),
-      branch:
-        session.sourceContext?.githubRepoContext?.startingBranch || "main",
+      branch: session.sourceContext?.githubRepoContext?.startingBranch ?? "main",
     }));
   }
 
@@ -335,7 +350,7 @@ export class JulesClient {
       FAILED: "failed",
       PAUSED: "paused",
     };
-    return stateMap[state] || "active";
+    return stateMap[state] ?? "active";
   }
 
   async getSession(id: string): Promise<Session> {
@@ -351,14 +366,14 @@ export class JulesClient {
     }
 
     const requestBody = {
-      prompt: prompt,
+      prompt,
       sourceContext: {
         source: data.sourceId,
         githubRepoContext: {
-          startingBranch: data.startingBranch || "main", // Default to main branch
+          startingBranch: data.startingBranch ?? "main", // Default to main branch
         },
       },
-      title: data.title || "Untitled Session",
+      title: data.title ?? "Untitled Session",
       requirePlanApproval: false, // Auto-approve plans by default
     };
 
@@ -371,13 +386,13 @@ export class JulesClient {
   }
 
   async deleteSession(id: string): Promise<void> {
-    await this.request<void>(`/sessions/${id}`, {
+    await this.request(`/sessions/${id}`, {
       method: "DELETE",
     });
   }
 
   async approvePlan(sessionId: string): Promise<void> {
-    await this.request<void>(`/sessions/${sessionId}:approvePlan`, {
+    await this.request(`/sessions/${sessionId}:approvePlan`, {
       method: "POST",
       body: JSON.stringify({}),
     });
@@ -390,9 +405,9 @@ export class JulesClient {
     );
 
     // Transform API response to match our Activity type
-    return (response.activities || []).map((activity: ApiActivity) => {
+    return response.activities.map((activity: ApiActivity) => {
       // Extract ID from name field (e.g., "sessions/ID/activities/ACTIVITY_ID")
-      const id = activity.name?.split("/").pop() || activity.id || "";
+      const id = activity.name?.split("/").pop() ?? activity.id ?? "";
 
       // Determine type and content based on activity structure
       let type: Activity["type"] = "message";
@@ -401,26 +416,26 @@ export class JulesClient {
       // Extract content from various possible fields
       if (activity.planGenerated) {
         type = "plan";
-        const plan = activity.planGenerated.plan || activity.planGenerated;
+        const plan = activity.planGenerated.plan ?? activity.planGenerated;
         content =
-          plan.description ||
-          plan.summary ||
-          plan.title ||
-          JSON.stringify(plan.steps || plan, null, 2);
+          firstNonEmptyString(plan.description, plan.summary, plan.title) ??
+          JSON.stringify(plan.steps ?? plan, null, 2);
       } else if (activity.planApproved) {
         type = "plan";
         content = "Plan approved";
       } else if (activity.progressUpdated) {
         type = "progress";
         content =
-          activity.progressUpdated.progressDescription ||
-          activity.progressUpdated.description ||
-          activity.progressUpdated.message ||
+          firstNonEmptyString(
+            activity.progressUpdated.progressDescription,
+            activity.progressUpdated.description,
+            activity.progressUpdated.message,
+          ) ??
           JSON.stringify(activity.progressUpdated, null, 2);
       } else if (activity.sessionCompleted) {
         type = "result";
         const result = activity.sessionCompleted;
-        content = result.summary || result.message || "Session completed";
+        content = firstNonEmptyString(result.summary, result.message) ?? "Session completed";
       }
 
       // Extract artifacts from top-level artifacts array (applies to all activity types)
@@ -439,26 +454,30 @@ export class JulesClient {
       } else if (activity.agentMessaged) {
         type = "message";
         content =
-          activity.agentMessaged.agentMessage ||
-          activity.agentMessaged.message ||
-          "";
+          firstNonEmptyString(
+            activity.agentMessaged.agentMessage,
+            activity.agentMessaged.message,
+          ) ?? "";
       } else if (activity.userMessage) {
         type = "message";
-        content =
-          activity.userMessage.message || activity.userMessage.content || "";
+        content = firstNonEmptyString(
+          activity.userMessage.message,
+          activity.userMessage.content,
+        ) ?? "";
       }
 
       // Fallback: try common content fields
       if (!content) {
         content =
-          activity.message ||
-          activity.content ||
-          activity.text ||
-          activity.description ||
+          firstNonEmptyString(
+            activity.message,
+            activity.content,
+            activity.text,
+            activity.description,
+          ) ??
           (activity.artifacts
             ? JSON.stringify(activity.artifacts, null, 2)
-            : "") ||
-          "";
+            : "");
       }
 
       // Last resort: show activity type
@@ -492,32 +511,32 @@ export class JulesClient {
     );
 
     // Transform similar to listActivities
-    const id = response.name?.split("/").pop() || activityId;
+    const id = response.name?.split("/").pop() ?? activityId;
     let type: Activity["type"] = "message";
     let content = "";
 
     if (response.planGenerated) {
       type = "plan";
-      const plan = response.planGenerated.plan || response.planGenerated;
+      const plan = response.planGenerated.plan ?? response.planGenerated;
       content =
-        plan.description ||
-        plan.summary ||
-        plan.title ||
-        JSON.stringify(plan.steps || plan, null, 2);
+        firstNonEmptyString(plan.description, plan.summary, plan.title) ??
+        JSON.stringify(plan.steps ?? plan, null, 2);
     } else if (response.planApproved) {
       type = "plan";
       content = "Plan approved";
     } else if (response.progressUpdated) {
       type = "progress";
       content =
-        response.progressUpdated.progressDescription ||
-        response.progressUpdated.description ||
-        response.progressUpdated.message ||
+        firstNonEmptyString(
+          response.progressUpdated.progressDescription,
+          response.progressUpdated.description,
+          response.progressUpdated.message,
+        ) ??
         JSON.stringify(response.progressUpdated, null, 2);
     } else if (response.sessionCompleted) {
       type = "result";
       const result = response.sessionCompleted;
-      content = result.summary || result.message || "Session completed";
+      content = firstNonEmptyString(result.summary, result.message) ?? "Session completed";
     }
 
     // Extract artifacts from top-level artifacts array (applies to all activity types)
@@ -536,22 +555,26 @@ export class JulesClient {
     } else if (response.agentMessaged) {
       type = "message";
       content =
-        response.agentMessaged.agentMessage ||
-        response.agentMessaged.message ||
-        "";
+        firstNonEmptyString(
+          response.agentMessaged.agentMessage,
+          response.agentMessaged.message,
+        ) ?? "";
     } else if (response.userMessage) {
       type = "message";
-      content =
-        response.userMessage.message || response.userMessage.content || "";
+      content = firstNonEmptyString(
+        response.userMessage.message,
+        response.userMessage.content,
+      ) ?? "";
     }
 
     if (!content) {
       content =
-        response.message ||
-        response.content ||
-        response.text ||
-        response.description ||
-        "";
+        firstNonEmptyString(
+          response.message,
+          response.content,
+          response.text,
+          response.description,
+        ) ?? "";
     }
 
     return {

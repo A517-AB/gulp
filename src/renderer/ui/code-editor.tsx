@@ -1,3 +1,4 @@
+import '@renderer/lib/monaco'
 import { useTheme } from '@renderer/providers/theme'
 import Editor, { type EditorProps } from '@monaco-editor/react'
 import { cn } from '@/utils'

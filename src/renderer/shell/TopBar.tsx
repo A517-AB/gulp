@@ -11,9 +11,22 @@ interface TopBarProps {
 
 export function TopBar({ left, center, right }: TopBarProps) {
     const { enterLowPower, isLowPower, exitLowPower } = useStore()
-    const handleLowPowerToggle = isLowPower
-        ? () => { lowPowerBridge ? lowPowerBridge.exit() : exitLowPower() }
-        : () => { lowPowerBridge ? lowPowerBridge.enter() : enterLowPower() }
+    const handleLowPowerToggle = () => {
+        if (isLowPower) {
+            if (lowPowerBridge) {
+                lowPowerBridge.exit()
+            } else {
+                exitLowPower()
+            }
+            return
+        }
+
+        if (lowPowerBridge) {
+            lowPowerBridge.enter()
+        } else {
+            enterLowPower()
+        }
+    }
 
     return (
         <header className="group/bar app-drag-region relative h-toolbar flex items-center gap-2 px-3 bg-base shrink-0">

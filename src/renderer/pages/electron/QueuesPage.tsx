@@ -6,7 +6,7 @@ import {
   ListTodo, ChevronRight, ChevronDown, Send, Loader2,
   Plus, Folder, Trash2, CheckSquare, ListTree,
 } from "lucide-react";
-import { useJules } from "@renderer/lib/jules/provider";
+import { useJules } from "@renderer/lib/jules/context";
 import { queues as electronQueues, isElectron } from "@shared/bridge";
 import { InlineEdit } from "@renderer/ui/inline-edit";
 import type { Source, FleetTask, FleetTaskGroup } from "@/types/jules";

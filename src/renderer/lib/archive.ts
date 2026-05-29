@@ -5,12 +5,18 @@
 
 const ARCHIVED_SESSIONS_KEY = "jules-archived-sessions";
 
+function parseArchivedSessions(stored: string): string[] {
+  const parsed: unknown = JSON.parse(stored)
+  if (!Array.isArray(parsed)) return []
+  return parsed.filter((item): item is string => typeof item === 'string')
+}
+
 export function getArchivedSessions(): Set<string> {
   if (typeof window === "undefined") return new Set();
 
   try {
     const stored = localStorage.getItem(ARCHIVED_SESSIONS_KEY);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
+    return stored ? new Set(parseArchivedSessions(stored)) : new Set();
   } catch {
     return new Set();
   }

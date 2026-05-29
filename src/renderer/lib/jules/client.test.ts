@@ -1,17 +1,59 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { JulesClient, JulesAPIError } from "./client";
 
-// Mock global fetch
-const mockFetch = vi.fn();
-global.fetch = mockFetch;
+const mockFetch = vi.fn<typeof fetch>();
+
+function createJsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
+function getFirstItem<T>(items: readonly T[], label: string): T {
+  const firstItem = items[0];
+  if (firstItem === undefined) {
+    throw new Error(`Expected ${label} to contain at least one item`);
+  }
+
+  return firstItem;
+}
+
+function getFetchCall(): Parameters<typeof fetch> {
+  const firstCall = mockFetch.mock.calls[0];
+  if (firstCall === undefined) {
+    throw new Error("Expected fetch to be called");
+  }
+
+  return firstCall;
+}
+
+function getRequestUrl(input: RequestInfo | URL): string {
+  if (typeof input === 'string') {
+    return input;
+  }
+
+  if (input instanceof URL) {
+    return input.toString();
+  }
+
+  return input.url;
+}
 
 describe("JulesClient", () => {
   const apiKey = "test-api-key";
   let client: JulesClient;
 
   beforeEach(() => {
+    vi.stubGlobal('fetch', mockFetch);
     client = new JulesClient(apiKey);
-    mockFetch.mockClear();
+    mockFetch.mockReset();
+  });
+
+  afterAll(() => {
+    vi.unstubAllGlobals();
   });
 
   describe("constructor", () => {
@@ -38,24 +80,25 @@ describe("JulesClient", () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      mockFetch.mockResolvedValueOnce(createJsonResponse(mockResponse));
 
       const sessions = await client.listSessions();
+      const [requestUrl, requestInit] = getFetchCall();
+      const headers = requestInit?.headers;
 
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining("https://jules.googleapis.com/v1alpha/sessions"),
-        expect.objectContaining({
-          headers: expect.objectContaining({ "x-goog-api-key": apiKey }),
-        }),
-      );
+      expect(getRequestUrl(requestUrl)).toContain("https://jules.googleapis.com/v1alpha/sessions");
+      expect(headers).toBeInstanceOf(Headers);
+      if (!(headers instanceof Headers)) {
+        throw new Error("Expected fetch headers to be a Headers instance");
+      }
+      expect(headers.get("x-goog-api-key")).toBe(apiKey);
 
       expect(sessions).toHaveLength(2);
-      expect(sessions[0].status).toBe("active");
-      expect(sessions[1].status).toBe("completed");
-      expect(sessions[0].sourceId).toBe("owner/repo");
+      const firstSession = getFirstItem(sessions, "sessions");
+      const secondSession = getFirstItem(sessions.slice(1), "sessions");
+      expect(firstSession.status).toBe("active");
+      expect(secondSession.status).toBe("completed");
+      expect(firstSession.sourceId).toBe("owner/repo");
     });
   });
 
@@ -79,16 +122,14 @@ describe("JulesClient", () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      mockFetch.mockResolvedValueOnce(createJsonResponse(mockResponse));
 
       const activities = await client.listActivities(sessionId);
+      const firstActivity = getFirstItem(activities, "activities");
 
-      expect(activities[0].type).toBe("plan");
-      expect(activities[0].content).toContain("Test Plan");
-      expect(activities[0].role).toBe("agent");
+      expect(firstActivity.type).toBe("plan");
+      expect(firstActivity.content).toContain("Test Plan");
+      expect(firstActivity.role).toBe("agent");
     });
 
     it("should correctly map a progressUpdated activity", async () => {
@@ -105,15 +146,13 @@ describe("JulesClient", () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      mockFetch.mockResolvedValueOnce(createJsonResponse(mockResponse));
 
       const activities = await client.listActivities(sessionId);
+      const firstActivity = getFirstItem(activities, "activities");
 
-      expect(activities[0].type).toBe("progress");
-      expect(activities[0].content).toBe("Working on it...");
+      expect(firstActivity.type).toBe("progress");
+      expect(firstActivity.content).toBe("Working on it...");
     });
 
     it("should extract git patch from artifacts", async () => {
@@ -137,14 +176,12 @@ describe("JulesClient", () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      mockFetch.mockResolvedValueOnce(createJsonResponse(mockResponse));
 
       const activities = await client.listActivities(sessionId);
+      const firstActivity = getFirstItem(activities, "activities");
 
-      expect(activities[0].diff).toBe("diff --git a/file.ts b/file.ts");
+      expect(firstActivity.diff).toBe("diff --git a/file.ts b/file.ts");
     });
 
     it("should extract bash output from artifacts", async () => {
@@ -166,24 +203,18 @@ describe("JulesClient", () => {
         ],
       };
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
+      mockFetch.mockResolvedValueOnce(createJsonResponse(mockResponse));
 
       const activities = await client.listActivities(sessionId);
+      const firstActivity = getFirstItem(activities, "activities");
 
-      expect(activities[0].bashOutput).toBe("Success\n");
+      expect(firstActivity.bashOutput).toBe("Success\n");
     });
   });
 
   describe("Error Handling", () => {
     it("should throw JulesAPIError on 401", async () => {
-      mockFetch.mockResolvedValue({
-        ok: false,
-        status: 401,
-        json: async () => ({ error: { message: "Unauthorized" } }),
-      });
+      mockFetch.mockResolvedValue(createJsonResponse({ error: { message: "Unauthorized" } }, 401));
 
       await expect(client.listSessions()).rejects.toThrow(JulesAPIError);
       await expect(client.listSessions()).rejects.toThrow("Invalid API key");

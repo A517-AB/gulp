@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback, memo, useRef } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useMemo, useCallback, memo } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Code2, Plus, Trash2, Search, Pencil, Copy, Check } from 'lucide-react'
 import { useSnippets } from '@renderer/hooks/use-snippets'
 import { InlineEdit } from '@renderer/ui/inline-edit'
@@ -16,14 +16,19 @@ const LANGUAGE_ITEMS = LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.ic
 const TITLE_ADJ  = ['swift', 'async', 'clean', 'lazy', 'eager', 'raw', 'pure', 'silent', 'fuzzy', 'dark', 'sharp', 'wild']
 const TITLE_NOUN = ['handler', 'parser', 'runner', 'hook', 'util', 'patch', 'probe', 'loop', 'pipe', 'trap', 'drop', 'snap']
 
+function pickRandom(values: readonly string[], fallback: string) {
+  const value = values[Math.floor(Math.random() * values.length)]
+  return value ?? fallback
+}
+
 function randomTitle() {
-  const a = TITLE_ADJ[Math.floor(Math.random() * TITLE_ADJ.length)]
-  const b = TITLE_NOUN[Math.floor(Math.random() * TITLE_NOUN.length)]
+  const a = pickRandom(TITLE_ADJ, 'fresh')
+  const b = pickRandom(TITLE_NOUN, 'snippet')
   return `${a}-${b}`
 }
 
 function withAlpha(color: string, a: number) {
-  return color.replace(')', ` / ${a})`)
+  return color.replace(')', ` / ${String(a)})`)
 }
 
 interface SnippetRowProps {
@@ -168,7 +173,7 @@ export function SnippetsPage() {
 
   const handleEditorSave = useCallback(() => {
     if (!editingSnippet || !draftScript.trim()) return
-    void saveSnippet({
+    saveSnippet({
       ...editingSnippet,
       script: draftScript,
       languageId: draftLang,
@@ -186,20 +191,19 @@ export function SnippetsPage() {
 
   const handleDelete = useCallback((id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    void deleteSnippet(id)
+    deleteSnippet(id)
   }, [deleteSnippet])
 
   const handleTitleSave = useCallback((snippet: Snippet, newTitle: string) => {
-    void saveSnippet({ ...snippet, title: newTitle || null })
+    saveSnippet({ ...snippet, title: newTitle || null })
   }, [saveSnippet])
-
-  const snippetsRef = useRef<Snippet[]>([])
-  snippetsRef.current = snippets
 
   const handleLangChange = useCallback((id: string, newLang: string) => {
-    const snippet = snippetsRef.current.find(s => s.id === id)
-    if (snippet) void saveSnippet({ ...snippet, languageId: newLang })
-  }, [saveSnippet])
+    const snippet = snippets.find(s => s.id === id)
+    if (snippet) {
+      saveSnippet({ ...snippet, languageId: newLang })
+    }
+  }, [snippets, saveSnippet])
 
   // ── render ───────────────────────────────────────────────────────────────
 

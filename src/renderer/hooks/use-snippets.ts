@@ -16,10 +16,10 @@ export function useSnippets() {
       setSnippets(data)
       setLoading(false)
     }
-    loadSnippets()
+    void loadSnippets()
   }, [])
 
-  const saveSnippet = useCallback(async (snippet: Snippet) => {
+  const saveSnippet = useCallback((snippet: Snippet) => {
     setSnippets((prev) => {
       const existing = prev.find(s => s.id === snippet.id)
       const next = existing 
@@ -33,7 +33,7 @@ export function useSnippets() {
     })
   }, [])
 
-  const deleteSnippet = useCallback(async (id: string) => {
+  const deleteSnippet = useCallback((id: string) => {
     setSnippets((prev) => {
       const next = prev.filter(s => s.id !== id)
       if (snippetsApi) {

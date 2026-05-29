@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useJules } from "@/lib/jules/provider";
+import { useJules } from "@/lib/jules/context";
 import type { Activity, UseActivityFeedApiProps, UseActivityFeedApiReturn } from "@/types/activity-feed";
 
 const QUICK_REVIEW_PROMPT =
@@ -51,10 +51,19 @@ export function useActivityFeedApi({
   }, [client, session.id]);
 
   useEffect(() => {
-    loadActivities(true);
+    const initialLoad = window.setTimeout(() => {
+      void loadActivities(true);
+    }, 0);
+
     if (session.status !== "active") return;
-    const interval = setInterval(() => loadActivities(false), 5000);
-    return () => { clearInterval(interval); };
+    const interval = window.setInterval(() => {
+      void loadActivities(false);
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+      window.clearInterval(interval);
+    };
   }, [session.id, session.status, loadActivities]);
 
   const handleApprovePlan = useCallback(async () => {
@@ -63,7 +72,9 @@ export function useActivityFeedApi({
       setApprovingPlan(true);
       setError(null);
       await client.approvePlan(session.id);
-      setTimeout(() => loadActivities(false), 1000);
+      window.setTimeout(() => {
+        void loadActivities(false);
+      }, 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to approve plan");
     } finally {
@@ -78,7 +89,9 @@ export function useActivityFeedApi({
       setError(null);
       const userMessage = await client.createActivity({ sessionId: session.id, content: message.trim() });
       setActivities((prev) => [...prev, userMessage]);
-      setTimeout(() => loadActivities(false), 2000);
+      window.setTimeout(() => {
+        void loadActivities(false);
+      }, 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send message");
     } finally {
