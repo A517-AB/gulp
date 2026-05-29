@@ -7,28 +7,26 @@ import { env } from "@shared/bridge";
 import { JulesClient } from "./client";
 import { JulesContext } from "./context";
 
-function makeClient(key: string | null) {
-  return key ? new JulesClient(key) : null;
-}
-
 export function JulesProvider({ children }: { children: ReactNode }) {
-  const [apiKey, setApiKeyState] = useState<string | null>(
-    () => localStorage.getItem("jules-api-key")
-  );
-  const [client, setClient] = useState<JulesClient | null>(
-    () => makeClient(localStorage.getItem("jules-api-key"))
-  );
+  const [apiKey, setApiKeyState] = useState<string | null>(null);
+  const [client, setClient] = useState<JulesClient | null>(null);
 
-  // Only needed for the Electron env path where the key comes from an async IPC call
   useEffect(() => {
-    if (apiKey || !env?.getApiKey) return;
-    void env.getApiKey().then((envKey) => {
-      if (envKey) {
-        setApiKeyState(envKey);
-        setClient(new JulesClient(envKey));
+    async function init() {
+      let stored = localStorage.getItem("jules-api-key");
+
+      if (!stored && env?.getApiKey) {
+        const envKey = await env.getApiKey();
+        if (envKey) stored = envKey;
       }
-    });
-  }, [apiKey]);
+
+      if (stored) {
+        setApiKeyState(stored);
+        setClient(new JulesClient(stored));
+      }
+    }
+    void init();
+  }, []);
 
   const setApiKey = (key: string) => {
     console.log("[JulesProvider] setting api key");
