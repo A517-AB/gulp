@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react'
 import { useEffect } from 'react'
 import { Outlet, useLocation, NavLink, useMatches } from 'react-router'
-import { TopBar } from '@renderer/shell'
-import { ThemeProvider } from '@renderer/providers/theme'
-import { navRoutes, type AppRoute } from '@renderer/router'
+import { TopBar } from '@/shell'
+import { ThemeProvider } from '@/providers/theme'
+import { navRoutes, type AppRoute } from '@/renderer/router'
 import { useStore } from '@/store/app'
-import { lowPower as lowPowerBridge, popup as popupBridge } from '@shared/bridge'
+import { lowPower as lowPowerBridge, popup as popupBridge } from '@/shared/bridge'
 import { notify } from '@/store/notifications'
-import { Clock } from '@renderer/components/shared/Clock'
-import { Notifications } from '@renderer/components/shared/Notifications'
-import { useAlarmEngine } from '@renderer/lib/alarms'
+import { Clock } from '@/components/shared/Clock'
+import { Notifications } from '@/components/shared/Notifications'
+import { useAlarmEngine } from '@/lib/alarms'
 
 export default function RootLayout(): ReactNode {
     const location = useLocation()

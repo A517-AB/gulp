@@ -1,5 +1,5 @@
-import '@renderer/lib/monaco'
-import { useTheme } from '@renderer/providers/theme'
+import '@/lib/monaco'
+import { useTheme } from '@/providers/theme'
 import Editor, { type EditorProps } from '@monaco-editor/react'
 import { cn } from '@/utils'
 import { Loader2 } from 'lucide-react'

@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from '@renderer/App'
+import App from '@/renderer/App'
 
 const root = document.getElementById('root')
 if (!root) throw new Error('[main] Root element #root not found in DOM')

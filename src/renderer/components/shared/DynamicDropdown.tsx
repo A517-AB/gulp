@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/popover'
 import { cn } from '@/utils'
 
 export interface DropdownItem {

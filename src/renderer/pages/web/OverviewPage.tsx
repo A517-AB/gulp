@@ -1,9 +1,9 @@
 import type { ReactNode, ChangeEvent, KeyboardEvent } from 'react'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useJules } from '@renderer/lib/jules/context'
-import { BlockEditor } from '@renderer/components/shared/BlockEditor'
-import { useChatAliases } from '@renderer/hooks/use-settings'
+import { useJules } from '@/lib/jules/context'
+import { BlockEditor } from '@/components/shared/BlockEditor'
+import { useChatAliases } from '@/hooks/use-settings'
 import type { Activity } from '@/types/jules'
 import type { ChatAlias } from '@/types/settings'
 

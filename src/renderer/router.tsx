@@ -1,19 +1,22 @@
-import type { ComponentType } from 'react'
+import { lazy, type ComponentType } from 'react'
 import { createHashRouter, type RouteObject } from 'react-router'
 // RouteObject cast needed: exactOptionalPropertyTypes makes children?: X[] incompatible with RouteObject[]
-import { isElectron, isWeb } from '@shared/bridge'
-import { RootLayout } from '@renderer/layouts'
-import { RouteErrorBoundary } from '@renderer/core'
-import {
-    HomePage, SettingsPage, JulesPage,
-} from '@renderer/pages/shared'
-import {
-    ProjectsPage, NotesPage,
-    ActivityPage, ReposPage, SnapshotPage, QueuesPage, SnippetsPage,
-} from '@renderer/pages/electron'
-import {
-    OverviewPage,
-} from '@renderer/pages/web'
+import { isElectron, isWeb } from '@/shared/bridge'
+import { RootLayout } from '@/layouts'
+import { RouteErrorBoundary } from '@/core'
+
+const HomePage     = lazy(() => import('@/pages/shared/HomePage'))
+const SettingsPage = lazy(() => import('@/pages/shared/SettingsPage'))
+const JulesPage    = lazy(() => import('@/pages/shared/JulesPage'))
+
+const ProjectsPage = lazy(() => import('@/pages/electron/ProjectsPage'))
+const ActivityPage = lazy(() => import('@/pages/electron/ActivityPage'))
+const ReposPage    = lazy(() => import('@/pages/electron/ReposPage'))
+const SnapshotPage = lazy(() => import('@/pages/electron/SnapshotPage'))
+const QueuesPage   = lazy(() => import('@/pages/electron/QueuesPage'))
+const SnippetsPage = lazy(() => import('@/pages/electron/SnippetsPage'))
+
+const OverviewPage = lazy(() => import('@/pages/web/OverviewPage'))
 
 // ── dev ───────────────────────────────────────────────────────────────────────
 
@@ -21,7 +24,7 @@ if (import.meta.env.DEV) {
     console.log('[router] platform:', { isElectron, isWeb })
 
     if (!isElectron && !isWeb) {
-        console.warn('[router] neither isElectron nor isWeb is true — check @shared/bridge')
+        console.warn('[router] neither isElectron nor isWeb is true — check @/shared/bridge')
     }
 
     if (isElectron && isWeb) {
@@ -46,7 +49,6 @@ const sharedRoutes: AppRoute[] = [
 // ── electron ──────────────────────────────────────────────────────────────────
 
 const electronRoutes: AppRoute[] = [
-    { path: 'notes',         Component: NotesPage,    handle: { title: 'Notes',    inNav: true } },
     { path: 'projects',     Component: ProjectsPage,  handle: { title: 'Projects', inNav: true } },
     { path: 'repos',        Component: ReposPage,     handle: { title: 'Repos', inNav: true } },
     { path: 'queues',        Component: QueuesPage,   handle: { title: 'Queues', inNav: true } },

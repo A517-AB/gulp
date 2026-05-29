@@ -6,22 +6,10 @@
     "module": "esnext",
     "types": ["node", "bun-types", "vite/client"],
     "paths": {
-      "@/*": ["./src/*"],
-      "@renderer": ["./src/renderer/index.ts"],
-      "@renderer/*": ["./src/renderer/*"],
-      "@shared": ["./src/shared/index.ts"],
-      "@shared/*": ["./src/shared/*"],
-      "@electron/*": ["./src/electron/*"],
-      "@renderer/shell": ["./src/renderer/shell/index.ts"],
-      "@renderer/shell/*": ["./src/renderer/shell/*"],
-      "@renderer/core": ["./src/renderer/core/index.ts"],
-      "@renderer/core/*": ["./src/renderer/core/*"],
-      "@/ui": ["./src/renderer/ui"],
-      "@/ui/*": ["./src/renderer/ui/*"],
-      "@/utils": ["./src/renderer/utils/index.ts"],
-      "@/utils/*": ["./src/renderer/utils/*"],
-      "@api": ["./src/renderer/api/index.ts"],
-      "@api/*": ["./src/renderer/api/*"]
+      "@/shared": ["./src/shared"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/electron": ["./src/electron"],
+      "@/electron/*": ["./src/electron/*"]
     },
 
     /* Bundler mode */

@@ -1,14 +1,14 @@
 import { useState, useMemo, useCallback, memo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Code2, Plus, Trash2, Search, Pencil, Copy, Check } from 'lucide-react'
-import { useSnippets } from '@renderer/hooks/use-snippets'
-import { InlineEdit } from '@renderer/ui/inline-edit'
-import { CodeEditor } from '@renderer/ui/code-editor'
-import { DynamicDropdown } from '@renderer/components/shared/DynamicDropdown'
+import { useSnippets } from '@/hooks/use-snippets'
+import { InlineEdit } from '@/ui/inline-edit'
+import { CodeEditor } from '@/ui/code-editor'
+import { DynamicDropdown } from '@/components/shared/DynamicDropdown'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from '@renderer/ui/dialog'
-import { LANGUAGES, langFor } from '@renderer/lib/languages'
+} from '@/ui/dialog'
+import { LANGUAGES, langFor } from '@/lib/languages'
 import type { Snippet } from '../../../types/snippets'
 
 const LANGUAGE_ITEMS = LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))

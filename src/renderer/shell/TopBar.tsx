@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { isElectron, windowControls, lowPower as lowPowerBridge } from '@shared/bridge';
+import { isElectron, windowControls, lowPower as lowPowerBridge } from '@/shared/bridge';
 import { ThemeToggle } from '@/ui/theme-toggle';
 import { useStore } from '@/store/app';
 

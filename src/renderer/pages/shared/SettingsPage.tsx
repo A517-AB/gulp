@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Settings2 } from 'lucide-react'
-import { usePowerSettings, useAlarmSettings, useNotificationSettings } from '@renderer/hooks/use-settings'
+import { usePowerSettings, useAlarmSettings, useNotificationSettings } from '@/hooks/use-settings'
 import { useSettingsStore } from '@/store/settings'
 import type { Deadline } from '@/types/settings'
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Clock } from '@renderer/components/shared/Clock';
+import { Clock } from '@/components/shared/Clock';
 
 export default function HomePage(): ReactNode {
   return (

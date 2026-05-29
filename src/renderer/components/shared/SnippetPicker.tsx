@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/popover'
 import { cn } from '@/utils'
 import { Paperclip, Check } from 'lucide-react'
 import type { Snippet } from '@/types/snippets'
