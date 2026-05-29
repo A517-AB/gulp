@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Send, Loader2, Play, GitPullRequest } from "lucide-react";
-import { Textarea } from "@renderer/ui/textarea";
-import { Button } from "@renderer/ui/button";
+import { Textarea } from "@/ui/textarea";
+import { Button } from "@/ui/button";
 import { DynamicDropdown } from "./DynamicDropdown";
 import { SnippetPicker } from "./SnippetPicker";
-import { compilePromptWithSnippets } from "@renderer/utils/snippets";
+import { compilePromptWithSnippets } from "@/utils/snippets";
 import { NewSessionDialog } from "../new-session-dialog";
 import type { Session } from "@/types/jules";
 import type { Snippet } from "@/types/snippets";

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { FileCode } from "lucide-react";
-import { ScrollArea } from "@renderer/ui/scroll-area";
-import { DiffViewer } from "@renderer/ui/diff-viewer";
+import { ScrollArea } from "@/ui/scroll-area";
+import { DiffViewer } from "@/ui/diff-viewer";
 import type { CodeDiffSidebarProps } from "@/types/activity-feed";
 
 export function CodeDiffSidebar({ activities, repoUrl }: CodeDiffSidebarProps) {

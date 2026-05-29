@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Pencil, Check } from "lucide-react";
-import { MarkdownContent } from "@renderer/components/shared/MarkdownContent";
+import { MarkdownContent } from "@/components/shared/MarkdownContent";
 
 const STORAGE_KEY = "jules:projects-notes";
 

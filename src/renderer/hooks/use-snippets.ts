@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
-import { snippets as snippetsApi } from "@shared/bridge"
+import { snippets as snippetsApi } from "@/shared/bridge"
 import type { Snippet } from "../../types/snippets"
 
 export function useSnippets() {

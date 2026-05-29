@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { useJules } from "@renderer/lib/jules/context";
-import { queues } from "@shared/bridge";
+import { useJules } from "@/lib/jules/context";
+import { queues } from "@/shared/bridge";
 import type { FleetTaskGroup, FleetTask } from "@/types/jules";
 
 export function taskKey(group: FleetTaskGroup, task: FleetTask): string {

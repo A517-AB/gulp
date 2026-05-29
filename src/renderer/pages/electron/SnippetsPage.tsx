@@ -357,3 +357,5 @@ export function SnippetsPage() {
     </div>
   )
 }
+
+export default SnippetsPage

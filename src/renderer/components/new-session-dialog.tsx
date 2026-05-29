@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@renderer/ui/dialog";
-import { Button } from "@renderer/ui/button";
-import { Input } from "@renderer/ui/input";
-import { Textarea } from "@renderer/ui/textarea";
-import { Label } from "@renderer/ui/label";
-import { Combobox } from "@renderer/ui/combobox";
-import { useNewSessionForm } from "@renderer/hooks/use-new-session-form";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/ui/dialog";
+import { Button } from "@/ui/button";
+import { Input } from "@/ui/input";
+import { Textarea } from "@/ui/textarea";
+import { Label } from "@/ui/label";
+import { Combobox } from "@/ui/combobox";
+import { useNewSessionForm } from "@/hooks/use-new-session-form";
 import type { NewSessionDialogProps } from "@/types/activity-feed";
 
 export function NewSessionDialog({ onSessionCreated, initialValues, trigger, open: controlledOpen, onOpenChange }: NewSessionDialogProps) {

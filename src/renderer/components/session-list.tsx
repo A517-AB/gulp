@@ -1,11 +1,11 @@
 import { isToday, parseISO } from "date-fns";
 import { Search } from "lucide-react";
-import { ScrollArea } from "@renderer/ui/scroll-area";
-import { Input } from "@renderer/ui/input";
-import { Badge } from "@renderer/ui/badge";
-import { Button } from "@renderer/ui/button";
-import { useSessionList } from "@renderer/hooks/use-session-list";
-import { STATE_DOT } from "@renderer/utils/session";
+import { ScrollArea } from "@/ui/scroll-area";
+import { Input } from "@/ui/input";
+import { Badge } from "@/ui/badge";
+import { Button } from "@/ui/button";
+import { useSessionList } from "@/hooks/use-session-list";
+import { STATE_DOT } from "@/utils/session";
 import type { SessionListProps } from "@/types/activity-feed";
 
 const LIMIT = 100;

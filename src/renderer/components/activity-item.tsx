@@ -1,14 +1,14 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChevronDown, ChevronRight, Terminal, Loader2 } from "lucide-react";
-import { Card, CardContent } from "@renderer/ui/card";
-import { Badge } from "@renderer/ui/badge";
-import { Avatar, AvatarFallback } from "@renderer/ui/avatar";
-import { Button } from "@renderer/ui/button";
-import { BashOutput } from "@renderer/ui/bash-output";
-import { BorderGlow } from "@renderer/ui/border-glow";
+import { Card, CardContent } from "@/ui/card";
+import { Badge } from "@/ui/badge";
+import { Avatar, AvatarFallback } from "@/ui/avatar";
+import { Button } from "@/ui/button";
+import { BashOutput } from "@/ui/bash-output";
+import { BorderGlow } from "@/ui/border-glow";
 import { PlanContent } from "./plan-content";
-import { formatDate, getActivityTypeColor } from "@renderer/utils/activity";
+import { formatDate, getActivityTypeColor } from "@/utils/activity";
 import type { Activity, ActivityGroup, ActivityRole } from "@/types/activity-feed";
 
 function parseJsonContent(content: string): { ok: true; value: unknown } | { ok: false } {

@@ -3,7 +3,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { env } from "@shared/bridge";
+import { env } from "@/shared/bridge";
 import { JulesClient } from "./client";
 import { JulesContext } from "./context";
 
