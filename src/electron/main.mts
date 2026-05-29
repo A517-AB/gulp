@@ -13,13 +13,6 @@ import { registerSdkHandlers } from "./jules/handlers";
 import { registerReposHandlers } from "./repos";
 import { registerPowerMonitor } from "./power";
 
-// --- Chromium Hardware & Rendering Optimizations ---
-app.commandLine.appendSwitch('force-color-profile', 'srgb');
-app.commandLine.appendSwitch('enable-gpu-rasterization');
-app.commandLine.appendSwitch('enable-zero-copy');
-app.commandLine.appendSwitch('enable-hardware-overlays'); // TODO: no-op on Windows with transparent:true (DWM owns compositing) — revisit if we ever go opaque or ship on macOS/Linux
-// ---------------------------------------------------
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -33,6 +26,11 @@ console.log("[main] JULES_API_KEY:", process.env.JULES_API_KEY ? "SET ✓" : "NO
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let forceQuit = false;
+
+// Guards an auto-reload-on-crash loop: reset on every clean load, capped so a
+// renderer that crashes on boot doesn't reload forever.
+let crashReloadCount = 0;
+const MAX_CRASH_RELOADS = 3;
 
 // --- Tray Icon Logic ---
 export type TrayState = 'active' | 'idle' | 'low-power';
@@ -70,6 +68,10 @@ function createWindow() {
     height: 800,
     frame: false,
     transparent: true,
+    // Explicit fully-transparent alpha. Without this the compositor has no
+    // defined clear color for the surface, which makes the repaint-after-reload
+    // bug (window goes fully see-through on Ctrl+R) more likely.
+    backgroundColor: "#00000000",
     webPreferences: {
       preload: preloadPath,
       contextIsolation: true,
@@ -88,6 +90,12 @@ function createWindow() {
 
   mainWindow.webContents.on("did-finish-load", () => {
     console.log("[main] renderer loaded ok");
+    crashReloadCount = 0; // a clean load clears the crash-loop guard
+    // Transparent + frameless windows can fail to repaint their compositor
+    // surface after a reload (Ctrl+R), leaving the window fully see-through —
+    // i.e. "the whole window disappears". Force a full repaint after every
+    // load. See electron/electron #18877, #28255, #11733.
+    mainWindow?.webContents.invalidate();
   });
 
   mainWindow.webContents.on("did-fail-load", (_e, code, desc, url) => {
@@ -98,6 +106,38 @@ function createWindow() {
         void mainWindow?.loadURL(DEV_URL);
       }, 1000);
     }
+  });
+
+  // ── crash / hang diagnostics ──────────────────────────────────────────────
+  // Without these a renderer or GPU crash on a transparent frameless window is
+  // silent: the window goes blank/transparent and looks like it "disappeared".
+  // Surface the cause and auto-recover instead of leaving a dead window.
+  mainWindow.webContents.on("render-process-gone", (_e, details) => {
+    console.error("[main] render process gone:", details.reason, "exitCode:", details.exitCode);
+    // 'clean-exit'/'killed' are intentional (e.g. shutdown); anything else is
+    // a crash worth reloading from — but only up to the cap.
+    const isCrash = details.reason !== "clean-exit" && details.reason !== "killed";
+    if (isCrash && crashReloadCount < MAX_CRASH_RELOADS) {
+      crashReloadCount++;
+      console.log(`[main] reloading renderer after crash (${String(crashReloadCount)}/${String(MAX_CRASH_RELOADS)})…`);
+      // render-process-gone can fire during teardown when the window is
+      // already destroyed; reload() on a destroyed window throws.
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.reload();
+    } else if (isCrash) {
+      console.error("[main] renderer crashed too many times — leaving it; check logs above");
+    }
+  });
+
+  mainWindow.webContents.on("unresponsive", () => {
+    console.warn("[main] renderer became unresponsive");
+  });
+
+  mainWindow.webContents.on("responsive", () => {
+    console.log("[main] renderer responsive again");
+  });
+
+  mainWindow.webContents.on("preload-error", (_e, errPreloadPath, error) => {
+    console.error("[main] preload error in", errPreloadPath, error);
   });
 
   // Add listeners for window show/hide to update tray state
@@ -214,6 +254,13 @@ void app.whenReady().then(() => {
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+
+// Catches GPU/utility process crashes. With hardware acceleration + a
+// transparent window, a dead GPU process is a prime suspect for the window
+// going blank, so make it loud rather than silent.
+app.on("child-process-gone", (_e, details) => {
+  console.error("[main] child process gone:", details.type, "-", details.reason);
 });
 
 app.on("will-quit", () => {
