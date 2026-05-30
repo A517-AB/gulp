@@ -60,7 +60,7 @@ export default defineConfig({
   },
   plugins: [
     tailwindcss(),
-    react(),
+    react({ fastRefresh: false }),
     
     babel({ presets: [reactCompilerPreset()] }),
     ...isWeb ? [] : [

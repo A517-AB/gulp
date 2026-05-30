@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeScript Lesson: Modifying Types</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- PrismJS Theme (VSCode Dark like) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-heading: #ffffff;
+            --accent-color: #58a6ff;
+            --success-color: #3fb950;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            color: var(--text-heading);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: -0.05em;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            animation: slideUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+
+        h2 {
+            color: var(--text-heading);
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        /* Custom Prism overrides to look more integrated */
+        pre[class*="language-"] {
+            background: #090c10 !important;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin: 1.5em 0;
+            padding: 1.2em;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+        }
+
+        code[class*="language-"] {
+            font-family: 'Fira Code', monospace;
+            text-shadow: none !important;
+        }
+
+        .highlight {
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .icon {
+            stroke: var(--accent-color);
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>TypeScript Utility Types</h1>
+            <p class="subtitle">How to customize imported types without rewriting them.</p>
+        </header>
+
+        <div class="card">
+            <h2>
+                <i data-lucide="package-open" class="icon"></i>
+                The Problem
+            </h2>
+            <p>You imported the <code>Cheese</code> type from someone else's package. It looks like this:</p>
+            <pre><code class="language-typescript">import type { Cheese } from 'some-package';
+
+// What it looks like under the hood:
+// type Cheese = {
+//   name: string;
+//   ageInMonths: number;
+//   isStinky: boolean;
+// };</code></pre>
+            <p>But you don't care if it's stinky! You just want to use the package as-is, immediately, without having to check the <code>isStinky</code> property or redefine the whole type from scratch.</p>
+        </div>
+
+        <div class="card">
+            <h2>
+                <i data-lucide="scissors" class="icon"></i>
+                The Solution: Omit
+            </h2>
+            <p>TypeScript has built-in "Utility Types" that let you transform existing types. To remove a property, you use <span class="highlight">Omit</span>.</p>
+            <p><code>Omit</code> takes two arguments: the original type, and the property you want to throw away.</p>
+            <pre><code class="language-typescript">// Create a new type based on Cheese, but remove 'isStinky'
+type MyPerfectCheese = Omit&lt;Cheese, 'isStinky'&gt;;
+
+// Now, MyPerfectCheese looks exactly like this:
+// type MyPerfectCheese = {
+//   name: string;
+//   ageInMonths: number;
+// }</code></pre>
+        </div>
+
+        <div class="card">
+            <h2>
+                <i data-lucide="check-circle" class="icon"></i>
+                In Action
+            </h2>
+            <p>Now you can consume it straight from the package without TypeScript yelling at you about missing the stinky property!</p>
+            <pre><code class="language-typescript">const snackTime: MyPerfectCheese = {
+  name: "Gouda",
+  ageInMonths: 6
+  // No 'isStinky' required here!
+};
+
+console.log(`Eating ${snackTime.name} immediately!`);</code></pre>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

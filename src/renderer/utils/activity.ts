@@ -1,5 +1,5 @@
 import { parseISO, isValid, formatDistanceToNow } from "date-fns";
-import type { Activity, ActivityGroup, ActivityType } from "@/types/activity-feed";
+import type { Activity, ActivityGroup, ActivityType } from '@/utils/types'
 
 export function formatDate(dateString: string): string {
   if (!dateString) return "Unknown date";

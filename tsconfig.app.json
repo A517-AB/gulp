@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // TODO: upgrade target + lib to ESNext, module stays ESNext, moduleResolution stays bundler
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "module": "esnext",
     "types": ["vite/client"],
     "paths": {

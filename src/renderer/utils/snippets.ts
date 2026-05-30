@@ -1,4 +1,4 @@
-import type { Snippet } from "@/types/snippets";
+import type { Snippet } from '@/utils/types'
 
 /**
  * Compiles a final prompt string by combining the user's custom message

@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { isElectron, windowControls, lowPower as lowPowerBridge } from '@/shared/bridge';
+import { isElectron, windowControls } from '@/shared/bridge';
 import { ThemeToggle } from '@/ui/theme-toggle';
-import { useStore } from '@/store/app';
 
 interface TopBarProps {
     left?:   ReactNode
@@ -11,23 +10,8 @@ interface TopBarProps {
 }
 
 export function TopBar({ left, center, right }: TopBarProps) {
-    const { enterLowPower, isLowPower, exitLowPower } = useStore()
-    const handleLowPowerToggle = () => {
-        if (isLowPower) {
-            if (lowPowerBridge) {
-                lowPowerBridge.exit()
-            } else {
-                exitLowPower()
-            }
-            return
-        }
-
-        if (lowPowerBridge) {
-            lowPowerBridge.enter()
-        } else {
-            enterLowPower()
-        }
-    }
+    // TODO: rewire hidden button to something useful
+    const handleHiddenAction = () => { /* stub */ }
 
     return (
         <header className="group/bar app-drag-region relative h-toolbar flex items-center gap-2 px-3 bg-base shrink-0">
@@ -39,7 +23,7 @@ export function TopBar({ left, center, right }: TopBarProps) {
             {/* NOTE: Hidden low-power trigger on the far left. It is invisible by design and only appears as a very faint 3% opacity indentation on press. */}
             <motion.button
                 type="button"
-                onDoubleClick={handleLowPowerToggle}
+                onDoubleClick={handleHiddenAction}
                 whileTap={{ scale: 0.95, opacity: 0.03 }}
                 className="absolute left-0 top-0 w-16 h-full bg-fg-primary opacity-0 cursor-default z-50 rounded-md"
                 aria-hidden="true"

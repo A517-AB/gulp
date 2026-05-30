@@ -1,42 +1,42 @@
+"use client";
+
 import {
+  createContext,
+  useContext,
   useState,
-  useEffect,
   type ReactNode,
 } from "react";
-import { env } from "@/shared/bridge";
 import { JulesClient } from "./client";
-import { JulesContext } from "./context";
+
+interface JulesContextType {
+  client: JulesClient | null;
+  apiKey: string | null;
+  isLoading: boolean;
+  setApiKey: (key: string) => void;
+  clearApiKey: () => void;
+}
+
+const JulesContext = createContext<JulesContextType | undefined>(undefined);
 
 export function JulesProvider({ children }: { children: ReactNode }) {
-  const [apiKey, setApiKeyState] = useState<string | null>(null);
-  const [client, setClient] = useState<JulesClient | null>(null);
-
-  useEffect(() => {
-    async function init() {
-      let stored = localStorage.getItem("jules-api-key");
-
-      if (!stored && env?.getApiKey) {
-        const envKey = await env.getApiKey();
-        if (envKey) stored = envKey;
-      }
-
-      if (stored) {
-        setApiKeyState(stored);
-        setClient(new JulesClient(stored));
-      }
-    }
-    void init();
-  }, []);
+  const [apiKey, setApiKeyState] = useState<string | null>(() =>
+    typeof window !== "undefined" ? localStorage.getItem("jules-api-key") : null
+  );
+  const [client, setClient] = useState<JulesClient | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = localStorage.getItem("jules-api-key");
+    return stored ? new JulesClient(stored) : null;
+  });
+  // No loading state needed — localStorage is read synchronously above
+  const isLoading = false;
 
   const setApiKey = (key: string) => {
-    console.log("[JulesProvider] setting api key");
     localStorage.setItem("jules-api-key", key);
     setApiKeyState(key);
     setClient(new JulesClient(key));
   };
 
   const clearApiKey = () => {
-    console.log("[JulesProvider] clearing api key");
     localStorage.removeItem("jules-api-key");
     setApiKeyState(null);
     setClient(null);
@@ -44,9 +44,17 @@ export function JulesProvider({ children }: { children: ReactNode }) {
 
   return (
     <JulesContext.Provider
-      value={{ client, apiKey, setApiKey, clearApiKey }}
+      value={{ client, apiKey, isLoading, setApiKey, clearApiKey }}
     >
       {children}
     </JulesContext.Provider>
   );
+}
+
+export function useJules() {
+  const context = useContext(JulesContext);
+  if (context === undefined) {
+    throw new Error("useJules must be used within a JulesProvider");
+  }
+  return context;
 }

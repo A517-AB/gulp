@@ -1,24 +1,17 @@
 import type { ReactNode, ChangeEvent, KeyboardEvent } from 'react'
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useJules } from '@/lib/jules/context'
 import { BlockEditor } from '@/components/shared/BlockEditor'
-import { useChatAliases } from '@/hooks/use-settings'
-import type { ChatAlias } from '@/types/settings'
+
+interface ChatAlias {
+  alias: string
+  sessionId: string
+  label?: string
+}
 
 interface MarkdownEntry {
   id: string
   content: string
-}
-
-function looksLikeMarkdown(content: string): boolean {
-  return (
-    /^#{1,6}\s/m.test(content) ||
-    content.includes('```') ||
-    /\*\*.+\*\*/.test(content) ||
-    /^[-*]\s/m.test(content) ||
-    /^\d+\.\s/m.test(content)
-  )
 }
 
 function extractZip(content: string): string | null {
@@ -27,20 +20,15 @@ function extractZip(content: string): string | null {
 }
 
 export default function OverviewPage(): ReactNode {
-  const { client } = useJules()
-  const [aliases] = useChatAliases()
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null)
+  const aliases: ChatAlias[] = []
   const [activeAlias, setActiveAlias] = useState<string | null>(null)
   const [input, setInput] = useState('')
-  const [isSending, setIsSending] = useState(false)
   const [markdownEntry, setMarkdownEntry] = useState<MarkdownEntry | null>(null)
   const [showAliasMenu, setShowAliasMenu] = useState(false)
   const [aliasQuery, setAliasQuery] = useState('')
   const [aliasMenuIndex, setAliasMenuIndex] = useState(0)
 
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const lastMdIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
@@ -57,38 +45,13 @@ export default function OverviewPage(): ReactNode {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  useEffect(() => {
-    if (!activeSessionId || !client) return
-
-    const doFetch = async () => {
-      try {
-        const acts = await client.listActivities(activeSessionId)
-        const latestMd = [...acts].reverse().find(a => a.role === 'agent' && looksLikeMarkdown(a.content))
-        if (latestMd && latestMd.id !== lastMdIdRef.current) {
-          lastMdIdRef.current = latestMd.id
-          setMarkdownEntry({ id: latestMd.id, content: latestMd.content })
-        }
-      } catch (e) {
-        console.error('[OverviewPage]', e)
-      }
-    }
-
-    void doFetch()
-    pollRef.current = setInterval(() => { void doFetch() }, 3000)
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current)
-    }
-  }, [activeSessionId, client])
-
   const filteredAliases = aliases.filter(a =>
     a.alias.toLowerCase().startsWith(aliasQuery.toLowerCase())
   )
 
   const selectAlias = (alias: ChatAlias) => {
-    setActiveSessionId(alias.sessionId)
     setActiveAlias(alias.alias)
     setMarkdownEntry(null)
-    lastMdIdRef.current = null
     setInput('')
     setShowAliasMenu(false)
     setTimeout(() => inputRef.current?.focus(), 0)
@@ -106,23 +69,6 @@ export default function OverviewPage(): ReactNode {
     }
   }
 
-  const handleSend = async () => {
-    const trimmed = input.trim()
-    if (!trimmed || !activeSessionId || !client || isSending) return
-    setInput('')
-    setIsSending(true)
-    try {
-      await client.createActivity({
-        sessionId: activeSessionId,
-        content: `${trimmed}\n\nReport back with markdown please.`,
-      })
-    } catch (e) {
-      console.error('[OverviewPage] send failed:', e)
-    } finally {
-      setIsSending(false)
-    }
-  }
-
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (showAliasMenu && filteredAliases.length > 0) {
       if (e.key === 'ArrowDown') { e.preventDefault(); setAliasMenuIndex(i => Math.min(i + 1, filteredAliases.length - 1)); return }
@@ -134,10 +80,6 @@ export default function OverviewPage(): ReactNode {
         return
       }
       if (e.key === 'Escape') { setShowAliasMenu(false); return }
-    }
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      void handleSend()
     }
   }
 
@@ -223,9 +165,7 @@ export default function OverviewPage(): ReactNode {
           value={input}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-
           rows={1}
-          disabled={isSending}
           className="w-full resize-none bg-transparent border-none outline-none ring-0 text-sm text-fg-primary placeholder:text-fg-ghost opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-300"
         />
       </div>

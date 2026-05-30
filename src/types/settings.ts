@@ -63,17 +63,10 @@ export interface NotificationSettings {
   defaultDurationMs: number
 }
 
-export interface ChatAlias {
-  alias:     string
-  sessionId: string
-  label?:    string
-}
-
 export interface AppSettings {
   power:        PowerSettings
   alarms:       AlarmSettings
   notifications: NotificationSettings
-  chatAliases:  ChatAlias[]
 }
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
@@ -117,7 +110,4 @@ export const DEFAULT_SETTINGS: AppSettings = {
   notifications: {
     defaultDurationMs: 5000,
   },
-  chatAliases: [
-    { alias: 'check', sessionId: '8320215904274774054' },
-  ],
 }

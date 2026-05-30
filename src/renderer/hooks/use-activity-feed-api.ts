@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useJules } from "@/lib/jules/context";
+import { useJules } from "@/lib/jules/provider";
 import type { Activity, UseActivityFeedApiProps, UseActivityFeedApiReturn } from "@/types/activity-feed";
 
 const QUICK_REVIEW_PROMPT =

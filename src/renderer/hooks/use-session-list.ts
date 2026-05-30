@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { useJules } from "@/lib/jules/context";
+import { useJules } from "@/lib/jules/provider";
 import { getArchivedSessions } from "@/lib/archive";
 import type { Session, UseSessionListReturn } from "@/types/activity-feed";
 

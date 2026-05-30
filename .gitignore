@@ -24,6 +24,8 @@ dist-electron
 *.sln
 *.sw?
 
+TESTING/
+
 # GitHub workflows (OAuth token lacks workflow scope)
 .github/workflows/
 .jules/cache/

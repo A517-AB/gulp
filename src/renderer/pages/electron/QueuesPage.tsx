@@ -6,7 +6,6 @@ import {
   ListTodo, ChevronRight, ChevronDown, Send, Loader2,
   Plus, Folder, Trash2, CheckSquare, ListTree,
 } from "lucide-react";
-import { useJules } from "@/lib/jules/context";
 import { queues as electronQueues, isElectron } from "@/shared/bridge";
 import { InlineEdit } from "@/ui/inline-edit";
 import type { Source, FleetTask, FleetTaskGroup } from "@/types/jules";
@@ -115,7 +114,7 @@ function SourcePicker({ value, sources, onChange }: {
 // ── QueuesView ─────────────────────────────────────────────────────────────────
 
 export default function QueuesView() {
-  const { client } = useJules();
+  const client = null;
   const [sources, setSources] = useState<Source[]>([]);
   const [tasks, setTasks] = useState<FleetTaskGroup[]>([]);
   const [queue, setQueue] = useState<unknown[]>([]);

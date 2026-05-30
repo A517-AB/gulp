@@ -1,4 +1,3 @@
-import { type ComponentType } from 'react'
 import { type RouteObject } from 'react-router'
 import { isElectron, isWeb } from '@/shared/bridge'
 
@@ -30,15 +29,9 @@ if (import.meta.env.DEV) {
     }
 }
 
-// ── types ─────────────────────────────────────────────────────────────────────
-
-export type AppRoute = Omit<RouteObject, 'handle'> & {
-    handle?: { title: string; inNav?: boolean; lowPowerView?: ComponentType }
-}
-
 // ── shared ────────────────────────────────────────────────────────────────────
 
-const sharedRoutes: AppRoute[] = [
+const sharedRoutes: RouteObject[] = [
     { index: true,        Component: HomePage,      handle: { title: 'Home',      inNav: true } },
     { path: 'settings',  Component: SettingsPage,  handle: { title: 'Settings',  inNav: true } },
     { path: 'jules', Component: JulesPage, handle: { title: 'Jules', inNav: true } },
@@ -46,7 +39,7 @@ const sharedRoutes: AppRoute[] = [
 
 // ── electron ──────────────────────────────────────────────────────────────────
 
-const electronRoutes: AppRoute[] = [
+const electronRoutes: RouteObject[] = [
     { path: 'projects',     Component: ProjectsPage,  handle: { title: 'Projects', inNav: true } },
     { path: 'repos',        Component: ReposPage,     handle: { title: 'Repos', inNav: true } },
     { path: 'queues',        Component: QueuesPage,   handle: { title: 'Queues', inNav: true } },
@@ -57,13 +50,9 @@ const electronRoutes: AppRoute[] = [
     { path: 'overview', Component: OverviewPage, handle: { title: 'Overview', inNav: true } },
 ]
 
-// ── web ───────────────────────────────────────────────────────────────────────
-
-const webRoutes: AppRoute[] = []
-
 // ── nav export ────────────────────────────────────────────────────────────────
 
-export const navRoutes: AppRoute[] = [
+export const navRoutes: RouteObject[] = [
     ...sharedRoutes,
     ...(isElectron ? electronRoutes : []),
     ...(isWeb      ? webRoutes      : []),

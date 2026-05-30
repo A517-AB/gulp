@@ -1,4 +1,4 @@
-import type { SessionStatus, SessionStatusInfo } from "@/types/activity-feed";
+import type { SessionStatus, SessionStatusInfo } from '@/utils/types'
 
 export const STATE_COLOR: Record<SessionStatus, string> = {
   active:    "bg-cyan-500/15 text-cyan-400",
