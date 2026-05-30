@@ -50,6 +50,10 @@ const electronRoutes: RouteObject[] = [
     { path: 'overview', Component: OverviewPage, handle: { title: 'Overview', inNav: true } },
 ]
 
+// ── web ───────────────────────────────────────────────────────────────────────
+
+const webRoutes: RouteObject[] = []
+
 // ── nav export ────────────────────────────────────────────────────────────────
 
 export const navRoutes: RouteObject[] = [

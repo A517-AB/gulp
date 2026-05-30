@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, type SyntheticEvent } from "react";
+import { useJules } from "@/lib/jules/context";
 import type { Source, SessionFormData, UseNewSessionFormProps, UseNewSessionFormReturn } from "@/types/activity-feed";
 
 const DEFAULT_FORM: SessionFormData = {
@@ -15,7 +16,7 @@ export function useNewSessionForm({
   onSessionCreated,
   onClose,
 }: UseNewSessionFormProps): UseNewSessionFormReturn {
-  const client = null;
+  const { client } = useJules();
   const [sources, setSources] = useState<Source[]>([]);
   const [formData, setFormData] = useState<SessionFormData>(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);
