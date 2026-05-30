@@ -27,14 +27,20 @@ export function JulesProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (apiKey || !env?.getApiKey) return;
     let cancelled = false;
-    void env.getApiKey().then((envKey) => {
-      if (cancelled) return;
-      if (envKey) {
-        setApiKeyState(envKey);
-        setClient(new JulesClient(envKey));
-      }
-      setIsLoading(false);
-    });
+    env.getApiKey()
+      .then((envKey) => {
+        if (cancelled) return;
+        if (envKey) {
+          setApiKeyState(envKey);
+          setClient(new JulesClient(envKey));
+        }
+        setIsLoading(false);
+      })
+      .catch((err: unknown) => {
+        // An IPC failure here must not leave the UI stuck in a loading state.
+        console.error("[JulesProvider] failed to read API key from env:", err);
+        if (!cancelled) setIsLoading(false);
+      });
     return () => {
       cancelled = true;
     };
