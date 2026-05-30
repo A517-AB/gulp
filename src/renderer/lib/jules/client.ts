@@ -313,12 +313,13 @@ export class JulesClient {
   // Sessions
   async listSessions(sourceId?: string): Promise<Session[]> {
     const params = sourceId ? `?sourceId=${sourceId}` : "";
-    const response = await this.request<{ sessions: ApiSession[] }>(
+    const response = await this.request<{ sessions?: ApiSession[] }>(
       `/sessions${params}`,
     );
 
-    // Transform API response to match our Session type
-    return response.sessions.map((session: ApiSession) => ({
+    // Transform API response to match our Session type. The Jules API can omit
+    // the array entirely (e.g. no sessions yet), so guard before mapping.
+    return (response.sessions ?? []).map((session: ApiSession) => ({
       id: session.id,
       sourceId: session.sourceContext?.source?.replace("sources/github/", "") ?? "",
       title: session.title ?? "",
@@ -389,12 +390,13 @@ export class JulesClient {
 
   // Activities
   async listActivities(sessionId: string): Promise<Activity[]> {
-    const response = await this.request<{ activities: ApiActivity[] }>(
+    const response = await this.request<{ activities?: ApiActivity[] }>(
       `/sessions/${sessionId}/activities`,
     );
 
-    // Transform API response to match our Activity type
-    return response.activities.map((activity: ApiActivity) => {
+    // Transform API response to match our Activity type. A session with no
+    // activities yet can come back without the array, so guard before mapping.
+    return (response.activities ?? []).map((activity: ApiActivity) => {
       // Extract ID from name field (e.g., "sessions/ID/activities/ACTIVITY_ID")
       const id = activity.name?.split("/").pop() ?? activity.id ?? "";
 

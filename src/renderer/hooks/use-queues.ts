@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useJules } from "@/lib/jules/context";
 import { queues } from "@/shared/bridge";
 import type { FleetTaskGroup, FleetTask } from "@/types/jules";
 
@@ -7,7 +8,7 @@ export function taskKey(group: FleetTaskGroup, task: FleetTask): string {
 }
 
 export function useQueues() {
-  const client = null;
+  const { client } = useJules();
   const [groups, setGroups] = useState<FleetTaskGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState<Set<string>>(new Set());

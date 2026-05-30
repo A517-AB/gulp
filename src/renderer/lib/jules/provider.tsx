@@ -1,34 +1,50 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  type ReactNode,
-} from "react";
+import { useState, useEffect, type ReactNode } from "react";
+import { env } from "@/shared/bridge";
 import { JulesClient } from "./client";
+import { JulesContext } from "./context";
 
-interface JulesContextType {
-  client: JulesClient | null;
-  apiKey: string | null;
-  isLoading: boolean;
-  setApiKey: (key: string) => void;
-  clearApiKey: () => void;
+function readStoredKey(): string | null {
+  return typeof window !== "undefined"
+    ? localStorage.getItem("jules-api-key")
+    : null;
 }
 
-const JulesContext = createContext<JulesContextType | undefined>(undefined);
-
 export function JulesProvider({ children }: { children: ReactNode }) {
-  const [apiKey, setApiKeyState] = useState<string | null>(() =>
-    typeof window !== "undefined" ? localStorage.getItem("jules-api-key") : null
-  );
+  const [apiKey, setApiKeyState] = useState<string | null>(readStoredKey);
   const [client, setClient] = useState<JulesClient | null>(() => {
-    if (typeof window === "undefined") return null;
-    const stored = localStorage.getItem("jules-api-key");
+    const stored = readStoredKey();
     return stored ? new JulesClient(stored) : null;
   });
-  // No loading state needed — localStorage is read synchronously above
-  const isLoading = false;
+  // In the Electron app the key comes from the JULES_API_KEY env var via IPC,
+  // not localStorage — so when there's no stored key we still have to fetch it
+  // asynchronously. isLoading stays true until that round-trip settles.
+  const [isLoading, setIsLoading] = useState(
+    () => !readStoredKey() && !!env?.getApiKey,
+  );
+
+  useEffect(() => {
+    if (apiKey || !env?.getApiKey) return;
+    let cancelled = false;
+    env.getApiKey()
+      .then((envKey) => {
+        if (cancelled) return;
+        if (envKey) {
+          setApiKeyState(envKey);
+          setClient(new JulesClient(envKey));
+        }
+        setIsLoading(false);
+      })
+      .catch((err: unknown) => {
+        // An IPC failure here must not leave the UI stuck in a loading state.
+        console.error("[JulesProvider] failed to read API key from env:", err);
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [apiKey]);
 
   const setApiKey = (key: string) => {
     localStorage.setItem("jules-api-key", key);
@@ -49,12 +65,4 @@ export function JulesProvider({ children }: { children: ReactNode }) {
       {children}
     </JulesContext.Provider>
   );
-}
-
-export function useJules() {
-  const context = useContext(JulesContext);
-  if (context === undefined) {
-    throw new Error("useJules must be used within a JulesProvider");
-  }
-  return context;
 }

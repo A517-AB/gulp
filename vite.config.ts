@@ -60,8 +60,8 @@ export default defineConfig({
   },
   plugins: [
     tailwindcss(),
-    react({ fastRefresh: false }),
-    
+    react(),
+
     babel({ presets: [reactCompilerPreset()] }),
     ...isWeb ? [] : [
       electron({
