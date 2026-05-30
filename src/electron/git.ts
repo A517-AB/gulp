@@ -44,7 +44,7 @@ export function registerGitHandlers(): void {
   )
 
   ipcMain.handle('git.log', (_e, cwd: string, limit = 20, branch?: string) =>
-    git(cwd, ['log', `--max-count=${String(limit)}`, '--pretty=format:%H|%s|%an|%ar|%D', ...(branch ? [branch as string] : [])])
+    git(cwd, ['log', `--max-count=${limit}`, '--pretty=format:%H|%s|%an|%ar|%D', ...(branch ? [branch] : [])])
   )
 
   ipcMain.handle('git.diff', (_e, cwd: string, args: string[] = []) =>
@@ -82,7 +82,7 @@ export function registerGitHandlers(): void {
   )
 
   ipcMain.handle('git.commit', (_e, cwd: string, message: string, allowEmpty = false) =>
-    git(cwd, ['commit', '-m', message, ...((allowEmpty as boolean) ? ['--allow-empty'] : [])])
+    git(cwd, ['commit', '-m', message, ...(allowEmpty ? ['--allow-empty'] : [])])
   )
 
   ipcMain.handle('git.amend', (_e, cwd: string, message?: string) =>
@@ -92,15 +92,15 @@ export function registerGitHandlers(): void {
   // ── sync ──────────────────────────────────────────────────────────────────────
 
   ipcMain.handle('git.push', (_e, cwd: string, remote = 'origin', branch?: string, force = false) =>
-    git(cwd, ['push', ...((force as boolean) ? ['--force-with-lease'] : []), remote, ...(branch ? [branch as string] : [])])
+    git(cwd, ['push', ...(force ? ['--force-with-lease'] : []), remote, ...(branch ? [branch] : [])])
   )
 
   ipcMain.handle('git.pull', (_e, cwd: string, remote = 'origin', branch?: string, rebase = false) =>
-    git(cwd, ['pull', ...((rebase as boolean) ? ['--rebase'] : []), remote, ...(branch ? [branch as string] : [])])
+    git(cwd, ['pull', ...(rebase ? ['--rebase'] : []), remote, ...(branch ? [branch] : [])])
   )
 
   ipcMain.handle('git.fetch', (_e, cwd: string, remote = 'origin', prune = true) =>
-    git(cwd, ['fetch', ...((prune as boolean) ? ['--prune'] : []), remote as string])
+    git(cwd, ['fetch', ...(prune ? ['--prune'] : []), remote])
   )
 
   // ── branches ─────────────────────────────────────────────────────────────────
@@ -130,7 +130,7 @@ export function registerGitHandlers(): void {
   // ── reset / restore ───────────────────────────────────────────────────────────
 
   ipcMain.handle('git.reset', (_e, cwd: string, mode: 'soft' | 'mixed' | 'hard' = 'mixed', ref = 'HEAD') =>
-    git(cwd, ['reset', `--${String(mode)}`, ref as string])
+    git(cwd, ['reset', `--${mode}`, ref])
   )
 
   ipcMain.handle('git.restore', (_e, cwd: string, files: string[]) =>
@@ -181,9 +181,7 @@ export function registerGitHandlers(): void {
       pwsh:   ['pwsh',   '-Command', code],
       python: ['python', '-c', code],
     }
-    const runner = runners[lang]
-    if (!runner) throw new Error(`Unsupported language: ${lang}`)
-    const [cmd, flag, script] = runner
+    const [cmd, flag, script] = runners[lang]
     return run(cmd, [flag, script], cwd)
   })
 }

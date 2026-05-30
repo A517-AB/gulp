@@ -44,15 +44,15 @@ function PwshIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 export const LANGUAGES: LanguagePreset[] = [
-  { id: 'python',     name: 'Python',     icon: makeIcon(siPython),     color: 'oklch(0.765 0.216 135.509)' },
+  { id: 'python',     name: 'Python',     icon: makeIcon(siPython),     color: 'oklch(0.75 0.15 250)' },
   { id: 'javascript', name: 'JavaScript', icon: makeIcon(siJavascript), color: 'oklch(0.85 0.17 90)'  },
   { id: 'typescript', name: 'TypeScript', icon: makeIcon(siTypescript), color: 'oklch(0.6 0.15 250)'  },
   { id: 'bash',       name: 'Bash',       icon: makeIcon(siGnubash),    color: 'oklch(0.7 0.1 150)'   },
   { id: 'pwsh',       name: 'PowerShell', icon: PwshIcon,               color: 'oklch(0.6 0.15 260)'  },
   { id: 'json',       name: 'JSON',       icon: makeIcon(siJson),       color: 'oklch(0.7 0.1 30)'    },
   { id: 'markdown',   name: 'Markdown',   icon: makeIcon(siMarkdown),   color: 'oklch(0.75 0.08 220)' },
-  { id: 'html',       name: 'HTML',       icon: makeIcon(siHtml5),      color: 'oklch(0.616 0.177 34.544)'   },
-  { id: 'jules',      name: 'Jules',      icon: JulesIcon,               color: 'oklch(0.405 0.185 295.245)' },
+  { id: 'html',       name: 'HTML',       icon: makeIcon(siHtml5),      color: 'oklch(0.7 0.18 35)'   },
+  { id: 'jules',      name: 'Jules',      icon: JulesIcon,               color: 'oklch(0.75 0.12 290)' },
 ]
 
 export function langFor(id: string | null) {

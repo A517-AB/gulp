@@ -1,0 +1,28 @@
+{
+  "resource": {
+    "name": "sessions/17631772081446071089",
+    "title": "UI Folder Cleanup & Optimization Post-Next.js Migration",
+    "createTime": "2026-05-18T15:18:50.212293063Z",
+    "updateTime": "2026-05-18T19:25:09.577578Z",
+    "state": "paused",
+    "sourceContext": {
+      "source": "sources/github/A517-AB/steal",
+      "githubRepoContext": {
+        "startingBranch": "master"
+      },
+      "environmentVariablesEnabled": true
+    },
+    "prompt": "yo yo, i need you make sure my ui folder is clean from the transport, i moved from next js. it's annoying but works now. first tell me how much is used, and how much can be hrtn already start cleaning up and then improvijg, don't just delete shit, make it work. \n",
+    "url": "https://jules.google.com/session/17631772081446071089",
+    "id": "17631772081446071089",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "17631772081446071089",
+      "title": "UI Folder Cleanup & Optimization Post-Next.js Migration",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397358
+}

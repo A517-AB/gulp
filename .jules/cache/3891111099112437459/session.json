@@ -1,0 +1,21 @@
+{
+  "resource": {
+    "name": "sessions/3891111099112437459",
+    "title": "yo yo, testing jules api\n",
+    "createTime": "2026-05-23T01:15:55.197714126Z",
+    "updateTime": "2026-05-23T01:27:48.284965Z",
+    "state": "completed",
+    "prompt": "yo yo, testing jules api\n",
+    "url": "https://jules.google.com/session/3891111099112437459",
+    "id": "3891111099112437459",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "3891111099112437459",
+      "title": "yo yo, testing jules api\n",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397340
+}

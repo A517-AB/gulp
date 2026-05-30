@@ -1,0 +1,21 @@
+{
+  "resource": {
+    "name": "sessions/8505391624421708228",
+    "title": "the audit tool in this folder, can you see it? just confmation is fine, if you cna't see it, it means my attemp to start a repoless juless section didn't get well. if you see just a path, it means it went wrong, if you see the code itself, it means it went well, if you see a full repo or import, it's fgucking great.",
+    "createTime": "2026-05-21T17:06:15.261813824Z",
+    "updateTime": "2026-05-21T18:00:44.696877Z",
+    "state": "completed",
+    "prompt": "the audit tool in this folder, can you see it? just confmation is fine, if you cna't see it, it means my attemp to start a repoless juless section didn't get well. if you see just a path, it means it went wrong, if you see the code itself, it means it went well, if you see a full repo or import, it's fgucking great.",
+    "url": "https://jules.google.com/session/8505391624421708228",
+    "id": "8505391624421708228",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "8505391624421708228",
+      "title": "the audit tool in this folder, can you see it? just confmation is fine, if you cna't see it, it means my attemp to start a repoless juless section didn't get well. if you see just a path, it means it went wrong, if you see the code itself, it means it went well, if you see a full repo or import, it's fgucking great.",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397342
+}

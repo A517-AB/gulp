@@ -1,0 +1,21 @@
+{
+  "resource": {
+    "name": "sessions/11752884317441482098",
+    "title": "hello",
+    "createTime": "2026-05-21T17:13:12.576548274Z",
+    "updateTime": "2026-05-21T17:20:33.672175Z",
+    "state": "completed",
+    "prompt": "hello",
+    "url": "https://jules.google.com/session/11752884317441482098",
+    "id": "11752884317441482098",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "11752884317441482098",
+      "title": "hello",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397341
+}

@@ -1,0 +1,28 @@
+{
+  "resource": {
+    "name": "sessions/5760787109461919320",
+    "title": "Jules Cessions Window: Missing Code Issue",
+    "createTime": "2026-05-19T14:57:24.074431167Z",
+    "updateTime": "2026-05-19T15:16:34.994385Z",
+    "state": "awaitingUserFeedback",
+    "sourceContext": {
+      "source": "sources/github/A517-AB/jules",
+      "githubRepoContext": {
+        "startingBranch": "main"
+      },
+      "environmentVariablesEnabled": true
+    },
+    "prompt": "check fucntionailities of jules cessions window. tghert'es misisngf code that shows up as  {}\n",
+    "url": "https://jules.google.com/session/5760787109461919320",
+    "id": "5760787109461919320",
+    "archived": false,
+    "outputs": [],
+    "outcome": {
+      "sessionId": "5760787109461919320",
+      "title": "Jules Cessions Window: Missing Code Issue",
+      "state": "completed",
+      "outputs": []
+    }
+  },
+  "_lastSyncedAt": 1779778397350
+}
