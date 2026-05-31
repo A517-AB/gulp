@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsList, TabsTrigger } from '@/ui/tabs'
 import { MarkdownEditor } from '@/components/markdown'
+import { downloadZip } from './lib'
 import type { JulesLocalGeneratedFile } from '@shared/electron'
 
 interface ArtifactPanelProps {
   files: JulesLocalGeneratedFile[]
   onDismiss: () => void
+  /** Optional: fetch the full generated-file set (incl. non-md) for the zip download. Falls back to `files`. */
+  onZip?: () => Promise<JulesLocalGeneratedFile[]> | JulesLocalGeneratedFile[]
 }
 
 function downloadFile(file: JulesLocalGeneratedFile) {
@@ -19,9 +22,14 @@ function downloadFile(file: JulesLocalGeneratedFile) {
   URL.revokeObjectURL(url)
 }
 
-export function ArtifactPanel({ files, onDismiss }: ArtifactPanelProps) {
+export function ArtifactPanel({ files, onDismiss, onZip }: ArtifactPanelProps) {
   const [activeFile, setActiveFile] = useState(0)
   const current = files[activeFile]
+
+  const handleZip = async () => {
+    const all = onZip ? await onZip() : files
+    void downloadZip(all)
+  }
 
   return (
     <motion.div
@@ -35,12 +43,18 @@ export function ArtifactPanel({ files, onDismiss }: ArtifactPanelProps) {
       <div className="absolute top-6 right-6 z-10 flex gap-4 opacity-0 group-hover/panel:opacity-100 transition-opacity duration-300">
         {current && (
           <button
-            onClick={() => downloadFile(current)}
+            onClick={() => { downloadFile(current); }}
             className="text-xs text-fg-ghost hover:text-fg-secondary transition-colors"
           >
             save
           </button>
         )}
+        <button
+          onClick={() => { void handleZip() }}
+          className="text-xs text-fg-ghost hover:text-fg-secondary transition-colors"
+        >
+          zip
+        </button>
         <button
           onClick={onDismiss}
           className="text-xs text-fg-ghost hover:text-fg-secondary transition-colors"
@@ -54,7 +68,7 @@ export function ArtifactPanel({ files, onDismiss }: ArtifactPanelProps) {
         <div className="px-10 pt-8 shrink-0">
           <Tabs
             value={String(activeFile)}
-            onValueChange={v => setActiveFile(Number(v))}
+            onValueChange={v => { setActiveFile(Number(v)); }}
           >
             <TabsList className="bg-transparent border-none gap-4 p-0 h-auto">
               {files.map((f, i) => (

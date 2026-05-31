@@ -1,35 +1,51 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { sdkIpc } from '@shared/bridge'
 import type { JulesLocalGeneratedFile } from '@shared/electron'
 
 const POLL_MS = 3000
 
-export function useArtifactStream(sessionId: string | null) {
+export interface ArtifactStream {
+  files: JulesLocalGeneratedFile[]
+  /** Count of files that arrived after this session became active (drives the "md received" notification). */
+  freshCount: number
+  /** Force an immediate fetch (used by display mode). */
+  refresh: () => void
+}
+
+export function useArtifactStream(sessionId: string | null): ArtifactStream {
   const [files, setFiles] = useState<JulesLocalGeneratedFile[]>([])
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [freshCount, setFreshCount] = useState(0)
+  // Paths present when the session became active — anything beyond this is "fresh".
+  const baselineRef = useRef<Set<string> | null>(null)
 
-  useEffect(() => {
-    if (!sessionId || !sdkIpc) {
-      setFiles([])
-      return
-    }
-
-    const fetch = async () => {
-      try {
-        const result = await sdkIpc!.getMarkdownFiles(sessionId)
-        if (result.length > 0) setFiles(result)
-      } catch {
-        // session may not have files yet
+  const fetchFiles = useCallback(async (isInitial: boolean) => {
+    if (!sessionId || !sdkIpc) return
+    try {
+      const result = await sdkIpc.getMarkdownFiles(sessionId)
+      const baseline = baselineRef.current
+      if (isInitial || baseline === null) {
+        baselineRef.current = new Set(result.map(f => f.path))
+        setFiles(result)
+        setFreshCount(0)
+        return
       }
-    }
-
-    void fetch()
-    intervalRef.current = setInterval(() => { void fetch() }, POLL_MS)
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
+      setFiles(result)
+      setFreshCount(result.filter(f => !baseline.has(f.path)).length)
+    } catch {
+      // session may not have files yet
     }
   }, [sessionId])
 
-  return files
+  useEffect(() => {
+    baselineRef.current = null
+    // Initial fetch + poll, both via timer callbacks so setState never runs
+    // synchronously in the effect body.
+    const initial = setTimeout(() => { void fetchFiles(true) }, 0)
+    const id = setInterval(() => { void fetchFiles(false) }, POLL_MS)
+    return () => { clearTimeout(initial); clearInterval(id) }
+  }, [fetchFiles])
+
+  const refresh = useCallback(() => { void fetchFiles(false) }, [fetchFiles])
+
+  return { files, freshCount, refresh }
 }

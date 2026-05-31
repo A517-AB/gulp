@@ -24,7 +24,7 @@ export function SavedCommands({ aliases, activeId, onSelect, visible }: SavedCom
           {aliases.map(alias => (
             <button
               key={alias.id}
-              onClick={() => onSelect(alias)}
+              onClick={() => { onSelect(alias); }}
               className={`text-[10px] font-mono px-2 py-0.5 rounded transition-colors ${
                 activeId === alias.id
                   ? 'text-fg-primary bg-surface'

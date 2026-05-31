@@ -49,10 +49,10 @@ export function GhostInput({ value, onChange, onKeyDown, placeholder, disabled }
       <textarea
         ref={ref}
         value={value}
-        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => { onChange(e.target.value); }}
         onKeyDown={onKeyDown}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onFocus={() => { setFocused(true); }}
+        onBlur={() => { setFocused(false); }}
         placeholder={placeholder}
         rows={1}
         disabled={disabled}

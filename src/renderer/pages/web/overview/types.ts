@@ -4,6 +4,8 @@ export interface JulesAlias {
   label?: string
   sessionId: string
   sourceId?: string
-  defaultPrompt?: string
-  scriptBlock?: string
+  /** Hidden context appended to the message body in send mode. Nullable. */
+  instructions?: string
+  /** What this session usually returns. Nullable. */
+  expects?: 'md' | 'zip'
 }

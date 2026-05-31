@@ -1,12 +1,15 @@
 import { useState, useCallback, type KeyboardEvent } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { sdkIpc } from '@shared/bridge'
+import type { JulesLocalGeneratedFile } from '@shared/electron'
 import { useAliases } from './use-aliases'
 import { useArtifactStream } from './use-artifact-stream'
 import { GhostInput } from './GhostInput'
 import { AliasMenu } from './AliasMenu'
 import { ArtifactPanel } from './ArtifactPanel'
 import { SavedCommands } from './SavedCommands'
+import { MdNotification } from './MdNotification'
+import { buildPrompt } from './lib'
 import type { JulesAlias } from './types'
 
 export default function OverviewPage() {
@@ -28,13 +31,13 @@ export default function OverviewPage() {
     ? activeAlias.sessionId
     : null
 
-  const files = useArtifactStream(artifactSessionId)
-  const hasArtifacts = files.length > 0
+  const { files, freshCount, refresh } = useArtifactStream(artifactSessionId)
+  const hasArtifacts = artifactSessionId !== null && files.length > 0
 
   const selectAlias = useCallback((alias: JulesAlias) => {
     setActiveAlias(alias)
     setDismissedSession(null)
-    setInput(alias.defaultPrompt ?? '')
+    setInput('') // empty input + Enter = display mode
     setAliasMenuOpen(false)
     setAliasQuery('')
   }, [])
@@ -51,18 +54,35 @@ export default function OverviewPage() {
   }, [])
 
   const handleSend = useCallback(async () => {
-    const trimmed = input.trim()
-    if (!trimmed || !activeAlias || isSending || !sdkIpc) return
+    if (!activeAlias || isSending || !sdkIpc) return
+    const body = input.trim()
+
+    // Display mode — no body, just (re)surface the last markdown for this session.
+    if (body === '') {
+      refresh()
+      return
+    }
+
+    // Send mode — body + alias instructions + hardcoded markdown directive.
     setInput('')
     setIsSending(true)
     try {
-      await sdkIpc.sendMessage(activeAlias.sessionId, trimmed)
+      await sdkIpc.sendMessage(activeAlias.sessionId, buildPrompt(activeAlias, body))
     } catch (e) {
       console.error('[OverviewPage] send failed:', e)
     } finally {
       setIsSending(false)
     }
-  }, [input, activeAlias, isSending])
+  }, [input, activeAlias, isSending, refresh])
+
+  const handleZip = useCallback(async (): Promise<JulesLocalGeneratedFile[]> => {
+    if (!activeAlias || !sdkIpc) return files
+    try {
+      return await sdkIpc.getGeneratedFiles(activeAlias.sessionId)
+    } catch {
+      return files
+    }
+  }, [activeAlias, files])
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (aliasMenuOpen && filteredAliases.length > 0) {
@@ -85,8 +105,8 @@ export default function OverviewPage() {
   return (
     <div
       className="flex h-full w-full overflow-hidden relative"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => { setHovered(true); }}
+      onMouseLeave={() => { setHovered(false); }}
     >
       {/* Top fade */}
       <div
@@ -94,12 +114,15 @@ export default function OverviewPage() {
         style={{ background: 'linear-gradient(to bottom, var(--color-base, #0a0a0a) 0%, transparent 100%)' }}
       />
 
+      <MdNotification trigger={freshCount} />
+
       {/* Left: artifact panel */}
       <AnimatePresence>
         {hasArtifacts && (
           <div className="h-full" style={{ width: '50%' }}>
             <ArtifactPanel
               files={files}
+              onZip={handleZip}
               onDismiss={() => {
                 if (activeAlias) setDismissedSession(activeAlias.sessionId)
               }}
@@ -137,7 +160,7 @@ export default function OverviewPage() {
               value={input}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              placeholder={activeAlias ? 'ask something...' : 'type / to select a session'}
+              placeholder={activeAlias ? 'ask, or press enter for the last note' : 'type / to select a session'}
               disabled={isSending}
             />
           </div>
