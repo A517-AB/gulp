@@ -9,7 +9,7 @@ export interface Preset {
   chainDepth?: number
 }
 
-const KEY = 'jules:presets'
+const KEY = 'workspace:presets'
 
 export function getPresets(): Preset[] {
   try {

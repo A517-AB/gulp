@@ -20,6 +20,7 @@ export interface DynamicDropdownProps {
 
 export function DynamicDropdown({ items, value, onChange, placeholder = "Select...", className }: DynamicDropdownProps) {
   const [open, setOpen] = React.useState(false)
+  const [hoveredId, setHoveredId] = React.useState<string | null>(null)
   const selected = items.find(item => item.id === value)
 
   const TriggerIcon = selected?.icon
@@ -29,7 +30,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
       <PopoverTrigger asChild>
         <button
           className={cn(
-            "flex items-center justify-center size-9 rounded-md transition-colors hover:bg-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "flex items-center justify-center size-9 rounded-lg transition-all hover:bg-hover active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring relative",
             className
           )}
           style={{ color: selected?.color || 'var(--fg-secondary)' }}
@@ -51,40 +52,65 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
             asChild
             forceMount
             align="start"
-            className="w-48 p-1 overflow-hidden"
+            className="w-48 p-0 overflow-hidden bg-transparent border-none"
             sideOffset={8}
           >
             <motion.div
-              initial={{ opacity: 0, y: -4, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -4, scale: 0.95 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-              className="z-50 bg-overlay border border-subtle rounded-md shadow-lg"
+              initial={{ opacity: 0, y: -8, scale: 0.96, filter: "blur(4px)" }}
+              animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -4, scale: 0.98, filter: "blur(2px)" }}
+              transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+              className="z-50 bg-overlay/90 backdrop-blur-xl border border-subtle rounded-xl shadow-xl overflow-hidden"
+              onMouseLeave={() => setHoveredId(null)}
             >
-              <div className="flex flex-col">
-                {items.map((item) => {
+              <div className="flex flex-col p-1.5 relative z-10">
+                {items.map((item, i) => {
                   const ItemIcon = item.icon
                   const isSelected = item.id === value
                   return (
-                    <button
+                    <motion.button
                       key={item.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.03, type: "spring", stiffness: 300, damping: 24 }}
                       onClick={() => {
                         onChange(item.id)
                         setOpen(false)
                       }}
+                      onMouseEnter={() => setHoveredId(item.id)}
                       className={cn(
-                        "flex items-center gap-2 px-2 py-1.5 text-sm rounded-sm transition-colors w-full text-left",
-                        isSelected ? "bg-selected text-fg-primary" : "hover:bg-hover text-fg-secondary"
+                        "relative flex items-center gap-2.5 px-2.5 py-2 text-sm rounded-lg transition-colors w-full text-left outline-none",
+                        isSelected ? "text-fg-primary font-medium" : "text-fg-secondary"
                       )}
                     >
+                      {hoveredId === item.id && (
+                        <motion.div
+                          layoutId="dropdown-hover"
+                          className="absolute inset-0 bg-hover rounded-lg -z-10"
+                          initial={false}
+                          transition={{ type: "spring", bounce: 0, duration: 0.2 }}
+                        />
+                      )}
+
                       {ItemIcon && (
                         <ItemIcon 
-                          className="size-4 shrink-0" 
-                          style={{ color: item.color || 'currentColor' }} 
+                          className="size-4 shrink-0 transition-transform duration-200"
+                          style={{
+                            color: item.color || 'currentColor',
+                            transform: hoveredId === item.id ? "scale(1.15)" : "scale(1)"
+                          }}
                         />
                       )}
                       <span className="truncate">{item.label}</span>
-                    </button>
+
+                      {isSelected && (
+                        <motion.div
+                          layoutId="dropdown-active-dot"
+                          className="absolute right-3 size-1.5 rounded-full"
+                          style={{ backgroundColor: item.color || 'var(--color-primary, currentColor)' }}
+                        />
+                      )}
+                    </motion.button>
                   )
                 })}
               </div>

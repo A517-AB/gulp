@@ -60,7 +60,7 @@ describe("JulesClient", () => {
   });
 
   describe("listActivities", () => {
-    const sessionId = "session-123";
+    const sessionId = "workspace-123";
 
     it("should correctly map a planGenerated activity", async () => {
       const mockResponse = {

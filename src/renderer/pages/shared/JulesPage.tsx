@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { ActivityFeed } from "@renderer/components/activity-feed";
-import { SessionList } from "@renderer/components/session-list";
-import { CodeDiffSidebar } from "@renderer/components/code-diff-sidebar";
-import { NewSessionDialog } from "@renderer/components/new-session-dialog";
+import { ActivityFeed } from "@/components/workspace/activity-feed.tsx";
+import { SessionList } from "@/components/workspace/session-list.tsx";
+import { CodeDiffSidebar } from "@/components/workspace/code-diff-sidebar.tsx";
+import { NewSessionDialog } from "@/components/workspace/new-session-dialog.tsx";
 import { useResizable } from "@renderer/hooks/use-resizable";
 import type { Activity, Session, SessionInitialValues } from "@/types/activity-feed";
 

@@ -1,0 +1,9 @@
+import type { FsEntry } from '@shared'
+export type { FileTreeNode } from '@/hooks/use-file-tree'
+
+export interface FileTreeProps {
+  root: string | null
+  onSelectFile?:   (entry: FsEntry) => void
+  onSelectFolder?: (entry: FsEntry) => void
+  className?: string
+}

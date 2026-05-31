@@ -5,7 +5,7 @@ export interface Todo {
   sessionId?: string
 }
 
-const KEY = 'jules:todos'
+const KEY = 'workspace:todos'
 
 export function getTodos(): Todo[] {
   try {

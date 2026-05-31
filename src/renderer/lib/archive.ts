@@ -1,9 +1,9 @@
 /**
  * Client-side archive management for Jules sessions
- * Since the Jules API doesn't support archiving, we store archived session IDs in localStorage
+ * Since the Jules API doesn't support archiving, we store archived workspace IDs in localStorage
  */
 
-const ARCHIVED_SESSIONS_KEY = "jules-archived-sessions";
+const ARCHIVED_SESSIONS_KEY = "workspace-archived-sessions";
 
 export function getArchivedSessions(): Set<string> {
   if (typeof window === "undefined") return new Set();

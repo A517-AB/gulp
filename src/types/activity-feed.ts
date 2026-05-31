@@ -17,7 +17,7 @@ export interface SessionStatusInfo {
   icon: string;
 }
 
-// Shared shape used by NewSessionDialog and the layout when pre-filling a session
+// Shared shape used by NewSessionDialog and the layout when pre-filling a workspace
 export interface SessionInitialValues {
   sourceId?: string;
   title?: string;
@@ -36,9 +36,9 @@ export interface QuickActionTemplate {
   icon?: FC<SVGProps<SVGSVGElement>>;
   defaultPrompt: string;
   allowedDestinations: ActionDestination[];
-  /** If true, this action is only available when the session is completely finished */
+  /** If true, this action is only available when the workspace is completely finished */
   requiresCompletedSession?: boolean;
-  /** Pass this flag to the new session to natively trigger a PR */
+  /** Pass this flag to the new workspace to natively trigger a PR */
   autoCreatePr?: boolean;
 }
 
@@ -86,7 +86,7 @@ export interface UseSessionListReturn {
   loadSessions: () => Promise<void>;
 }
 
-// ---- New session form hook ----
+// ---- New workspace form hook ----
 
 export interface SessionFormData {
   sourceId: string;

@@ -5,7 +5,7 @@ import { Button } from "@renderer/ui/button";
 import { DynamicDropdown } from "./DynamicDropdown";
 import { SnippetPicker } from "./SnippetPicker";
 import { compilePromptWithSnippets } from "@renderer/utils/snippets";
-import { NewSessionDialog } from "../new-session-dialog";
+import { NewSessionDialog } from "@/components/workspace/new-session-dialog.tsx";
 import type { Session } from "@/types/jules";
 import type { Snippet } from "@/types/snippets";
 import type { QuickActionTemplate } from "@/types/activity-feed";
@@ -62,7 +62,7 @@ export function SmartActionInput({
   const selectedAction = ACTION_TEMPLATES.find(a => a.id === selectedActionId) ?? ACTION_TEMPLATES[0]!;
   const destination = selectedAction.allowedDestinations[0] ?? "current_session";
 
-  // Filter actions based on session status
+  // Filter actions based on workspace status
   const availableActions = ACTION_TEMPLATES.filter(action => {
     if (action.requiresCompletedSession && session.status !== "completed") return false;
     return true;

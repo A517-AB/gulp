@@ -11,7 +11,7 @@
       "@renderer/*": ["./src/renderer/*"],
       "@shared": ["./src/shared/index.ts"],
       "@shared/*": ["./src/shared/*"],
-      "@electron/*": ["./src/electron/*"],
+      "@electron/*": ["./electron/*"],
       "@renderer/shell": ["./src/renderer/shell/index.ts"],
       "@renderer/shell/*": ["./src/renderer/shell/*"],
       "@renderer/core": ["./src/renderer/core/index.ts"],
@@ -28,21 +28,20 @@
       "@/lib/*": ["./src/renderer/lib/*"],
       "@/utils": ["./src/renderer/utils/index.ts"],
       "@/utils/*": ["./src/renderer/utils/*"],
-      "@api": ["./src/renderer/api"],
-      "@api/index": ["./src/renderer/api/index.ts"],
-      "@api/*": ["./src/renderer/api/*"]
     },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
+    
     "moduleDetection": "force",
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "strict": true,
+
 
     /* Linting */
     "noUnusedLocals": true,
@@ -63,5 +62,6 @@
     "noImplicitAny": true,
   },
   "include": ["src"],
-  "exclude": ["src/electron", "src/renderer/lib/jules/client.test.ts"]
+  "exclude": [
+    "electron", "src/renderer/lib/jules/client.test.ts"]
 }

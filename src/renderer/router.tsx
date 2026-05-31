@@ -7,7 +7,7 @@ import {
     HomePage, SettingsPage, JulesPage,
 } from '@renderer/pages/shared'
 import {
-    ProjectsPage,
+    NotesPage,
     ActivityPage, ReposPage, SnapshotPage, QueuesPage, SnippetsPage,
 } from '@renderer/pages/electron'
 import {
@@ -39,13 +39,13 @@ export type AppRoute = Omit<RouteObject, 'handle'> & {
 const sharedRoutes: AppRoute[] = [
     { index: true,        Component: HomePage,      handle: { title: 'Home',      inNav: true } },
     { path: 'settings',  Component: SettingsPage,  handle: { title: 'Settings',  inNav: true } },
-    { path: 'jules', Component: JulesPage, handle: { title: 'Sessions', inNav: true } },
+    { path: 'session', Component: JulesPage, handle: { title: 'Sessions', inNav: true } },
 ]
 
 // ── electron ──────────────────────────────────────────────────────────────────
 
 const electronRoutes: AppRoute[] = [
-    { path: 'projects',     Component: ProjectsPage,  handle: { title: 'Projects', inNav: true } },
+    { path: 'notes',     Component: NotesPage,  handle: { title: 'Notes', inNav: true } },
     { path: 'repos',        Component: ReposPage,     handle: { title: 'Repos', inNav: true } },
     { path: 'queues',        Component: QueuesPage,   handle: { title: 'Queues', inNav: true } },
     { path: 'snippets',      Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },

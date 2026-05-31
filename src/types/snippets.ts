@@ -10,7 +10,7 @@ export interface LanguagePreset {
 export type SnippetCategory = 'standard' | 'jules'
 
 // HANDOFF: Jules snippet extensions go here.
-// When category === 'jules', a snippet can carry attached tools/context
+// When category === 'workspace', a snippet can carry attached tools/context
 // that gets formatted as text and sent to Jules alongside the script.
 // Jules does not accept files — everything must be serialized as plain text.
 

@@ -67,7 +67,7 @@ export function useNewSessionForm({
       onClose();
       onSessionCreated?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create session");
+      setError(err instanceof Error ? err.message : "Failed to create workspace");
     } finally {
       setLoading(false);
     }

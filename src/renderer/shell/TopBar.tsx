@@ -1,28 +1,19 @@
-import type { ReactNode } from 'react';
+import type { TopBarProps } from './types';
 import { isElectron, windowControls } from '@shared/bridge';
 import { ThemeToggle } from '@/ui/theme-toggle';
 
-interface TopBarProps {
-    left?:   ReactNode
-    center?: ReactNode
-    right?:  ReactNode
-}
-
 export function TopBar({ left, center, right }: TopBarProps) {
     return (
-        <header className="app-drag-region h-toolbar flex items-center gap-2 px-3 bg-surface border-b border-hair shrink-0">
-
-            <div className="flex items-center gap-2 flex-1 min-w-0">
+        <header className="app-drag-region h-toolbar grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-3 shrink-0 bg-transparent">
+            <div className="flex items-center gap-2 min-w-0 justify-start">
                 {left}
             </div>
 
-            {center != null && (
-                <div className="flex items-center gap-2 shrink-0">
-                    {center}
-                </div>
-            )}
+            <div className="flex items-center gap-2 justify-center">
+                {center}
+            </div>
 
-            <div className="flex items-center gap-2 flex-1 justify-end">
+            <div className="flex items-center gap-2 justify-end">
                 {right}
                 <ThemeToggle />
 

@@ -1,9 +1,9 @@
-import type { Snippet } from "@/types/snippets";
+import type { Snippet } from '@/utils/types'
 
 /**
  * Compiles a final prompt string by combining the user's custom message
  * with any attached snippets. It automatically adds the correct conversational
- * prefixes based on whether the snippets are "jules" instructions or "standard" context.
+ * prefixes based on whether the snippets are "workspace" instructions or "standard" context.
  */
 export function compilePromptWithSnippets(
   userMessage: string,

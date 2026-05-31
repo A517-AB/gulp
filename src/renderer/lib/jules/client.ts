@@ -151,7 +151,7 @@ export class JulesClient {
         }
 
         if (response.status === 404) {
-          // For activities endpoint, 404 just means no activities yet (new session)
+          // For activities endpoint, 404 just means no activities yet (new workspace)
           // Return empty array instead of throwing error
           if (endpoint.includes("/activities")) {
             return { activities: [] } as T;
@@ -294,7 +294,7 @@ export class JulesClient {
         "[Jules Client] Failed to sort sources by activity:",
         error,
       );
-      // Continue with unsorted sources if session fetch fails
+      // Continue with unsorted sources if workspace fetch fails
     }
 
     return sources;
@@ -362,7 +362,7 @@ export class JulesClient {
       requirePlanApproval: false, // Auto-approve plans by default
     };
 
-    console.log("[Jules Client] Creating session with:", requestBody);
+    console.log("[Jules Client] Creating workspace with:", requestBody);
 
     return this.request<Session>("/sessions", {
       method: "POST",

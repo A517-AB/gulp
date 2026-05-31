@@ -12,7 +12,7 @@ function makeIcon(si: { path: string }) {
   }
 }
 
-// Jules SVG paths extracted from google-jules.svg, rewritten to use currentColor
+// Jules SVG paths extracted from google-workspace.svg, rewritten to use currentColor
 function JulesIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="4.67 1.67 16.69 17.61" fill="currentColor" {...props}>
@@ -52,7 +52,7 @@ export const LANGUAGES: LanguagePreset[] = [
   { id: 'json',       name: 'JSON',       icon: makeIcon(siJson),       color: 'oklch(0.7 0.1 30)'    },
   { id: 'markdown',   name: 'Markdown',   icon: makeIcon(siMarkdown),   color: 'oklch(0.75 0.08 220)' },
   { id: 'html',       name: 'HTML',       icon: makeIcon(siHtml5),      color: 'oklch(0.7 0.18 35)'   },
-  { id: 'jules',      name: 'Jules',      icon: JulesIcon,               color: 'oklch(0.75 0.12 290)' },
+  { id: 'session',      name: 'Jules',      icon: JulesIcon,               color: 'oklch(0.75 0.12 290)' },
 ]
 
 export function langFor(id: string | null) {

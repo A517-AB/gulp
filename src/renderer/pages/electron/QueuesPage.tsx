@@ -11,7 +11,7 @@ import { queues as electronQueues, isElectron } from "@shared/bridge";
 import { InlineEdit } from "@renderer/ui/inline-edit";
 import type { Source, FleetTask, FleetTaskGroup } from "@/types/jules";
 
-const TASKS_STORAGE_KEY = "jules:fleet-tasks";
+const TASKS_STORAGE_KEY = "workspace:fleet-tasks";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -216,7 +216,7 @@ export default function QueuesView() {
         startingBranch: group.baseBranch ?? "main",
       });
     } catch (err) {
-      console.error("Failed to start session:", err);
+      console.error("Failed to start workspace:", err);
     } finally {
       setSendingStates((p) => ({ ...p, [key]: false }));
     }

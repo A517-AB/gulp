@@ -1,4 +1,4 @@
-import type { ElectronAPI } from "../types/electron";
+import type { ElectronAPI } from "./electron";
 
 const el: ElectronAPI | undefined = typeof window !== "undefined" ? window.electron : undefined;
 

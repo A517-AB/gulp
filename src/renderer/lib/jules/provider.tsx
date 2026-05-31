@@ -22,7 +22,7 @@ export function JulesProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
-      let stored = localStorage.getItem("jules-api-key");
+      let stored = localStorage.getItem("workspace-api-key");
       console.log("[JulesProvider] stored api key:", stored ? "found" : "not found");
 
       // Check Vite environment variables (injected by vite.config.ts)
@@ -53,14 +53,14 @@ export function JulesProvider({ children }: { children: ReactNode }) {
 
   const setApiKey = (key: string) => {
     console.log("[JulesProvider] setting api key");
-    localStorage.setItem("jules-api-key", key);
+    localStorage.setItem("workspace-api-key", key);
     setApiKeyState(key);
     setClient(new JulesClient(key));
   };
 
   const clearApiKey = () => {
     console.log("[JulesProvider] clearing api key");
-    localStorage.removeItem("jules-api-key");
+    localStorage.removeItem("workspace-api-key");
     setApiKeyState(null);
     setClient(null);
   };

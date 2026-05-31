@@ -12,9 +12,9 @@ export default defineConfig([
     'references/**',
     'scripts/**',
     // excluded from tsconfig — Jules example files not part of this project
-    'src/electron/ipc/advanced-session.ts',
+    'src/electron/ipc/advanced-workspace.ts',
     'src/electron/ipc/agent.ts',
-    'src/electron/ipc/basic-session.ts',
+    'src/electron/ipc/basic-workspace.ts',
     'src/electron/ipc/file-system-events.ts',
   ]),
   {
