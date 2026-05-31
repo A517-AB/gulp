@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { TestResult } from './types'
+import type { TestResult } from '../types'
 
 interface TestRowProps {
   label: string
@@ -16,7 +16,7 @@ export function TestRow({ label, result, onRun }: TestRowProps) {
 
   const copyResult = () => {
     const text = hasItems
-      ? `${result.summary}\n${result.items!.join('\n')}`
+      ? `${result.summary}\n${result.items?.join('\n')}`
       : result.summary
     void navigator.clipboard.writeText(text)
   }

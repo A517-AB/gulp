@@ -14,7 +14,7 @@ export function Section({ title, children, defaultOpen = false }: SectionProps) 
   return (
     <div className="border-b border-hair last:border-0">
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={() => { setOpen(v => !v); }}
         className="w-full flex items-center justify-between py-4 text-xs font-mono uppercase tracking-widest text-fg-dim hover:text-fg-primary transition-colors text-left"
       >
         {title}

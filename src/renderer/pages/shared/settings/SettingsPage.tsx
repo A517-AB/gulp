@@ -9,7 +9,7 @@ export default function SettingsPage() {
         <Section title="General">
           <GeneralPanel />
         </Section>
-        <Section title="Testing" defaultOpen>
+        <Section title="Jules Connection" defaultOpen>
           <TestingPanel />
         </Section>
       </div>

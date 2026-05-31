@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { sdkIpc, isElectron } from '@shared/bridge'
 import { useJules } from '@/lib/jules/provider'
-import { TestRow } from '../TestRow'
+import { TestRow } from './TestRow'
 import type { TestDef, TestResult } from '../types'
 
 function buildTests(client: ReturnType<typeof useJules>['client']): TestDef[] {
