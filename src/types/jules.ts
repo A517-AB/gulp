@@ -5,25 +5,37 @@ export interface Source {
   metadata?: Record<string, unknown>;
 }
 
+export type SessionStatus =
+  | "queued"
+  | "planning"
+  | "awaitingApproval"
+  | "awaitingFeedback"
+  | "active"
+  | "paused"
+  | "completed"
+  | "failed"
+
 export interface Session {
   id: string;
   sourceId: string;
   title: string;
-  status: "active" | "completed" | "failed" | "paused";
+  status: SessionStatus;
   createdAt: string;
   updatedAt: string;
   lastActivityAt?: string;
   branch?: string;
 }
 
+export type ActivityType = "message" | "plan" | "progress" | "result" | "error"
+
 export interface Activity {
   id: string;
   sessionId: string;
-  type: "message" | "plan" | "progress" | "result" | "error";
+  type: ActivityType;
   role: "user" | "agent";
   content: string;
-  diff?: string; // Unified diff patch from artifacts
-  bashOutput?: string; // Bash command output from artifacts
+  diff?: string;
+  bashOutput?: string;
   metadata?: Record<string, unknown>;
   createdAt: string;
 }
@@ -34,6 +46,7 @@ export interface CreateSessionRequest {
   title?: string;
   startingBranch?: string;
   autoCreatePr?: boolean;
+  requireApproval?: boolean;
 }
 
 export interface CreateActivityRequest {
@@ -67,4 +80,3 @@ export interface SessionTemplate {
   createdAt: string;
   updatedAt: string;
 }
-

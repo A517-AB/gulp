@@ -52,7 +52,8 @@ export function useActivityFeedApi({
 
   useEffect(() => {
     loadActivities(true);
-    if (session.status !== "active") return;
+    const isLive = session.status === "active" || session.status === "queued" || session.status === "planning" || session.status === "awaitingApproval" || session.status === "awaitingFeedback";
+    if (!isLive) return;
     const interval = setInterval(() => loadActivities(false), 5000);
     return () => { clearInterval(interval); };
   }, [session.id, session.status, loadActivities]);

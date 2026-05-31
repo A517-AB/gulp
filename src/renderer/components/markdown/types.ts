@@ -6,4 +6,5 @@ export interface MarkdownEditorProps {
   initialContent?: string;
   readOnly?: boolean;
   className?: string;
+  onChange?: (markdown: string) => void;
 }

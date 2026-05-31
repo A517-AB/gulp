@@ -35,6 +35,12 @@ export default defineConfig([
     },
     rules: {
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+      '@typescript-eslint/ban-ts-comment': ['error', {
+        'ts-ignore': true,
+        'ts-nocheck': true,
+        'ts-expect-error': 'allow-with-description',
+        minimumDescriptionLength: 10,
+      }],
     },
   },
   {
