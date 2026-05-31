@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { siPython, siJavascript, siTypescript, siGnubash, siJson, siMarkdown, siHtml5 } from 'simple-icons'
 import type { SVGProps } from 'react'
 import type { LanguagePreset } from '@/types/snippets'

@@ -1,7 +1,8 @@
-import { useState, useMemo, useCallback, memo, useRef } from 'react'
+import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Code2, Plus, Trash2, Search, Pencil, Copy, Check } from 'lucide-react'
 import { useSnippets } from '@renderer/hooks/use-snippets'
+import type { SnippetItem } from '@renderer/hooks/use-snippets'
 import { InlineEdit } from '@renderer/ui/inline-edit'
 import { CodeEditor } from '@renderer/ui/code-editor'
 import { DynamicDropdown } from '@renderer/components/shared/DynamicDropdown'
@@ -9,7 +10,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@renderer/ui/dialog'
 import { LANGUAGES, langFor } from '@renderer/lib/languages'
-import type { Snippet } from '../../../types/snippets'
+import { fuseFilePath } from '@shared/fuse'
 
 const LANGUAGE_ITEMS = LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))
 
@@ -27,12 +28,12 @@ function withAlpha(color: string, a: number) {
 }
 
 interface SnippetRowProps {
-  snippet: Snippet
+  snippet: SnippetItem
   isCopied: boolean
-  onOpen: (s: Snippet) => void
-  onCopy: (s: Snippet, e: React.MouseEvent) => void
+  onOpen: (s: SnippetItem) => void
+  onCopy: (s: SnippetItem, e: React.MouseEvent) => void
   onDelete: (id: string, e: React.MouseEvent) => void
-  onTitleSave: (s: Snippet, title: string) => void
+  onTitleSave: (s: SnippetItem, title: string) => void
   onLangChange: (id: string, lang: string) => void
 }
 
@@ -40,7 +41,6 @@ const SnippetRow = memo(function SnippetRow({
   snippet, isCopied, onOpen, onCopy, onDelete, onTitleSave, onLangChange,
 }: SnippetRowProps) {
   const lang = langFor(snippet.languageId)
-  const preview = snippet.script.split('\n').slice(0, 3).join('\n')
   const gradientColor = lang?.color ? withAlpha(lang.color, 0.4) : null
   const [hovered, setHovered] = useState(false)
 
@@ -68,15 +68,15 @@ const SnippetRow = memo(function SnippetRow({
             className="text-sm font-semibold text-fg-primary"
             placeholder="Untitled"
           />
-          {snippet.category === 'jules' && (
-            <span className="shrink-0 text-[9px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/20 uppercase">
-              Jules
+          {snippet.type === 'build' && (
+            <span className="shrink-0 text-[9px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400 border border-orange-500/20 uppercase">
+              Build
             </span>
           )}
         </div>
-        <pre className="text-[10px] font-mono text-fg-dim leading-relaxed whitespace-pre-wrap truncate max-h-[3.6em] overflow-hidden bg-transparent border-0 p-0 m-0">
-          {preview}
-        </pre>
+        <p className="text-[10px] font-mono text-fg-dim truncate">
+          {snippet.file}
+        </p>
       </div>
 
       <div className="relative flex items-center justify-end gap-1 mt-2" onClick={e => { e.stopPropagation() }}>
@@ -116,96 +116,94 @@ const SnippetRow = memo(function SnippetRow({
 })
 
 export function SnippetsPage() {
-  const { snippets, saveSnippet, deleteSnippet } = useSnippets()
+  const { items, saveItem, updateMeta, deleteItem, readCode } = useSnippets()
 
-  // search
   const [search, setSearch] = useState('')
-
-  // editor dialog
   const [editorOpen, setEditorOpen] = useState(false)
-  const [editingSnippet, setEditingSnippet] = useState<Snippet | null>(null)
+  const [editingItem, setEditingItem] = useState<SnippetItem | null>(null)
   const [draftScript, setDraftScript] = useState('')
   const [draftLang, setDraftLang] = useState('python')
-
-  // copy feedback
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
-    if (!search) return snippets
+    if (!search) return items
     const q = search.toLowerCase()
-    return snippets.filter(s =>
+    return items.filter(s =>
       (s.title?.toLowerCase().includes(q) ?? false) ||
-      s.script.toLowerCase().includes(q) ||
-      (s.languageId?.toLowerCase().includes(q) ?? false) ||
-      (s.tags?.some(t => t.toLowerCase().includes(q)) ?? false)
+      s.languageId.toLowerCase().includes(q) ||
+      s.file.toLowerCase().includes(q) ||
+      (s.tags.some(t => t.toLowerCase().includes(q)))
     )
-  }, [snippets, search])
+  }, [items, search])
 
-  const totalSnippets = snippets.length
+  // ── handlers ───────────────────────────────────────────────────────────────
 
-  // ── handlers ─────────────────────────────────────────────────────────────
-
-  const openEditor = useCallback((snippet: Snippet) => {
-    setEditingSnippet(snippet)
-    setDraftScript(snippet.script)
-    setDraftLang(snippet.languageId ?? 'python')
+  const openEditor = useCallback(async (item: SnippetItem) => {
+    setEditingItem(item)
+    setDraftLang(item.languageId)
+    setDraftScript('')
     setEditorOpen(true)
-  }, [])
+    const code = await readCode(item)
+    setDraftScript(code)
+  }, [readCode])
 
   const openNewEditor = useCallback(() => {
-    const newSnippet: Snippet = {
+    const lang = 'python'
+    const title = randomTitle()
+    const now = new Date().toISOString()
+    const newItem: SnippetItem = {
       id: crypto.randomUUID(),
-      title: randomTitle(),
-      languageId: 'python',
-      script: '',
-      createdAt: new Date().toISOString(),
+      title,
+      languageId: lang,
+      type: 'snippet',
+      file: fuseFilePath('snippet', lang, title),
+      tags: [],
+      createdAt: now,
+      updatedAt: now,
     }
-    setEditingSnippet(newSnippet)
+    setEditingItem(newItem)
     setDraftScript('')
-    setDraftLang('python')
+    setDraftLang(lang)
     setEditorOpen(true)
   }, [])
 
   const handleEditorSave = useCallback(() => {
-    if (!editingSnippet || !draftScript.trim()) return
-    void saveSnippet({
-      ...editingSnippet,
-      script: draftScript,
-      languageId: draftLang,
-    })
+    if (!editingItem || !draftScript.trim()) return
+    const now = new Date().toISOString()
+    void saveItem({ ...editingItem, languageId: draftLang, updatedAt: now }, draftScript)
     setEditorOpen(false)
-    setEditingSnippet(null)
-  }, [editingSnippet, draftScript, draftLang, saveSnippet])
+    setEditingItem(null)
+  }, [editingItem, draftScript, draftLang, saveItem])
 
-  const handleCopy = useCallback((snippet: Snippet, e: React.MouseEvent) => {
+  const handleCopy = useCallback(async (snippet: SnippetItem, e: React.MouseEvent) => {
     e.stopPropagation()
-    void navigator.clipboard.writeText(snippet.script)
+    const code = await readCode(snippet)
+    void navigator.clipboard.writeText(code)
     setCopiedId(snippet.id)
     setTimeout(() => { setCopiedId(null) }, 1500)
-  }, [])
+  }, [readCode])
 
   const handleDelete = useCallback((id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    void deleteSnippet(id)
-  }, [deleteSnippet])
+    void deleteItem(id)
+  }, [deleteItem])
 
-  const handleTitleSave = useCallback((snippet: Snippet, newTitle: string) => {
-    void saveSnippet({ ...snippet, title: newTitle || null })
-  }, [saveSnippet])
+  const handleTitleSave = useCallback((snippet: SnippetItem, newTitle: string) => {
+    updateMeta({ ...snippet, title: newTitle || null, updatedAt: new Date().toISOString() })
+  }, [updateMeta])
 
-  const snippetsRef = useRef<Snippet[]>([])
-  snippetsRef.current = snippets
+  const itemsRef = useRef<SnippetItem[]>([])
+  useEffect(() => { itemsRef.current = items }, [items])
 
   const handleLangChange = useCallback((id: string, newLang: string) => {
-    const snippet = snippetsRef.current.find(s => s.id === id)
-    if (snippet) void saveSnippet({ ...snippet, languageId: newLang })
-  }, [saveSnippet])
+    const item = itemsRef.current.find(s => s.id === id)
+    if (item) updateMeta({ ...item, languageId: newLang, updatedAt: new Date().toISOString() })
+  }, [updateMeta])
 
-  // ── render ───────────────────────────────────────────────────────────────
+  // ── render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex flex-col h-full p-6 overflow-hidden max-w-7xl mx-auto w-full bg-base text-fg-primary">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-md bg-surface border border-subtle flex items-center justify-center">
@@ -239,20 +237,19 @@ export function SnippetsPage() {
           </button>
           <span className="bg-surface border border-subtle text-fg-muted text-[10px] px-2.5 py-1 rounded font-mono flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-            {totalSnippets} TOTAL
+            {items.length} TOTAL
           </span>
         </div>
       </div>
 
-      {/* List */}
       <div className="flex-1 overflow-auto pr-2 pb-12">
         {filtered.map(snippet => (
           <SnippetRow
             key={snippet.id}
             snippet={snippet}
             isCopied={copiedId === snippet.id}
-            onOpen={openEditor}
-            onCopy={handleCopy}
+            onOpen={item => { void openEditor(item) }}
+            onCopy={(s, e) => { void handleCopy(s, e) }}
             onDelete={handleDelete}
             onTitleSave={handleTitleSave}
             onLangChange={handleLangChange}
@@ -277,9 +274,8 @@ export function SnippetsPage() {
         )}
       </div>
 
-      {/* ── Monaco Editor Dialog ─────────────────────────────────────────── */}
       <Dialog open={editorOpen} onOpenChange={open => {
-        if (!open) { setEditorOpen(false); setEditingSnippet(null) }
+        if (!open) { setEditorOpen(false); setEditingItem(null) }
       }}>
         <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-overlay border-subtle shadow-xl">
           <DialogHeader className="px-5 pt-5 pb-3 border-b border-hair">
@@ -291,8 +287,8 @@ export function SnippetsPage() {
               />
               <DialogTitle asChild>
                 <InlineEdit
-                  value={editingSnippet?.title ?? ''}
-                  onSave={v => { setEditingSnippet(s => s ? { ...s, title: v || null } : s) }}
+                  value={editingItem?.title ?? ''}
+                  onSave={v => { setEditingItem(s => s ? { ...s, title: v || null } : s) }}
                   className="text-sm font-bold text-fg-primary uppercase tracking-wider"
                   placeholder="Untitled"
                 />
@@ -311,7 +307,7 @@ export function SnippetsPage() {
 
           <DialogFooter className="px-5 py-3 border-t border-hair bg-surface">
             <button
-              onClick={() => { setEditorOpen(false); setEditingSnippet(null) }}
+              onClick={() => { setEditorOpen(false); setEditingItem(null) }}
               className="px-3 py-1.5 rounded text-xs font-mono text-fg-muted hover:text-fg-primary transition-colors uppercase tracking-wider"
             >
               Cancel

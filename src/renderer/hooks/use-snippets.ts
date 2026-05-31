@@ -1,47 +1,77 @@
-import { useState, useEffect, useCallback } from "react"
-import { snippets as snippetsApi } from "@shared/bridge"
-import type { Snippet } from "../../types/snippets"
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { snippets as snippetsApi, filesystem } from '@shared/bridge'
+import { fuseResolve } from '@shared/fuse'
+import type { FuseManifestItem } from '@shared/fuse'
+
+export type { FuseManifestItem as SnippetItem } from '@shared/fuse'
 
 export function useSnippets() {
-  const [snippets, setSnippets] = useState<Snippet[]>([])
+  const [items, setItems] = useState<FuseManifestItem[]>([])
   const [loading, setLoading] = useState(true)
+  const saving = useRef(false)
+
+  const load = useCallback(async () => {
+    if (!snippetsApi) { setLoading(false); return }
+    const manifest = await snippetsApi.get()
+    setItems(manifest.items)
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { void load() }, [load])
 
   useEffect(() => {
-    async function loadSnippets() {
-      if (!snippetsApi) {
-        setLoading(false)
-        return
-      }
-      const data = await snippetsApi.get()
-      setSnippets(data)
-      setLoading(false)
+    return snippetsApi?.onChanged(() => {
+      if (saving.current) return
+      void load()
+    })
+  }, [load])
+
+  const saveItem = useCallback(async (item: FuseManifestItem, code: string) => {
+    const api = snippetsApi
+    const fs = filesystem
+    if (!api || !fs) return
+    saving.current = true
+    try {
+      await fs.writeFile(fuseResolve(item.file), code)
+      setItems(prev => {
+        const next = prev.find(i => i.id === item.id)
+          ? prev.map(i => i.id === item.id ? item : i)
+          : [item, ...prev]
+        void api.save({ version: 1, items: next })
+        return next
+      })
+    } finally {
+      setTimeout(() => { saving.current = false }, 500)
     }
-    loadSnippets()
   }, [])
 
-  const saveSnippet = useCallback(async (snippet: Snippet) => {
-    setSnippets((prev) => {
-      const existing = prev.find(s => s.id === snippet.id)
-      const next = existing 
-        ? prev.map(s => s.id === snippet.id ? snippet : s)
-        : [snippet, ...prev]
-      
-      if (snippetsApi) {
-        snippetsApi.save(next).catch(console.error)
-      }
+  const updateMeta = useCallback((item: FuseManifestItem) => {
+    const api = snippetsApi
+    if (!api) return
+    setItems(prev => {
+      const next = prev.map(i => i.id === item.id ? item : i)
+      void api.save({ version: 1, items: next })
       return next
     })
   }, [])
 
-  const deleteSnippet = useCallback(async (id: string) => {
-    setSnippets((prev) => {
-      const next = prev.filter(s => s.id !== id)
-      if (snippetsApi) {
-        snippetsApi.save(next).catch(console.error)
-      }
+  const deleteItem = useCallback(async (id: string) => {
+    const api = snippetsApi
+    const fs = filesystem
+    if (!api) return
+    const item = items.find(i => i.id === id)
+    if (item && fs) await fs.deleteFile(fuseResolve(item.file))
+    setItems(prev => {
+      const next = prev.filter(i => i.id !== id)
+      void api.save({ version: 1, items: next })
       return next
     })
+  }, [items])
+
+  const readCode = useCallback(async (item: FuseManifestItem): Promise<string> => {
+    if (!filesystem) return ''
+    return filesystem.readFile(fuseResolve(item.file))
   }, [])
 
-  return { snippets, loading, saveSnippet, deleteSnippet }
+  return { items, loading, saveItem, updateMeta, deleteItem, readCode }
 }

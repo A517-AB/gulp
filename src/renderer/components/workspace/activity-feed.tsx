@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Code, Send, Archive, Play, MoreVertical, Loader2 } from "lucide-react";
+import { Code, Send, Archive, Play, MoreVertical, Loader2, GitBranch } from "lucide-react";
+import { sdkIpc, filesystem } from "@shared/bridge";
 import { ScrollArea } from "@/ui/scroll-area.tsx";
 import { Textarea } from "@/ui/textarea.tsx";
 import { Button } from "@/ui/button.tsx";
@@ -17,12 +18,27 @@ export function ActivityFeed({ session, onArchive, showCodeDiffs, onToggleCodeDi
   const { grouped, latest } = useActivityGroups(api.activities);
   const [message, setMessage] = useState("");
   const [expandedBash, setExpandedBash] = useState<Set<string>>(new Set());
+  const [applyState, setApplyState] = useState<{ status: "idle" | "applying" | "done" | "error"; message?: string }>({ status: "idle" });
   const toggleBash = (id: string) => {
     setExpandedBash(prev => { const n = new Set(prev); if (n.has(id)) { n.delete(id); } else { n.add(id); } return n; });
   };
 
+  const handleApplyLocally = async () => {
+    if (!sdkIpc || !filesystem) return;
+    const cwd = await filesystem.showOpenDialog();
+    if (!cwd) return;
+    setApplyState({ status: "applying" });
+    const result = await sdkIpc.applyPatch(session.id, { cwd });
+    if (result.success) {
+      setApplyState({ status: "done", message: `Applied to branch: ${result.branch}` });
+    } else {
+      setApplyState({ status: "error", message: result.error });
+    }
+  };
+
   const statusInfo = getStatusInfo(session.status);
   const hasDiffs = api.activities.some((a) => a.diff);
+  const canApplyLocally = sdkIpc !== null && session.status === "completed" && hasDiffs;
 
   const submit = async () => { await api.handleSendMessage(message); setMessage(""); };
 
@@ -67,6 +83,12 @@ export function ActivityFeed({ session, onArchive, showCodeDiffs, onToggleCodeDi
                     <Play className="mr-2 h-3.5 w-3.5" /><span>Start Code Review</span>
                   </DropdownMenuItem>
                 )}
+                {canApplyLocally && (
+                  <DropdownMenuItem onClick={() => { void handleApplyLocally(); }} disabled={applyState.status === "applying"} className="focus:bg-hover text-xs cursor-pointer">
+                    <GitBranch className="mr-2 h-3.5 w-3.5" />
+                    <span>{applyState.status === "applying" ? "Applying…" : "Apply locally"}</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => { archiveSession(session.id); onArchive?.(); }} className="focus:bg-hover text-xs cursor-pointer text-red-400 focus:text-red-400">
                   <Archive className="mr-2 h-3.5 w-3.5" /><span>Archive Session</span>
                 </DropdownMenuItem>
@@ -80,6 +102,18 @@ export function ActivityFeed({ session, onArchive, showCodeDiffs, onToggleCodeDi
         <div className="border-b border-hair bg-red-950/20 px-4 py-3 flex items-center justify-between gap-2">
           <p className="text-[11px] font-mono text-red-400 uppercase">{api.error}</p>
           <Button variant="outline" size="sm" onClick={() => { void api.loadActivities(true); }} className="h-7 text-[10px] font-mono uppercase border-hair hover:bg-hover text-fg-secondary">Retry</Button>
+        </div>
+      )}
+      {applyState.status === "done" && (
+        <div className="border-b border-hair bg-green-950/20 px-4 py-2 flex items-center justify-between gap-2">
+          <p className="text-[11px] font-mono text-green-400 uppercase">{applyState.message}</p>
+          <button onClick={() => { setApplyState({ status: "idle" }); }} className="text-[10px] font-mono text-fg-dim hover:text-fg-secondary uppercase">✕</button>
+        </div>
+      )}
+      {applyState.status === "error" && (
+        <div className="border-b border-hair bg-red-950/20 px-4 py-2 flex items-center justify-between gap-2">
+          <p className="text-[11px] font-mono text-red-400 uppercase">{applyState.message}</p>
+          <button onClick={() => { setApplyState({ status: "idle" }); }} className="text-[10px] font-mono text-fg-dim hover:text-fg-secondary uppercase">✕</button>
         </div>
       )}
 

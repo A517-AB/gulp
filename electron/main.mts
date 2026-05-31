@@ -9,6 +9,7 @@ import { registerFilesystemHandlers } from "./filesystem";
 import { registerSnippetsHandlers } from "./snippets";
 import { registerGitHandlers } from "./git";
 import { registerGitHubHandlers } from "./github";
+import { registerJulesLocalHandlers } from "./julesLocal";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -113,9 +114,10 @@ app.whenReady().then(() => {
   registerTerminalHandlers(() => mainWindow?.webContents ?? null);
   registerQueuesHandlers();
   registerFilesystemHandlers();
-  registerSnippetsHandlers();
+  registerSnippetsHandlers(() => mainWindow?.webContents ?? null);
   registerGitHandlers();
   registerGitHubHandlers();
+  registerJulesLocalHandlers();
   createWindow();
 
   tray = new Tray(buildTrayIcon());

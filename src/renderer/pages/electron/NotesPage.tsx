@@ -1,4 +1,4 @@
-import { MarkdownEditor } from '@renderer/components/markdown';
+import { MarkdownEditor } from '@/components/markdown';
 
 export default function NotesPage() {
   return (

@@ -9,9 +9,9 @@ import type { FsEntry } from '@shared'
 // ── context ───────────────────────────────────────────────────────────────────
 
 interface TreeCtx {
-  loadChildren:    (node: FileTreeNode) => Promise<void>
-  onSelectFile?:   (entry: FsEntry) => void
-  onSelectFolder?: (entry: FsEntry) => void
+  loadChildren:   (node: FileTreeNode) => Promise<void>
+  onSelectFile:   ((entry: FsEntry) => void) | undefined
+  onSelectFolder: ((entry: FsEntry) => void) | undefined
 }
 
 const TreeContext = createContext<TreeCtx | null>(null)

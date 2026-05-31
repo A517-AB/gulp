@@ -146,8 +146,48 @@ const env: ElectronAPI["env"] = {
 // ── snippets ───────────────────────────────────────────────────────────────────
 
 const snippets: ElectronAPI["snippets"] = {
-  get:  () => ipcRenderer.invoke("snippets.get"),
-  save: (data) => ipcRenderer.invoke("snippets.save", data),
+  get:       () => ipcRenderer.invoke("snippets.get"),
+  save:      (data) => ipcRenderer.invoke("snippets.save", data),
+  onChanged: (cb) => {
+    const handler = (_event: IpcRendererEvent, data: { event: string; path: string }) => cb(data)
+    ipcRenderer.on("snippets.changed", handler)
+    return () => { ipcRenderer.off("snippets.changed", handler) }
+  },
+};
+
+// ── jules local ────────────────────────────────────────────────────────────────
+
+const julesLocal: ElectronAPI["sdkIpc"] = {
+  setApiKey: (apiKey) => ipcRenderer.invoke("jules.apiKey.set", apiKey),
+  createSession: (request) => ipcRenderer.invoke("jules.session.create", request),
+  resumeSession: (sessionId) => ipcRenderer.invoke("jules.session.resume", sessionId),
+  getSession: (sessionId) => ipcRenderer.invoke("jules.session.get", sessionId),
+  approve: (sessionId) => ipcRenderer.invoke("jules.session.approve", sessionId),
+  sendMessage: (sessionId, prompt) => ipcRenderer.invoke("jules.session.send", sessionId, prompt),
+  ask: (sessionId, prompt) => ipcRenderer.invoke("jules.session.ask", sessionId, prompt),
+  getGeneratedFiles: (sessionId, filter) => ipcRenderer.invoke("jules.session.files", sessionId, filter),
+  getMarkdownFiles: (sessionId) => ipcRenderer.invoke("jules.session.files.markdown", sessionId),
+  startStream: (sessionId) => ipcRenderer.invoke("jules.stream.start", sessionId),
+  stopStream: (sessionId) => ipcRenderer.invoke("jules.stream.stop", sessionId),
+  onActivity: (cb) => {
+    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => {
+      cb(data)
+    }
+    ipcRenderer.on("jules.stream.activity", handler)
+    return () => {
+      ipcRenderer.off("jules.stream.activity", handler)
+    }
+  },
+  onStreamState: (cb) => {
+    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => {
+      cb(data)
+    }
+    ipcRenderer.on("jules.stream.state", handler)
+    return () => {
+      ipcRenderer.off("jules.stream.state", handler)
+    }
+  },
+  applyPatch: (sessionId, opts) => ipcRenderer.invoke("jules.applyPatch", sessionId, opts),
 };
 
 // ── expose ─────────────────────────────────────────────────────────────────────
@@ -161,6 +201,7 @@ const api: ElectronAPI = {
   filesystem,
   env,
   snippets,
+  sdkIpc: julesLocal,
 };
 
 contextBridge.exposeInMainWorld("electron", api);

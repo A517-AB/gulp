@@ -1,10 +1,11 @@
-export { isElectron, isWeb, terminal, queues, windowControls, power, popup, filesystem, snippets } from './bridge'
+export { isElectron, isWeb, terminal, queues, windowControls, power, popup, filesystem, snippets, sdkIpc } from './bridge'
 
 export type { FsEntry, FsStat, ReaddirOptions, FileFilter, FsBookmark } from './filesystem'
 
+export { FUSE_ROOT, fuseResolve, fuseFilePath, FuseSnippetType, FuseManifestItem, FuseManifest, FuseChangeEvent } from './fuse'
+
 export type {
   ElectronAPI,
-  SdkIpc,
   ShellType,
   TerminalAPI,
   QueuesAPI,
@@ -15,4 +16,16 @@ export type {
   FilesystemAPI,
   EnvAPI,
   SnippetsAPI,
+  JulesLocalAPI,
+  JulesLocalSessionState,
+  JulesLocalSessionRequest,
+  JulesLocalSessionInfo,
+  JulesLocalGeneratedFile,
+  JulesLocalFileFilter,
+  JulesLocalArtifact,
+  JulesLocalPlanStep,
+  JulesLocalPlan,
+  JulesLocalActivity,
+  JulesLocalStreamActivityEvent,
+  JulesLocalStreamStateEvent,
 } from './electron'

@@ -1,66 +1,5 @@
-import type {
-  SessionResource, SessionConfig, SessionState, SerializedSnapshot,
-  Activity, ActivityAgentMessaged, Source, JulesOptions, JulesQuery,
-  JulesDomain, ListSessionsOptions, JulesClient, SessionClient, Outcome,
-} from '@google/jules-sdk'
-import type { Snippet } from '../types/snippets'
 import type { FsEntry, FsStat, ReaddirOptions, FileFilter } from './filesystem'
-
-// ── sdk ipc types ──────────────────────────────────────────────────────────────
-
-type _Unsubscribe   = () => void
-type _SyncOpts      = NonNullable<Parameters<JulesClient['sync']>[0]>
-type _SyncStats     = Awaited<ReturnType<JulesClient['sync']>>
-type _SyncProgress  = Parameters<NonNullable<_SyncOpts['onProgress']>>[0]
-type _SyncOptions   = Omit<_SyncOpts, 'onProgress' | 'signal'>
-type _SelectOptions = Parameters<SessionClient['activities']['select']>[0]
-type _ListOptions   = Parameters<SessionClient['activities']['list']>[0]
-type _StreamOptions = Parameters<SessionClient['stream']>[0]
-type _IpcOutcome    = Omit<Outcome, 'generatedFiles' | 'changeSet'>
-
-export interface SdkIpc {
-  client: {
-    sessions:         (options?: ListSessionsOptions) => Promise<SessionResource[]>
-    streamSessions:   (onItem: (item: SessionResource) => void, onDone?: () => void, options?: ListSessionsOptions) => _Unsubscribe
-    sync:             (options?: _SyncOptions) => Promise<_SyncStats>
-    onSyncProgress:   (cb: (p: _SyncProgress) => void) => _Unsubscribe
-    select:           <T extends JulesDomain>(query: JulesQuery<T>) => Promise<(T extends 'sessions' ? SessionResource : Activity)[]>
-    getSessionResource: (id: string) => Promise<SessionResource>
-    run:              (config: SessionConfig) => Promise<{ id: string }>
-    with:             (options: JulesOptions) => Promise<void>
-  }
-  session: {
-    send:      (id: string, prompt: string) => Promise<void>
-    ask:       (id: string, prompt: string) => Promise<ActivityAgentMessaged>
-    approve:   (id: string) => Promise<void>
-    info:      (id: string) => Promise<SessionResource>
-    result:    (id: string) => Promise<_IpcOutcome>
-    waitFor:   (id: string, state: SessionState) => Promise<void>
-    snapshot:  (id: string, options?: { activities?: boolean }) => Promise<SerializedSnapshot>
-    archive:   (id: string) => Promise<void>
-    unarchive: (id: string) => Promise<void>
-    select:    (id: string, options?: _SelectOptions) => Promise<Activity[]>
-    hydrate:   (id: string) => Promise<number>
-    stream:    (id: string, onItem: (item: Activity) => void, onDone?: () => void, options?: _StreamOptions) => _Unsubscribe
-    history:   (id: string, onItem: (item: Activity) => void, onDone?: () => void) => _Unsubscribe
-    updates:   (id: string, onItem: (item: Activity) => void, onDone?: () => void) => _Unsubscribe
-  }
-  activities: {
-    hydrate:  (id: string) => Promise<number>
-    select:   (id: string, options?: _SelectOptions) => Promise<Activity[]>
-    list:     (id: string, options?: _ListOptions) => Promise<{ activities: Activity[]; nextPageToken?: string }>
-    get:      (id: string, activityId: string) => Promise<Activity>
-    history:  (id: string, onItem: (item: Activity) => void, onDone?: () => void) => _Unsubscribe
-    updates:  (id: string, onItem: (item: Activity) => void, onDone?: () => void) => _Unsubscribe
-    stream:   (id: string, onItem: (item: Activity) => void, onDone?: () => void) => _Unsubscribe
-  }
-  sources: {
-    get: (filter: { github: string }) => Promise<Source | undefined>
-  }
-  artifact: {
-    save: (data: string, filepath: string) => Promise<string>
-  }
-}
+import type { FuseManifest, FuseChangeEvent } from './fuse'
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
 
@@ -142,9 +81,136 @@ export interface EnvAPI {
   getApiKey: () => Promise<string | null>;
 }
 
+export type JulesLocalSessionState =
+  | 'unspecified'
+  | 'queued'
+  | 'planning'
+  | 'awaitingPlanApproval'
+  | 'awaitingUserFeedback'
+  | 'inProgress'
+  | 'paused'
+  | 'failed'
+  | 'completed'
+
+export interface JulesLocalSessionRequest {
+  prompt: string;
+  title?: string;
+  github?: string;
+  branch?: string;
+  requireApproval?: boolean;
+  autoPr?: boolean;
+  environmentVariablesEnabled?: boolean;
+}
+
+export interface JulesLocalSessionInfo {
+  id: string;
+  title: string;
+  prompt: string;
+  state: JulesLocalSessionState;
+  url: string;
+  source?: string;
+  branch?: string;
+  archived: boolean;
+  outputTypes: Array<'pullRequest' | 'changeSet'>;
+  pullRequestUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JulesLocalGeneratedFile {
+  path: string;
+  changeType: 'created' | 'modified' | 'deleted';
+  content: string;
+  additions: number;
+  deletions: number;
+}
+
+export interface JulesLocalFileFilter {
+  extensions?: string[];
+  pathIncludes?: string;
+}
+
+export interface JulesLocalArtifact {
+  type: 'changeSet' | 'bashOutput' | 'media';
+  source?: string;
+  diff?: string;
+  summary?: string;
+  files?: JulesLocalGeneratedFile[];
+  command?: string;
+  output?: string;
+  exitCode?: number | null;
+  format?: string;
+  hasData?: boolean;
+}
+
+export interface JulesLocalPlanStep {
+  id: string;
+  title: string;
+  description?: string;
+  index: number;
+}
+
+export interface JulesLocalPlan {
+  id: string;
+  createTime: string;
+  steps: JulesLocalPlanStep[];
+}
+
+export interface JulesLocalActivity {
+  id: string;
+  type: string;
+  createTime: string;
+  originator?: string;
+  message?: string;
+  title?: string;
+  description?: string;
+  reason?: string;
+  plan?: JulesLocalPlan;
+  artifacts: JulesLocalArtifact[];
+}
+
+export interface JulesLocalStreamActivityEvent {
+  sessionId: string;
+  activity: JulesLocalActivity;
+}
+
+export interface JulesLocalStreamStateEvent {
+  sessionId: string;
+  state: 'started' | 'completed' | 'failed' | 'stopped';
+  info?: JulesLocalSessionInfo;
+  error?: string;
+}
+
 export interface SnippetsAPI {
-  get: () => Promise<Snippet[]>;
-  save: (data: Snippet[]) => Promise<boolean>;
+  get:       () => Promise<FuseManifest>;
+  save:      (data: FuseManifest) => Promise<boolean>;
+  onChanged: (cb: (change: FuseChangeEvent) => void) => () => void;
+}
+
+export interface JulesLocalAPI {
+  setApiKey: (apiKey: string | null) => Promise<boolean>;
+  createSession: (request: JulesLocalSessionRequest) => Promise<JulesLocalSessionInfo>;
+  resumeSession: (sessionId: string) => Promise<JulesLocalSessionInfo>;
+  getSession: (sessionId: string) => Promise<JulesLocalSessionInfo>;
+  approve: (sessionId: string) => Promise<void>;
+  sendMessage: (sessionId: string, prompt: string) => Promise<void>;
+  ask: (sessionId: string, prompt: string) => Promise<JulesLocalActivity>;
+  getGeneratedFiles: (
+    sessionId: string,
+    filter?: JulesLocalFileFilter,
+  ) => Promise<JulesLocalGeneratedFile[]>;
+  getMarkdownFiles: (sessionId: string) => Promise<JulesLocalGeneratedFile[]>;
+  startStream: (sessionId: string) => Promise<void>;
+  stopStream: (sessionId: string) => Promise<void>;
+  onActivity: (cb: (payload: JulesLocalStreamActivityEvent) => void) => () => void;
+  onStreamState: (cb: (payload: JulesLocalStreamStateEvent) => void) => () => void;
+  applyPatch: (
+    sessionId: string,
+    opts: { branch?: string; dryRun?: boolean; cwd: string }
+  ) => Promise<
+    | { success: true; branch: string; commitMessage: string; dryRun?: boolean }
+    | { success: false; error: string }
+  >;
 }
 
 // ── root ───────────────────────────────────────────────────────────────────────
@@ -157,8 +223,8 @@ export interface ElectronAPI {
   popup:      PopupAPI;
   filesystem: FilesystemAPI;
   env:        EnvAPI;
-  snippets:   SnippetsAPI;
-  sdkIpc?:    SdkIpc;
+  snippets: SnippetsAPI;
+  sdkIpc:   JulesLocalAPI;
 }
 
 // ── global augments ────────────────────────────────────────────────────────────

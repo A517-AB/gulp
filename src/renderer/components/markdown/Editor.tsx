@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useCreateBlockNote } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
-import { cn } from '@renderer/utils';
+import { cn } from '@/utils';
 import '@blocknote/mantine/style.css';
 import type { MarkdownEditorProps } from './types';
 
