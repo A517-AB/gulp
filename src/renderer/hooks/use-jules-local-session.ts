@@ -28,6 +28,8 @@ export interface UseJulesLocalSessionResult {
   streaming: boolean
   error: string | null
   refreshSession: () => Promise<void>
+  refreshActivities: () => Promise<void>
+  hydrateSession: () => Promise<number>
   loadFiles: (filter?: JulesLocalFileFilter) => Promise<JulesLocalGeneratedFile[]>
   loadMarkdownFiles: () => Promise<JulesLocalGeneratedFile[]>
   approve: () => Promise<void>
@@ -94,6 +96,36 @@ export function useJulesLocalSession(
       setLoadingSession(false)
     }
   }, [sessionId])
+
+  const refreshActivities = useCallback(async () => {
+    if (!sessionId) {
+      setActivities([])
+      return
+    }
+
+    try {
+      setError(null)
+      setActivities(await localJules.getHistory(sessionId))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Failed to load Jules activity history')
+    }
+  }, [sessionId])
+
+  const hydrateSession = useCallback(async () => {
+    if (!sessionId) {
+      return 0
+    }
+
+    try {
+      setError(null)
+      const synced = await localJules.hydrateSession(sessionId)
+      await refreshActivities()
+      return synced
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Failed to hydrate Jules session history')
+      return 0
+    }
+  }, [refreshActivities, sessionId])
 
   const loadFiles = useCallback(
     async (filter?: JulesLocalFileFilter) => {
@@ -207,11 +239,19 @@ export function useJulesLocalSession(
       return
     }
 
-    void refreshSession()
-    if (autoStart) {
-      void startStream()
+    let cancelled = false
+
+    void (async () => {
+      await Promise.all([refreshSession(), refreshActivities()])
+      if (!cancelled && autoStart) {
+        await startStream()
+      }
+    })()
+
+    return () => {
+      cancelled = true
     }
-  }, [autoStart, refreshSession, sessionId, startStream])
+  }, [autoStart, refreshActivities, refreshSession, sessionId, startStream])
 
   useEffect(() => {
     if (!sessionId) {
@@ -247,6 +287,10 @@ export function useJulesLocalSession(
         setError(payload.error)
       }
 
+      if (payload.state === 'completed' || payload.state === 'failed') {
+        void refreshActivities()
+      }
+
       if (payload.state === 'completed') {
         void loadFiles()
       }
@@ -274,6 +318,8 @@ export function useJulesLocalSession(
     streaming,
     error,
     refreshSession,
+    refreshActivities,
+    hydrateSession,
     loadFiles,
     loadMarkdownFiles,
     approve,

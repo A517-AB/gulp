@@ -39,7 +39,8 @@ export type AppRoute = Omit<RouteObject, 'handle'> & {
 const sharedRoutes: AppRoute[] = [
     { index: true,        Component: HomePage,      handle: { title: 'Home',      inNav: true } },
     { path: 'settings',  Component: SettingsPage,  handle: { title: 'Settings',  inNav: true } },
-    { path: 'session', Component: JulesPage, handle: { title: 'Sessions', inNav: true } },
+    { path: 'session',   Component: JulesPage,     handle: { title: 'Sessions',  inNav: true } },
+    { path: 'overview',  Component: OverviewPage,  handle: { title: 'Overview',  inNav: true } },
 ]
 
 // ── electron ──────────────────────────────────────────────────────────────────
@@ -55,9 +56,7 @@ const electronRoutes: AppRoute[] = [
 
 // ── web ───────────────────────────────────────────────────────────────────────
 
-const webRoutes: AppRoute[] = [
-    { path: 'overview', Component: OverviewPage, handle: { title: 'Overview', inNav: true } },
-]
+const webRoutes: AppRoute[] = []
 
 // ── nav export ────────────────────────────────────────────────────────────────
 

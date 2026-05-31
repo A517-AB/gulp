@@ -20,6 +20,7 @@ export interface Session {
   sourceId: string;
   title: string;
   status: SessionStatus;
+  archived: boolean;
   createdAt: string;
   updatedAt: string;
   lastActivityAt?: string;

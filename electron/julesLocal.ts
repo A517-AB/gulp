@@ -6,6 +6,7 @@ import {
   type JulesClient,
   type SessionConfig,
   type SessionResource,
+  type Source,
 } from '@google/jules-sdk'
 import { execFileSync } from 'child_process'
 import { writeFileSync, unlinkSync } from 'fs'
@@ -13,10 +14,15 @@ import * as path from 'path'
 import type {
   JulesLocalActivity,
   JulesLocalArtifact,
+  JulesLocalFleetIssueFixRequest,
+  JulesLocalFleetIssueFixResult,
   JulesLocalFileFilter,
   JulesLocalGeneratedFile,
+  JulesLocalSessionOutcome,
   JulesLocalSessionInfo,
   JulesLocalSessionRequest,
+  JulesLocalSessionSnapshot,
+  JulesLocalSource,
   JulesLocalStreamStateEvent,
 } from '@shared/electron'
 
@@ -34,6 +40,58 @@ type StreamState = JulesLocalStreamStateEvent['state']
 
 interface ActiveStream {
   stopped: boolean
+}
+
+type ChangeSetLike = {
+  source: string
+  gitPatch: { unidiffPatch: string }
+  parsed: () => {
+    files: Array<{
+      path: string
+      changeType: 'created' | 'modified' | 'deleted'
+      additions: number
+      deletions: number
+    }>
+    summary: { totalFiles: number }
+  }
+}
+
+type SessionOutcomeLike = {
+  sessionId: string
+  title: string
+  state: 'completed' | 'failed'
+  outputs: Array<{ pullRequest: { url: string; title: string } } | { changeSet: unknown }>
+  pullRequest?: { url: string; title: string }
+  generatedFiles: () => { all: () => JulesLocalGeneratedFile[] }
+  changeSet: () => ChangeSetLike | undefined
+}
+
+type SessionSnapshotLike = {
+  id: string
+  state: JulesLocalSessionSnapshot['state']
+  url: string
+  createdAt: Date
+  updatedAt: Date
+  durationMs: number
+  prompt: string
+  title: string
+  activities: readonly Activity[]
+  activityCounts: Readonly<Record<string, number>>
+  timeline: ReadonlyArray<{ time: string; type: string; summary: string }>
+  insights: {
+    completionAttempts: number
+    planRegenerations: number
+    userInterventions: number
+    failedCommands: ReadonlyArray<Activity>
+  }
+  generatedFiles: { all: () => JulesLocalGeneratedFile[] }
+  changeSet: () => ChangeSetLike | undefined
+  toMarkdown: () => string
+  pr?: { url: string; title: string }
+}
+
+type HydratableSession = {
+  hydrate: () => Promise<number>
 }
 
 let apiKeyOverride: string | null = null
@@ -129,6 +187,41 @@ function toGeneratedFiles(files: JulesLocalGeneratedFile[]): JulesLocalGenerated
   return files.map(serializeGeneratedFile)
 }
 
+function serializeSource(source: Source): JulesLocalSource {
+  return {
+    name: source.name,
+    id: source.id,
+    type: 'githubRepo',
+    fullName: `${source.githubRepo.owner}/${source.githubRepo.repo}`,
+    owner: source.githubRepo.owner,
+    repo: source.githubRepo.repo,
+    isPrivate: source.githubRepo.isPrivate,
+    ...(source.githubRepo.defaultBranch
+      ? { defaultBranch: source.githubRepo.defaultBranch }
+      : {}),
+    branches: source.githubRepo.branches ?? [],
+  }
+}
+
+function serializeChangeSetArtifact(artifact: ChangeSetLike): JulesLocalArtifact {
+  const parsed = artifact.parsed()
+  const files = parsed.files.map((file) => ({
+    path: file.path,
+    changeType: file.changeType,
+    content: '',
+    additions: file.additions,
+    deletions: file.deletions,
+  }))
+
+  return {
+    type: 'changeSet',
+    source: artifact.source,
+    diff: artifact.gitPatch.unidiffPatch,
+    summary: `${parsed.summary.totalFiles} files changed`,
+    files,
+  }
+}
+
 function normalizeExtensions(extensions?: string[]): string[] {
   return (extensions ?? []).map((extension) => {
     const normalized = extension.trim().toLowerCase()
@@ -194,31 +287,88 @@ function serializeSessionInfo(session: SessionResource): JulesLocalSessionInfo {
   }
 }
 
+function serializeOutcome(outcome: SessionOutcomeLike): JulesLocalSessionOutcome {
+  const changeSet = outcome.changeSet()
+
+  return {
+    sessionId: outcome.sessionId,
+    title: outcome.title,
+    state: outcome.state,
+    outputTypes: outcome.outputs.map((output) =>
+      'pullRequest' in output ? 'pullRequest' : 'changeSet',
+    ),
+    generatedFiles: toGeneratedFiles(outcome.generatedFiles().all()),
+    ...(outcome.pullRequest
+      ? {
+          pullRequestUrl: outcome.pullRequest.url,
+          pullRequestTitle: outcome.pullRequest.title,
+        }
+      : {}),
+    ...(changeSet ? { changeSet: serializeChangeSetArtifact(changeSet) } : {}),
+  }
+}
+
+function serializeSnapshot(snapshot: SessionSnapshotLike): JulesLocalSessionSnapshot {
+  const changeSet = snapshot.changeSet()
+
+  return {
+    id: snapshot.id,
+    state: snapshot.state,
+    url: snapshot.url,
+    createdAt: snapshot.createdAt.toISOString(),
+    updatedAt: snapshot.updatedAt.toISOString(),
+    durationMs: snapshot.durationMs,
+    prompt: snapshot.prompt,
+    title: snapshot.title,
+    activities: snapshot.activities.map(serializeActivity),
+    activityCounts: { ...snapshot.activityCounts },
+    timeline: snapshot.timeline.map((entry) => ({
+      time: entry.time,
+      type: entry.type,
+      summary: entry.summary,
+    })),
+    insights: {
+      completionAttempts: snapshot.insights.completionAttempts,
+      planRegenerations: snapshot.insights.planRegenerations,
+      userInterventions: snapshot.insights.userInterventions,
+      failedCommandCount: snapshot.insights.failedCommands.length,
+    },
+    generatedFiles: toGeneratedFiles(snapshot.generatedFiles.all()),
+    markdown: snapshot.toMarkdown(),
+    ...(snapshot.pr
+      ? {
+          pullRequestUrl: snapshot.pr.url,
+          pullRequestTitle: snapshot.pr.title,
+        }
+      : {}),
+    ...(changeSet ? { changeSet: serializeChangeSetArtifact(changeSet) } : {}),
+  }
+}
+
+function toFleetTitle(
+  repository: string,
+  issue: string,
+  titlePrefix?: string,
+): string {
+  const normalizedPrefix = titlePrefix?.trim()
+  if (normalizedPrefix) {
+    return `${normalizedPrefix} · ${repository}`
+  }
+
+  const firstLine = issue.trim().split(/\r?\n/, 1)[0] ?? 'Issue fix'
+  return `${firstLine.slice(0, 72)} · ${repository}`
+}
+
 function serializeArtifact(artifact: Activity['artifacts'][number]): JulesLocalArtifact {
   if (artifact.type === 'changeSet') {
-    const parsed = artifact.parsed()
-    const files = parsed.files.map((file) => ({
-      path: file.path,
-      changeType: file.changeType,
-      content: '',
-      additions: file.additions,
-      deletions: file.deletions,
-    }))
-
-    return {
-      type: 'changeSet',
-      source: artifact.source,
-      diff: artifact.gitPatch.unidiffPatch,
-      summary: `${parsed.summary.totalFiles} files changed`,
-      files,
-    }
+    return serializeChangeSetArtifact(artifact)
   }
 
   if (artifact.type === 'bashOutput') {
     return {
       type: 'bashOutput',
       command: artifact.command,
-      output: artifact.stdout,
+      output: [artifact.stdout, artifact.stderr].filter(Boolean).join('\n\n'),
       exitCode: artifact.exitCode,
     }
   }
@@ -275,6 +425,16 @@ function serializeActivity(activity: Activity): JulesLocalActivity {
     default:
       return base
   }
+}
+
+async function collectActivities(iterable: AsyncIterable<Activity>): Promise<JulesLocalActivity[]> {
+  const activities: JulesLocalActivity[] = []
+
+  for await (const activity of iterable) {
+    activities.push(serializeActivity(activity))
+  }
+
+  return activities.sort((left, right) => left.createTime.localeCompare(right.createTime))
 }
 
 async function getSessionFiles(
@@ -338,6 +498,119 @@ export function registerJulesLocalHandlers() {
     'jules.session.get',
     async (_event, sessionId: string): Promise<JulesLocalSessionInfo> => {
       return serializeSessionInfo(await getClient().session(sessionId).info())
+    },
+  )
+
+  ipcMain.handle('jules.session.hydrate', async (_event, sessionId: string) => {
+    return (getClient().session(sessionId) as unknown as HydratableSession).hydrate()
+  })
+
+  ipcMain.handle(
+    'jules.session.history',
+    async (_event, sessionId: string): Promise<JulesLocalActivity[]> => {
+      return collectActivities(getClient().session(sessionId).history())
+    },
+  )
+
+  ipcMain.handle(
+    'jules.sources.list',
+    async (): Promise<JulesLocalSource[]> => {
+      const sources: JulesLocalSource[] = []
+
+      for await (const source of getClient().sources()) {
+        if (source.type === 'githubRepo') {
+          sources.push(serializeSource(source))
+        }
+      }
+
+      return sources.sort((left, right) => left.fullName.localeCompare(right.fullName))
+    },
+  )
+
+  ipcMain.handle(
+    'jules.sources.get',
+    async (_event, github: string): Promise<JulesLocalSource | null> => {
+      const normalized = github.trim()
+      if (!normalized) {
+        return null
+      }
+
+      const source = await getClient().sources.get({ github: normalized })
+      return source ? serializeSource(source) : null
+    },
+  )
+
+  ipcMain.handle(
+    'jules.session.result',
+    async (_event, sessionId: string): Promise<JulesLocalSessionOutcome> => {
+      return serializeOutcome(await getClient().session(sessionId).result())
+    },
+  )
+
+  ipcMain.handle(
+    'jules.session.snapshot',
+    async (_event, sessionId: string): Promise<JulesLocalSessionSnapshot> => {
+      return serializeSnapshot(await getClient().session(sessionId).snapshot())
+    },
+  )
+
+  ipcMain.handle(
+    'jules.fleet.issueFix',
+    async (
+      _event,
+      request: JulesLocalFleetIssueFixRequest,
+    ): Promise<JulesLocalFleetIssueFixResult[]> => {
+      const issue = request.issue.trim()
+      if (!issue) {
+        throw new Error('A fleet issue prompt is required.')
+      }
+
+      const repositories = Array.from(
+        new Set(
+          request.repositories
+            .map((repository) => repository.trim())
+            .filter(Boolean),
+        ),
+      )
+
+      if (repositories.length === 0) {
+        throw new Error('At least one repository is required for fleet dispatch.')
+      }
+
+      const runs = await getClient().all(
+        repositories,
+        async (repository) => ({
+          prompt: issue,
+          title: toFleetTitle(repository, issue, request.titlePrefix),
+          source: {
+            github: repository,
+            baseBranch: request.branch ?? 'main',
+          },
+          requireApproval: request.requireApproval ?? false,
+          autoPr: request.autoPr ?? true,
+        }),
+        {
+          ...(request.concurrency ? { concurrency: request.concurrency } : {}),
+          ...(request.stopOnError !== undefined
+            ? { stopOnError: request.stopOnError }
+            : {}),
+          ...(request.delayMs ? { delayMs: request.delayMs } : {}),
+        },
+      )
+
+      return Promise.all(
+        repositories.map(async (repository, index) => {
+          const run = runs[index]
+          if (!run) {
+            throw new Error(`Fleet dispatch did not return a session for ${repository}.`)
+          }
+
+          return {
+            repository,
+            session: serializeSessionInfo(await getClient().session(run.id).info()),
+          }
+        }),
+      )
     },
   )
 

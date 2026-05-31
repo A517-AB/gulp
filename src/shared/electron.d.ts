@@ -125,6 +125,18 @@ export interface JulesLocalGeneratedFile {
   deletions: number;
 }
 
+export interface JulesLocalSource {
+  name: string;
+  id: string;
+  type: 'githubRepo';
+  fullName: string;
+  owner: string;
+  repo: string;
+  isPrivate: boolean;
+  defaultBranch?: string;
+  branches: string[];
+}
+
 export interface JulesLocalFileFilter {
   extensions?: string[];
   pathIncludes?: string;
@@ -181,6 +193,67 @@ export interface JulesLocalStreamStateEvent {
   error?: string;
 }
 
+export interface JulesLocalSessionOutcome {
+  sessionId: string;
+  title: string;
+  state: 'completed' | 'failed';
+  outputTypes: Array<'pullRequest' | 'changeSet'>;
+  generatedFiles: JulesLocalGeneratedFile[];
+  pullRequestUrl?: string;
+  pullRequestTitle?: string;
+  changeSet?: JulesLocalArtifact;
+}
+
+export interface JulesLocalSnapshotTimelineEntry {
+  time: string;
+  type: string;
+  summary: string;
+}
+
+export interface JulesLocalSnapshotInsights {
+  completionAttempts: number;
+  planRegenerations: number;
+  userInterventions: number;
+  failedCommandCount: number;
+}
+
+export interface JulesLocalSessionSnapshot {
+  id: string;
+  state: JulesLocalSessionState;
+  url: string;
+  createdAt: string;
+  updatedAt: string;
+  durationMs: number;
+  prompt: string;
+  title: string;
+  activities: JulesLocalActivity[];
+  activityCounts: Record<string, number>;
+  timeline: JulesLocalSnapshotTimelineEntry[];
+  insights: JulesLocalSnapshotInsights;
+  generatedFiles: JulesLocalGeneratedFile[];
+  markdown: string;
+  pullRequestUrl?: string;
+  pullRequestTitle?: string;
+  changeSet?: JulesLocalArtifact;
+}
+
+export interface JulesLocalFleetIssueFixRequest {
+  repositories: string[];
+  issue: string;
+  branch?: string;
+  titlePrefix?: string;
+  autoPr?: boolean;
+  requireApproval?: boolean;
+  concurrency?: number;
+  stopOnError?: boolean;
+  delayMs?: number;
+}
+
+export interface JulesLocalFleetIssueFixResult {
+  repository: string;
+  session: JulesLocalSessionInfo;
+}
+
 export interface SnippetsAPI {
   get:       () => Promise<FuseManifest>;
   save:      (data: FuseManifest) => Promise<boolean>;
@@ -192,6 +265,15 @@ export interface JulesLocalAPI {
   createSession: (request: JulesLocalSessionRequest) => Promise<JulesLocalSessionInfo>;
   resumeSession: (sessionId: string) => Promise<JulesLocalSessionInfo>;
   getSession: (sessionId: string) => Promise<JulesLocalSessionInfo>;
+  hydrateSession: (sessionId: string) => Promise<number>;
+  getHistory: (sessionId: string) => Promise<JulesLocalActivity[]>;
+  listSources: () => Promise<JulesLocalSource[]>;
+  getSource: (github: string) => Promise<JulesLocalSource | null>;
+  getResult: (sessionId: string) => Promise<JulesLocalSessionOutcome>;
+  getSnapshot: (sessionId: string) => Promise<JulesLocalSessionSnapshot>;
+  dispatchFleetIssueFix: (
+    request: JulesLocalFleetIssueFixRequest,
+  ) => Promise<JulesLocalFleetIssueFixResult[]>;
   approve: (sessionId: string) => Promise<void>;
   sendMessage: (sessionId: string, prompt: string) => Promise<void>;
   ask: (sessionId: string, prompt: string) => Promise<JulesLocalActivity>;

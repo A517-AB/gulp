@@ -14,6 +14,7 @@ interface ApiSession {
   id: string;
   title?: string;
   state?: string;
+  archived?: boolean;
   createTime: string;
   updateTime: string;
   lastActivityAt?: string;
@@ -37,7 +38,7 @@ interface ApiActivity {
   createTime: string;
   originator?: string;
   planGenerated?: { plan?: { description?: string; summary?: string; title?: string; steps?: unknown[] }; description?: string; summary?: string; title?: string };
-  planApproved?: boolean;
+  planApproved?: boolean | { planId?: string };
   progressUpdated?: { progressDescription?: string; description?: string; message?: string; artifacts?: ApiArtifact[] };
   sessionCompleted?: { summary?: string; message?: string; artifacts?: ApiArtifact[] };
   sessionFailed?: { reason?: string };
@@ -143,6 +144,7 @@ function parseSession(raw: ApiSession): Session {
     sourceId: raw.sourceContext?.source?.replace("sources/github/", "") ?? "",
     title: raw.title ?? "",
     status: STATE_MAP[raw.state ?? ""] ?? "active",
+    archived: raw.archived ?? false,
     createdAt: raw.createTime,
     updatedAt: raw.updateTime,
     ...(raw.lastActivityAt ? { lastActivityAt: raw.lastActivityAt } : {}),
@@ -231,13 +233,14 @@ export class JulesClient {
 
   // ── sessions ─────────────────────────────────────────────────────────────────
 
-  async listSessions(sourceId?: string): Promise<Session[]> {
+  async listSessions(options?: { sourceId?: string; filter?: string }): Promise<Session[]> {
     let all: ApiSession[] = []
     let pageToken: string | undefined
 
     do {
       const params = new URLSearchParams({ pageSize: "100" })
-      if (sourceId) params.set("sourceId", sourceId)
+      if (options?.sourceId) params.set("sourceId", options.sourceId)
+      if (options?.filter) params.set("filter", options.filter)
       if (pageToken) params.set("pageToken", pageToken)
       const res = await this.request<{ sessions?: ApiSession[]; nextPageToken?: string }>(`/sessions?${params}`)
       if (res.sessions) all = all.concat(res.sessions)
@@ -279,6 +282,14 @@ export class JulesClient {
       method: "POST",
       body: JSON.stringify({}),
     })
+  }
+
+  async archiveSession(id: string): Promise<void> {
+    await this.request<void>(`/sessions/${id}:archive`, { method: "POST", body: JSON.stringify({}) })
+  }
+
+  async unarchiveSession(id: string): Promise<void> {
+    await this.request<void>(`/sessions/${id}:unarchive`, { method: "POST", body: JSON.stringify({}) })
   }
 
   // ── activities ────────────────────────────────────────────────────────────────
