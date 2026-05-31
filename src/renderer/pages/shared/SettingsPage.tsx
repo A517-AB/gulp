@@ -1,146 +1,287 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
-import { sdkIpc } from '@shared/bridge'
+import { sdkIpc, isElectron } from '@shared/bridge'
 import { useJules } from '@/lib/jules/provider'
+import { motion, AnimatePresence } from 'framer-motion'
 
-// ── section registry ──────────────────────────────────────────────────────────
+// ── accordion section ─────────────────────────────────────────────────────────
 
-type SectionId = 'general' | 'testing'
-
-interface Section {
-  id: SectionId
-  label: string
-  panel: () => ReactNode
-}
-
-// ── panels ────────────────────────────────────────────────────────────────────
-
-function GeneralPanel() {
+function Section({ title, children, defaultOpen = false }: {
+  title: string
+  children: ReactNode
+  defaultOpen?: boolean
+}) {
+  const [open, setOpen] = useState(defaultOpen)
   return (
-    <div>
-      <p className="text-xs text-fg-muted">Nothing here yet.</p>
+    <div className="border-b border-hair last:border-0">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between py-4 text-xs font-mono uppercase tracking-widest text-fg-dim hover:text-fg-primary transition-colors text-left"
+      >
+        {title}
+        <span className="text-fg-ghost">{open ? '−' : '+'}</span>
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="pb-8">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
 
-function TestingPanel() {
-  const { client } = useJules()
-  const [results, setResults] = useState<Record<string, string>>({})
+// ── test types ────────────────────────────────────────────────────────────────
 
-  const run = (key: string, fn: () => Promise<string>) => async () => {
-    setResults(r => ({ ...r, [key]: '…' }))
-    try {
-      const val = await fn()
-      setResults(r => ({ ...r, [key]: `✓ ${val}` }))
-    } catch (e) {
-      setResults(r => ({ ...r, [key]: `✕ ${e instanceof Error ? e.message : String(e)}` }))
-    }
+interface TestResult {
+  status: 'idle' | 'running' | 'ok' | 'fail'
+  summary: string
+  items?: string[]
+}
+
+interface TestDef {
+  key: string
+  label: string
+  electronOnly?: boolean
+  fn: () => Promise<{ summary: string; items?: string[] }>
+}
+
+// ── test row ──────────────────────────────────────────────────────────────────
+
+function TestRow({ label, result, onRun }: {
+  label: string
+  result: TestResult
+  onRun: () => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+
+  const copyResult = () => {
+    const text = result.items
+      ? `${result.summary}\n${result.items.join('\n')}`
+      : result.summary
+    void navigator.clipboard.writeText(text)
   }
 
-  const tests: { key: string; label: string; fn: () => Promise<string> }[] = [
+  const hasItems = result.items && result.items.length > 0
+  const isFail = result.status === 'fail'
+  const isOk = result.status === 'ok'
+
+  return (
+    <div className="space-y-2 py-2">
+      <div className="flex items-start gap-2">
+        <button
+          onClick={onRun}
+          disabled={result.status === 'running'}
+          className="shrink-0 mt-0.5 px-2 py-1 rounded bg-surface border border-subtle text-[10px] font-mono text-fg-muted hover:text-fg-primary hover:bg-hover transition-colors disabled:opacity-40"
+        >
+          {result.status === 'running' ? '…' : 'run'}
+        </button>
+        <span className="text-xs font-mono text-fg-secondary leading-relaxed flex-1 break-all">{label}</span>
+        {(isOk || isFail) && (
+          <span className={`shrink-0 mt-0.5 text-[10px] font-mono ${isOk ? 'text-green-500' : 'text-red-400'}`}>
+            {isOk ? '✓' : '✕'}
+          </span>
+        )}
+      </div>
+
+      {result.summary && result.status !== 'idle' && result.status !== 'running' && (
+        <div className="ml-12 space-y-1.5">
+          <div className={`relative group/res rounded border px-3 py-2 text-[11px] font-mono leading-relaxed whitespace-pre-wrap break-all ${
+            isFail ? 'bg-red-500/5 border-red-500/20 text-red-300' : 'bg-surface border-subtle text-fg-secondary'
+          }`}>
+            {result.summary}
+            <button
+              onClick={copyResult}
+              className="absolute top-1.5 right-1.5 opacity-0 group-hover/res:opacity-100 transition-opacity text-[9px] font-mono text-fg-ghost hover:text-fg-primary bg-base border border-hair px-1.5 py-0.5 rounded"
+            >
+              copy
+            </button>
+          </div>
+
+          {hasItems && (
+            <>
+              <button
+                onClick={() => setExpanded(v => !v)}
+                className="text-[10px] font-mono text-fg-ghost hover:text-fg-secondary transition-colors"
+              >
+                {expanded ? '▲ hide' : `▼ see all (${result.items!.length})`}
+              </button>
+              <AnimatePresence>
+                {expanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="rounded border border-subtle bg-surface max-h-56 overflow-y-auto">
+                      {result.items!.map((item, i) => (
+                        <div key={i} className="px-3 py-1.5 text-[10px] font-mono text-fg-secondary border-b border-hair last:border-0">
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── test definitions ──────────────────────────────────────────────────────────
+
+function buildTests(client: ReturnType<typeof useJules>['client']): TestDef[] {
+  return [
+    // ── sdkIpc (Electron only) ─────────────────────────────────────────────
     {
-      key: 'sdkIpc',
-      label: 'sdkIpc reachable',
+      key: 'sdk_key',
+      label: 'sdkIpc.setApiKey(localStorage key)',
+      electronOnly: true,
       fn: async () => {
-        if (!sdkIpc) return 'null — not in Electron'
+        if (!sdkIpc) throw new Error('sdkIpc is null')
         await sdkIpc.setApiKey(localStorage.getItem('jules-api-key'))
-        return 'reachable, key forwarded'
+        return { summary: 'reachable — key forwarded to main process' }
       },
     },
     {
-      key: 'listSessions',
-      label: 'client.listSessions()',
+      key: 'sdk_sources',
+      label: 'sdkIpc.listSources()',
+      electronOnly: true,
       fn: async () => {
-        if (!client) return 'no client'
-        const sessions = await client.listSessions()
-        return `${sessions.length} sessions`
+        if (!sdkIpc) throw new Error('sdkIpc is null')
+        const s = await sdkIpc.listSources()
+        return {
+          summary: `${s.length} sources`,
+          items: s.map(x => `${x.fullName} (${x.isPrivate ? 'private' : 'public'}, default: ${x.defaultBranch ?? 'n/a'})`),
+        }
       },
     },
+    // ── HTTP client ────────────────────────────────────────────────────────
     {
-      key: 'listArchived',
-      label: 'client.listSessions({ filter: "archived = true" })',
-      fn: async () => {
-        if (!client) return 'no client'
-        const sessions = await client.listSessions({ filter: 'archived = true' })
-        return `${sessions.length} archived sessions`
-      },
-    },
-    {
-      key: 'listSources',
+      key: 'client_sources',
       label: 'client.listSources()',
       fn: async () => {
-        if (!client) return 'no client'
-        const sources = await client.listSources()
-        return `${sources.length} sources`
+        if (!client) throw new Error('no client — API key not set?')
+        const s = await client.listSources()
+        return {
+          summary: `${s.length} sources`,
+          items: s.map(x => x.name),
+        }
       },
     },
     {
-      key: 'sdkSources',
-      label: 'sdkIpc.listSources()',
+      key: 'client_sessions',
+      label: 'client.listSessions()',
       fn: async () => {
-        if (!sdkIpc) return 'null — not in Electron'
-        const sources = await sdkIpc.listSources()
-        return `${sources.length} sources`
+        if (!client) throw new Error('no client')
+        const s = await client.listSessions()
+        return {
+          summary: `${s.length} sessions`,
+          items: s.map(x => `[${x.status}] ${x.title || 'Untitled'} — ${x.id}`),
+        }
+      },
+    },
+    {
+      key: 'client_sessions_archived',
+      label: "client.listSessions({ filter: 'archived = true' })",
+      fn: async () => {
+        if (!client) throw new Error('no client')
+        const s = await client.listSessions({ filter: 'archived = true' })
+        return {
+          summary: `${s.length} archived sessions`,
+          items: s.map(x => `${x.title || 'Untitled'} — ${x.id}`),
+        }
       },
     },
   ]
+}
+
+// ── testing panel ─────────────────────────────────────────────────────────────
+
+function TestingPanel() {
+  const { client } = useJules()
+  const allTests = buildTests(client)
+  const tests = allTests.filter(t => !t.electronOnly || isElectron)
+
+  const [results, setResults] = useState<Record<string, TestResult>>(() =>
+    Object.fromEntries(allTests.map(t => [t.key, { status: 'idle', summary: '' }]))
+  )
+
+  const runOne = async (def: TestDef) => {
+    setResults(r => ({ ...r, [def.key]: { status: 'running', summary: '' } }))
+    try {
+      const out = await def.fn()
+      setResults(r => ({ ...r, [def.key]: { status: 'ok', ...out } }))
+    } catch (e) {
+      setResults(r => ({
+        ...r,
+        [def.key]: { status: 'fail', summary: e instanceof Error ? e.message : String(e) },
+      }))
+    }
+  }
+
+  const runAll = async () => {
+    for (const t of tests) await runOne(t)
+  }
 
   return (
-    <div className="space-y-2 max-w-xl">
-      {tests.map(t => (
-        <div key={t.key} className="flex items-center gap-3">
-          <button
-            onClick={() => { void run(t.key, t.fn)() }}
-            className="shrink-0 px-3 py-1 rounded bg-surface border border-subtle text-xs font-mono text-fg-primary hover:bg-hover transition-colors"
-          >
-            run
-          </button>
-          <span className="text-xs font-mono text-fg-muted truncate">{t.label}</span>
-          {results[t.key] && (
-            <span className="text-xs font-mono text-fg-secondary ml-auto shrink-0">{results[t.key]}</span>
-          )}
-        </div>
-      ))}
+    <div className="space-y-3">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => { void runAll() }}
+          className="px-3 py-1.5 rounded bg-surface border border-subtle text-xs font-mono text-fg-primary hover:bg-hover transition-colors"
+        >
+          run all
+        </button>
+        <span className="text-[10px] font-mono text-fg-ghost">
+          {isElectron ? 'electron — all tests available' : 'web — sdkIpc tests skipped'}
+        </span>
+      </div>
+
+      <div className="divide-y divide-hair">
+        {tests.map(t => (
+          <TestRow
+            key={t.key}
+            label={t.label}
+            result={results[t.key] ?? { status: 'idle', summary: '' }}
+            onRun={() => { void runOne(t) }}
+          />
+        ))}
+      </div>
     </div>
   )
 }
 
-// ── registry ──────────────────────────────────────────────────────────────────
+// ── general panel ─────────────────────────────────────────────────────────────
 
-const SECTIONS: Section[] = [
-  { id: 'general', label: 'General', panel: GeneralPanel },
-  { id: 'testing', label: 'Testing', panel: TestingPanel },
-]
+function GeneralPanel() {
+  return <p className="text-xs text-fg-muted">Nothing here yet.</p>
+}
 
 // ── page ──────────────────────────────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const [active, setActive] = useState<SectionId>('general')
-  const current = SECTIONS.find(s => s.id === active)
-
   return (
-    <div className="flex h-full w-full">
-      <div className="w-44 shrink-0 border-r border-hair pt-8 px-3 flex flex-col gap-0.5">
-        {SECTIONS.map(s => (
-          <button
-            key={s.id}
-            onClick={() => setActive(s.id)}
-            className={`text-left px-3 py-1.5 rounded text-xs transition-colors ${
-              active === s.id
-                ? 'bg-surface text-fg-primary'
-                : 'text-fg-muted hover:text-fg-primary hover:bg-hover'
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex-1 overflow-y-auto pt-8 px-10">
-        <h2 className="text-xs font-mono uppercase tracking-widest text-fg-dim mb-6">
-          {current?.label}
-        </h2>
-        {current && <current.panel />}
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-2xl mx-auto px-8 py-10">
+        <Section title="General">
+          <GeneralPanel />
+        </Section>
+        <Section title="Testing" defaultOpen>
+          <TestingPanel />
+        </Section>
       </div>
     </div>
   )
