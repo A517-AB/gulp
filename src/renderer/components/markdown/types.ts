@@ -1,10 +1,14 @@
-import type { BlockNoteEditor, Block, PartialBlock } from "@blocknote/core";
+import type { Block, PartialBlock, BlockNoteEditor } from "@blocknote/core";
 
-export type { BlockNoteEditor, Block, PartialBlock };
+export type { Block, PartialBlock, BlockNoteEditor };
+
+// Convenience aliases using BlockNote's inferred default schemas
+export type NoteBlock = Block;
+export type NotePartialBlock = PartialBlock;
 
 export interface MarkdownEditorProps {
-  initialContent?: string;
+  initialContent?: NotePartialBlock[];
   readOnly?: boolean;
   className?: string;
-  onChange?: (markdown: string) => void;
+  onChange?: (blocks: NoteBlock[]) => void;
 }
