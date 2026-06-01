@@ -1,4 +1,5 @@
 import { ipcMain, type WebContents } from 'electron'
+import { dispatchNotification } from './notifications'
 import {
   connect,
   jules,
@@ -471,6 +472,17 @@ async function finishStream(
     state,
     ...(info ? { info: serializeSessionInfo(info) } : {}),
   })
+
+  dispatchNotification({
+    id: crypto.randomUUID(),
+    channel: 'session',
+    title: state === 'completed' ? 'Jules Session Complete' : 'Jules Session Failed',
+    body: info?.title || `Session ${sessionId.slice(0, 8)}`,
+    timestamp: new Date().toISOString(),
+    sound: true,
+    actions: ['open', 'dismiss'],
+    meta: { sessionId }
+  }, sender)
 }
 
 export function registerJulesLocalHandlers() {

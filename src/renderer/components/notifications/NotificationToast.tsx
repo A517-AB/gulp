@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useNavigate } from 'react-router'
 import { X, BellRing } from 'lucide-react'
 import { alarms as alarmsIpc, notifications as notificationsIpc } from '@shared/bridge'
 import { useNotifications, playAlarmBeep, alarmAudio } from '@/store/notifications'
@@ -17,6 +18,7 @@ const AUTO_DISMISS_MS = 8_000
 
 function Toast({ item }: { item: AppNotification }) {
   const dismiss = useNotifications((s) => s.dismiss)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (item.channel === 'alarm') return;
@@ -36,6 +38,9 @@ function Toast({ item }: { item: AppNotification }) {
     if (item.channel === 'alarm' && action === 'snooze' && item.meta?.alarmId) {
       const minutes = parseInt(item.meta.snoozeMinutes || '5', 10)
       await alarmsIpc?.snooze(item.meta.alarmId, minutes)
+      dismiss(item.id)
+    } else if (item.channel === 'session' && action === 'open' && item.meta?.sessionId) {
+      navigate(`/activity/${item.meta.sessionId}`)
       dismiss(item.id)
     } else if (action === 'dismiss') {
       dismiss(item.id)
