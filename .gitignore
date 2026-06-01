@@ -28,3 +28,4 @@ typecheck.log
 
 # GitHub workflows (OAuth token lacks workflow scope)
 .github/workflows/
+__pycache__/
