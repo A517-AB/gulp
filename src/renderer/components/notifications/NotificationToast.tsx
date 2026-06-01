@@ -35,14 +35,14 @@ function Toast({ item }: { item: AppNotification }) {
   }, [item.id, item.channel])
 
   const handleAction = async (action: string) => {
-    if (item.channel === 'alarm' && action === 'snooze' && item.meta?.alarmId) {
-      const minutes = parseInt(item.meta.snoozeMinutes || '5', 10)
-      await alarmsIpc?.snooze(item.meta.alarmId, minutes)
-      dismiss(item.id)
-    } else if (item.channel === 'session' && action === 'open' && item.meta?.sessionId) {
-      navigate(`/activity/${item.meta.sessionId}`)
-      dismiss(item.id)
-    } else if (action === 'dismiss') {
+    try {
+      if (item.channel === 'alarm' && action === 'snooze' && item.meta?.alarmId) {
+        const minutes = parseInt(item.meta.snoozeMinutes || '5', 10)
+        await alarmsIpc?.snooze(item.meta.alarmId, minutes)
+      } else if (item.channel === 'session' && action === 'open' && item.meta?.sessionId) {
+        navigate(`/activity/${item.meta.sessionId}`)
+      }
+    } finally {
       dismiss(item.id)
     }
   }

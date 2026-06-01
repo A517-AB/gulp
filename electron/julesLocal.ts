@@ -9,6 +9,7 @@ import {
   type SessionResource,
   type Source,
 } from '@google/jules-sdk'
+import { randomUUID } from 'node:crypto'
 import { execFileSync } from 'child_process'
 import { writeFileSync, unlinkSync } from 'fs'
 import * as path from 'path'
@@ -474,7 +475,7 @@ async function finishStream(
   })
 
   dispatchNotification({
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     channel: 'session',
     title: state === 'completed' ? 'Jules Session Complete' : 'Jules Session Failed',
     body: info?.title || `Session ${sessionId.slice(0, 8)}`,
