@@ -26,12 +26,12 @@ export default function NotesPage() {
     const ipc = notes
     if (isElectron && ipc) {
       ipc.get(NOTE_ID).then((raw) => {
-        setContent(raw ? (raw as NotePartialBlock[]) : undefined)
+        setContent(raw ? (raw) : undefined)
         setReady(true)
       })
       return ipc.onChanged(() => {
         ipc.get(NOTE_ID).then((raw) => {
-          setContent(raw ? (raw as NotePartialBlock[]) : undefined)
+          setContent(raw ? (raw) : undefined)
           setContentVersion((v) => v + 1)
         })
       })

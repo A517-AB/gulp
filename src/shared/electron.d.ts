@@ -116,7 +116,7 @@ export interface JulesLocalSessionInfo {
   source?: string;
   branch?: string;
   archived: boolean;
-  outputTypes: Array<'pullRequest' | 'changeSet'>;
+  outputTypes: ('pullRequest' | 'changeSet')[];
   pullRequestUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -202,7 +202,7 @@ export interface JulesLocalSessionOutcome {
   sessionId: string;
   title: string;
   state: 'completed' | 'failed';
-  outputTypes: Array<'pullRequest' | 'changeSet'>;
+  outputTypes: ('pullRequest' | 'changeSet')[];
   generatedFiles: JulesLocalGeneratedFile[];
   pullRequestUrl?: string;
   pullRequestTitle?: string;

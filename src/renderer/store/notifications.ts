@@ -10,9 +10,9 @@ interface NotificationStore {
 
 export const useNotifications = create<NotificationStore>((set) => ({
   items: [],
-  add:      (n) => set((s) => ({ items: [n, ...s.items].slice(0, 20) })),
-  dismiss:  (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
-  clearAll: () => set({ items: [] }),
+  add:      (n) => { set((s) => ({ items: [n, ...s.items].slice(0, 20) })); },
+  dismiss:  (id) => { set((s) => ({ items: s.items.filter((i) => i.id !== id) })); },
+  clearAll: () => { set({ items: [] }); },
 }))
 
 /** Play a simple notification ding via Web Audio API. */

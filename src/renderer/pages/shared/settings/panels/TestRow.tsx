@@ -56,7 +56,7 @@ export function TestRow({ label, result, onRun }: TestRowProps) {
           {hasItems && (
             <>
               <button
-                onClick={() => setExpanded(v => !v)}
+                onClick={() => { setExpanded(v => !v); }}
                 className="text-[10px] font-mono text-fg-ghost hover:text-fg-secondary transition-colors"
               >
                 {expanded ? '▲ hide' : `▼ see all (${result.items!.length})`}

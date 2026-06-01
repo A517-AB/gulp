@@ -17,7 +17,7 @@ export interface Command {
 }
 
 export function normalizeCommand(raw: Record<string, unknown>): Command {
-  const r = raw as { [k: string]: unknown }
+  const r = raw
   const out: Command = {
     id:      String(r['id'] ?? crypto.randomUUID()),
     trigger: (r['trigger'] as Trigger) ?? '/',

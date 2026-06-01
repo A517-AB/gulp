@@ -61,7 +61,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
               exit={{ opacity: 0, y: -4, scale: 0.98, filter: "blur(2px)" }}
               transition={{ type: "spring", bounce: 0, duration: 0.3 }}
               className="z-50 bg-overlay/90 backdrop-blur-xl border border-subtle rounded-xl shadow-xl overflow-hidden"
-              onMouseLeave={() => setHoveredId(null)}
+              onMouseLeave={() => { setHoveredId(null); }}
             >
               <div className="flex flex-col p-1.5 relative z-10">
                 {items.map((item, i) => {
@@ -77,7 +77,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
                         onChange(item.id)
                         setOpen(false)
                       }}
-                      onMouseEnter={() => setHoveredId(item.id)}
+                      onMouseEnter={() => { setHoveredId(item.id); }}
                       className={cn(
                         "relative flex items-center gap-2.5 px-2.5 py-2 text-sm rounded-lg transition-colors w-full text-left outline-none",
                         isSelected ? "text-fg-primary font-medium" : "text-fg-secondary"

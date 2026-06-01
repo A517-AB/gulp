@@ -22,8 +22,8 @@ function Toast({ item }: { item: AppNotification }) {
 
   useEffect(() => {
     if (item.channel === 'alarm') return;
-    const t = setTimeout(() => dismiss(item.id), AUTO_DISMISS_MS)
-    return () => clearTimeout(t)
+    const t = setTimeout(() => { dismiss(item.id); }, AUTO_DISMISS_MS)
+    return () => { clearTimeout(t); }
   }, [item.id, dismiss, item.channel])
 
   useEffect(() => {
@@ -81,7 +81,7 @@ function Toast({ item }: { item: AppNotification }) {
         )}
       </div>
       <button
-        onClick={() => dismiss(item.id)}
+        onClick={() => { dismiss(item.id); }}
         className="mt-0.5 text-fg-secondary hover:text-fg-primary transition-colors shrink-0"
         aria-label="Dismiss"
       >

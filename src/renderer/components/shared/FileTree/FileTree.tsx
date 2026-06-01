@@ -77,7 +77,7 @@ export function FileTree({ root, onSelectFile, onSelectFolder, className }: File
       if (entry) setHeight(entry.contentRect.height)
     })
     ro.observe(el)
-    return () => ro.disconnect()
+    return () => { ro.disconnect(); }
   }, [])
 
   const ctx = useMemo<TreeCtx>(

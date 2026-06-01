@@ -93,7 +93,7 @@ export function Clock({ size = 240, className }: ClockProps) {
 
     update();
     const id = setInterval(update, 1000);
-    return () => clearInterval(id);
+    return () => { clearInterval(id); };
   }, []);
 
   return (

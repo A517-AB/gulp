@@ -132,7 +132,7 @@ export default function AlarmsPage() {
               className="flex items-center gap-4 rounded-lg border border-border bg-surface px-4 py-3 group"
             >
               <button
-                onClick={() => openEdit(alarm)}
+                onClick={() => { openEdit(alarm); }}
                 className="flex-1 text-left"
               >
                 <span className={`text-2xl font-mono font-light tabular-nums ${alarm.enabled ? 'text-fg-primary' : 'text-fg-secondary'}`}>
@@ -194,7 +194,7 @@ export default function AlarmsPage() {
               <Input
                 placeholder="Alarm label"
                 value={form.label}
-                onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
+                onChange={(e) => { setForm((f) => ({ ...f, label: e.target.value })); }}
               />
             </div>
 
@@ -202,7 +202,7 @@ export default function AlarmsPage() {
               <Label>Repeat</Label>
               <Select
                 value={form.repeat}
-                onValueChange={(v) => setForm((f) => ({ ...f, repeat: v as AlarmRepeat }))}
+                onValueChange={(v) => { setForm((f) => ({ ...f, repeat: v as AlarmRepeat })); }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -219,7 +219,7 @@ export default function AlarmsPage() {
               <Label>Snooze</Label>
               <Select
                 value={String(form.snoozeMinutes)}
-                onValueChange={(v) => setForm((f) => ({ ...f, snoozeMinutes: Number(v) }))}
+                onValueChange={(v) => { setForm((f) => ({ ...f, snoozeMinutes: Number(v) })); }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -234,7 +234,7 @@ export default function AlarmsPage() {
 
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setForm((f) => ({ ...f, sound: !f.sound }))}
+                onClick={() => { setForm((f) => ({ ...f, sound: !f.sound })); }}
                 className="flex items-center gap-2 text-sm text-fg-secondary hover:text-fg-primary transition-colors"
               >
                 {form.sound ? <Volume2 size={15} /> : <VolumeX size={15} />}
@@ -244,7 +244,7 @@ export default function AlarmsPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => { setOpen(false); }}>Cancel</Button>
             <Button onClick={save}>Save</Button>
           </DialogFooter>
         </DialogContent>

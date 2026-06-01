@@ -206,7 +206,7 @@ export function RepolessWorkbench() {
               <label className="text-xs uppercase tracking-[0.24em] text-white/50">Title</label>
               <Input
                 value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                onChange={(event) => { setTitle(event.target.value); }}
                 placeholder="Repoless design review"
                 className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
@@ -216,7 +216,7 @@ export function RepolessWorkbench() {
               <label className="text-xs uppercase tracking-[0.24em] text-white/50">Initial prompt</label>
               <Textarea
                 value={prompt}
-                onChange={(event) => setPrompt(event.target.value)}
+                onChange={(event) => { setPrompt(event.target.value); }}
                 className="min-h-[150px] border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
             </div>
@@ -225,7 +225,7 @@ export function RepolessWorkbench() {
               <input
                 type="checkbox"
                 checked={requireApproval}
-                onChange={(event) => setRequireApproval(event.target.checked)}
+                onChange={(event) => { setRequireApproval(event.target.checked); }}
                 className="size-3.5 appearance-none rounded border border-white/20 bg-black/40 checked:bg-sky-500 checked:border-sky-500 transition-all focus:ring-1 focus:ring-sky-500/50 cursor-pointer"
               />
               Require plan approval before execution
@@ -234,7 +234,7 @@ export function RepolessWorkbench() {
             <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
               <Input
                 value={resumeId}
-                onChange={(event) => setResumeId(event.target.value)}
+                onChange={(event) => { setResumeId(event.target.value); }}
                 placeholder="Existing session id"
                 className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
@@ -473,7 +473,7 @@ export function RepolessWorkbench() {
             <div className="space-y-3 border-t border-white/10 pt-4">
               <Textarea
                 value={messageDraft}
-                onChange={(event) => setMessageDraft(event.target.value)}
+                onChange={(event) => { setMessageDraft(event.target.value); }}
                 placeholder="Ask for a refinement, request a markdown artifact, or continue the task..."
                 className="min-h-[120px] border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
@@ -516,7 +516,7 @@ export function RepolessWorkbench() {
                     <button
                       key={file.path}
                       type="button"
-                      onClick={() => setSelectedFilePath(file.path)}
+                      onClick={() => { setSelectedFilePath(file.path); }}
                       className={`group w-full rounded-xl border px-4 py-3 text-left transition-all duration-300 ${selectedFilePath === file.path ? 'border-sky-500/50 bg-sky-500/10 text-white shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200'}`}
                     >
                       <div className="font-mono text-xs text-white/90">{file.path}</div>

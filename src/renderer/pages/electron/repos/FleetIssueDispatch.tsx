@@ -236,7 +236,7 @@ export function FleetIssueDispatch() {
               <label className="text-xs uppercase tracking-[0.24em] text-white/50">Repositories</label>
               <Textarea
                 value={repositoriesRaw}
-                onChange={(event) => setRepositoriesRaw(event.target.value)}
+                onChange={(event) => { setRepositoriesRaw(event.target.value); }}
                 placeholder="owner/repo-a&#10;owner/repo-b"
                 className="min-h-[150px] border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
@@ -247,7 +247,7 @@ export function FleetIssueDispatch() {
               <label className="text-xs uppercase tracking-[0.24em] text-white/50">Issue prompt</label>
               <Textarea
                 value={issue}
-                onChange={(event) => setIssue(event.target.value)}
+                onChange={(event) => { setIssue(event.target.value); }}
                 className="min-h-[160px] border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
             </div>
@@ -257,7 +257,7 @@ export function FleetIssueDispatch() {
                 <label className="text-xs uppercase tracking-[0.24em] text-white/50">Base branch</label>
                 <Input
                   value={branch}
-                  onChange={(event) => setBranch(event.target.value)}
+                  onChange={(event) => { setBranch(event.target.value); }}
                   className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
                 />
               </div>
@@ -265,7 +265,7 @@ export function FleetIssueDispatch() {
                 <label className="text-xs uppercase tracking-[0.24em] text-white/50">Title prefix</label>
                 <Input
                   value={titlePrefix}
-                  onChange={(event) => setTitlePrefix(event.target.value)}
+                  onChange={(event) => { setTitlePrefix(event.target.value); }}
                   className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
                 />
               </div>
@@ -275,7 +275,7 @@ export function FleetIssueDispatch() {
                   type="number"
                   min="1"
                   value={concurrency}
-                  onChange={(event) => setConcurrency(event.target.value)}
+                  onChange={(event) => { setConcurrency(event.target.value); }}
                   className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
                 />
               </div>
@@ -285,7 +285,7 @@ export function FleetIssueDispatch() {
                   type="number"
                   min="0"
                   value={delayMs}
-                  onChange={(event) => setDelayMs(event.target.value)}
+                  onChange={(event) => { setDelayMs(event.target.value); }}
                   className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
                 />
               </div>
@@ -296,7 +296,7 @@ export function FleetIssueDispatch() {
                 <input
                   type="checkbox"
                   checked={autoPr}
-                  onChange={(event) => setAutoPr(event.target.checked)}
+                  onChange={(event) => { setAutoPr(event.target.checked); }}
                   className="size-4 rounded border-white/20 bg-black"
                 />
                 Auto-create PR when possible
@@ -305,7 +305,7 @@ export function FleetIssueDispatch() {
                 <input
                   type="checkbox"
                   checked={requireApproval}
-                  onChange={(event) => setRequireApproval(event.target.checked)}
+                  onChange={(event) => { setRequireApproval(event.target.checked); }}
                   className="size-4 rounded border-white/20 bg-black"
                 />
                 Require plan approval on every run
@@ -314,7 +314,7 @@ export function FleetIssueDispatch() {
                 <input
                   type="checkbox"
                   checked={stopOnError}
-                  onChange={(event) => setStopOnError(event.target.checked)}
+                  onChange={(event) => { setStopOnError(event.target.checked); }}
                   className="size-4 rounded border-white/20 bg-black"
                 />
                 Stop the fleet if a repo fails early
@@ -361,7 +361,7 @@ export function FleetIssueDispatch() {
             <div className="flex gap-2">
               <Input
                 value={sourceQuery}
-                onChange={(event) => setSourceQuery(event.target.value)}
+                onChange={(event) => { setSourceQuery(event.target.value); }}
                 placeholder="Filter connected repos"
                 className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
@@ -388,14 +388,14 @@ export function FleetIssueDispatch() {
                     <div className="mt-3 flex gap-2">
                       <Button
                         size="sm"
-                        onClick={() => appendRepository(source.fullName)}
+                        onClick={() => { appendRepository(source.fullName); }}
                       >
                         Add to Fleet
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setSourceQuery(source.fullName)}
+                        onClick={() => { setSourceQuery(source.fullName); }}
                         className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                       >
                         Focus
@@ -430,7 +430,7 @@ export function FleetIssueDispatch() {
                   <button
                     key={item.session.id}
                     type="button"
-                    onClick={() => setSelectedSessionId(item.session.id)}
+                    onClick={() => { setSelectedSessionId(item.session.id); }}
                     className={`group w-full rounded-xl border px-4 py-3 text-left transition-all duration-300 ${active ? 'border-sky-500/50 bg-sky-500/10 text-white shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200'}`}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -667,7 +667,7 @@ export function FleetIssueDispatch() {
                   <button
                     key={file.path}
                     type="button"
-                    onClick={() => setSelectedFilePath(file.path)}
+                    onClick={() => { setSelectedFilePath(file.path); }}
                     className={`group w-full rounded-xl border px-4 py-3 text-left text-sm transition-all duration-300 ${selectedFilePath === file.path ? 'border-sky-500/50 bg-sky-500/10 text-white shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200'}`}
                   >
                     <div className="font-mono text-xs text-white/90">{file.path}</div>

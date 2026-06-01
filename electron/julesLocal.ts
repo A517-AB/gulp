@@ -44,31 +44,31 @@ interface ActiveStream {
   stopped: boolean
 }
 
-type ChangeSetLike = {
+interface ChangeSetLike {
   source: string
   gitPatch: { unidiffPatch: string }
   parsed: () => {
-    files: Array<{
+    files: {
       path: string
       changeType: 'created' | 'modified' | 'deleted'
       additions: number
       deletions: number
-    }>
+    }[]
     summary: { totalFiles: number }
   }
 }
 
-type SessionOutcomeLike = {
+interface SessionOutcomeLike {
   sessionId: string
   title: string
   state: 'completed' | 'failed'
-  outputs: Array<{ pullRequest: { url: string; title: string } } | { changeSet: unknown }>
+  outputs: ({ pullRequest: { url: string; title: string } } | { changeSet: unknown })[]
   pullRequest?: { url: string; title: string }
   generatedFiles: () => { all: () => JulesLocalGeneratedFile[] }
   changeSet: () => ChangeSetLike | undefined
 }
 
-type SessionSnapshotLike = {
+interface SessionSnapshotLike {
   id: string
   state: JulesLocalSessionSnapshot['state']
   url: string
@@ -79,12 +79,12 @@ type SessionSnapshotLike = {
   title: string
   activities: readonly Activity[]
   activityCounts: Readonly<Record<string, number>>
-  timeline: ReadonlyArray<{ time: string; type: string; summary: string }>
+  timeline: readonly { time: string; type: string; summary: string }[]
   insights: {
     completionAttempts: number
     planRegenerations: number
     userInterventions: number
-    failedCommands: ReadonlyArray<Activity>
+    failedCommands: readonly Activity[]
   }
   generatedFiles: { all: () => JulesLocalGeneratedFile[] }
   changeSet: () => ChangeSetLike | undefined
@@ -92,7 +92,7 @@ type SessionSnapshotLike = {
   pr?: { url: string; title: string }
 }
 
-type HydratableSession = {
+interface HydratableSession {
   hydrate: () => Promise<number>
 }
 

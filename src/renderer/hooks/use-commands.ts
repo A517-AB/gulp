@@ -59,13 +59,13 @@ export function useCommands() {
   }, [])
 
   const add    = useCallback((cmd: Omit<Command, 'id'>) =>
-    commit([...userCommands, { ...cmd, id: crypto.randomUUID() }]), [userCommands, commit])
+    { commit([...userCommands, { ...cmd, id: crypto.randomUUID() }]); }, [userCommands, commit])
 
   const update = useCallback((updated: Command) =>
-    commit(userCommands.map(c => c.id === updated.id ? updated : c)), [userCommands, commit])
+    { commit(userCommands.map(c => c.id === updated.id ? updated : c)); }, [userCommands, commit])
 
   const remove = useCallback((id: string) =>
-    commit(userCommands.filter(c => c.id !== id)), [userCommands, commit])
+    { commit(userCommands.filter(c => c.id !== id)); }, [userCommands, commit])
 
   return {
     commands: [...BUILT_IN_COMMANDS, ...userCommands],

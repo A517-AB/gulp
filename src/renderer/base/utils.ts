@@ -120,7 +120,7 @@ export function extend<T extends Record<string, unknown>>(
         if (isObject(copyValue)) {
           const clone = srcValue && isObject(srcValue) ? srcValue : {};
           (result as Record<string, unknown>)[key] = extend(
-            clone as Record<string, unknown>, 
+            clone, 
             copyValue
           );
         } else if (Array.isArray(copyValue)) {
@@ -158,7 +158,7 @@ export function merge<T extends Record<string, unknown>>(
  * Generate a unique ID with optional prefix.
  * @example getUniqueID('slide') // returns 'slide_0', 'slide_1', etc.
  */
-export function getUniqueID(prefix: string = 'id'): string {
+export function getUniqueID(prefix = 'id'): string {
   return `${prefix}_${uid++}`;
 }
 
@@ -276,7 +276,7 @@ export function setImmediate(handler: () => void): () => void {
  * Check if child element is descendant of parent (or same element).
  */
 export function compareElementParent(child: Node | null, parent: Node): boolean {
-  let node: Node | null = child;
+  const node: Node | null = child;
   
   if (node === parent) return true;
   if (node === document || !node) return false;
@@ -292,7 +292,7 @@ export function compareElementParent(child: Node | null, parent: Node): boolean 
 export function formatUnit(value: number | string): string {
   const result = String(value);
   
-  if (result.match(/auto|cm|mm|in|px|pt|pc|%|em|ex|ch|rem|vw|vh|vmin|vmax/)) {
+  if (/auto|cm|mm|in|px|pt|pc|%|em|ex|ch|rem|vw|vh|vmin|vmax/.exec(result)) {
     return result;
   }
   
@@ -338,7 +338,7 @@ export function getInstance<T>(
   component: new (...args: any[]) => T
 ): T | null {
   const elem = typeof element === 'string' 
-    ? document.querySelector(element) as HTMLElement
+    ? document.querySelector(element)!
     : element;
     
   if (!elem) return null;
@@ -361,7 +361,7 @@ export function getInstance<T>(
  */
 export function addInstance(element: string | HTMLElement, instance: unknown): void {
   const elem = typeof element === 'string' 
-    ? document.querySelector(element) as HTMLElement
+    ? document.querySelector(element)!
     : element;
     
   if (!elem) return;

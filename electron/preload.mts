@@ -157,7 +157,7 @@ const aliases: ElectronAPI["aliases"] = {
   get:  () => ipcRenderer.invoke("aliases.get"),
   save: (data) => ipcRenderer.invoke("aliases.save", data),
   onChanged: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => { cb(data); }
     ipcRenderer.on("aliases.changed", handler)
     return () => { ipcRenderer.off("aliases.changed", handler) }
   },
@@ -171,7 +171,7 @@ const notes: ElectronAPI["notes"] = {
   save:   (id, title, blocks) => ipcRenderer.invoke("notes.save", id, title, blocks),
   delete: (id) => ipcRenderer.invoke("notes.delete", id),
   onChanged: (cb) => {
-    const handler = () => cb()
+    const handler = () => { cb(); }
     ipcRenderer.on("notes.changed", handler)
     return () => { ipcRenderer.off("notes.changed", handler) }
   },
@@ -186,7 +186,7 @@ const alarms: ElectronAPI["alarms"] = {
   toggle:  (id, enabled) => ipcRenderer.invoke("alarms.toggle", id, enabled),
   snooze:  (id, minutes) => ipcRenderer.invoke("alarms.snooze", id, minutes),
   onChanged: (cb) => {
-    const handler = () => cb()
+    const handler = () => { cb(); }
     ipcRenderer.on("alarms.changed", handler)
     return () => { ipcRenderer.off("alarms.changed", handler) }
   },
@@ -195,9 +195,9 @@ const alarms: ElectronAPI["alarms"] = {
 // ── notifications ──────────────────────────────────────────────────────────────
 
 const notifications: ElectronAPI["notifications"] = {
-  send: (n) => ipcRenderer.send("notification.send", n),
+  send: (n) => { ipcRenderer.send("notification.send", n); },
   onReceived: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => { cb(data); }
     ipcRenderer.on("notification.received", handler)
     return () => { ipcRenderer.off("notification.received", handler) }
   },
@@ -209,7 +209,7 @@ const snippets: ElectronAPI["snippets"] = {
   get:       () => ipcRenderer.invoke("snippets.get"),
   save:      (data) => ipcRenderer.invoke("snippets.save", data),
   onChanged: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: { event: string; path: string }) => cb(data)
+    const handler = (_event: IpcRendererEvent, data: { event: string; path: string }) => { cb(data); }
     ipcRenderer.on("snippets.changed", handler)
     return () => { ipcRenderer.off("snippets.changed", handler) }
   },

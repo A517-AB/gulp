@@ -84,7 +84,7 @@ export function ReposWorkbench() {
                 <Input
                   type="password"
                   value={apiKey}
-                  onChange={(event) => setApiKey(event.target.value)}
+                  onChange={(event) => { setApiKey(event.target.value); }}
                   placeholder="AIzaSy..."
                   className="w-full border-white/10 bg-black/60 pl-4 text-white placeholder:text-zinc-600 transition-all duration-300 focus:border-sky-500/50 focus:ring-sky-500/20"
                 />

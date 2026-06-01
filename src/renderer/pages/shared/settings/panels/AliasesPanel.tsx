@@ -7,7 +7,7 @@ import { isElectron } from '@shared/bridge'
 
 type CommandForm = Omit<Command, 'id'>
 
-type FormState = {
+interface FormState {
   trigger: Trigger
   command: string
   sessionId: string
