@@ -6,13 +6,9 @@ import { TRIGGERS } from '@shared/aliases'
 import { useAliases } from './use-aliases'
 import { useHistory } from './use-history'
 import { useArtifactStream } from './use-artifact-stream'
-import { GhostInput } from './GhostInput'
-import { AliasMenu } from './AliasMenu'
-import { HistoryPanel } from './HistoryPanel'
-import { ArtifactPanel } from './ArtifactPanel'
-import { MdNotification } from './MdNotification'
-import { buildPrompt } from './lib'
-import type { JulesAlias } from './types'
+import { GhostInput, AliasMenu, HistoryPanel, ArtifactPanel, MdNotification } from '../../../components/overview'
+import { buildPrompt } from '../../../components/overview'
+import type { JulesAlias } from '../../../components/overview'
 import type { HistoryEntry } from '@shared/history'
 import SettingsPage from '../../shared/SettingsPage'
 
@@ -43,6 +39,14 @@ export default function OverviewPage() {
   const closePanel = useCallback(() => { setPanelMode('none'); setPanelIndex(0) }, [])
 
   const selectAlias = useCallback((alias: JulesAlias) => {
+    if (alias.command === 'settings' && alias.trigger === '/') {
+      setPanelMode('settings')
+      setActiveAlias(null)
+      setInput('')
+      setAliasQuery('')
+      return
+    }
+
     setActiveAlias(alias)
     setDismissedSession(null)
     setInput('')
@@ -57,11 +61,6 @@ export default function OverviewPage() {
 
   const handleChange = useCallback((val: string) => {
     setInput(val)
-    
-    if (val === '/settings') {
-      setPanelMode('settings')
-      return
-    }
 
     const trigger = TRIGGERS.find(t => val.startsWith(t))
     if (trigger && !val.includes(' ')) {
@@ -78,7 +77,17 @@ export default function OverviewPage() {
   const handleSend = useCallback(async () => {
     if (!activeAlias || isSending) return
     const trigger = activeAlias.trigger ?? '/'
-    const body = input.trim()
+
+    // Basic sanitization: trim and remove zero-width or non-printable chars (excluding standard whitespace)
+    // eslint-disable-next-line no-control-regex
+    const sanitizedInput = input.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, '')
+    const body = sanitizedInput.trim()
+
+    // Enforce reasonable max length limit
+    if (body.length > 10000) {
+      console.warn('Input too long. Dropping.')
+      return
+    }
 
     // / trigger is display-only — never sends to Jules
     if (trigger === '/') {
@@ -92,8 +101,12 @@ export default function OverviewPage() {
       return
     }
 
-    if (!sdkIpc) return
     setInput('')
+    if (!sdkIpc) {
+      if (body) void pushHistory(body)
+      return
+    }
+
     setIsSending(true)
     try {
       await sdkIpc.sendMessage(activeAlias.sessionId, buildPrompt(activeAlias, body))

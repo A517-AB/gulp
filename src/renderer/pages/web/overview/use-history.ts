@@ -19,13 +19,14 @@ function lsSave(entries: HistoryEntry[]): void {
 }
 
 export function useHistory() {
-  const [entries, setEntries] = useState<HistoryEntry[]>([])
+  const [entries, setEntries] = useState<HistoryEntry[]>(() => {
+    if (!isElectron) return lsLoad()
+    return []
+  })
 
   useEffect(() => {
     if (isElectron && historyApi) {
-      historyApi.get().then(setEntries)
-    } else {
-      setEntries(lsLoad())
+      void historyApi.get().then(setEntries)
     }
   }, [])
 
