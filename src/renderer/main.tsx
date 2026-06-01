@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import '@renderer/lib/monaco' // local Monaco workers — must run before any Editor mounts
 import App from '@renderer/App'
 import '@renderer/index.css'
+import log from 'electron-log/renderer'
+
+Object.assign(console, log.functions)
 
 const root = document.getElementById('root')
 if (!root) throw new Error('[main] Root element #root not found in DOM')

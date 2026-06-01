@@ -2,6 +2,10 @@ import { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage, p
 import * as path from "path";
 import * as fs from "fs";
 import { fileURLToPath } from "url";
+import log from "electron-log/main";
+
+log.initialize();
+Object.assign(console, log.functions);
 
 import { registerTerminalHandlers } from "./Terminal";
 import { registerQueuesHandlers } from "./queues";
