@@ -19,6 +19,7 @@ function lsLoad(): NotePartialBlock[] | undefined {
 export default function NotesPage() {
   const [content, setContent] = useState<NotePartialBlock[] | undefined>(undefined)
   const [ready, setReady] = useState(false)
+  const [contentVersion, setContentVersion] = useState(0)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function NotesPage() {
       return ipc.onChanged(() => {
         ipc.get(NOTE_ID).then((raw) => {
           setContent(raw ? (raw as NotePartialBlock[]) : undefined)
+          setContentVersion((v) => v + 1)
         })
       })
     }
