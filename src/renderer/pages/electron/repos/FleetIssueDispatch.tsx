@@ -227,13 +227,13 @@ export function FleetIssueDispatch() {
         <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Dispatch a fleet issue fix</CardTitle>
-            <CardDescription className="text-white/55">
+            <CardDescription className="text-white/60">
               One repo per line or comma-separated. The Electron bridge fans these out through the Jules SDK and returns concrete session IDs immediately.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.24em] text-white/45">Repositories</label>
+              <label className="text-xs uppercase tracking-[0.24em] text-white/50">Repositories</label>
               <Textarea
                 value={repositoriesRaw}
                 onChange={(event) => setRepositoriesRaw(event.target.value)}
@@ -244,7 +244,7 @@ export function FleetIssueDispatch() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.24em] text-white/45">Issue prompt</label>
+              <label className="text-xs uppercase tracking-[0.24em] text-white/50">Issue prompt</label>
               <Textarea
                 value={issue}
                 onChange={(event) => setIssue(event.target.value)}
@@ -254,7 +254,7 @@ export function FleetIssueDispatch() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.24em] text-white/45">Base branch</label>
+                <label className="text-xs uppercase tracking-[0.24em] text-white/50">Base branch</label>
                 <Input
                   value={branch}
                   onChange={(event) => setBranch(event.target.value)}
@@ -262,7 +262,7 @@ export function FleetIssueDispatch() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.24em] text-white/45">Title prefix</label>
+                <label className="text-xs uppercase tracking-[0.24em] text-white/50">Title prefix</label>
                 <Input
                   value={titlePrefix}
                   onChange={(event) => setTitlePrefix(event.target.value)}
@@ -270,7 +270,7 @@ export function FleetIssueDispatch() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.24em] text-white/45">Concurrency</label>
+                <label className="text-xs uppercase tracking-[0.24em] text-white/50">Concurrency</label>
                 <Input
                   type="number"
                   min="1"
@@ -280,7 +280,7 @@ export function FleetIssueDispatch() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs uppercase tracking-[0.24em] text-white/45">Inter-run delay (ms)</label>
+                <label className="text-xs uppercase tracking-[0.24em] text-white/50">Inter-run delay (ms)</label>
                 <Input
                   type="number"
                   min="0"
@@ -353,7 +353,7 @@ export function FleetIssueDispatch() {
         <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Connected sources</CardTitle>
-            <CardDescription className="text-white/55">
+            <CardDescription className="text-white/60">
               Pull connected repos from Jules locally, filter them fast, and drop them straight into the fleet target list.
             </CardDescription>
           </CardHeader>
@@ -382,7 +382,7 @@ export function FleetIssueDispatch() {
                 filteredSources.slice(0, 40).map((source) => (
                   <div key={source.id} className="rounded-xl border border-white/5 bg-white/[0.03] p-4 transition-all hover:bg-white/[0.06] hover:shadow-lg">
                     <div className="font-mono text-sm text-white/90">{source.fullName}</div>
-                    <div className="mt-1 text-xs uppercase tracking-[0.22em] text-white/35">
+                    <div className="mt-1 text-xs uppercase tracking-[0.22em] text-white/40">
                       {source.defaultBranch ?? 'no default branch'} • {source.isPrivate ? 'private' : 'public'}
                     </div>
                     <div className="mt-3 flex gap-2">
@@ -416,7 +416,7 @@ export function FleetIssueDispatch() {
       <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
         <CardHeader>
           <CardTitle>Fleet sessions</CardTitle>
-          <CardDescription className="text-white/55">
+          <CardDescription className="text-white/60">
             Each dispatch returns real session IDs immediately. Pick one to inspect its live transcript, outputs, and final result.
           </CardDescription>
         </CardHeader>
@@ -431,7 +431,7 @@ export function FleetIssueDispatch() {
                     key={item.session.id}
                     type="button"
                     onClick={() => setSelectedSessionId(item.session.id)}
-                    className={`group w-full rounded-xl border px-4 py-3 text-left transition-all duration-300 ${active ? 'border-sky-500/50 bg-sky-500/10 shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 hover:border-white/20 hover:bg-white/10'}`}
+                    className={`group w-full rounded-xl border px-4 py-3 text-left transition-all duration-300 ${active ? 'border-sky-500/50 bg-sky-500/10 text-white shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200'}`}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
@@ -442,7 +442,7 @@ export function FleetIssueDispatch() {
                         {item.session.state}
                       </span>
                     </div>
-                    <div className="mt-3 grid gap-1 text-xs text-white/45">
+                    <div className="mt-3 grid gap-1 text-xs text-white/50">
                       <div>Session ID: {item.session.id}</div>
                       <div>Updated: {formatTimestamp(item.session.updatedAt)}</div>
                       {item.session.pullRequestUrl && <div>PR ready</div>}
@@ -463,7 +463,7 @@ export function FleetIssueDispatch() {
         <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Selected session inspector</CardTitle>
-            <CardDescription className="text-white/55">
+            <CardDescription className="text-white/60">
               Inspect one session in detail without leaving the app.
             </CardDescription>
           </CardHeader>
@@ -478,8 +478,8 @@ export function FleetIssueDispatch() {
                   <span>Updated {formatTimestamp(session.updatedAt)}</span>
                 </div>
 
-                <div className="grid gap-2 text-sm text-white/65">
-                  <div className="font-mono text-white/85">{session.id}</div>
+                <div className="grid gap-2 text-sm text-white/70">
+                  <div className="font-mono text-white/90">{session.id}</div>
                   <div>{session.title || 'Untitled session'}</div>
                   <div>Outputs: {session.outputTypes.join(', ') || 'none yet'}</div>
                   {session.url && (
@@ -629,11 +629,11 @@ export function FleetIssueDispatch() {
                             <span>{activity.type}</span>
                             <span>{formatTimestamp(activity.createTime)}</span>
                           </div>
-                          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/85">
+                          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/90">
                             {summarizeActivity(activity)}
                           </p>
                           {artifactSummary && (
-                            <p className="mt-2 text-xs text-white/45">{artifactSummary}</p>
+                            <p className="mt-2 text-xs text-white/50">{artifactSummary}</p>
                           )}
                         </div>
                       )
@@ -656,7 +656,7 @@ export function FleetIssueDispatch() {
         <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Selected session files</CardTitle>
-            <CardDescription className="text-white/55">
+            <CardDescription className="text-white/60">
               Generated files from the selected run stay local in the renderer once you fetch them.
             </CardDescription>
           </CardHeader>
@@ -670,8 +670,8 @@ export function FleetIssueDispatch() {
                     onClick={() => setSelectedFilePath(file.path)}
                     className={`group w-full rounded-xl border px-4 py-3 text-left text-sm transition-all duration-300 ${selectedFilePath === file.path ? 'border-sky-500/50 bg-sky-500/10 text-white shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200'}`}
                   >
-                    <div className="font-mono text-xs text-white/85">{file.path}</div>
-                    <div className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/35">
+                    <div className="font-mono text-xs text-white/90">{file.path}</div>
+                    <div className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/40">
                       {file.changeType} • +{file.additions} / -{file.deletions}
                     </div>
                   </button>
@@ -694,7 +694,7 @@ export function FleetIssueDispatch() {
 
             <div className="rounded-xl border border-white/5 bg-white/5 p-4 shadow-inner backdrop-blur-md transition-colors hover:bg-white/10">
               <div className="mb-2 text-xs uppercase tracking-[0.22em] text-white/40">Snapshot markdown</div>
-              <pre className="max-h-[220px] overflow-auto whitespace-pre-wrap text-xs leading-6 text-white/75">
+              <pre className="max-h-[220px] overflow-auto whitespace-pre-wrap text-xs leading-6 text-white/80">
                 {snapshot?.markdown || 'Load a snapshot to inspect the derived markdown summary.'}
               </pre>
             </div>

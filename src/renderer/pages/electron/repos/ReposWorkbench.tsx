@@ -62,9 +62,9 @@ export function ReposWorkbench() {
             </div>
           </div>
           <div className="flex gap-2">
-             <div className="rounded-full border border-white/5 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-wide text-zinc-400 backdrop-blur-md">
-               sources • history • snapshot • result • fleet
-             </div>
+            <div className="rounded-full border border-white/5 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-wide text-zinc-400 backdrop-blur-md">
+              sources • history • snapshot • result • fleet
+            </div>
           </div>
         </div>
 

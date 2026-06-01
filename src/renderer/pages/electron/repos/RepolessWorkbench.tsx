@@ -197,13 +197,13 @@ export function RepolessWorkbench() {
         <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Start or resume repoless</CardTitle>
-            <CardDescription className="text-white/55">
+            <CardDescription className="text-white/60">
               This uses the interactive Jules session route with no repository attached, then keeps the transcript and generated files live through the local bridge.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.24em] text-white/45">Title</label>
+              <label className="text-xs uppercase tracking-[0.24em] text-white/50">Title</label>
               <Input
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
@@ -213,7 +213,7 @@ export function RepolessWorkbench() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.24em] text-white/45">Initial prompt</label>
+              <label className="text-xs uppercase tracking-[0.24em] text-white/50">Initial prompt</label>
               <Textarea
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
@@ -226,7 +226,7 @@ export function RepolessWorkbench() {
                 type="checkbox"
                 checked={requireApproval}
                 onChange={(event) => setRequireApproval(event.target.checked)}
-                className="size-4 rounded border-white/20 bg-black"
+                className="size-3.5 appearance-none rounded border border-white/20 bg-black/40 checked:bg-sky-500 checked:border-sky-500 transition-all focus:ring-1 focus:ring-sky-500/50 cursor-pointer"
               />
               Require plan approval before execution
             </label>
@@ -271,7 +271,7 @@ export function RepolessWorkbench() {
         <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Session controls</CardTitle>
-            <CardDescription className="text-white/55">
+            <CardDescription className="text-white/60">
               Refresh the cached activity history, inspect snapshot analytics, or pull the final outcome after completion.
             </CardDescription>
           </CardHeader>
@@ -285,8 +285,8 @@ export function RepolessWorkbench() {
                   <span>Updated {formatTimestamp(session.updatedAt)}</span>
                 </div>
 
-                <div className="grid gap-2 text-sm text-white/65">
-                  <div>ID: <span className="font-mono text-white/85">{session.id}</span></div>
+                <div className="grid gap-2 text-sm text-white/70">
+                  <div>ID: <span className="font-mono text-white/90">{session.id}</span></div>
                   <div>Created: {formatTimestamp(session.createdAt)}</div>
                   <div>Outputs: {session.outputTypes.join(', ') || 'none yet'}</div>
                   {session.url && (
@@ -438,7 +438,7 @@ export function RepolessWorkbench() {
         <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Transcript</CardTitle>
-            <CardDescription className="text-white/55">
+            <CardDescription className="text-white/60">
               Cached history plus live stream events. Use Ask for request-response or Send for fire-and-forget follow-ups.
             </CardDescription>
           </CardHeader>
@@ -454,11 +454,11 @@ export function RepolessWorkbench() {
                         <span>{activity.type}</span>
                         <span>{formatTimestamp(activity.createTime)}</span>
                       </div>
-                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/85">
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/90">
                         {summarizeActivity(activity)}
                       </p>
                       {artifactSummary && (
-                        <p className="mt-2 text-xs text-white/45">{artifactSummary}</p>
+                        <p className="mt-2 text-xs text-white/50">{artifactSummary}</p>
                       )}
                     </div>
                   )
@@ -505,7 +505,7 @@ export function RepolessWorkbench() {
           <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
             <CardHeader>
               <CardTitle>Generated files</CardTitle>
-              <CardDescription className="text-white/55">
+              <CardDescription className="text-white/60">
                 Pull markdown-only files or the full generated file set, then inspect the content locally.
               </CardDescription>
             </CardHeader>
@@ -517,10 +517,10 @@ export function RepolessWorkbench() {
                       key={file.path}
                       type="button"
                       onClick={() => setSelectedFilePath(file.path)}
-                      className={`group w-full rounded-xl border px-4 py-3 text-left transition-all duration-300 ${selectedFilePath === file.path ? 'border-sky-500/50 bg-sky-500/10 shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200'}`}
+                      className={`group w-full rounded-xl border px-4 py-3 text-left transition-all duration-300 ${selectedFilePath === file.path ? 'border-sky-500/50 bg-sky-500/10 text-white shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200'}`}
                     >
-                      <div className="font-mono text-xs text-white/85">{file.path}</div>
-                      <div className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/35">
+                      <div className="font-mono text-xs text-white/90">{file.path}</div>
+                      <div className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/40">
                         {file.changeType} • +{file.additions} / -{file.deletions}
                       </div>
                     </button>
@@ -546,12 +546,12 @@ export function RepolessWorkbench() {
           <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
             <CardHeader>
               <CardTitle>Snapshot markdown</CardTitle>
-              <CardDescription className="text-white/55">
+              <CardDescription className="text-white/60">
                 The SDK snapshot summary is useful when you want a compact run report without opening the Jules web UI.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <pre className="max-h-[320px] overflow-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-black/30 p-3 text-xs leading-6 text-white/75">
+              <pre className="max-h-[320px] overflow-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-black/30 p-3 text-xs leading-6 text-white/80">
                 {snapshot?.markdown || 'Load a snapshot to inspect the derived markdown summary.'}
               </pre>
             </CardContent>
