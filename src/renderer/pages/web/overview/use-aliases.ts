@@ -16,19 +16,15 @@ function lsLoad(): JulesAlias[] {
 export type AliasesStatus = 'ok' | 'file-not-found' | 'loading'
 
 export function useAliases() {
-  const [aliases, setAliases] = useState<JulesAlias[]>([])
-  const [status, setStatus] = useState<AliasesStatus>('loading')
+  const [aliases, setAliases] = useState<JulesAlias[]>(() => isElectron ? [] : lsLoad())
+  const [status, setStatus] = useState<AliasesStatus>(() => isElectron ? 'loading' : 'ok')
 
   useEffect(() => {
-    if (isElectron && aliasesApi) {
-      aliasesApi.get().then(({ aliases: data, fileFound }) => {
-        setAliases(data)
-        setStatus(fileFound ? 'ok' : 'file-not-found')
-      })
-    } else {
-      setAliases(lsLoad())
-      setStatus('ok')
-    }
+    if (!isElectron || !aliasesApi) return
+    void aliasesApi.get().then(({ aliases: data, fileFound }) => {
+      setAliases(data)
+      setStatus(fileFound ? 'ok' : 'file-not-found')
+    })
   }, [])
 
   useEffect(() => {
@@ -47,7 +43,7 @@ export function useAliases() {
   const commit = useCallback((next: JulesAlias[]) => {
     setAliases(next)
     if (isElectron && aliasesApi) {
-      aliasesApi.save(next).then(() => {})
+      void aliasesApi.save(next).catch(e => { console.error('[aliases] save failed:', e) })
     } else {
       localStorage.setItem(LS_KEY, JSON.stringify(next))
     }

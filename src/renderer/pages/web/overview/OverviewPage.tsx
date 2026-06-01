@@ -3,17 +3,20 @@ import { AnimatePresence } from 'framer-motion'
 import { sdkIpc } from '@shared/bridge'
 import type { JulesLocalGeneratedFile } from '@shared/electron'
 import { TRIGGERS } from '@shared/aliases'
+import type { HistoryEntry } from '@shared/history'
+import {
+  AliasMenu,
+  ArtifactPanel,
+  GhostInput,
+  HistoryPanel,
+  MdNotification,
+  SavedCommands,
+  buildPrompt,
+  type JulesAlias,
+} from '@/components/overview'
 import { useAliases } from './use-aliases'
 import { useHistory } from './use-history'
 import { useArtifactStream } from './use-artifact-stream'
-import { GhostInput } from './GhostInput'
-import { AliasMenu } from './AliasMenu'
-import { HistoryPanel } from './HistoryPanel'
-import { ArtifactPanel } from './ArtifactPanel'
-import { MdNotification } from './MdNotification'
-import { buildPrompt } from './lib'
-import type { JulesAlias } from './types'
-import type { HistoryEntry } from '@shared/history'
 import SettingsPage from '../../shared/SettingsPage'
 
 type PanelMode = 'none' | 'aliases' | 'history' | 'settings'
@@ -27,7 +30,6 @@ export default function OverviewPage() {
   const [panelIndex, setPanelIndex] = useState(0)
   const [isSending, setIsSending] = useState(false)
   const [dismissedSession, setDismissedSession] = useState<string | null>(null)
-
   const [aliasQuery, setAliasQuery] = useState('')
 
   const filteredAliases = panelMode === 'aliases'
@@ -42,13 +44,47 @@ export default function OverviewPage() {
 
   const closePanel = useCallback(() => { setPanelMode('none'); setPanelIndex(0) }, [])
 
+  /**
+   * Core send — accepts alias + body directly so script-mode aliases can fire
+   * immediately from selectAlias without waiting for state to settle.
+   *
+   * Mode routing:
+   *   action:settings  → handled in selectAlias, never reaches here
+   *   mode:script      → sends alias.instructions to Jules immediately (body ignored)
+   *   mode:prompt / default → sends body + instructions to Jules
+   */
+  const sendWith = useCallback(async (alias: JulesAlias, body: string) => {
+    if (isSending) return
+    const effectiveBody = alias.mode === 'script' ? '' : body
+    const prompt = buildPrompt(alias, effectiveBody)
+    if (!prompt) return
+
+    if (!sdkIpc) return
+    setIsSending(true)
+    try {
+      await sdkIpc.sendMessage(alias.sessionId, prompt)
+      if (effectiveBody) void pushHistory(effectiveBody)
+    } catch (e) { console.error('[overview] send failed:', e) }
+    finally { setIsSending(false) }
+  }, [isSending, pushHistory])
+
   const selectAlias = useCallback((alias: JulesAlias) => {
+    if (alias.action === 'settings') {
+      setPanelMode('settings')
+      setActiveAlias(null)
+      setInput('')
+      setAliasQuery('')
+      return
+    }
     setActiveAlias(alias)
     setDismissedSession(null)
     setInput('')
     setAliasQuery('')
     closePanel()
-  }, [closePanel])
+    if (alias.mode === 'script') {
+      void sendWith(alias, '')
+    }
+  }, [closePanel, sendWith])
 
   const selectHistory = useCallback((entry: HistoryEntry) => {
     setInput(entry.text)
@@ -57,12 +93,6 @@ export default function OverviewPage() {
 
   const handleChange = useCallback((val: string) => {
     setInput(val)
-    
-    if (val === '/settings') {
-      setPanelMode('settings')
-      return
-    }
-
     const trigger = TRIGGERS.find(t => val.startsWith(t))
     if (trigger && !val.includes(' ')) {
       setAliasQuery(val.slice(1))
@@ -77,30 +107,16 @@ export default function OverviewPage() {
 
   const handleSend = useCallback(async () => {
     if (!activeAlias || isSending) return
-    const trigger = activeAlias.trigger ?? '/'
+    // display-only aliases: / trigger with no mode set just refreshes the artifact view
+    if ((activeAlias.trigger === '/' || !activeAlias.trigger) && !activeAlias.mode) {
+      refresh()
+      return
+    }
     const body = input.trim()
-
-    // / trigger is display-only — never sends to Jules
-    if (trigger === '/') {
-      refresh()
-      return
-    }
-
-    // empty + non-action: refresh without sending
-    if (body === '' && trigger !== '!') {
-      refresh()
-      return
-    }
-
-    if (!sdkIpc) return
+    if (!body && activeAlias.mode !== 'script') { refresh(); return }
     setInput('')
-    setIsSending(true)
-    try {
-      await sdkIpc.sendMessage(activeAlias.sessionId, buildPrompt(activeAlias, body))
-      if (body) void pushHistory(body)
-    } catch (e) { console.error('[overview] send failed:', e) }
-    finally { setIsSending(false) }
-  }, [input, activeAlias, isSending, refresh, pushHistory])
+    await sendWith(activeAlias, body)
+  }, [activeAlias, isSending, input, refresh, sendWith])
 
   const handleZip = useCallback(async (): Promise<JulesLocalGeneratedFile[]> => {
     if (!activeAlias || !sdkIpc) return files
@@ -109,7 +125,6 @@ export default function OverviewPage() {
   }, [activeAlias, files])
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Ctrl+Space → toggle alias picker
     if (e.code === 'Space' && e.ctrlKey && !e.shiftKey && !e.altKey) {
       e.preventDefault()
       if (panelMode === 'aliases') { closePanel(); setAliasQuery('') }
@@ -146,7 +161,6 @@ export default function OverviewPage() {
       if (e.key === 'Escape') { closePanel(); return }
     }
 
-    // Arrow Up from empty → open history
     if (e.key === 'ArrowUp' && input === '' && panelMode === 'none' && historyEntries.length > 0) {
       e.preventDefault()
       setPanelMode('history')
@@ -222,6 +236,13 @@ export default function OverviewPage() {
               disabled={isSending}
             />
           </div>
+
+          <SavedCommands
+            aliases={aliases}
+            activeId={activeAlias?.id ?? null}
+            onSelect={selectAlias}
+            visible={panelMode === 'none' && !input}
+          />
         </div>
       </div>
     </div>
