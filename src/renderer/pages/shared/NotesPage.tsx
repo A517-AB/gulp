@@ -58,6 +58,7 @@ export default function NotesPage() {
   return (
     <div className="w-full h-full">
       <MarkdownEditor
+        key={contentVersion}
         {...(content !== undefined ? { initialContent: content } : {})}
         onChange={handleChange}
       />

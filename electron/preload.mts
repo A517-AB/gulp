@@ -177,6 +177,32 @@ const notes: ElectronAPI["notes"] = {
   },
 }
 
+// ── alarms ─────────────────────────────────────────────────────────────────────
+
+const alarms: ElectronAPI["alarms"] = {
+  list:    () => ipcRenderer.invoke("alarms.list"),
+  save:    (alarm) => ipcRenderer.invoke("alarms.save", alarm),
+  delete:  (id) => ipcRenderer.invoke("alarms.delete", id),
+  toggle:  (id, enabled) => ipcRenderer.invoke("alarms.toggle", id, enabled),
+  snooze:  (id, minutes) => ipcRenderer.invoke("alarms.snooze", id, minutes),
+  onChanged: (cb) => {
+    const handler = () => cb()
+    ipcRenderer.on("alarms.changed", handler)
+    return () => { ipcRenderer.off("alarms.changed", handler) }
+  },
+}
+
+// ── notifications ──────────────────────────────────────────────────────────────
+
+const notifications: ElectronAPI["notifications"] = {
+  send: (n) => ipcRenderer.send("notification.send", n),
+  onReceived: (cb) => {
+    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+    ipcRenderer.on("notification.received", handler)
+    return () => { ipcRenderer.off("notification.received", handler) }
+  },
+}
+
 // ── snippets ───────────────────────────────────────────────────────────────────
 
 const snippets: ElectronAPI["snippets"] = {
@@ -244,6 +270,8 @@ const api: ElectronAPI = {
   history,
   aliases,
   notes,
+  alarms,
+  notifications,
   snippets,
   sdkIpc: julesLocal,
 };

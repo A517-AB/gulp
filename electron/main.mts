@@ -13,6 +13,9 @@ import { registerJulesLocalHandlers } from "./julesLocal";
 import { registerAliasesHandlers } from "./aliases";
 import { registerHistoryHandlers } from "./history";
 import { registerNotesHandlers } from "./notes";
+import { registerAlarmsHandlers } from "./alarms";
+import { dispatchNotification } from "./notifications";
+import type { AppNotification } from "../src/shared/notifications";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -124,6 +127,10 @@ app.whenReady().then(() => {
   registerAliasesHandlers(() => mainWindow?.webContents ?? null);
   registerHistoryHandlers();
   registerNotesHandlers(() => mainWindow?.webContents ?? null);
+  registerAlarmsHandlers(() => mainWindow?.webContents ?? null);
+  ipcMain.on("notification.send", (_e, n: AppNotification) => {
+    dispatchNotification(n, mainWindow?.webContents ?? null);
+  });
   createWindow();
 
   tray = new Tray(buildTrayIcon());

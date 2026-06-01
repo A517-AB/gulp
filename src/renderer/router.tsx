@@ -7,7 +7,7 @@ import {
     HomePage, SettingsPage, JulesPage, NotesPage,
 } from '@renderer/pages/shared'
 import {
-    ActivityPage, ReposPage, SnapshotPage, QueuesPage, SnippetsPage,
+    ActivityPage, ReposPage, SnapshotPage, QueuesPage, SnippetsPage, AlarmsPage,
 } from '@renderer/pages/electron'
 import {
     OverviewPage,
@@ -46,9 +46,10 @@ const sharedRoutes: AppRoute[] = [
 // ── electron ──────────────────────────────────────────────────────────────────
 
 const electronRoutes: AppRoute[] = [
-    { path: 'repos',        Component: ReposPage,     handle: { title: 'Repos', inNav: true } },
-    { path: 'queues',        Component: QueuesPage,   handle: { title: 'Queues', inNav: true } },
-    { path: 'snippets',      Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },
+    { path: 'repos',        Component: ReposPage,     handle: { title: 'Repos',    inNav: true } },
+    { path: 'queues',       Component: QueuesPage,    handle: { title: 'Queues',   inNav: true } },
+    { path: 'snippets',     Component: SnippetsPage,  handle: { title: 'Snippets', inNav: true } },
+    { path: 'alarms',       Component: AlarmsPage,    handle: { title: 'Alarms',   inNav: true } },
     { path: 'activity/:id', Component: ActivityPage },
     { path: 'snapshot/:id', Component: SnapshotPage },
 ]

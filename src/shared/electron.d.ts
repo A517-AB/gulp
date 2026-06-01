@@ -3,6 +3,8 @@ import type { FuseManifest, FuseChangeEvent } from './fuse'
 import type { JulesAlias } from './aliases'
 import type { HistoryEntry } from './history'
 import type { NoteMeta } from './notes'
+import type { AlarmEntry } from './alarms'
+import type { AppNotification } from './notifications'
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
 
@@ -263,6 +265,20 @@ export interface HistoryAPI {
   remove: (id: string) => Promise<HistoryEntry[]>
 }
 
+export interface AlarmsAPI {
+  list:    () => Promise<AlarmEntry[]>
+  save:    (alarm: AlarmEntry) => Promise<boolean>
+  delete:  (id: string) => Promise<boolean>
+  toggle:  (id: string, enabled: boolean) => Promise<boolean>
+  snooze:  (id: string, minutes: number) => Promise<boolean>
+  onChanged: (cb: () => void) => () => void
+}
+
+export interface NotificationsAPI {
+  send:       (n: AppNotification) => void
+  onReceived: (cb: (n: AppNotification) => void) => () => void
+}
+
 export interface NotesAPI {
   get:       (id: string) => Promise<object[] | null>
   save:      (id: string, title: string, blocks: object[]) => Promise<boolean>
@@ -328,10 +344,12 @@ export interface ElectronAPI {
   popup:      PopupAPI;
   filesystem: FilesystemAPI;
   env:        EnvAPI;
-  history:  HistoryAPI;
-  aliases:  AliasesAPI;
-  notes:    NotesAPI;
-  snippets: SnippetsAPI;
+  history:       HistoryAPI;
+  aliases:       AliasesAPI;
+  notes:         NotesAPI;
+  alarms:        AlarmsAPI;
+  notifications: NotificationsAPI;
+  snippets:      SnippetsAPI;
   sdkIpc:   JulesLocalAPI;
 }
 

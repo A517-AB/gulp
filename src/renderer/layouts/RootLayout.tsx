@@ -3,6 +3,7 @@ import { Outlet, useLocation, NavLink } from 'react-router'
 import { TopBar } from '@renderer/shell'
 import { ThemeProvider } from '@renderer/providers/theme'
 import { navRoutes } from '@renderer/router'
+import { NotificationToast } from '@/components/notifications'
 
 export default function RootLayout(): ReactNode {
     const location = useLocation()
@@ -39,6 +40,7 @@ export default function RootLayout(): ReactNode {
                 <main className="flex-1 overflow-hidden min-h-0 h-full">
                     <Outlet />
                 </main>
+                <NotificationToast />
             </div>
         </ThemeProvider>
     )
