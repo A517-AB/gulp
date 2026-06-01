@@ -194,7 +194,7 @@ export function RepolessWorkbench() {
   return (
     <div className="grid gap-4 xl:grid-cols-[420px_minmax(0,1fr)]">
       <div className="space-y-4">
-        <Card className="border-white/10 bg-zinc-950/80 text-white">
+        <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Start or resume repoless</CardTitle>
             <CardDescription className="text-white/55">
@@ -208,7 +208,7 @@ export function RepolessWorkbench() {
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Repoless design review"
-                className="border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
             </div>
 
@@ -217,7 +217,7 @@ export function RepolessWorkbench() {
               <Textarea
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
-                className="min-h-[180px] border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                className="min-h-[150px] border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
             </div>
 
@@ -236,7 +236,7 @@ export function RepolessWorkbench() {
                 value={resumeId}
                 onChange={(event) => setResumeId(event.target.value)}
                 placeholder="Existing session id"
-                className="border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
               <Button
                 variant="outline"
@@ -244,7 +244,7 @@ export function RepolessWorkbench() {
                   void handleResumeSession()
                 }}
                 disabled={creating}
-                className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
               >
                 Resume Existing
               </Button>
@@ -268,7 +268,7 @@ export function RepolessWorkbench() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-zinc-950/80 text-white">
+        <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Session controls</CardTitle>
             <CardDescription className="text-white/55">
@@ -308,7 +308,7 @@ export function RepolessWorkbench() {
                       void refreshSession()
                     }}
                     disabled={loadingSession}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {loadingSession ? 'Refreshing...' : 'Refresh Session'}
                   </Button>
@@ -317,7 +317,7 @@ export function RepolessWorkbench() {
                     onClick={() => {
                       void refreshActivities()
                     }}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     Refresh Transcript
                   </Button>
@@ -326,7 +326,7 @@ export function RepolessWorkbench() {
                     onClick={() => {
                       void hydrateSession()
                     }}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     Hydrate Cache
                   </Button>
@@ -336,7 +336,7 @@ export function RepolessWorkbench() {
                       void handleSnapshot()
                     }}
                     disabled={loadingSnapshot}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {loadingSnapshot ? 'Loading Snapshot...' : 'Load Snapshot'}
                   </Button>
@@ -346,7 +346,7 @@ export function RepolessWorkbench() {
                       void handleOutcome()
                     }}
                     disabled={loadingOutcome}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {loadingOutcome ? 'Loading Outcome...' : 'Load Outcome'}
                   </Button>
@@ -359,7 +359,7 @@ export function RepolessWorkbench() {
                       void loadMarkdownFiles()
                     }}
                     disabled={loadingFiles}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     Markdown Files
                   </Button>
@@ -369,7 +369,7 @@ export function RepolessWorkbench() {
                       void loadFiles()
                     }}
                     disabled={loadingFiles}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {loadingFiles ? 'Loading Files...' : 'All Files'}
                   </Button>
@@ -378,7 +378,7 @@ export function RepolessWorkbench() {
                     onClick={() => {
                       void (streaming ? stopStream() : startStream())
                     }}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {streaming ? 'Stop Stream' : 'Start Stream'}
                   </Button>
@@ -396,7 +396,7 @@ export function RepolessWorkbench() {
                 {(snapshot || outcome) && (
                   <div className="grid gap-3 md:grid-cols-2">
                     {snapshot && (
-                      <div className="rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white/70">
+                      <div className="rounded-xl border border-white/5 bg-white/5 p-4 shadow-inner backdrop-blur-md text-sm text-white/70 transition-colors hover:bg-white/10">
                         <div className="text-xs uppercase tracking-[0.24em] text-white/40">Snapshot</div>
                         <div className="mt-2">Duration: {(snapshot.durationMs / 1000).toFixed(1)}s</div>
                         <div>Timeline entries: {snapshot.timeline.length}</div>
@@ -405,7 +405,7 @@ export function RepolessWorkbench() {
                       </div>
                     )}
                     {outcome && (
-                      <div className="rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white/70">
+                      <div className="rounded-xl border border-white/5 bg-white/5 p-4 shadow-inner backdrop-blur-md text-sm text-white/70 transition-colors hover:bg-white/10">
                         <div className="text-xs uppercase tracking-[0.24em] text-white/40">Outcome</div>
                         <div className="mt-2">State: {outcome.state}</div>
                         <div>Generated files: {outcome.generatedFiles.length}</div>
@@ -426,7 +426,7 @@ export function RepolessWorkbench() {
                 )}
               </>
             ) : (
-              <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-sm text-white/45">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm font-medium text-zinc-500 shadow-inner">
                 Start or resume a repoless session to unlock the controls.
               </div>
             )}
@@ -435,7 +435,7 @@ export function RepolessWorkbench() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
-        <Card className="border-white/10 bg-zinc-950/80 text-white">
+        <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Transcript</CardTitle>
             <CardDescription className="text-white/55">
@@ -449,7 +449,7 @@ export function RepolessWorkbench() {
                   const artifactSummary = summarizeArtifacts(activity)
 
                   return (
-                    <div key={activity.id} className="rounded-xl border border-white/10 bg-black/25 p-3">
+                    <div key={activity.id} className="rounded-xl border border-white/5 bg-white/[0.03] p-4 transition-all hover:bg-white/[0.06] hover:shadow-lg">
                       <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-[0.22em] text-white/40">
                         <span>{activity.type}</span>
                         <span>{formatTimestamp(activity.createTime)}</span>
@@ -464,7 +464,7 @@ export function RepolessWorkbench() {
                   )
                 })
               ) : (
-                <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-sm text-white/45">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm font-medium text-zinc-500 shadow-inner">
                   No activity history yet.
                 </div>
               )}
@@ -475,7 +475,7 @@ export function RepolessWorkbench() {
                 value={messageDraft}
                 onChange={(event) => setMessageDraft(event.target.value)}
                 placeholder="Ask for a refinement, request a markdown artifact, or continue the task..."
-                className="min-h-[120px] border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                className="min-h-[120px] border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -492,7 +492,7 @@ export function RepolessWorkbench() {
                     void handleSend()
                   }}
                   disabled={!sessionId || !messageDraft.trim()}
-                  className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                  className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                 >
                   Send Only
                 </Button>
@@ -502,7 +502,7 @@ export function RepolessWorkbench() {
         </Card>
 
         <div className="space-y-4">
-          <Card className="border-white/10 bg-zinc-950/80 text-white">
+          <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
             <CardHeader>
               <CardTitle>Generated files</CardTitle>
               <CardDescription className="text-white/55">
@@ -517,7 +517,7 @@ export function RepolessWorkbench() {
                       key={file.path}
                       type="button"
                       onClick={() => setSelectedFilePath(file.path)}
-                      className={`w-full rounded-xl border px-3 py-2 text-left text-sm transition ${selectedFilePath === file.path ? 'border-sky-400/35 bg-sky-500/10 text-white' : 'border-white/10 bg-black/20 text-white/70 hover:bg-white/5'}`}
+                      className={`group w-full rounded-xl border px-4 py-3 text-left transition-all duration-300 ${selectedFilePath === file.path ? 'border-sky-500/50 bg-sky-500/10 shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200'}`}
                     >
                       <div className="font-mono text-xs text-white/85">{file.path}</div>
                       <div className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/35">
@@ -526,13 +526,13 @@ export function RepolessWorkbench() {
                     </button>
                   ))
                 ) : (
-                  <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-sm text-white/45">
+                  <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm font-medium text-zinc-500 shadow-inner">
                     No generated files loaded yet.
                   </div>
                 )}
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-black/30 p-3">
+              <div className="rounded-xl border border-white/5 bg-white/5 p-4 shadow-inner backdrop-blur-md transition-colors hover:bg-white/10">
                 <div className="mb-2 text-xs uppercase tracking-[0.22em] text-white/40">
                   {selectedFile?.path ?? 'File preview'}
                 </div>
@@ -543,7 +543,7 @@ export function RepolessWorkbench() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-zinc-950/80 text-white">
+          <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
             <CardHeader>
               <CardTitle>Snapshot markdown</CardTitle>
               <CardDescription className="text-white/55">

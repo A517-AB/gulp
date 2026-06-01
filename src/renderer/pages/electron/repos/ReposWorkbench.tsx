@@ -12,6 +12,7 @@ import { Input } from '@/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 import { FleetIssueDispatch } from './FleetIssueDispatch'
 import { RepolessWorkbench } from './RepolessWorkbench'
+import { Sparkles, TerminalSquare, KeyRound, Server } from 'lucide-react'
 
 export function ReposWorkbench() {
   const [apiKey, setApiKey] = useState('')
@@ -39,79 +40,112 @@ export function ReposWorkbench() {
   }
 
   return (
-    <div className="h-full overflow-auto bg-neutral-950 text-white">
-      <div className="mx-auto flex max-w-[1700px] flex-col gap-4 p-4 md:p-6">
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-white/40">
-              Local Jules Tools
-            </p>
+    <div className="relative h-full overflow-auto bg-neutral-950 text-white selection:bg-sky-500/30">
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="absolute -left-[10%] -top-[20%] h-[50%] w-[50%] rounded-full bg-sky-900/20 blur-[120px]" />
+        <div className="absolute -right-[10%] top-[40%] h-[60%] w-[40%] rounded-full bg-emerald-900/10 blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex max-w-[1700px] flex-col gap-8 p-6 md:p-10">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-400">
+              <Server className="size-3" /> Local Jules Tools
+            </div>
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-white">Repos control room</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
-                This page stays local to Electron, talks through the shared Jules bridge, and gives you a real repoless tool plus a fleet dispatch surface against connected repositories.
+              <h1 className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-4xl font-bold tracking-tight text-transparent">
+                Repos Control Room
+              </h1>
+              <p className="mt-3 max-w-2xl text-base leading-relaxed text-zinc-400">
+                This environment stays local to Electron, communicating via the shared Jules bridge. Manage a real repoless tool and direct fleet operations across connected repositories.
               </p>
             </div>
           </div>
-          <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-white/45">
-            sources • history • snapshot • result • fleet
+          <div className="flex gap-2">
+             <div className="rounded-full border border-white/5 bg-white/5 px-4 py-1.5 text-xs font-medium tracking-wide text-zinc-400 backdrop-blur-md">
+               sources • history • snapshot • result • fleet
+             </div>
           </div>
         </div>
 
-        <Card className="border-white/10 bg-zinc-950/80 text-white">
-          <CardHeader>
-            <CardTitle>Runtime API key override</CardTitle>
-            <CardDescription className="text-white/55">
-              Leave it blank to fall back to your configured environment key. This only affects Electron-local Jules SDK calls.
+        <Card className="border-white/5 bg-black/40 text-white shadow-2xl backdrop-blur-xl">
+          <CardHeader className="pb-4">
+            <div className="flex items-center gap-2">
+              <KeyRound className="size-5 text-sky-400" />
+              <CardTitle className="text-lg">Runtime API key override</CardTitle>
+            </div>
+            <CardDescription className="text-zinc-400">
+              Leave blank to fall back to your default environment key. This override only affects Electron-local SDK operations.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-3 md:flex-row md:items-center">
-            <Input
-              type="password"
-              value={apiKey}
-              onChange={(event) => setApiKey(event.target.value)}
-              placeholder="AIza..."
-              className="border-white/10 bg-black/40 text-white placeholder:text-white/30"
-            />
-            <div className="flex gap-2">
-              <Button
-                onClick={() => {
-                  void applyApiKey(apiKey.trim() || null)
-                }}
-                disabled={savingApiKey}
-              >
-                {savingApiKey ? 'Saving...' : 'Apply Override'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  void applyApiKey(null)
-                }}
-                disabled={savingApiKey}
-                className="border-white/10 bg-transparent text-white hover:bg-white/10"
-              >
-                Clear Override
-              </Button>
+          <CardContent>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="relative flex-1">
+                <Input
+                  type="password"
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                  placeholder="AIzaSy..."
+                  className="w-full border-white/10 bg-black/60 pl-4 text-white placeholder:text-zinc-600 transition-all duration-300 focus:border-sky-500/50 focus:ring-sky-500/20"
+                />
+              </div>
+              <div className="flex shrink-0 gap-3">
+                <Button
+                  onClick={() => {
+                    void applyApiKey(apiKey.trim() || null)
+                  }}
+                  disabled={savingApiKey}
+                  className="bg-sky-600 text-white shadow-lg shadow-sky-900/20 transition-all hover:bg-sky-500"
+                >
+                  {savingApiKey ? 'Saving...' : 'Apply Override'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    void applyApiKey(null)
+                  }}
+                  disabled={savingApiKey}
+                  className="border-white/10 bg-white/5 text-zinc-300 transition-all hover:bg-white/10 hover:text-white"
+                >
+                  Clear Override
+                </Button>
+              </div>
             </div>
+            {apiKeyMessage && (
+              <div className="mt-4 flex items-center gap-2 rounded-lg border border-sky-500/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-200">
+                <Sparkles className="size-4" />
+                <span>{apiKeyMessage}</span>
+              </div>
+            )}
           </CardContent>
-          {apiKeyMessage && (
-            <CardContent className="pt-0 text-sm text-white/65">{apiKeyMessage}</CardContent>
-          )}
         </Card>
 
-        <Tabs defaultValue="fleet" className="gap-4">
-          <TabsList className="w-full justify-start bg-white/5 p-1 text-white/65 md:w-fit">
-            <TabsTrigger value="fleet">Fleet fix dispatch</TabsTrigger>
-            <TabsTrigger value="repoless">Repoless workbench</TabsTrigger>
+        <Tabs defaultValue="fleet" className="flex flex-col gap-6">
+          <TabsList className="h-12 w-full justify-start rounded-xl bg-white/5 p-1 text-zinc-400 backdrop-blur-md md:w-fit">
+            <TabsTrigger 
+              value="fleet" 
+              className="rounded-lg px-6 py-2 transition-all data-[state=active]:bg-sky-500/20 data-[state=active]:text-sky-300"
+            >
+              Fleet fix dispatch
+            </TabsTrigger>
+            <TabsTrigger 
+              value="repoless" 
+              className="rounded-lg px-6 py-2 transition-all data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-300"
+            >
+              <TerminalSquare className="mr-2 size-4" />
+              Repoless workbench
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="fleet" className="mt-0">
-            <FleetIssueDispatch />
-          </TabsContent>
+          <div className="rounded-2xl border border-white/5 bg-black/20 p-1 shadow-2xl backdrop-blur-sm">
+            <TabsContent value="fleet" className="m-0 focus-visible:outline-none focus-visible:ring-0">
+              <FleetIssueDispatch />
+            </TabsContent>
 
-          <TabsContent value="repoless" className="mt-0">
-            <RepolessWorkbench />
-          </TabsContent>
+            <TabsContent value="repoless" className="m-0 focus-visible:outline-none focus-visible:ring-0">
+              <RepolessWorkbench />
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
     </div>

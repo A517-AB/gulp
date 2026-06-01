@@ -224,7 +224,7 @@ export function FleetIssueDispatch() {
   return (
     <div className="grid gap-4 xl:grid-cols-[420px_360px_minmax(0,1fr)]">
       <div className="space-y-4">
-        <Card className="border-white/10 bg-zinc-950/80 text-white">
+        <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Dispatch a fleet issue fix</CardTitle>
             <CardDescription className="text-white/55">
@@ -238,7 +238,7 @@ export function FleetIssueDispatch() {
                 value={repositoriesRaw}
                 onChange={(event) => setRepositoriesRaw(event.target.value)}
                 placeholder="owner/repo-a&#10;owner/repo-b"
-                className="min-h-[150px] border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                className="min-h-[150px] border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
               <p className="text-xs text-white/40">{repositoryList.length} unique repositories queued</p>
             </div>
@@ -248,7 +248,7 @@ export function FleetIssueDispatch() {
               <Textarea
                 value={issue}
                 onChange={(event) => setIssue(event.target.value)}
-                className="min-h-[160px] border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                className="min-h-[160px] border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
             </div>
 
@@ -258,7 +258,7 @@ export function FleetIssueDispatch() {
                 <Input
                   value={branch}
                   onChange={(event) => setBranch(event.target.value)}
-                  className="border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                  className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
                 />
               </div>
               <div className="space-y-2">
@@ -266,7 +266,7 @@ export function FleetIssueDispatch() {
                 <Input
                   value={titlePrefix}
                   onChange={(event) => setTitlePrefix(event.target.value)}
-                  className="border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                  className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
                 />
               </div>
               <div className="space-y-2">
@@ -276,7 +276,7 @@ export function FleetIssueDispatch() {
                   min="1"
                   value={concurrency}
                   onChange={(event) => setConcurrency(event.target.value)}
-                  className="border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                  className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
                 />
               </div>
               <div className="space-y-2">
@@ -286,7 +286,7 @@ export function FleetIssueDispatch() {
                   min="0"
                   value={delayMs}
                   onChange={(event) => setDelayMs(event.target.value)}
-                  className="border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                  className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
                 />
               </div>
             </div>
@@ -336,7 +336,7 @@ export function FleetIssueDispatch() {
                   void handleRefreshResults()
                 }}
                 disabled={!results.length}
-                className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
               >
                 Refresh Fleet States
               </Button>
@@ -350,7 +350,7 @@ export function FleetIssueDispatch() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-zinc-950/80 text-white">
+        <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Connected sources</CardTitle>
             <CardDescription className="text-white/55">
@@ -363,7 +363,7 @@ export function FleetIssueDispatch() {
                 value={sourceQuery}
                 onChange={(event) => setSourceQuery(event.target.value)}
                 placeholder="Filter connected repos"
-                className="border-white/10 bg-black/40 text-white placeholder:text-white/30"
+                className="border-white/10 bg-black/60 text-white placeholder:text-zinc-600 focus:border-sky-500/50 focus:ring-sky-500/20 transition-all duration-300"
               />
               <Button
                 variant="outline"
@@ -371,7 +371,7 @@ export function FleetIssueDispatch() {
                   void loadSources()
                 }}
                 disabled={loadingSources}
-                className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
               >
                 {loadingSources ? 'Loading...' : 'Reload'}
               </Button>
@@ -380,7 +380,7 @@ export function FleetIssueDispatch() {
             <div className="max-h-[420px] space-y-2 overflow-auto pr-2">
               {filteredSources.length > 0 ? (
                 filteredSources.slice(0, 40).map((source) => (
-                  <div key={source.id} className="rounded-xl border border-white/10 bg-black/25 p-3">
+                  <div key={source.id} className="rounded-xl border border-white/5 bg-white/[0.03] p-4 transition-all hover:bg-white/[0.06] hover:shadow-lg">
                     <div className="font-mono text-sm text-white/90">{source.fullName}</div>
                     <div className="mt-1 text-xs uppercase tracking-[0.22em] text-white/35">
                       {source.defaultBranch ?? 'no default branch'} • {source.isPrivate ? 'private' : 'public'}
@@ -396,7 +396,7 @@ export function FleetIssueDispatch() {
                         size="sm"
                         variant="outline"
                         onClick={() => setSourceQuery(source.fullName)}
-                        className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                        className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                       >
                         Focus
                       </Button>
@@ -404,7 +404,7 @@ export function FleetIssueDispatch() {
                   </div>
                 ))
               ) : (
-                <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-sm text-white/45">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm font-medium text-zinc-500 shadow-inner">
                   {loadingSources ? 'Loading connected sources...' : 'No connected sources matched the current filter.'}
                 </div>
               )}
@@ -413,7 +413,7 @@ export function FleetIssueDispatch() {
         </Card>
       </div>
 
-      <Card className="border-white/10 bg-zinc-950/80 text-white">
+      <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
         <CardHeader>
           <CardTitle>Fleet sessions</CardTitle>
           <CardDescription className="text-white/55">
@@ -431,7 +431,7 @@ export function FleetIssueDispatch() {
                     key={item.session.id}
                     type="button"
                     onClick={() => setSelectedSessionId(item.session.id)}
-                    className={`w-full rounded-xl border px-3 py-3 text-left transition ${active ? 'border-sky-400/35 bg-sky-500/10' : 'border-white/10 bg-black/20 hover:bg-white/5'}`}
+                    className={`group w-full rounded-xl border px-4 py-3 text-left transition-all duration-300 ${active ? 'border-sky-500/50 bg-sky-500/10 shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 hover:border-white/20 hover:bg-white/10'}`}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
@@ -451,7 +451,7 @@ export function FleetIssueDispatch() {
                 )
               })
             ) : (
-              <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-sm text-white/45">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm font-medium text-zinc-500 shadow-inner">
                 Dispatch a fleet run to populate this list.
               </div>
             )}
@@ -460,7 +460,7 @@ export function FleetIssueDispatch() {
       </Card>
 
       <div className="space-y-4">
-        <Card className="border-white/10 bg-zinc-950/80 text-white">
+        <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Selected session inspector</CardTitle>
             <CardDescription className="text-white/55">
@@ -511,7 +511,7 @@ export function FleetIssueDispatch() {
                       void refreshSession()
                     }}
                     disabled={loadingSession}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {loadingSession ? 'Refreshing...' : 'Refresh Session'}
                   </Button>
@@ -520,7 +520,7 @@ export function FleetIssueDispatch() {
                     onClick={() => {
                       void refreshActivities()
                     }}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     Refresh Transcript
                   </Button>
@@ -529,7 +529,7 @@ export function FleetIssueDispatch() {
                     onClick={() => {
                       void hydrateSession()
                     }}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     Hydrate Cache
                   </Button>
@@ -538,7 +538,7 @@ export function FleetIssueDispatch() {
                     onClick={() => {
                       void (streaming ? stopStream() : startStream())
                     }}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {streaming ? 'Stop Stream' : 'Start Stream'}
                   </Button>
@@ -551,7 +551,7 @@ export function FleetIssueDispatch() {
                       void loadMarkdownFiles()
                     }}
                     disabled={loadingFiles}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     Markdown Files
                   </Button>
@@ -561,7 +561,7 @@ export function FleetIssueDispatch() {
                       void loadFiles()
                     }}
                     disabled={loadingFiles}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {loadingFiles ? 'Loading Files...' : 'All Files'}
                   </Button>
@@ -571,7 +571,7 @@ export function FleetIssueDispatch() {
                       void handleSnapshot()
                     }}
                     disabled={loadingSnapshot}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {loadingSnapshot ? 'Loading Snapshot...' : 'Snapshot'}
                   </Button>
@@ -581,7 +581,7 @@ export function FleetIssueDispatch() {
                       void handleOutcome()
                     }}
                     disabled={loadingOutcome}
-                    className="border-white/10 bg-transparent text-white hover:bg-white/10"
+                    className="border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     {loadingOutcome ? 'Loading Outcome...' : 'Outcome'}
                   </Button>
@@ -590,7 +590,7 @@ export function FleetIssueDispatch() {
                 {(snapshot || outcome) && (
                   <div className="grid gap-3 md:grid-cols-2">
                     {snapshot && (
-                      <div className="rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white/70">
+                      <div className="rounded-xl border border-white/5 bg-white/5 p-4 shadow-inner backdrop-blur-md text-sm text-white/70 transition-colors hover:bg-white/10">
                         <div className="text-xs uppercase tracking-[0.24em] text-white/40">Snapshot</div>
                         <div className="mt-2">Timeline entries: {snapshot.timeline.length}</div>
                         <div>Generated files: {snapshot.generatedFiles.length}</div>
@@ -598,7 +598,7 @@ export function FleetIssueDispatch() {
                       </div>
                     )}
                     {outcome && (
-                      <div className="rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white/70">
+                      <div className="rounded-xl border border-white/5 bg-white/5 p-4 shadow-inner backdrop-blur-md text-sm text-white/70 transition-colors hover:bg-white/10">
                         <div className="text-xs uppercase tracking-[0.24em] text-white/40">Outcome</div>
                         <div className="mt-2">State: {outcome.state}</div>
                         <div>Generated files: {outcome.generatedFiles.length}</div>
@@ -624,7 +624,7 @@ export function FleetIssueDispatch() {
                       const artifactSummary = summarizeArtifacts(activity)
 
                       return (
-                        <div key={activity.id} className="rounded-xl border border-white/10 bg-black/25 p-3">
+                        <div key={activity.id} className="rounded-xl border border-white/5 bg-white/[0.03] p-4 transition-all hover:bg-white/[0.06] hover:shadow-lg">
                           <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-[0.22em] text-white/40">
                             <span>{activity.type}</span>
                             <span>{formatTimestamp(activity.createTime)}</span>
@@ -639,21 +639,21 @@ export function FleetIssueDispatch() {
                       )
                     })
                   ) : (
-                    <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-sm text-white/45">
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm font-medium text-zinc-500 shadow-inner">
                       No activity history loaded for the selected session yet.
                     </div>
                   )}
                 </div>
               </>
             ) : (
-              <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-sm text-white/45">
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm font-medium text-zinc-500 shadow-inner">
                 Pick a fleet session to inspect it here.
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-zinc-950/80 text-white">
+        <Card className="border-white/5 bg-black/40 backdrop-blur-xl shadow-2xl text-white transition-all duration-500 hover:bg-black/50">
           <CardHeader>
             <CardTitle>Selected session files</CardTitle>
             <CardDescription className="text-white/55">
@@ -668,7 +668,7 @@ export function FleetIssueDispatch() {
                     key={file.path}
                     type="button"
                     onClick={() => setSelectedFilePath(file.path)}
-                    className={`w-full rounded-xl border px-3 py-2 text-left text-sm transition ${selectedFilePath === file.path ? 'border-sky-400/35 bg-sky-500/10 text-white' : 'border-white/10 bg-black/20 text-white/70 hover:bg-white/5'}`}
+                    className={`group w-full rounded-xl border px-4 py-3 text-left text-sm transition-all duration-300 ${selectedFilePath === file.path ? 'border-sky-500/50 bg-sky-500/10 text-white shadow-[0_0_15px_rgba(14,165,233,0.15)]' : 'border-white/5 bg-white/5 text-zinc-400 hover:border-white/20 hover:bg-white/10 hover:text-zinc-200'}`}
                   >
                     <div className="font-mono text-xs text-white/85">{file.path}</div>
                     <div className="mt-1 text-[11px] uppercase tracking-[0.24em] text-white/35">
@@ -677,13 +677,13 @@ export function FleetIssueDispatch() {
                   </button>
                 ))
               ) : (
-                <div className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-6 text-sm text-white/45">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] px-6 py-10 text-center text-sm font-medium text-zinc-500 shadow-inner">
                   No generated files loaded for the selected session.
                 </div>
               )}
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-black/30 p-3">
+            <div className="rounded-xl border border-white/5 bg-white/5 p-4 shadow-inner backdrop-blur-md transition-colors hover:bg-white/10">
               <div className="mb-2 text-xs uppercase tracking-[0.22em] text-white/40">
                 {selectedFile?.path ?? 'File preview'}
               </div>
@@ -692,7 +692,7 @@ export function FleetIssueDispatch() {
               </pre>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-black/30 p-3">
+            <div className="rounded-xl border border-white/5 bg-white/5 p-4 shadow-inner backdrop-blur-md transition-colors hover:bg-white/10">
               <div className="mb-2 text-xs uppercase tracking-[0.22em] text-white/40">Snapshot markdown</div>
               <pre className="max-h-[220px] overflow-auto whitespace-pre-wrap text-xs leading-6 text-white/75">
                 {snapshot?.markdown || 'Load a snapshot to inspect the derived markdown summary.'}
