@@ -4,7 +4,7 @@ import { BlockNoteView } from '@blocknote/mantine'
 import type { BlockNoteEditor, BlockSchema, InlineContentSchema, StyleSchema } from '@blocknote/core'
 import { cn } from '@/utils'
 import '@blocknote/mantine/style.css'
-import type { NoteBlock, MarkdownEditorProps } from './types'
+import type { MarkdownEditorProps } from './types'
 
 // BlockNoteView's generic constraint requires BlockSchema (the index type), but
 // _DefaultBlockSchema has optional props that don't satisfy PropSchema under
@@ -17,7 +17,7 @@ export function MarkdownEditor({ initialContent, readOnly, className, onChange }
   useEffect(() => {
     if (!onChange) return
     return editor.onChange(() => {
-      onChange(editor.document as NoteBlock[])
+      onChange(editor.document)
     })
   }, [editor, onChange])
 
