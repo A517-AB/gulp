@@ -15,5 +15,6 @@ export const popup          = el?.popup       ?? null;
 export const filesystem     = el?.filesystem  ?? null;
 export const history  = el?.history  ?? null;
 export const aliases  = el?.aliases  ?? null;
+export const notes    = el?.notes    ?? null;
 export const snippets = el?.snippets ?? null;
 export const sdkIpc   = el?.sdkIpc   ?? null;

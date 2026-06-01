@@ -12,6 +12,7 @@ import { registerGitHubHandlers } from "./github";
 import { registerJulesLocalHandlers } from "./julesLocal";
 import { registerAliasesHandlers } from "./aliases";
 import { registerHistoryHandlers } from "./history";
+import { registerNotesHandlers } from "./notes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -122,6 +123,7 @@ app.whenReady().then(() => {
   registerJulesLocalHandlers();
   registerAliasesHandlers(() => mainWindow?.webContents ?? null);
   registerHistoryHandlers();
+  registerNotesHandlers(() => mainWindow?.webContents ?? null);
   createWindow();
 
   tray = new Tray(buildTrayIcon());

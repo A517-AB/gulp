@@ -163,6 +163,20 @@ const aliases: ElectronAPI["aliases"] = {
   },
 }
 
+// ── notes ──────────────────────────────────────────────────────────────────────
+
+const notes: ElectronAPI["notes"] = {
+  list:   () => ipcRenderer.invoke("notes.list"),
+  get:    (id) => ipcRenderer.invoke("notes.get", id),
+  save:   (id, title, blocks) => ipcRenderer.invoke("notes.save", id, title, blocks),
+  delete: (id) => ipcRenderer.invoke("notes.delete", id),
+  onChanged: (cb) => {
+    const handler = () => cb()
+    ipcRenderer.on("notes.changed", handler)
+    return () => { ipcRenderer.off("notes.changed", handler) }
+  },
+}
+
 // ── snippets ───────────────────────────────────────────────────────────────────
 
 const snippets: ElectronAPI["snippets"] = {
@@ -229,6 +243,7 @@ const api: ElectronAPI = {
   env,
   history,
   aliases,
+  notes,
   snippets,
   sdkIpc: julesLocal,
 };

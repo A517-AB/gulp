@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsList, TabsTrigger } from '@/ui/tabs'
-import { MarkdownEditor } from '@/components/markdown'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { downloadZip } from './lib'
 import type { JulesLocalGeneratedFile } from '@shared/electron'
 
@@ -88,11 +89,11 @@ export function ArtifactPanel({ files, onDismiss, onZip }: ArtifactPanelProps) {
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-10 pt-16 pb-10" style={{ scrollbarWidth: 'none' }}>
         {current && (
-          <MarkdownEditor
-            key={current.path}
-            initialContent={current.content}
-            readOnly
-          />
+          <div className="prose prose-sm max-w-none">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {current.content}
+            </ReactMarkdown>
+          </div>
         )}
       </div>
     </motion.div>

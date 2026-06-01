@@ -4,10 +4,9 @@ import { isElectron, isWeb } from '@shared/bridge'
 import { RootLayout } from '@renderer/layouts'
 import { RouteErrorBoundary } from '@renderer/core'
 import {
-    HomePage, SettingsPage, JulesPage,
+    HomePage, SettingsPage, JulesPage, NotesPage,
 } from '@renderer/pages/shared'
 import {
-    NotesPage,
     ActivityPage, ReposPage, SnapshotPage, QueuesPage, SnippetsPage,
 } from '@renderer/pages/electron'
 import {
@@ -41,12 +40,12 @@ const sharedRoutes: AppRoute[] = [
     { path: 'settings',  Component: SettingsPage,  handle: { title: 'Settings',  inNav: true } },
     { path: 'session',   Component: JulesPage,     handle: { title: 'Sessions',  inNav: true } },
     { path: 'overview',  Component: OverviewPage,  handle: { title: 'Overview',  inNav: true } },
+    { path: 'notes',     Component: NotesPage,     handle: { title: 'Notes',     inNav: true } },
 ]
 
 // ── electron ──────────────────────────────────────────────────────────────────
 
 const electronRoutes: AppRoute[] = [
-    { path: 'notes',     Component: NotesPage,  handle: { title: 'Notes', inNav: true } },
     { path: 'repos',        Component: ReposPage,     handle: { title: 'Repos', inNav: true } },
     { path: 'queues',        Component: QueuesPage,   handle: { title: 'Queues', inNav: true } },
     { path: 'snippets',      Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },

@@ -2,6 +2,7 @@ import type { FsEntry, FsStat, ReaddirOptions, FileFilter } from './filesystem'
 import type { FuseManifest, FuseChangeEvent } from './fuse'
 import type { JulesAlias } from './aliases'
 import type { HistoryEntry } from './history'
+import type { NoteMeta } from './notes'
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
 
@@ -262,6 +263,14 @@ export interface HistoryAPI {
   remove: (id: string) => Promise<HistoryEntry[]>
 }
 
+export interface NotesAPI {
+  get:       (id: string) => Promise<object[] | null>
+  save:      (id: string, title: string, blocks: object[]) => Promise<boolean>
+  delete:    (id: string) => Promise<boolean>
+  list:      () => Promise<NoteMeta[]>
+  onChanged: (cb: () => void) => () => void
+}
+
 export interface AliasesAPI {
   get:       () => Promise<{ aliases: JulesAlias[]; fileFound: boolean }>
   save:      (aliases: JulesAlias[]) => Promise<boolean>
@@ -321,6 +330,7 @@ export interface ElectronAPI {
   env:        EnvAPI;
   history:  HistoryAPI;
   aliases:  AliasesAPI;
+  notes:    NotesAPI;
   snippets: SnippetsAPI;
   sdkIpc:   JulesLocalAPI;
 }
