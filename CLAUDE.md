@@ -65,6 +65,10 @@ Copy `.env.example` to `.env`:
 - `JULES_API_KEY` — Google Jules API key (also read from `~/.jules` by `vite.config.ts`)
 - `GITHUB_TOKEN` — GitHub personal access token, used by the Electron main process (`electron/github.ts`)
 
+## User conventions
+
+- **"push"** always means: merge current work to `master` (the repo's default branch). Never just push to a feature branch and stop.
+
 ## TypeScript config
 
 Two tsconfig roots composed by `tsconfig.json` (project references):
