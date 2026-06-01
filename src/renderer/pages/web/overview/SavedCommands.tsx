@@ -31,7 +31,7 @@ export function SavedCommands({ aliases, activeId, onSelect, visible }: SavedCom
                   : 'text-fg-ghost hover:text-fg-secondary'
               }`}
             >
-              /{alias.command}
+              {alias.trigger ?? '/'}{alias.command}
             </button>
           ))}
         </motion.div>

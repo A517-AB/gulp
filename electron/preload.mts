@@ -143,6 +143,26 @@ const env: ElectronAPI["env"] = {
   getApiKey: () => ipcRenderer.invoke("env.getApiKey"),
 };
 
+// ── history ────────────────────────────────────────────────────────────────────
+
+const history: ElectronAPI["history"] = {
+  get:    () => ipcRenderer.invoke("history.get"),
+  push:   (text) => ipcRenderer.invoke("history.push", text),
+  remove: (id) => ipcRenderer.invoke("history.remove", id),
+}
+
+// ── aliases ────────────────────────────────────────────────────────────────────
+
+const aliases: ElectronAPI["aliases"] = {
+  get:  () => ipcRenderer.invoke("aliases.get"),
+  save: (data) => ipcRenderer.invoke("aliases.save", data),
+  onChanged: (cb) => {
+    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+    ipcRenderer.on("aliases.changed", handler)
+    return () => { ipcRenderer.off("aliases.changed", handler) }
+  },
+}
+
 // ── snippets ───────────────────────────────────────────────────────────────────
 
 const snippets: ElectronAPI["snippets"] = {
@@ -207,6 +227,8 @@ const api: ElectronAPI = {
   popup,
   filesystem,
   env,
+  history,
+  aliases,
   snippets,
   sdkIpc: julesLocal,
 };

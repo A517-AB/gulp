@@ -10,6 +10,8 @@ import { registerSnippetsHandlers } from "./snippets";
 import { registerGitHandlers } from "./git";
 import { registerGitHubHandlers } from "./github";
 import { registerJulesLocalHandlers } from "./julesLocal";
+import { registerAliasesHandlers } from "./aliases";
+import { registerHistoryHandlers } from "./history";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -118,6 +120,8 @@ app.whenReady().then(() => {
   registerGitHandlers();
   registerGitHubHandlers();
   registerJulesLocalHandlers();
+  registerAliasesHandlers(() => mainWindow?.webContents ?? null);
+  registerHistoryHandlers();
   createWindow();
 
   tray = new Tray(buildTrayIcon());

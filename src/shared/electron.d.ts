@@ -1,5 +1,7 @@
 import type { FsEntry, FsStat, ReaddirOptions, FileFilter } from './filesystem'
 import type { FuseManifest, FuseChangeEvent } from './fuse'
+import type { JulesAlias } from './aliases'
+import type { HistoryEntry } from './history'
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
 
@@ -254,6 +256,18 @@ export interface JulesLocalFleetIssueFixResult {
   session: JulesLocalSessionInfo;
 }
 
+export interface HistoryAPI {
+  get:    () => Promise<HistoryEntry[]>
+  push:   (text: string) => Promise<HistoryEntry[]>
+  remove: (id: string) => Promise<HistoryEntry[]>
+}
+
+export interface AliasesAPI {
+  get:       () => Promise<{ aliases: JulesAlias[]; fileFound: boolean }>
+  save:      (aliases: JulesAlias[]) => Promise<boolean>
+  onChanged: (cb: (aliases: JulesAlias[] | null) => void) => () => void
+}
+
 export interface SnippetsAPI {
   get:       () => Promise<FuseManifest>;
   save:      (data: FuseManifest) => Promise<boolean>;
@@ -305,6 +319,8 @@ export interface ElectronAPI {
   popup:      PopupAPI;
   filesystem: FilesystemAPI;
   env:        EnvAPI;
+  history:  HistoryAPI;
+  aliases:  AliasesAPI;
   snippets: SnippetsAPI;
   sdkIpc:   JulesLocalAPI;
 }

@@ -2,11 +2,9 @@ import JSZip from 'jszip'
 import type { JulesLocalGeneratedFile } from '@shared/electron'
 import type { JulesAlias } from './types'
 
-const MARKDOWN_DIRECTIVE = 'Report back in markdown.'
-
-/** Builds the prompt sent in send mode: body + alias instructions (if any) + markdown directive. */
 export function buildPrompt(alias: JulesAlias, body: string): string {
-  return [body.trim(), alias.instructions, MARKDOWN_DIRECTIVE]
+  const mdDirective = alias.expects === 'md' ? 'Report back in markdown.' : undefined
+  return [body.trim(), alias.instructions, mdDirective]
     .filter((part): part is string => Boolean(part?.trim()))
     .join('\n\n')
 }
