@@ -12,27 +12,31 @@ describe('buildPrompt', () => {
   })
 
   it('appends alias instructions after body', () => {
-    const result = buildPrompt(alias({ instructions: 'Be concise.' }), 'explain this')
-    expect(result).toBe('explain this\n\nBe concise.')
+    expect(buildPrompt(alias({ instructions: 'Be concise.' }), 'explain this'))
+      .toBe('explain this\n\nBe concise.')
   })
 
   it('appends markdown directive when expects is md', () => {
-    const result = buildPrompt(alias({ expects: 'md' }), 'summarize')
-    expect(result).toBe('summarize\n\nReport back in markdown.')
+    expect(buildPrompt(alias({ expects: 'md' }), 'summarize'))
+      .toBe('summarize\n\nReport back in markdown.')
   })
 
   it('appends both instructions and md directive in order', () => {
-    const result = buildPrompt(alias({ instructions: 'Be brief.', expects: 'md' }), 'review')
-    expect(result).toBe('review\n\nBe brief.\n\nReport back in markdown.')
+    expect(buildPrompt(alias({ instructions: 'Be brief.', expects: 'md' }), 'review'))
+      .toBe('review\n\nBe brief.\n\nReport back in markdown.')
   })
 
-  it('handles empty body with instructions', () => {
-    const result = buildPrompt(alias({ instructions: 'Run the suite.' }), '')
-    expect(result).toBe('Run the suite.')
+  it('script mode — empty body still produces prompt from instructions alone', () => {
+    expect(buildPrompt(alias({ mode: 'script', instructions: 'Run the suite.' }), ''))
+      .toBe('Run the suite.')
   })
 
-  it('handles empty body and no instructions', () => {
-    expect(buildPrompt(alias(), '')).toBe('')
+  it('script mode — empty body with no instructions returns empty string', () => {
+    expect(buildPrompt(alias({ mode: 'script' }), '')).toBe('')
+  })
+
+  it('prompt mode — empty body returns empty string (send is blocked upstream)', () => {
+    expect(buildPrompt(alias({ mode: 'prompt' }), '')).toBe('')
   })
 
   it('trims whitespace from body before joining', () => {

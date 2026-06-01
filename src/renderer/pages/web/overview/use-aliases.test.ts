@@ -31,39 +31,47 @@ describe('localStorage round-trip', () => {
     expect(readLS()).toEqual([])
   })
 
-  it('returns stored aliases', () => {
-    const a = makeAlias({ command: 'notes' })
-    writeLS([a])
-    const result = readLS()
-    expect(result).toHaveLength(1)
-    expect(result[0]!.command).toBe('notes')
+  it('stores and retrieves aliases', () => {
+    writeLS([makeAlias({ command: 'notes' })])
+    expect(readLS()[0]!.command).toBe('notes')
   })
 
   it('persists removal', () => {
-    const a = makeAlias({ id: 'fixed-id', command: 'old' })
+    const a = makeAlias({ id: 'fixed' })
     writeLS([a])
-    writeLS(readLS().filter(x => x.id !== 'fixed-id'))
+    writeLS(readLS().filter(x => x.id !== 'fixed'))
     expect(readLS()).toHaveLength(0)
   })
 
   it('persists update', () => {
-    const a = makeAlias({ id: 'fixed-id', command: 'original' })
+    const a = makeAlias({ id: 'fixed', command: 'original' })
     writeLS([a])
-    writeLS(readLS().map(x => x.id === 'fixed-id' ? { ...x, command: 'renamed' } : x))
+    writeLS(readLS().map(x => x.id === 'fixed' ? { ...x, command: 'renamed' } : x))
     expect(readLS()[0]!.command).toBe('renamed')
   })
 
-  it('handles invalid JSON gracefully', () => {
+  it('handles invalid JSON without throwing', () => {
     store[LS_KEY] = 'not-json'
-    // lsLoad catches parse errors and returns []
     let result: JulesAlias[] = []
     try { result = JSON.parse(store[LS_KEY]) as JulesAlias[] } catch { result = [] }
     expect(result).toEqual([])
   })
 })
 
-describe('JulesAlias.action field', () => {
-  it('settings alias carries action:settings', () => {
+describe('alias modes', () => {
+  it('script mode alias auto-fires (mode field present)', () => {
+    const a = makeAlias({ mode: 'script', instructions: 'Run linter.' })
+    expect(a.mode).toBe('script')
+    expect(a.instructions).toBe('Run linter.')
+  })
+
+  it('prompt mode alias waits for user body', () => {
+    const a = makeAlias({ mode: 'prompt', sessionId: 'session-abc' })
+    expect(a.mode).toBe('prompt')
+    expect(a.sessionId).toBe('session-abc')
+  })
+
+  it('action:settings alias skips Jules entirely', () => {
     const a: JulesAlias = {
       id: 'settings-id',
       command: 'settings',
@@ -72,19 +80,12 @@ describe('JulesAlias.action field', () => {
       action: 'settings',
     }
     expect(a.action).toBe('settings')
+    expect(a.mode).toBeUndefined()
   })
 
-  it('regular alias has no action', () => {
-    expect(makeAlias().action).toBeUndefined()
-  })
-
-  it('action is the only routing discriminant — not command string', () => {
-    // An alias named "settings" without action should NOT trigger the panel
-    const plain: JulesAlias = makeAlias({ command: 'settings' })
-    expect(plain.action).toBeUndefined()
-
-    // Only this one should
-    const panel: JulesAlias = makeAlias({ command: 'settings', action: 'settings', sessionId: '' })
-    expect(panel.action).toBe('settings')
+  it('alias without mode defaults to prompt behaviour', () => {
+    const a = makeAlias()
+    expect(a.mode).toBeUndefined()
+    // upstream sends only when body is non-empty — absence of mode === prompt
   })
 })
