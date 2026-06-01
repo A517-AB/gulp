@@ -6,9 +6,8 @@ import {
   ListTodo, ChevronRight, ChevronDown, Send, Loader2,
   Plus, Folder, Trash2, CheckSquare, ListTree,
 } from "lucide-react";
-import { useJules } from "@renderer/lib/jules/provider";
-import { queues as electronQueues, isElectron } from "@shared/bridge";
-import { InlineEdit } from "@renderer/ui/inline-edit";
+import { queues as electronQueues, isElectron } from "@/shared/bridge";
+import { InlineEdit } from "@/ui/inline-edit";
 import type { Source, FleetTask, FleetTaskGroup } from "@/types/jules";
 
 const TASKS_STORAGE_KEY = "workspace:fleet-tasks";
@@ -115,7 +114,7 @@ function SourcePicker({ value, sources, onChange }: {
 // ── QueuesView ─────────────────────────────────────────────────────────────────
 
 export default function QueuesView() {
-  const { client } = useJules();
+  const client = null;
   const [sources, setSources] = useState<Source[]>([]);
   const [tasks, setTasks] = useState<FleetTaskGroup[]>([]);
   const [queue, setQueue] = useState<unknown[]>([]);
@@ -331,6 +330,7 @@ export default function QueuesView() {
             )}
           </AnimatePresence>
 
+          {/* group = folder scope + repo anchor — future: attach group to repo picker so each group knows its target dir for git rebase/cherry-pick */}
           <button
             onClick={addGroup}
             className="bg-hover border border-hair text-fg-secondary text-2xs px-3 py-1.5 rounded-md flex items-center gap-2 hover:bg-active hover:text-fg-primary transition-colors"
@@ -514,6 +514,7 @@ export default function QueuesView() {
                         );
                       })}
 
+                      {/* topic + folder are just title fields — could use as Jules session title prefix, probably not worth it */}
                       <button
                         onClick={() => { addTask(gIdx); }}
                         className="text-2xs flex items-center gap-1.5 text-fg-ghost hover:text-fg-muted transition-colors py-1 px-2 rounded-md hover:bg-hover border border-transparent border-dashed hover:border-hair mt-1 w-full"

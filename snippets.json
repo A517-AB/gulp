@@ -1,15 +1,30 @@
-{
-  "version": 1,
-  "items": [
-    {
-      "id": "891517f6-1c35-449d-8f8e-f6662897acd6",
-      "title": "dark-drop",
-      "languageId": "javascript",
-      "type": "snippet",
-      "file": "snippets/python/dark-drop.py",
-      "tags": [],
-      "createdAt": "2026-05-31T14:50:11.257Z",
-      "updatedAt": "2026-05-31T15:06:51.592Z"
-    }
-  ]
-}
+[
+  {
+    "id": "514fbb26-a6bb-4398-94aa-7b2c728ec6dc",
+    "title": "lazy-runner",
+    "languageId": "javascript",
+    "script": "/*\r\nStoryline JS Trigger Demo Suite\r\nSlide: 1.1 Intro Slide\r\nObjects:\r\n- Rectangle 1\r\n- Oval 1\r\n\r\nWhat this demo does:\r\n1) Adds basic interactions:\r\n   - Hover effects (cursor + subtle glow)\r\n   - Click/tap effects (toggle spin / toggle follow)\r\n2) Adds animations (single update loop):\r\n   - Oval 1 orbits around its start position\r\n   - Parallax reacts to pointer position\r\n   - Optional follow behavior (click Oval 1 to toggle)\r\n   - Optional rotation spin (click Rectangle 1 to toggle)\r\n\r\nNotes:\r\n- Uses one global update() loop for all motion.\r\n- Uses pointerX()/pointerY() for mouse/touch.\r\n*/\r\n\r\n// --- Objects (by id) ---\r\nconst rect = object('6I2JMXP5x3N'); // Rectangle 1\r\nconst oval = object('6G3VcVMyj3S'); // Oval 1\r\n\r\n// --- Visual affordances ---\r\nrect.style.cursor = 'pointer';\r\noval.style.cursor = 'pointer';\r\n\r\n// Hover glow helpers (CSS filters)\r\nfunction setGlowOn(o) {\r\n  o.style.filter = 'drop-shadow(0px 6px 10px rgba(0,0,0,0.25))';\r\n}\r\nfunction setGlowOff(o) {\r\n  o.style.filter = '';\r\n}\r\n\r\n// --- Interactions (no extra triggers needed) ---\r\nrect.pointerover(() => {\r\n  rect.opacity = 90;\r\n  setGlowOn(rect);\r\n});\r\nrect.pointerout(() => {\r\n  rect.opacity = 100;\r\n  setGlowOff(rect);\r\n});\r\n\r\noval.pointerover(() => {\r\n  oval.opacity = 90;\r\n  setGlowOn(oval);\r\n});\r\noval.pointerout(() => {\r\n  oval.opacity = 100;\r\n  setGlowOff(oval);\r\n});\r\n\r\n// Toggle states controlled by clicks\r\nlet spinRect = true;\r\nlet followOval = false;\r\n\r\nrect.click(() => {\r\n  spinRect = !spinRect;\r\n  // quick feedback punch\r\n  rect.scale = rect.scale + 3;\r\n});\r\n\r\noval.click(() => {\r\n  followOval = !followOval;\r\n  // quick feedback punch\r\n  oval.scale = oval.scale + 4;\r\n});\r\n\r\n// --- Animation setup (capture starting positions) ---\r\nconst start = {\r\n  rect: { x: rect.x, y: rect.y, r: rect.rotation, s: rect.scale ?? 100 },\r\n  oval: { x: oval.x, y: oval.y, r: oval.rotation, s: oval.scale ?? 100 }\r\n};\r\n\r\n// Motion parameters\r\nconst orbit = {\r\n  radiusX: 70,\r\n  radiusY: 35,\r\n  speed: 1.2 // radians per second\r\n};\r\n\r\nconst parallax = {\r\n  amount: 18 // pixels\r\n};\r\n\r\nconst ease = {\r\n  pos: 0.12,\r\n  rot: 0.18,\r\n  scale: 0.20\r\n};\r\n\r\nlet lastTime;\r\nlet t = 0;\r\n\r\n// --- Single global loop ---\r\nupdate((time) => {\r\n  if (lastTime == null) lastTime = time;\r\n  const dt = (time - lastTime) / 1000;\r\n  lastTime = time;\r\n\r\n  // Clamp dt to avoid huge jumps on tab-switch\r\n  const cdt = Math.min(0.05, Math.max(0, dt));\r\n  t += cdt;\r\n\r\n  // Pointer normalized (-0.5..0.5)\r\n  const nx = (pointerX() / slideWidth()) - 0.5;\r\n  const ny = (pointerY() / slideHeight()) - 0.5;\r\n\r\n  // Target positions\r\n  // Oval: orbit + parallax or optionally follow pointer\r\n  let targetOvalX;\r\n  let targetOvalY;\r\n\r\n  if (followOval) {\r\n    targetOvalX = pointerX() - oval.width / 2;\r\n    targetOvalY = pointerY() - oval.height / 2;\r\n  } else {\r\n    const ox = Math.cos(t * orbit.speed * Math.PI * 2) * orbit.radiusX;\r\n    const oy = Math.sin(t * orbit.speed * Math.PI * 2) * orbit.radiusY;\r\n\r\n    targetOvalX = start.oval.x + ox + nx * parallax.amount;\r\n    targetOvalY = start.oval.y + oy + ny * parallax.amount;\r\n  }\r\n\r\n  // Rectangle: subtle parallax only\r\n  const targetRectX = start.rect.x + nx * (parallax.amount * 0.6);\r\n  const targetRectY = start.rect.y + ny * (parallax.amount * 0.6);\r\n\r\n  // Target rotations\r\n  const targetRectRot = spinRect ? (rect.rotation + 120 * cdt) : start.rect.r;\r\n  const targetOvalRot = followOval ? (oval.rotation + 180 * cdt) : (Math.sin(t * 2.2) * 8);\r\n\r\n  // Ease positions\r\n  oval.x += (targetOvalX - oval.x) * ease.pos;\r\n  oval.y += (targetOvalY - oval.y) * ease.pos;\r\n\r\n  rect.x += (targetRectX - rect.x) * ease.pos;\r\n  rect.y += (targetRectY - rect.y) * ease.pos;\r\n\r\n  // Ease rotations\r\n  rect.rotation += (targetRectRot - rect.rotation) * ease.rot;\r\n  oval.rotation += (targetOvalRot - oval.rotation) * ease.rot;\r\n\r\n  // Ease scales back to normal after click “punch”\r\n  const rectTargetScale = 100;\r\n  const ovalTargetScale = 100;\r\n  rect.scale += (rectTargetScale - rect.scale) * ease.scale;\r\n  oval.scale += (ovalTargetScale - oval.scale) * ease.scale;\r\n});\r\n",
+    "createdAt": "2026-05-29T21:58:34.420Z"
+  },
+  {
+    "id": "b0070028-ebc5-4f30-b2f1-36267d63af11",
+    "title": "lazy-trap",
+    "languageId": "javascript",
+    "script": "const  = object('ObjectID');\r\naddToTimeline(\r\n  objectName.animate(\r\n    [\r\n      { transform: 'translateX(0px)' },\r\n      { transform: 'translateX(200px) rotate(45deg)', filter: 'blur(4px)' }\r\n    ],\r\n    {\r\n      duration: 1000, // Animation duration in milliseconds<\r\n      easing: 'ease-in-out', // Easing function\r\n      fill: 'forwards' // Keep the final state after animation\r\n    }\r\n  )\r\n); \r\n",
+    "createdAt": "2026-05-27T08:00:38.239Z"
+  },
+  {
+    "id": "51b13635-0924-45d8-80d8-075628793128",
+    "title": null,
+    "languageId": "markdown",
+    "script": "ff",
+    "createdAt": "2026-05-27T07:13:39.764Z"
+  },
+  {
+    "id": "9b018e19-2488-474e-8a38-fcd979c2a75f",
+    "title": null,
+    "languageId": "jules",
+    "script": "testing\r\n",
+    "createdAt": "2026-05-27T06:20:27.044Z"
+  }
+]

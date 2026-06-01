@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { ActivityFeed } from "@/components/workspace/activity-feed.tsx";
-import { SessionList } from "@/components/workspace/session-list.tsx";
-import { CodeDiffSidebar } from "@/components/workspace/code-diff-sidebar.tsx";
-import { NewSessionDialog } from "@/components/workspace/new-session-dialog.tsx";
-import { useResizable } from "@renderer/hooks/use-resizable";
+import { ActivityFeed } from "@/components/activity-feed";
+import { SessionList } from "@/components/session-list";
+import { CodeDiffSidebar } from "@/components/code-diff-sidebar";
+import { NewSessionDialog } from "@/components/new-session-dialog";
+import { useResizable } from "@/hooks/use-resizable";
 import type { Activity, Session, SessionInitialValues } from "@/types/activity-feed";
 
 export default function JulesPage() {

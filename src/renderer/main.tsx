@@ -1,8 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import '@renderer/lib/monaco' // local Monaco workers — must run before any Editor mounts
-import App from '@renderer/App'
-import '@renderer/index.css'
+import App from '@/renderer/App'
 
 const root = document.getElementById('root')
 if (!root) throw new Error('[main] Root element #root not found in DOM')

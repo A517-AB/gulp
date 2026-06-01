@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { Send, Loader2, Play, GitPullRequest } from "lucide-react";
-import { Textarea } from "@renderer/ui/textarea";
-import { Button } from "@renderer/ui/button";
+import { Textarea } from "@/ui/textarea";
+import { Button } from "@/ui/button";
 import { DynamicDropdown } from "./DynamicDropdown";
 import { SnippetPicker } from "./SnippetPicker";
-import { compilePromptWithSnippets } from "@renderer/utils/snippets";
-import { NewSessionDialog } from "@/components/workspace/new-session-dialog.tsx";
+import { compilePromptWithSnippets } from "@/utils/snippets";
+import { NewSessionDialog } from "../new-session-dialog";
 import type { Session } from "@/types/jules";
 import type { Snippet } from "@/types/snippets";
 import type { QuickActionTemplate } from "@/types/activity-feed";
 
-const ACTION_TEMPLATES: QuickActionTemplate[] = [
+const ACTION_TEMPLATES = [
   {
     id: "standard-chat",
     label: "Send to Session",
@@ -33,7 +33,7 @@ const ACTION_TEMPLATES: QuickActionTemplate[] = [
     requiresCompletedSession: true,
     autoCreatePr: true,
   }
-];
+] satisfies [QuickActionTemplate, ...QuickActionTemplate[]]
 
 export interface SmartActionInputProps {
   session: Session;
@@ -58,18 +58,16 @@ export function SmartActionInput({
   const [handoffDialogOpen, setHandoffDialogOpen] = useState(false);
   const [handoffPrompt, setHandoffPrompt] = useState("");
 
-  // Safe: ACTION_TEMPLATES is a non-empty array defined in this module
-  const selectedAction = ACTION_TEMPLATES.find(a => a.id === selectedActionId) ?? ACTION_TEMPLATES[0]!;
+  const selectedAction = ACTION_TEMPLATES.find(a => a.id === selectedActionId) ?? ACTION_TEMPLATES[0];
   const destination = selectedAction.allowedDestinations[0] ?? "current_session";
 
-  // Filter actions based on workspace status
+  // Filter actions based on session status
   const availableActions = ACTION_TEMPLATES.filter(action => {
-    if (action.requiresCompletedSession && session.status !== "completed") return false;
-    return true;
+    return !('requiresCompletedSession' in action && action.requiresCompletedSession && session.status !== "completed");
+
   }).map(action => ({
     id: action.id,
     label: action.label,
-    ...(action.icon ? { icon: action.icon } : {}),
   }));
 
   const handleSubmit = async () => {
@@ -88,7 +86,7 @@ export function SmartActionInput({
       await onSendMessage(finalPrompt);
       setMessage("");
       setSelectedSnippetIds([]);
-    } else if (destination === "new_session") {
+    } else {
       setHandoffPrompt(finalPrompt);
       setHandoffDialogOpen(true);
     }

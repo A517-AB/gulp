@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Plus, Trash2, Bell, BellOff, Volume2, VolumeX } from 'lucide-react'
-import { alarms as alarmsIpc } from '@shared/bridge'
+import { alarms as alarmsIpc } from '@/shared/bridge'
 import { Button } from '@/ui/button'
 import { Input } from '@/ui/input'
 import { Label } from '@/ui/label'
@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/ui/dialog'
-import type { AlarmEntry, AlarmRepeat } from '@shared/alarms'
+import type { AlarmEntry, AlarmRepeat } from '@/shared/alarms'
 
 const REPEAT_LABELS: Record<AlarmRepeat, string> = {
   none:     'Once',

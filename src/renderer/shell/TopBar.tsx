@@ -1,19 +1,42 @@
-import type { TopBarProps } from './types';
-import { isElectron, windowControls } from '@shared/bridge';
+import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
+import { isElectron, windowControls } from '@/shared/bridge';
 import { ThemeToggle } from '@/ui/theme-toggle';
 
+interface TopBarProps {
+    left?:   ReactNode
+    center?: ReactNode
+    right?:  ReactNode
+}
+
 export function TopBar({ left, center, right }: TopBarProps) {
+    // TODO: rewire hidden button to something useful
+    const handleHiddenAction = () => { /* stub */ }
+
     return (
-        <header className="app-drag-region h-toolbar grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-3 shrink-0 bg-transparent">
-            <div className="flex items-center gap-2 min-w-0 justify-start">
+        <header className="group/bar app-drag-region relative h-toolbar flex items-center gap-2 px-3 bg-base shrink-0">
+
+            <div className="flex items-center gap-2 flex-1 min-w-0">
                 {left}
             </div>
 
-            <div className="flex items-center gap-2 justify-center">
-                {center}
-            </div>
+            {/* NOTE: Hidden low-power trigger on the far left. It is invisible by design and only appears as a very faint 3% opacity indentation on press. */}
+            <motion.button
+                type="button"
+                onDoubleClick={handleHiddenAction}
+                whileTap={{ scale: 0.95, opacity: 0.03 }}
+                className="absolute left-0 top-0 w-16 h-full bg-fg-primary opacity-0 cursor-default z-50 rounded-md"
+                aria-hidden="true"
+                tabIndex={-1}
+            />
 
-            <div className="flex items-center gap-2 justify-end">
+            {center != null && (
+                <div className="flex items-center gap-2 shrink-0 opacity-0 delay-[2000ms] transition-opacity duration-300 group-hover/bar:opacity-100 group-hover/bar:delay-0">
+                    {center}
+                </div>
+            )}
+
+            <div className="flex items-center gap-2 flex-1 justify-end opacity-0 delay-[2000ms] transition-opacity duration-300 group-hover/bar:opacity-100 group-hover/bar:delay-0">
                 {right}
                 <ThemeToggle />
 

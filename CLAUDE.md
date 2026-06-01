@@ -6,73 +6,63 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Development
-npm run dev          # Vite dev server (renderer)
-npm run dev:web      # Web target (VITE_TARGET=web)
+npm run dev          # Vite dev server
+npm run dev:web      # Web-only (VITE_TARGET=web, no Electron)
 
 # Build & run
-npm run build        # tsc -b, then vite build (vite-plugin-electron also builds the Electron main)
-npm run build:web    # web-target build (VITE_TARGET=web)
+npm run build        # tsc check + Vite build
 npm start            # build + launch Electron
-npm run run:e        # launch Electron against the existing build (no rebuild)
-npm run start:web    # build:web + vite preview
+npm run run:e        # launch Electron without rebuilding
 
 # Quality
 npm run lint         # ESLint (TypeScript strict + React hooks)
 npm run typecheck    # tsc -b --pretty false
 npm test             # Vitest
+
+# Code generation
+npm run gen:types    # Regenerate OpenAPI types (requires bunx)
 ```
 
 ## Architecture
 
-Dual-deployment app: runs as an **Electron desktop app** or a **web app** in a browser. The same React renderer serves both; a runtime check (`isElectron` in `src/shared/bridge.ts`) switches transport.
+Electron desktop app with an optional web mode. Same React renderer serves both; `isElectron` in `src/shared/bridge.ts` switches transport.
 
 ### Two layers
 
-**1. Renderer** (`src/renderer/`) — React 19 SPA
-- Pages split under `pages/electron/`, `pages/web/`, `pages/shared/`
-- Data via React Query hooks (`hooks/use-session*`)
-- Global session stream/outcome state in Zustand (`store/app.ts`)
-- Jules access goes through `JulesClient` (`lib/jules/client.ts`), provided to the tree by `useJules()` / `JulesProvider` (`lib/jules/provider.tsx`). The API key is read from `localStorage`, `VITE_JULES_API_KEY`, or the Electron env.
+**1. Renderer** (`src/renderer/`) — React 19 SPA in the browser/webview
+- Pages split under `pages/electron/`, `pages/web/`, `pages/shared/` — imported via barrel indexes
+- Jules API calls go through `src/renderer/lib/jules/client.ts` (direct HTTP to `jules.googleapis.com`)
+- Jules client exposed via React context (`lib/jules/context.ts` + `lib/jules/provider.tsx`)
 
-**2. Electron main** (`electron/` — at the repo **root**, not under `src/`) — Node.js context, never imported by the renderer
-- `main.mts`: window lifecycle, tray, global shortcut, power monitoring
-- `preload.mts`: context-isolated bridge exposing IPC to the renderer via `contextBridge`
-- IPC handlers: `Terminal.ts` (node-pty), `queues.ts`, `filesystem.ts`, `git.ts`, `github.ts`, `snippets.ts`, `popup.ts`
-- Built by `vite-plugin-electron` → `dist-electron/main.mjs`
-
-> The standalone **Bun/Hono sidecar server is removed** (there is no `server/` dir). `hono` and `@hono/*` linger in `package.json` but are unused/orphaned. The web-mode HTTP backend is being rebuilt as a Node server hosted by the Electron main process.
+**2. Electron main process** (`src/electron/`) — Node.js, never imported by renderer
+- `main.mts`: window lifecycle, tray, global shortcut (`Ctrl+Shift+Space`), power monitoring
+- `preload.mts`: context-isolated bridge; exposes IPC to renderer via `contextBridge`
+- IPC handlers: `Terminal.ts` (node-pty), `queues.ts`, `filesystem.ts`, `ipc/`
 
 ### Data flow
 
-- **Electron mode**: renderer → IPC (`window.electron`) → main process → Jules SDK
-- **Web mode**: renderer → HTTP → (backend being rebuilt) → Jules SDK
-
-The switch is `isElectron` in `src/shared/bridge.ts`; hooks/store branch on it.
+- **Electron mode**: renderer → IPC → main process
+- **Web mode**: renderer → direct HTTP/WS
 
 ### Path aliases
 
-Single flat prefix:
-
 | Alias | Resolves to |
 |---|---|
-| `@/` | `src/renderer/` |
+| `@/` | `src/` |
+| `@renderer/` | `src/renderer/` |
+| `@shared/` | `src/shared/` |
+| `@electron/` | `src/electron/` |
 
-Import as `@/components/...`, `@/ui/...`, `@/hooks/...`, `@/utils`. Declared in `tsconfig.app.json` and `vite.config.ts`. Electron code lives at the root `electron/` and uses relative imports (it's in the Node tsconfig, not the renderer alias space). Older imports may still use legacy prefixes (`@renderer/`, `@shared/`, `@electron/`, `@api`) — migrate those to `@/`.
+Aliases declared in `tsconfig.app.json` and `vite.config.ts`.
 
 ## Environment
 
-Copy `.env.example` to `.env`:
-- `JULES_API_KEY` — Google Jules API key (also read from `~/.jules` by `vite.config.ts`)
-- `GITHUB_TOKEN` — GitHub personal access token, used by the Electron main process (`electron/github.ts`)
-
-## User conventions
-
-- **"push"** always means: merge current work to `master` (the repo's default branch). Never just push to a feature branch and stop.
+Copy `.env.example` to `.env`. Required vars:
+- `JULES_API_KEY` — Google Jules API key
+- `GITHUB_TOKEN` — GitHub personal access token
 
 ## TypeScript config
 
-Two tsconfig roots composed by `tsconfig.json` (project references):
-- `tsconfig.app.json` — renderer (browser; excludes `electron`)
+- `tsconfig.app.json` — renderer (browser, excludes `src/electron`)
 - `tsconfig.node.json` — Electron main + Vite config (Node types)
-
-Run `typecheck` against the root. The project is on **TypeScript 6** — `baseUrl` is deprecated, so `paths` entries are self-prefixed (`./src/...`) with no `baseUrl`.
+- `tsconfig.json` — project-references root composing both

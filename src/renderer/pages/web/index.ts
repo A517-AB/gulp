@@ -1,1 +1,1 @@
-export { default as OverviewPage } from './OverviewPage';
+// no web-only pages yet

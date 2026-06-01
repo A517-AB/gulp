@@ -1,6 +1,24 @@
-
+declare global {
+  interface Window {
+    msCrypto?: Crypto;
+  }
+}
 
 let uid = 0;
+
+type PlainObject = Record<string, unknown>;
+type AnyFn<Args extends unknown[] = unknown[], Return = unknown> = (
+  this: unknown,
+  ...args: Args
+) => Return;
+
+type Constructor<T> = new (...args: unknown[]) => T;
+
+const INSTANCES_KEY = 'ca_instances' as const;
+
+type InstanceHost = HTMLElement & {
+  [INSTANCES_KEY]?: unknown[];
+};
 
 // ============================================================================
 // TYPE CHECKING
@@ -23,21 +41,15 @@ export function isUndefined(value: unknown): value is undefined {
 /**
  * Check whether the given argument is a plain object.
  */
-export function isObject(obj: unknown): obj is Record<string, unknown> {
-  return !isNullOrUndefined(obj) && obj.constructor === {}.constructor;
+export function isObject(obj: unknown): obj is PlainObject {
+  return typeof obj === 'object' && obj !== null && Object.getPrototypeOf(obj) === Object.prototype;
 }
 
 /**
- * Check whether the given array contains objects.
+ * Check whether the given array contains plain objects.
  */
-export function isObjectArray<T>(value: T[]): boolean {
-  const parser = Object.prototype.toString;
-  if (parser.call(value) === '[object Array]') {
-    if (parser.call(value[0]) === '[object Object]') {
-      return true;
-    }
-  }
-  return false;
+export function isObjectArray(value: unknown[]): boolean {
+  return value.length > 0 && value.every((item) => isObject(item));
 }
 
 // ============================================================================
@@ -48,106 +60,108 @@ export function isObjectArray<T>(value: T[]): boolean {
  * Get nested object value by path string.
  * @example getValue('user.settings.theme', config) // returns config.user.settings.theme
  */
-export function getValue<T = unknown>(nameSpace: string, obj: Record<string, unknown>): T | undefined {
+export function getValue(nameSpace: string, obj: PlainObject): unknown {
   let value: unknown = obj;
-  const splits = nameSpace.replace(/\[/g, '.').replace(/\]/g, '').split('.');
-  
-  for (let i = 0; i < splits.length && !isUndefined(value); i++) {
-    value = (value as Record<string, unknown>)[splits[i]!];
+  const splits = nameSpace.replace(/\[/g, '.').replace(/\]/g, '').split('.').filter(Boolean);
+
+  for (const key of splits) {
+    if (isNullOrUndefined(value) || (typeof value !== 'object' && !Array.isArray(value))) {
+      return undefined;
+    }
+
+    value = (value as Record<string, unknown>)[key];
   }
-  
-  return value as T | undefined;
+
+  return value;
 }
 
 /**
  * Set nested object value by path string.
  * @example setValue('user.settings.theme', 'dark', config)
  */
-export function setValue<T = unknown>(
-  nameSpace: string, 
-  value: T, 
-  obj: Record<string, unknown> = {}
-): Record<string, unknown> {
-  const keys = nameSpace.replace(/\[/g, '.').replace(/\]/g, '').split('.');
-  const start = obj;
-  let fromObj = start;
-  
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i]!;
-    
-    // Prevent prototype pollution
+export function setValue(
+  nameSpace: string,
+  value: unknown,
+  obj: PlainObject = {},
+): PlainObject {
+  const keys = nameSpace.replace(/\[/g, '.').replace(/\]/g, '').split('.').filter(Boolean);
+  let current: PlainObject = obj;
+
+  keys.forEach((key, index) => {
     if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-      continue;
+      return;
     }
-    
-    if (i + 1 === keys.length) {
-      fromObj[key] = value === undefined ? {} : value;
-    } else if (isNullOrUndefined(fromObj[key])) {
-      fromObj[key] = {};
+
+    const isLastKey = index === keys.length - 1;
+
+    if (isLastKey) {
+      current[key] = value;
+      if (value === undefined) {
+        current[key] = {};
+      }
+      return;
     }
-    
-    fromObj = fromObj[key] as Record<string, unknown>;
-  }
-  
-  return start;
+
+    const nextValue = current[key];
+    if (!isObject(nextValue)) {
+      current[key] = {};
+    }
+
+    current = current[key] as PlainObject;
+  });
+
+  return obj;
 }
 
 /**
  * Delete an item from an object.
  */
-export function deleteObject(obj: Record<string, unknown>, key: string): void {
-  delete obj[key];
+export function deleteObject(obj: PlainObject, key: string): void {
+  Reflect.deleteProperty(obj, key);
 }
 
 /**
  * Deep merge objects. Later sources override earlier ones.
  * @example extend({}, defaults, userConfig, { deep: true })
  */
-export function extend<T extends Record<string, unknown>>(
+export function extend<T extends PlainObject>(
   target: T,
-  ...sources: (Record<string, unknown> | undefined | null)[]
+  ...sources: (PlainObject | undefined | null)[]
 ): T {
-  const result = (target && typeof target === 'object' ? target : {}) as T;
-  
+  const result = (isObject(target) ? target : {}) as T;
+
   for (const source of sources) {
-    if (!source) continue;
-    
+    if (!isObject(source)) continue;
+
     Object.keys(source).forEach((key) => {
-      const srcValue = (result as Record<string, unknown>)[key];
+      const srcValue = (result as PlainObject)[key];
       const copyValue = source[key];
-      
-      if (isObject(copyValue) || Array.isArray(copyValue)) {
-        if (isObject(copyValue)) {
-          const clone = srcValue && isObject(srcValue) ? srcValue : {};
-          (result as Record<string, unknown>)[key] = extend(
-            clone as Record<string, unknown>, 
-            copyValue
-          );
-        } else if (Array.isArray(copyValue)) {
-          (result as Record<string, unknown>)[key] = [...copyValue];
-        }
-      } else {
-        (result as Record<string, unknown>)[key] = copyValue;
+
+      if (isObject(copyValue)) {
+        const clone = isObject(srcValue) ? srcValue : {};
+        (result as PlainObject)[key] = extend(clone, copyValue);
+        return;
       }
+
+      if (Array.isArray(copyValue)) {
+        (result as PlainObject)[key] = Array.from(copyValue);
+        return;
+      }
+
+      (result as PlainObject)[key] = copyValue;
     });
   }
-  
+
   return result;
 }
 
 /**
  * Shallow merge source into destination (mutates destination).
  */
-export function merge<T extends Record<string, unknown>>(
-  source: T, 
-  destination: Record<string, unknown>
-): void {
-  if (isNullOrUndefined(destination)) return;
-  
-  const keys = Object.keys(destination);
-  for (const key of keys) {
-    (source as Record<string, unknown>)[key] = destination[key];
-  }
+export function merge(source: PlainObject, destination: PlainObject): void {
+  Object.keys(destination).forEach((key) => {
+    source[key] = destination[key];
+  });
 }
 
 // ============================================================================
@@ -158,21 +172,26 @@ export function merge<T extends Record<string, unknown>>(
  * Generate a unique ID with optional prefix.
  * @example getUniqueID('slide') // returns 'slide_0', 'slide_1', etc.
  */
-export function getUniqueID(prefix: string = 'id'): string {
-  return `${prefix}_${uid++}`;
+export function getUniqueID(prefix = 'id'): string {
+  return `${prefix}_${String(uid++)}`;
+}
+
+function getCrypto(): Crypto | undefined {
+  if (typeof window === 'undefined') return undefined;
+  return window.msCrypto ?? window.crypto;
 }
 
 /**
  * Generate a cryptographically random unique ID.
  */
 export function uniqueID(): string {
-  if (typeof window === 'undefined') return getUniqueID();
-  
-  const num = new Uint16Array(5);
-  const intCrypto = (window as any).msCrypto || window.crypto;
-  intCrypto.getRandomValues(num);
-  
-  return Array.from(num).join('-');
+  const cryptoApi = getCrypto();
+  if (!cryptoApi) return getUniqueID();
+
+  const numbers = new Uint16Array(5);
+  cryptoApi.getRandomValues(numbers);
+
+  return Array.from(numbers, String).join('-');
 }
 
 // ============================================================================
@@ -183,17 +202,17 @@ export function uniqueID(): string {
  * Debounce a function - only executes after delay ms of inactivity.
  * @example const debouncedSave = debounce(save, 300)
  */
-export function debounce<T extends (...args: any[]) => any>(
-  fn: T, 
-  delay: number
-): (...args: Parameters<T>) => void {
+export function debounce<Args extends unknown[]>(
+  fn: AnyFn<Args>,
+  delay: number,
+): (...args: Args) => void {
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
-  
-  return function(this: unknown, ...args: Parameters<T>) {
+
+  return function debounced(this: unknown, ...args: Args) {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
-    
+
     timeoutId = setTimeout(() => {
       fn.apply(this, args);
       timeoutId = null;
@@ -205,17 +224,17 @@ export function debounce<T extends (...args: any[]) => any>(
  * Throttle a function - executes at most once per delay ms.
  * @example const throttledResize = throttle(onResize, 100)
  */
-export function throttle<T extends (...args: any[]) => any>(
-  fn: T, 
-  delay: number
-): (...args: Parameters<T>) => void {
+export function throttle<Args extends unknown[]>(
+  fn: AnyFn<Args>,
+  delay: number,
+): (...args: Args) => void {
   let lastCall = 0;
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
-  
-  return function(this: unknown, ...args: Parameters<T>) {
+
+  return function throttled(this: unknown, ...args: Args) {
     const now = Date.now();
     const remaining = delay - (now - lastCall);
-    
+
     if (remaining <= 0) {
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -223,8 +242,8 @@ export function throttle<T extends (...args: any[]) => any>(
       }
       lastCall = now;
       fn.apply(this, args);
-    } else if (!timeoutId) {
-      timeoutId = setTimeout(() => {
+    } else {
+      timeoutId ??= setTimeout(() => {
         lastCall = Date.now();
         timeoutId = null;
         fn.apply(this, args);
@@ -239,31 +258,39 @@ export function throttle<T extends (...args: any[]) => any>(
  */
 export function setImmediate(handler: () => void): () => void {
   if (typeof window === 'undefined') {
-    setTimeout(handler, 0);
-    return () => {};
+    const timeoutId = setTimeout(handler, 0);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }
-  
-  let unbind: () => void;
-  const num = new Uint16Array(5);
-  const intCrypto = (window as any).msCrypto || window.crypto;
-  intCrypto.getRandomValues(num);
-  const secret = 'ca2' + Array.from(num).join('');
-  
+
+  const cryptoApi = getCrypto();
+  if (!cryptoApi) {
+    const timeoutId = window.setTimeout(handler, 0);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }
+
+  const numbers = new Uint16Array(5);
+  cryptoApi.getRandomValues(numbers);
+  const secret = `ca2${Array.from(numbers, String).join('')}`;
+
   const messageHandler = (event: MessageEvent) => {
     if (
-      event.source === window && 
-      typeof event.data === 'string' && 
+      event.source === window &&
+      typeof event.data === 'string' &&
       event.data === secret
     ) {
       handler();
-      unbind();
+      window.removeEventListener('message', messageHandler);
     }
   };
-  
+
   window.addEventListener('message', messageHandler, false);
   window.postMessage(secret, window.location.origin);
-  
-  return unbind = () => {
+
+  return () => {
     window.removeEventListener('message', messageHandler);
   };
 }
@@ -276,12 +303,15 @@ export function setImmediate(handler: () => void): () => void {
  * Check if child element is descendant of parent (or same element).
  */
 export function compareElementParent(child: Node | null, parent: Node): boolean {
-  let node: Node | null = child;
-  
-  if (node === parent) return true;
-  if (node === document || !node) return false;
-  
-  return compareElementParent(node.parentNode, parent);
+  let currentNode = child;
+
+  while (currentNode) {
+    if (currentNode === parent) return true;
+    if (currentNode === document) return false;
+    currentNode = currentNode.parentNode;
+  }
+
+  return false;
 }
 
 /**
@@ -291,12 +321,9 @@ export function compareElementParent(child: Node | null, parent: Node): boolean 
  */
 export function formatUnit(value: number | string): string {
   const result = String(value);
-  
-  if (result.match(/auto|cm|mm|in|px|pt|pc|%|em|ex|ch|rem|vw|vh|vmin|vmax/)) {
-    return result;
-  }
-  
-  return result + 'px';
+  const unitPattern = /auto|cm|mm|in|px|pt|pc|%|em|ex|ch|rem|vw|vh|vmin|vmax/;
+
+  return unitPattern.exec(result) ? result : `${result}px`;
 }
 
 // ============================================================================
@@ -309,7 +336,7 @@ export function formatUnit(value: number | string): string {
  */
 export function queryParams(data: Record<string, string | number | boolean>): string {
   return Object.keys(data)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(String(data[key]))}`)
+    .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(String(data[key]))}`)
     .join('&');
 }
 
@@ -328,31 +355,33 @@ export function throwError(message: string): never {
 // INSTANCE MANAGEMENT
 // ============================================================================
 
-const INSTANCES_KEY = 'ca_instances';
+function resolveElement(element: string | HTMLElement): InstanceHost | null {
+  const resolvedElement = typeof element === 'string'
+    ? document.querySelector<HTMLElement>(element)
+    : element;
+
+  return resolvedElement;
+}
 
 /**
  * Get component instance from an element.
  */
 export function getInstance<T>(
-  element: string | HTMLElement, 
-  component: new (...args: any[]) => T
+  element: string | HTMLElement,
+  component: Constructor<T>,
 ): T | null {
-  const elem = typeof element === 'string' 
-    ? document.querySelector(element) as HTMLElement
-    : element;
-    
-  if (!elem) return null;
-  
-  const instances = (elem as any)[INSTANCES_KEY] as T[] | undefined;
-  
-  if (instances) {
-    for (const inst of instances) {
-      if (inst instanceof component) {
-        return inst;
-      }
+  const host = resolveElement(element);
+  if (!host) return null;
+
+  const instances = host[INSTANCES_KEY];
+  if (!instances) return null;
+
+  for (const instance of instances) {
+    if ((typeof instance === 'object' || typeof instance === 'function') && instance instanceof component) {
+      return instance;
     }
   }
-  
+
   return null;
 }
 
@@ -360,17 +389,11 @@ export function getInstance<T>(
  * Add component instance to an element.
  */
 export function addInstance(element: string | HTMLElement, instance: unknown): void {
-  const elem = typeof element === 'string' 
-    ? document.querySelector(element) as HTMLElement
-    : element;
-    
-  if (!elem) return;
-  
-  if ((elem as any)[INSTANCES_KEY]) {
-    (elem as any)[INSTANCES_KEY].push(instance);
-  } else {
-    (elem as any)[INSTANCES_KEY] = [instance];
-  }
+  const host = resolveElement(element);
+  if (!host) return;
+
+  host[INSTANCES_KEY] ??= [];
+  host[INSTANCES_KEY].push(instance);
 }
 
 // ============================================================================
@@ -395,11 +418,11 @@ export function lerp(start: number, end: number, t: number): number {
  * Map a value from one range to another.
  */
 export function mapRange(
-  value: number, 
-  inMin: number, 
-  inMax: number, 
-  outMin: number, 
-  outMax: number
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number,
 ): number {
   return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }

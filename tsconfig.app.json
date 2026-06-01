@@ -1,47 +1,56 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // TODO: upgrade target + lib to ESNext, module stays ESNext, moduleResolution stays bundler
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "module": "esnext",
     "types": ["vite/client"],
     "paths": {
-      "@/*": ["./src/*"],
-      "@renderer": ["./src/renderer/index.ts"],
-      "@renderer/*": ["./src/renderer/*"],
-      "@shared": ["./src/shared/index.ts"],
-      "@shared/*": ["./src/shared/*"],
-      "@electron/*": ["./electron/*"],
-      "@renderer/shell": ["./src/renderer/shell/index.ts"],
-      "@renderer/shell/*": ["./src/renderer/shell/*"],
-      "@renderer/core": ["./src/renderer/core/index.ts"],
-      "@renderer/core/*": ["./src/renderer/core/*"],
-      "@/components": ["./src/renderer/components"],
-      "@/components/*": ["./src/renderer/components/*"],
       "@/ui": ["./src/renderer/ui"],
       "@/ui/*": ["./src/renderer/ui/*"],
       "@/store": ["./src/renderer/store"],
       "@/store/*": ["./src/renderer/store/*"],
       "@/hooks": ["./src/renderer/hooks"],
       "@/hooks/*": ["./src/renderer/hooks/*"],
+      "@/components": ["./src/renderer/components"],
+      "@/components/*": ["./src/renderer/components/*"],
       "@/lib": ["./src/renderer/lib"],
       "@/lib/*": ["./src/renderer/lib/*"],
       "@/utils": ["./src/renderer/utils/index.ts"],
       "@/utils/*": ["./src/renderer/utils/*"],
+      "@/shell": ["./src/renderer/shell"],
+      "@/shell/*": ["./src/renderer/shell/*"],
+      "@/core": ["./src/renderer/core"],
+      "@/core/*": ["./src/renderer/core/*"],
+      "@/providers": ["./src/renderer/providers"],
+      "@/providers/*": ["./src/renderer/providers/*"],
+      "@/pages": ["./src/renderer/pages"],
+      "@/pages/*": ["./src/renderer/pages/*"],
+      "@/layouts": ["./src/renderer/layouts"],
+      "@/layouts/*": ["./src/renderer/layouts/*"],
+      "@/renderer": ["./src/renderer"],
+      "@/renderer/*": ["./src/renderer/*"],
+      "@/shared": ["./src/shared"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/electron": ["./src/electron"],
+      "@/electron/*": ["./src/electron/*"],
+      "@/types": ["./src/types"],
+      "@/types/*": ["./src/types/*"],
+      "@/api": ["./src/renderer/api"],
+      "@/api/*": ["./src/renderer/api/*"]
     },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    
     "moduleDetection": "force",
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "strict": true,
-
 
     /* Linting */
     "noUnusedLocals": true,
@@ -62,6 +71,5 @@
     "noImplicitAny": true,
   },
   "include": ["src"],
-  "exclude": [
-    "electron", "src/renderer/lib/jules/client.test.ts"]
+  "exclude": ["src/electron"]
 }

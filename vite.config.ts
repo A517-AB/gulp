@@ -3,48 +3,44 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
-import { isAbsolute, join } from 'node:path'
-import { existsSync, readFileSync } from 'node:fs'
-import { homedir } from 'node:os'
+import { fileURLToPath, URL } from 'node:url'
+import { isAbsolute } from 'node:path'
 
 const nodeExternal = (id: string) =>
   !id.startsWith('.') && !isAbsolute(id) && !id.startsWith('\0')
 
 const isWeb = process.env.VITE_TARGET === 'web';
 
-let julesApiKey = process.env.VITE_JULES_API_KEY ?? process.env.JULES_API_KEY;
-if (!julesApiKey) {
-  try {
-    const userPath = join(homedir(), '.workspace');
-    if (existsSync(userPath)) {
-      const content = readFileSync(userPath, 'utf-8').trim();
-      const match = /JULES_API_KEY=(.+)/.exec(content);
-      if (match?.[1]) {
-        julesApiKey = match[1].trim();
-      } else {
-        julesApiKey = content;
-      }
-    }
-  } catch (e) {
-    console.error('Failed to read .workspace from userpath:', e);
-  }
-}
-if (julesApiKey) {
-  process.env.VITE_JULES_API_KEY = julesApiKey;
-}
 
 // https://vite.dev/config/
 export default defineConfig({
   clearScreen: false,
   resolve: {
-    tsconfigPaths: true,
+    alias: {
+      '@/ui': fileURLToPath(new URL('./src/renderer/ui', import.meta.url)),
+      '@/store': fileURLToPath(new URL('./src/renderer/store', import.meta.url)),
+      '@/hooks': fileURLToPath(new URL('./src/renderer/hooks', import.meta.url)),
+      '@/components': fileURLToPath(new URL('./src/renderer/components', import.meta.url)),
+      '@/lib': fileURLToPath(new URL('./src/renderer/lib', import.meta.url)),
+      '@/utils': fileURLToPath(new URL('./src/renderer/utils', import.meta.url)),
+      '@/shell': fileURLToPath(new URL('./src/renderer/shell', import.meta.url)),
+      '@/core': fileURLToPath(new URL('./src/renderer/core', import.meta.url)),
+      '@/providers': fileURLToPath(new URL('./src/renderer/providers', import.meta.url)),
+      '@/pages': fileURLToPath(new URL('./src/renderer/pages', import.meta.url)),
+      '@/layouts': fileURLToPath(new URL('./src/renderer/layouts', import.meta.url)),
+      '@/renderer': fileURLToPath(new URL('./src/renderer', import.meta.url)),
+      '@/shared': fileURLToPath(new URL('./src/shared', import.meta.url)),
+      '@/electron': fileURLToPath(new URL('./src/electron', import.meta.url)),
+      '@/types': fileURLToPath(new URL('./src/types', import.meta.url)),
+      '@/api': fileURLToPath(new URL('./src/renderer/api', import.meta.url)),
+    },
   },
   server: {
     host: '127.0.0.1',
     port: 5173,
     strictPort: true,
     watch: {
-      ignored: ['**/.workspace/**'],
+      ignored: ['**/.jules/**'],
     },
     hmr: {
       overlay: false
@@ -64,13 +60,13 @@ export default defineConfig({
   },
   plugins: [
     tailwindcss(),
-    react(),
-
+    react({ fastRefresh: false }),
+    
     babel({ presets: [reactCompilerPreset()] }),
     ...isWeb ? [] : [
       electron({
         main: {
-          entry: 'electron/main.mts',
+          entry: 'src/electron/main.mts',
           vite: {
             build: {
               rolldownOptions: {
@@ -83,7 +79,7 @@ export default defineConfig({
           },
         },
         preload: {
-          input: 'electron/preload.mts',
+          input: 'src/electron/preload.mts',
           vite: {
             build: {
               rolldownOptions: {

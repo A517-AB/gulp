@@ -9,6 +9,14 @@ interface ExecResult {
   ok: boolean
 }
 
+function optionalArg(value: string | undefined): string[] {
+  return value ? [value] : []
+}
+
+function optionalFlag(enabled: boolean, flag: string): string[] {
+  return enabled ? [flag] : []
+}
+
 function run(cmd: string, args: string[], cwd: string): Promise<ExecResult> {
   return new Promise((resolve) => {
     const proc = spawn(cmd, args, { cwd, shell: false, env: process.env })
@@ -43,8 +51,13 @@ export function registerGitHandlers(): void {
     git(cwd, ['status', '--porcelain'])
   )
 
+<<<<<<< HEAD:electron/git.ts
   ipcMain.handle('git.log', (_e, cwd: string, limit = 20, branch?: string) =>
     git(cwd, ['log', `--max-count=${limit}`, '--pretty=format:%H|%s|%an|%ar|%D', ...(branch ? [branch] : [])])
+=======
+  ipcMain.handle('git.log', (_e, ...[cwd, limit = 20, branch]: [string, number?, string?]) =>
+    git(cwd, ['log', `--max-count=${String(limit)}`, '--pretty=format:%H|%s|%an|%ar|%D', ...optionalArg(branch)])
+>>>>>>> master:src/electron/git.ts
   )
 
   ipcMain.handle('git.diff', (_e, cwd: string, args: string[] = []) =>
@@ -81,8 +94,13 @@ export function registerGitHandlers(): void {
     git(cwd, ['restore', '--staged', ...files])
   )
 
+<<<<<<< HEAD:electron/git.ts
   ipcMain.handle('git.commit', (_e, cwd: string, message: string, allowEmpty = false) =>
     git(cwd, ['commit', '-m', message, ...(allowEmpty ? ['--allow-empty'] : [])])
+=======
+  ipcMain.handle('git.commit', (_e, ...[cwd, message, allowEmpty = false]: [string, string, boolean?]) =>
+    git(cwd, ['commit', '-m', message, ...optionalFlag(allowEmpty, '--allow-empty')])
+>>>>>>> master:src/electron/git.ts
   )
 
   ipcMain.handle('git.amend', (_e, cwd: string, message?: string) =>
@@ -91,6 +109,7 @@ export function registerGitHandlers(): void {
 
   // ── sync ──────────────────────────────────────────────────────────────────────
 
+<<<<<<< HEAD:electron/git.ts
   ipcMain.handle('git.push', (_e, cwd: string, remote = 'origin', branch?: string, force = false) =>
     git(cwd, ['push', ...(force ? ['--force-with-lease'] : []), remote, ...(branch ? [branch] : [])])
   )
@@ -101,6 +120,18 @@ export function registerGitHandlers(): void {
 
   ipcMain.handle('git.fetch', (_e, cwd: string, remote = 'origin', prune = true) =>
     git(cwd, ['fetch', ...(prune ? ['--prune'] : []), remote])
+=======
+  ipcMain.handle('git.push', (_e, ...[cwd, remote = 'origin', branch, force = false]: [string, string?, string?, boolean?]) =>
+    git(cwd, ['push', ...optionalFlag(force, '--force-with-lease'), remote, ...optionalArg(branch)])
+  )
+
+  ipcMain.handle('git.pull', (_e, ...[cwd, remote = 'origin', branch, rebase = false]: [string, string?, string?, boolean?]) =>
+    git(cwd, ['pull', ...optionalFlag(rebase, '--rebase'), remote, ...optionalArg(branch)])
+  )
+
+  ipcMain.handle('git.fetch', (_e, ...[cwd, remote = 'origin', prune = true]: [string, string?, boolean?]) =>
+    git(cwd, ['fetch', ...optionalFlag(prune, '--prune'), remote])
+>>>>>>> master:src/electron/git.ts
   )
 
   // ── branches ─────────────────────────────────────────────────────────────────
@@ -129,7 +160,11 @@ export function registerGitHandlers(): void {
 
   // ── reset / restore ───────────────────────────────────────────────────────────
 
+<<<<<<< HEAD:electron/git.ts
   ipcMain.handle('git.reset', (_e, cwd: string, mode: 'soft' | 'mixed' | 'hard' = 'mixed', ref = 'HEAD') =>
+=======
+  ipcMain.handle('git.reset', (_e, ...[cwd, mode = 'mixed', ref = 'HEAD']: [string, ('soft' | 'mixed' | 'hard')?, string?]) =>
+>>>>>>> master:src/electron/git.ts
     git(cwd, ['reset', `--${mode}`, ref])
   )
 

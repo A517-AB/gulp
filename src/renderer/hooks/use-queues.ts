@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useJules } from "@renderer/lib/jules/provider";
-import { queues } from "@shared/bridge";
+import { queues } from "@/shared/bridge";
 import type { FleetTaskGroup, FleetTask } from "@/types/jules";
 
 export function taskKey(group: FleetTaskGroup, task: FleetTask): string {
@@ -8,7 +7,7 @@ export function taskKey(group: FleetTaskGroup, task: FleetTask): string {
 }
 
 export function useQueues() {
-  const { client } = useJules();
+  const client = null;
   const [groups, setGroups] = useState<FleetTaskGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState<Set<string>>(new Set());
@@ -27,7 +26,15 @@ export function useQueues() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    const initialLoad = window.setTimeout(() => {
+      void load();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+    };
+  }, [load]);
 
   const sendTask = useCallback(async (group: FleetTaskGroup, task: FleetTask) => {
     if (!client) { setError("Jules client not ready"); return; }

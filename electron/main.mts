@@ -17,6 +17,7 @@ import { registerAlarmsHandlers } from "./alarms";
 import { dispatchNotification } from "./notifications";
 import type { AppNotification } from "../src/shared/notifications";
 
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -55,7 +56,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    titleBarStyle: "hidden",
+    frame: false,
+    transparent: true,
     webPreferences: {
       preload: preloadPath,
       contextIsolation: true,
@@ -66,11 +68,11 @@ function createWindow() {
 
   if (isDev) {
     console.log("[main] loading dev URL:", DEV_URL);
-    mainWindow.loadURL(DEV_URL);
+    void mainWindow.loadURL(DEV_URL);
   } else {
     const prodFile = path.join(__dirname, "../dist/index.html");
     console.log("[main] loading prod file:", prodFile);
-    mainWindow.loadFile(prodFile);
+    void mainWindow.loadFile(prodFile);
   }
 
   mainWindow.webContents.on("did-finish-load", () => {
@@ -79,10 +81,6 @@ function createWindow() {
 
   mainWindow.webContents.on("did-fail-load", (_e, code, desc, url) => {
     console.error("[main] renderer failed to load:", url, code, desc);
-    if (isDev) {
-      console.log("[main] retrying in 1s — is 'npm run dev' running?");
-      setTimeout(() => mainWindow?.loadURL(DEV_URL), 1000);
-    }
   });
 
   mainWindow.on("close", (e) => {
@@ -114,8 +112,27 @@ ipcMain.on("window.close", () => {
   mainWindow?.close();
 });
 
+ipcMain.on("lowPower.manualEnter", () => {
+  tray?.setImage(buildTrayIcon('low-power'));
+  mainWindow?.webContents.send("lowPower.enter");
+});
+
+ipcMain.on("lowPower.manualExit", () => {
+  const isVisible = mainWindow?.isVisible() ?? false;
+  tray?.setImage(buildTrayIcon(isVisible ? 'active' : 'idle'));
+  mainWindow?.webContents.send("lowPower.exit");
+});
+
+ipcMain.on("lowPower.toggleAlwaysOnTop", () => {
+  if (mainWindow) {
+    const next = !mainWindow.isAlwaysOnTop();
+    mainWindow.setAlwaysOnTop(next);
+    mainWindow.webContents.send("lowPower.alwaysOnTop", next);
+  }
+});
+
 // ── lifecycle ─────────────────────────────────────────────────────────────────
-app.whenReady().then(() => {
+void app.whenReady().then(() => {
   console.log("[main] app ready");
   registerTerminalHandlers(() => mainWindow?.webContents ?? null);
   registerQueuesHandlers();
@@ -146,14 +163,40 @@ app.whenReady().then(() => {
   });
 
   globalShortcut.register("Ctrl+Shift+Space", () => {
-    if (mainWindow?.isVisible() && mainWindow?.isFocused()) mainWindow.hide();
+    if (mainWindow?.isVisible() && mainWindow.isFocused()) mainWindow.hide();
     else { mainWindow?.show(); mainWindow?.focus(); }
   });
 
+<<<<<<< HEAD:electron/main.mts
   powerMonitor.on("suspend", () => mainWindow?.webContents.send("power.suspend"));
   powerMonitor.on("resume",  () => mainWindow?.webContents.send("power.resume"));
   powerMonitor.on("lock-screen",   () => mainWindow?.webContents.send("power.suspend"));
   powerMonitor.on("unlock-screen", () => mainWindow?.webContents.send("power.resume"));
+=======
+  globalShortcut.register("Ctrl+Shift+4", () => {
+    tray?.setImage(buildTrayIcon('low-power'));
+    mainWindow?.webContents.send("lowPower.enter");
+  });
+  globalShortcut.register("Ctrl+Shift+6", () => {
+    const isVisible = mainWindow?.isVisible() ?? false;
+    tray?.setImage(buildTrayIcon(isVisible ? 'active' : 'idle'));
+    mainWindow?.webContents.send("lowPower.exit");
+  });
+  globalShortcut.register("Ctrl+Shift+5", () => {
+    if (mainWindow) {
+      const next = !mainWindow.isAlwaysOnTop();
+      mainWindow.setAlwaysOnTop(next);
+      mainWindow.webContents.send("lowPower.alwaysOnTop", next);
+    }
+  });
+
+  // Register the new power monitor
+  registerPowerMonitor({
+    getWindow: () => mainWindow,
+    getTray: () => tray,
+    buildTrayIcon,
+  });
+>>>>>>> master:src/electron/main.mts
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -170,7 +213,7 @@ app.on("window-all-closed", () => {
 
 // ── env ───────────────────────────────────────────────────────────────────────
 ipcMain.handle("env.getApiKey", () => {
-  const apiKey = process.env.JULES_API_KEY || null;
+  const apiKey = process.env.JULES_API_KEY ?? null;
   console.log('[main] env.getApiKey called, returning:', apiKey ? 'API Key SET' : 'API Key NOT SET');
   return apiKey;
 });

@@ -1,39 +1,43 @@
-import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useMemo, useCallback, memo } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Code2, Plus, Trash2, Search, Pencil, Copy, Check } from 'lucide-react'
-import { useSnippets } from '@renderer/hooks/use-snippets'
-import type { SnippetItem } from '@renderer/hooks/use-snippets'
-import { InlineEdit } from '@renderer/ui/inline-edit'
-import { CodeEditor } from '@renderer/ui/code-editor'
-import { DynamicDropdown } from '@renderer/components/shared/DynamicDropdown'
+import { useSnippets } from '@/hooks/use-snippets'
+import { InlineEdit } from '@/ui/inline-edit'
+import { CodeEditor } from '@/ui/code-editor'
+import { DynamicDropdown } from '@/components/shared/DynamicDropdown'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from '@renderer/ui/dialog'
-import { LANGUAGES, langFor } from '@renderer/lib/languages'
-import { fuseFilePath } from '@shared/fuse'
+} from '@/ui/dialog'
+import { LANGUAGES, langFor } from '@/lib/languages'
+import type { Snippet } from '../../../types/snippets'
 
 const LANGUAGE_ITEMS = LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))
 
 const TITLE_ADJ  = ['swift', 'async', 'clean', 'lazy', 'eager', 'raw', 'pure', 'silent', 'fuzzy', 'dark', 'sharp', 'wild']
 const TITLE_NOUN = ['handler', 'parser', 'runner', 'hook', 'util', 'patch', 'probe', 'loop', 'pipe', 'trap', 'drop', 'snap']
 
+function pickRandom(values: readonly string[], fallback: string) {
+  const value = values[Math.floor(Math.random() * values.length)]
+  return value ?? fallback
+}
+
 function randomTitle() {
-  const a = TITLE_ADJ[Math.floor(Math.random() * TITLE_ADJ.length)]
-  const b = TITLE_NOUN[Math.floor(Math.random() * TITLE_NOUN.length)]
+  const a = pickRandom(TITLE_ADJ, 'fresh')
+  const b = pickRandom(TITLE_NOUN, 'snippet')
   return `${a}-${b}`
 }
 
 function withAlpha(color: string, a: number) {
-  return color.replace(')', ` / ${a})`)
+  return color.replace(')', ` / ${String(a)})`)
 }
 
 interface SnippetRowProps {
-  snippet: SnippetItem
+  snippet: Snippet
   isCopied: boolean
-  onOpen: (s: SnippetItem) => void
-  onCopy: (s: SnippetItem, e: React.MouseEvent) => void
+  onOpen: (s: Snippet) => void
+  onCopy: (s: Snippet, e: React.MouseEvent) => void
   onDelete: (id: string, e: React.MouseEvent) => void
-  onTitleSave: (s: SnippetItem, title: string) => void
+  onTitleSave: (s: Snippet, title: string) => void
   onLangChange: (id: string, lang: string) => void
 }
 
@@ -41,6 +45,7 @@ const SnippetRow = memo(function SnippetRow({
   snippet, isCopied, onOpen, onCopy, onDelete, onTitleSave, onLangChange,
 }: SnippetRowProps) {
   const lang = langFor(snippet.languageId)
+  const preview = snippet.script.split('\n').slice(0, 3).join('\n')
   const gradientColor = lang?.color ? withAlpha(lang.color, 0.4) : null
   const [hovered, setHovered] = useState(false)
 
@@ -68,15 +73,15 @@ const SnippetRow = memo(function SnippetRow({
             className="text-sm font-semibold text-fg-primary"
             placeholder="Untitled"
           />
-          {snippet.type === 'build' && (
-            <span className="shrink-0 text-[9px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400 border border-orange-500/20 uppercase">
-              Build
+          {snippet.category === 'jules' && (
+            <span className="shrink-0 text-[9px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/20 uppercase">
+              Jules
             </span>
           )}
         </div>
-        <p className="text-[10px] font-mono text-fg-dim truncate">
-          {snippet.file}
-        </p>
+        <pre className="text-xs font-mono text-fg-muted leading-relaxed whitespace-pre-wrap truncate max-h-[4.5em] overflow-hidden bg-transparent border-0 p-0 m-0 antialiased">
+          {preview}
+        </pre>
       </div>
 
       <div className="relative flex items-center justify-end gap-1 mt-2" onClick={e => { e.stopPropagation() }}>
@@ -116,94 +121,95 @@ const SnippetRow = memo(function SnippetRow({
 })
 
 export function SnippetsPage() {
-  const { items, saveItem, updateMeta, deleteItem, readCode } = useSnippets()
+  const { snippets, saveSnippet, deleteSnippet } = useSnippets()
 
+  // search
   const [search, setSearch] = useState('')
+
+  // editor dialog
   const [editorOpen, setEditorOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<SnippetItem | null>(null)
+  const [editingSnippet, setEditingSnippet] = useState<Snippet | null>(null)
   const [draftScript, setDraftScript] = useState('')
   const [draftLang, setDraftLang] = useState('python')
+
+  // copy feedback
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
-    if (!search) return items
+    if (!search) return snippets
     const q = search.toLowerCase()
-    return items.filter(s =>
+    return snippets.filter(s =>
       (s.title?.toLowerCase().includes(q) ?? false) ||
-      s.languageId.toLowerCase().includes(q) ||
-      s.file.toLowerCase().includes(q) ||
-      (s.tags.some(t => t.toLowerCase().includes(q)))
+      s.script.toLowerCase().includes(q) ||
+      (s.languageId?.toLowerCase().includes(q) ?? false) ||
+      (s.tags?.some(t => t.toLowerCase().includes(q)) ?? false)
     )
-  }, [items, search])
+  }, [snippets, search])
 
-  // ── handlers ───────────────────────────────────────────────────────────────
+  const totalSnippets = snippets.length
 
-  const openEditor = useCallback(async (item: SnippetItem) => {
-    setEditingItem(item)
-    setDraftLang(item.languageId)
-    setDraftScript('')
+  // ── handlers ─────────────────────────────────────────────────────────────
+
+  const openEditor = useCallback((snippet: Snippet) => {
+    setEditingSnippet(snippet)
+    setDraftScript(snippet.script)
+    setDraftLang(snippet.languageId ?? 'python')
     setEditorOpen(true)
-    const code = await readCode(item)
-    setDraftScript(code)
-  }, [readCode])
+  }, [])
 
   const openNewEditor = useCallback(() => {
-    const lang = 'python'
-    const title = randomTitle()
-    const now = new Date().toISOString()
-    const newItem: SnippetItem = {
+    const newSnippet: Snippet = {
       id: crypto.randomUUID(),
-      title,
-      languageId: lang,
-      type: 'snippet',
-      file: fuseFilePath('snippet', lang, title),
-      tags: [],
-      createdAt: now,
-      updatedAt: now,
+      title: randomTitle(),
+      languageId: 'python',
+      script: '',
+      createdAt: new Date().toISOString(),
     }
-    setEditingItem(newItem)
+    setEditingSnippet(newSnippet)
     setDraftScript('')
-    setDraftLang(lang)
+    setDraftLang('python')
     setEditorOpen(true)
   }, [])
 
   const handleEditorSave = useCallback(() => {
-    if (!editingItem || !draftScript.trim()) return
-    const now = new Date().toISOString()
-    void saveItem({ ...editingItem, languageId: draftLang, updatedAt: now }, draftScript)
+    if (!editingSnippet || !draftScript.trim()) return
+    saveSnippet({
+      ...editingSnippet,
+      script: draftScript,
+      languageId: draftLang,
+    })
     setEditorOpen(false)
-    setEditingItem(null)
-  }, [editingItem, draftScript, draftLang, saveItem])
+    setEditingSnippet(null)
+  }, [editingSnippet, draftScript, draftLang, saveSnippet])
 
-  const handleCopy = useCallback(async (snippet: SnippetItem, e: React.MouseEvent) => {
+  const handleCopy = useCallback((snippet: Snippet, e: React.MouseEvent) => {
     e.stopPropagation()
-    const code = await readCode(snippet)
-    void navigator.clipboard.writeText(code)
+    void navigator.clipboard.writeText(snippet.script)
     setCopiedId(snippet.id)
     setTimeout(() => { setCopiedId(null) }, 1500)
-  }, [readCode])
+  }, [])
 
   const handleDelete = useCallback((id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    void deleteItem(id)
-  }, [deleteItem])
+    deleteSnippet(id)
+  }, [deleteSnippet])
 
-  const handleTitleSave = useCallback((snippet: SnippetItem, newTitle: string) => {
-    updateMeta({ ...snippet, title: newTitle || null, updatedAt: new Date().toISOString() })
-  }, [updateMeta])
-
-  const itemsRef = useRef<SnippetItem[]>([])
-  useEffect(() => { itemsRef.current = items }, [items])
+  const handleTitleSave = useCallback((snippet: Snippet, newTitle: string) => {
+    saveSnippet({ ...snippet, title: newTitle || null })
+  }, [saveSnippet])
 
   const handleLangChange = useCallback((id: string, newLang: string) => {
-    const item = itemsRef.current.find(s => s.id === id)
-    if (item) updateMeta({ ...item, languageId: newLang, updatedAt: new Date().toISOString() })
-  }, [updateMeta])
+    const snippet = snippets.find(s => s.id === id)
+    if (snippet) {
+      saveSnippet({ ...snippet, languageId: newLang })
+    }
+  }, [snippets, saveSnippet])
 
-  // ── render ─────────────────────────────────────────────────────────────────
+  // ── render ───────────────────────────────────────────────────────────────
 
   return (
     <div className="flex flex-col h-full p-6 overflow-hidden max-w-7xl mx-auto w-full bg-base text-fg-primary">
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-md bg-surface border border-subtle flex items-center justify-center">
@@ -237,19 +243,20 @@ export function SnippetsPage() {
           </button>
           <span className="bg-surface border border-subtle text-fg-muted text-[10px] px-2.5 py-1 rounded font-mono flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-            {items.length} TOTAL
+            {totalSnippets} TOTAL
           </span>
         </div>
       </div>
 
+      {/* List */}
       <div className="flex-1 overflow-auto pr-2 pb-12">
         {filtered.map(snippet => (
           <SnippetRow
             key={snippet.id}
             snippet={snippet}
             isCopied={copiedId === snippet.id}
-            onOpen={item => { void openEditor(item) }}
-            onCopy={(s, e) => { void handleCopy(s, e) }}
+            onOpen={openEditor}
+            onCopy={handleCopy}
             onDelete={handleDelete}
             onTitleSave={handleTitleSave}
             onLangChange={handleLangChange}
@@ -274,54 +281,81 @@ export function SnippetsPage() {
         )}
       </div>
 
+      {/* ── Monaco Editor Dialog ─────────────────────────────────────────── */}
       <Dialog open={editorOpen} onOpenChange={open => {
-        if (!open) { setEditorOpen(false); setEditingItem(null) }
+        if (!open) { setEditorOpen(false); setEditingSnippet(null) }
       }}>
-        <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-overlay border-subtle shadow-xl">
-          <DialogHeader className="px-5 pt-5 pb-3 border-b border-hair">
-            <div className="flex items-center gap-3">
-              <DynamicDropdown
-                items={LANGUAGE_ITEMS}
-                value={draftLang}
-                onChange={setDraftLang}
-              />
-              <DialogTitle asChild>
-                <InlineEdit
-                  value={editingItem?.title ?? ''}
-                  onSave={v => { setEditingItem(s => s ? { ...s, title: v || null } : s) }}
-                  className="text-sm font-bold text-fg-primary uppercase tracking-wider"
-                  placeholder="Untitled"
-                />
-              </DialogTitle>
-            </div>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col gap-0 p-0 overflow-hidden bg-base border border-subtle shadow-2xl !duration-0 data-[state=closed]:!animate-none data-[state=open]:!animate-none">
+          <AnimatePresence>
+            {editorOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 15 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="flex flex-col h-full w-full"
+              >
+                <DialogHeader className="px-5 py-4 border-b border-hair">
+                  <div className="flex items-center gap-3">
+                    <DynamicDropdown
+                      items={LANGUAGE_ITEMS}
+                      value={draftLang}
+                      onChange={setDraftLang}
+                    />
+                    <DialogTitle asChild>
+                      <InlineEdit
+                        value={editingSnippet?.title ?? ''}
+                        onSave={v => { setEditingSnippet(s => s ? { ...s, title: v || null } : s) }}
+                        className="text-lg font-bold text-fg-primary tracking-wide bg-transparent"
+                        placeholder="Untitled Snippet"
+                      />
+                    </DialogTitle>
+                  </div>
+                </DialogHeader>
 
-          <div className="h-[60vh] min-h-[400px] w-full p-4 bg-base">
-            <CodeEditor
-              value={draftScript}
-              onChange={val => { setDraftScript(val ?? '') }}
-              language={langFor(draftLang)?.id ?? 'javascript'}
-              options={{ minimap: { enabled: false }, lineNumbers: 'on' }}
-            />
-          </div>
+                <div className="flex-1 w-full relative">
+                  <div className="absolute inset-0 pt-2">
+                    <CodeEditor
+                      value={draftScript}
+                      onChange={val => { setDraftScript(val ?? '') }}
+                      language={langFor(draftLang)?.id ?? 'javascript'}
+                      options={{ 
+                        minimap: { enabled: false }, 
+                        lineNumbers: 'on',
+                        renderLineHighlight: 'none',
+                        guides: { indentation: false },
+                        scrollBeyondLastLine: false,
+                        wordWrap: 'on',
+                        padding: { top: 16, bottom: 16 },
+                        automaticLayout: true,
+                        fontFamily: 'var(--font-mono)'
+                      }}
+                    />
+                  </div>
+                </div>
 
-          <DialogFooter className="px-5 py-3 border-t border-hair bg-surface">
-            <button
-              onClick={() => { setEditorOpen(false); setEditingItem(null) }}
-              className="px-3 py-1.5 rounded text-xs font-mono text-fg-muted hover:text-fg-primary transition-colors uppercase tracking-wider"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleEditorSave}
-              disabled={!draftScript.trim()}
-              className="bg-raised border border-subtle text-fg-primary text-xs px-4 py-1.5 rounded flex items-center gap-2 hover:bg-hover transition-colors disabled:opacity-50 uppercase font-mono tracking-wider"
-            >
-              Save
-            </button>
-          </DialogFooter>
+                <DialogFooter className="px-5 py-3 border-t border-hair">
+                  <button
+                    onClick={() => { setEditorOpen(false); setEditingSnippet(null) }}
+                    className="px-4 py-2 rounded-lg text-sm font-medium text-fg-muted hover:text-fg-primary hover:bg-hover transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleEditorSave}
+                    disabled={!draftScript.trim()}
+                    className="bg-primary/90 text-primary-foreground border border-primary text-sm px-6 py-2 rounded-lg font-medium hover:bg-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm active:scale-95"
+                  >
+                    Save Snippet
+                  </button>
+                </DialogFooter>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
     </div>
   )
 }
+
+export default SnippetsPage

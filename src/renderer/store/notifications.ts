@@ -1,21 +1,44 @@
 import { create } from 'zustand'
-import type { AppNotification, NotificationAction } from '@shared/notifications'
+
+export interface NotificationAction {
+  label: string
+  onClick: () => void
+}
+
+export interface AppNotification {
+  id: string
+  type: 'info' | 'success' | 'error' | 'warning'
+  title: string
+  body?: string
+  actions?: NotificationAction[]
+  duration: number
+  sound?: boolean
+  channel?: string
+}
 
 interface NotificationStore {
-  items: AppNotification[]
-  add:      (n: AppNotification) => void
-  dismiss:  (id: string) => void
-  clearAll: () => void
+  notifications: AppNotification[]
+  push: (n: Omit<AppNotification, 'id'>) => string
+  dismiss: (id: string) => void
 }
 
 export const useNotifications = create<NotificationStore>((set) => ({
-  items: [],
-  add:      (n) => set((s) => ({ items: [n, ...s.items].slice(0, 20) })),
-  dismiss:  (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
-  clearAll: () => set({ items: [] }),
+  notifications: [],
+  push: (n) => {
+    const id = crypto.randomUUID()
+    if (n.sound) playAlarmBeep()
+    set((s) => ({ notifications: [...s.notifications, { ...n, id }] }))
+    return id
+  },
+  dismiss: (id) => {
+    set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) }))
+  },
 }))
 
-/** Play a simple alarm beep via Web Audio API. */
+export function notify(n: Omit<AppNotification, 'id'>) {
+  return useNotifications.getState().push(n)
+}
+
 export function playAlarmBeep(): void {
   try {
     const ctx = new AudioContext()
@@ -31,6 +54,3 @@ export function playAlarmBeep(): void {
     osc.stop(ctx.currentTime + 1.5)
   } catch { /* AudioContext not available */ }
 }
-
-/** Actions the user can take on a notification from the renderer. */
-export type { NotificationAction }

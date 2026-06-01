@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/popover'
 import { cn } from '@/utils'
 import { Paperclip, Check } from 'lucide-react'
 import type { Snippet } from '@/types/snippets'
@@ -124,7 +124,7 @@ function SnippetItem({ snippet, isSelected, onToggle }: { snippet: Snippet, isSe
         {isSelected && <Check className="size-3 text-fg-primary" />}
       </div>
       <div className="flex flex-col overflow-hidden">
-        <span className="truncate font-medium">{snippet.title || 'Untitled'}</span>
+        <span className="truncate font-medium">{snippet.title ?? 'Untitled'}</span>
         {snippet.julesMeta?.description && (
           <span className="truncate text-xs text-fg-secondary opacity-70">
             {snippet.julesMeta.description}

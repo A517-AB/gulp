@@ -1,5 +1,4 @@
-import { useState, useCallback, useEffect, type FormEvent } from "react";
-import { useJules } from "@/lib/jules/provider";
+import { useState, useCallback, useEffect, type SyntheticEvent } from "react";
 import type { Source, SessionFormData, UseNewSessionFormProps, UseNewSessionFormReturn } from "@/types/activity-feed";
 
 const DEFAULT_FORM: SessionFormData = {
@@ -16,7 +15,7 @@ export function useNewSessionForm({
   onSessionCreated,
   onClose,
 }: UseNewSessionFormProps): UseNewSessionFormReturn {
-  const { client } = useJules();
+  const client = null;
   const [sources, setSources] = useState<Source[]>([]);
   const [formData, setFormData] = useState<SessionFormData>(DEFAULT_FORM);
   const [loading, setLoading] = useState(false);
@@ -31,7 +30,8 @@ export function useNewSessionForm({
       if (data.length === 0) {
         setError("No repositories found. Connect a GitHub repository in the Jules web app first.");
       } else {
-        setFormData((prev) => ({ ...prev, sourceId: prev.sourceId || data.at(0)?.id || "" }));
+        const firstSourceId = data.at(0)?.id ?? "";
+        setFormData((prev) => ({ ...prev, sourceId: prev.sourceId || firstSourceId }));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load repositories");
@@ -40,17 +40,23 @@ export function useNewSessionForm({
 
   useEffect(() => {
     if (!open) return;
-    setFormData((prev) => ({
-      ...prev,
-      sourceId: initialValues?.sourceId ?? prev.sourceId,
-      title: initialValues?.title ?? prev.title,
-      prompt: initialValues?.prompt ?? prev.prompt,
-      startingBranch: initialValues?.startingBranch ?? prev.startingBranch,
-    }));
-    loadSources();
+    const initializeForm = window.setTimeout(() => {
+      setFormData((prev) => ({
+        ...prev,
+        sourceId: initialValues?.sourceId ?? prev.sourceId,
+        title: initialValues?.title ?? prev.title,
+        prompt: initialValues?.prompt ?? prev.prompt,
+        startingBranch: initialValues?.startingBranch ?? prev.startingBranch,
+      }));
+      void loadSources();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(initializeForm);
+    };
   }, [open, initialValues, loadSources]);
 
-  const handleSubmit = useCallback(async (e: FormEvent) => {
+  const handleSubmit = useCallback(async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!client || !formData.sourceId || !formData.prompt) return;
     try {

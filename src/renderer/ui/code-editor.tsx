@@ -1,4 +1,5 @@
-import { useTheme } from '@renderer/providers/theme'
+import '@/lib/monaco'
+import { useTheme } from '@/providers/theme'
 import Editor, { type EditorProps } from '@monaco-editor/react'
 import { cn } from '@/utils'
 import { Loader2 } from 'lucide-react'
@@ -9,6 +10,13 @@ export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
 }
 
 
+/*
+ * NOTE: @monaco-editor/react currently bundles EVERY supported language and worker 
+ * into the dist/assets folder (over 100+ files, including a 6.8MB ts.worker).
+ * We are intentionally keeping it this way for now to experiment with different 
+ * languages without friction. If bundle size becomes an issue later, look into 
+ * `vite-plugin-monaco-editor` to tree-shake unused languages.
+ */
 export function CodeEditor({ 
   className, 
   containerClassName,

@@ -1,29 +1,32 @@
+// ─── TODO ────────────────────────────────────────────────────────────────────
+// [ ] Fix Jules API firing 3× on load — useCallback-in-useEffect deps trap
+//     — files: src/renderer/hooks/use-activity-feed-api.ts
+//              src/renderer/hooks/use-session-list.ts
+//     — fix: inline fetch logic directly in useEffect, depend on [client, session.id] only
+//     — also fix: early-return bug in use-activity-feed-api leaks initialLoad timeout
+// ─────────────────────────────────────────────────────────────────────────────
+
 import type { ReactNode } from 'react'
-import { Outlet, useLocation, NavLink } from 'react-router'
-import { TopBar } from '@renderer/shell'
-import { ThemeProvider } from '@renderer/providers/theme'
-import { navRoutes } from '@renderer/router'
-import { NotificationToast } from '@/components/notifications'
+import { NavLink } from 'react-router'
+import { Outlet } from 'react-router'
+import { TopBar } from '@/shell'
+import { ThemeProvider } from '@/providers/theme'
+import { navRoutes } from '@/renderer/routes'
+import { Notifications } from '@/components/shared/Notifications'
 
 export default function RootLayout(): ReactNode {
-    const location = useLocation()
-
-    if (import.meta.env.DEV) {
-        console.log('[router] →', location.pathname)
-    }
-
     const navLinks = navRoutes
         .filter(route => route.handle?.inNav)
         .map((route) => {
             const path = route.index ? '/' : `/${route.path ?? ''}`
             return (
-                <NavLink 
-                    key={path} 
+                <NavLink
+                    key={path}
                     to={path}
-                    className={({ isActive }) => 
+                    className={({ isActive }) =>
                         `px-3 py-1 text-sm rounded-md transition-colors ${
-                            isActive 
-                                ? 'bg-active text-fg-primary' 
+                            isActive
+                                ? 'bg-active text-fg-primary'
                                 : 'text-fg-secondary hover:text-fg-primary hover:bg-hover'
                         }`
                     }
@@ -40,8 +43,8 @@ export default function RootLayout(): ReactNode {
                 <main className="flex-1 overflow-hidden min-h-0 h-full">
                     <Outlet />
                 </main>
-                <NotificationToast />
             </div>
+            <Notifications />
         </ThemeProvider>
     )
 }

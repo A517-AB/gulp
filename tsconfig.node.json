@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "ES2022",
-    "lib": ["ES2022"],
+    "target": "ES2024",
+    "lib": ["ES2024"],
     "module": "esnext",
     "types": ["node", "vite/client"],
     "paths": {
-      "@/*": ["./src/*"],
-      "@shared": ["./src/shared/index.ts"],
-      "@shared/*": ["./src/shared/*"],
-      "@electron/*": ["./electron/*"]
+      "@/shared": ["./src/shared"],
+      "@/shared/*": ["./src/shared/*"],
+      "@/electron": ["./src/electron"],
+      "@/electron/*": ["./src/electron/*"]
     },
 
     /* Bundler mode */
@@ -35,10 +35,13 @@
     "noUncheckedIndexedAccess": true,
     "useUnknownInCatchVariables": true
   },
-  "include": [
-    "electron/**/*.ts",
-    "electron/**/*.mts",
-    "vite.config.ts"
-  ],
-  "exclude": []
+  "include": ["src/electron/**/*.ts", "src/electron/**/*.mts", "vite.config.ts", "src/shared/types.ts", "src/shared/ipc.ts", "src/shared/index.ts",
+    "jules-server.ts", "jules-server.ts"],
+  "exclude": [
+    "src/electron/jules/advanced-session.ts",
+    "src/electron/jules/agent.ts",
+    "src/electron/jules/basic-session.ts",
+    "src/electron/jules/file-system-events.ts",
+    "src/electron/jules/_shared/check-env.ts"
+  ]
 }
