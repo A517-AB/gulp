@@ -9,7 +9,7 @@ Object.assign(console, log.functions);
 
 import { registerTerminalHandlers } from "./Terminal";
 import { registerQueuesHandlers } from "./queues";
-import { registerFilesystemHandlers } from "./filesystem";
+import { registerFilesystemHandlers } from "./filesystem/handlers";
 import { registerSnippetsHandlers } from "./snippets";
 import { registerGitHandlers } from "./git";
 import { registerGitHubHandlers } from "./github";
@@ -27,9 +27,7 @@ const __dirname = path.dirname(__filename);
 const isDev = process.env.NODE_ENV === 'development';
 const DEV_URL = process.env.VITE_DEV_SERVER_URL ?? "http://127.0.0.1:5173";
 
-console.log("[main] starting, isDev:", isDev);
-console.log("[main] __dirname:", __dirname);
-console.log("[main] JULES_API_KEY:", process.env.JULES_API_KEY ? "SET ✓" : "NOT SET ✗");
+
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;

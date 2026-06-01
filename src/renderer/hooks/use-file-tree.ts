@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
-import { filesystem } from '@shared'
-import type { FsEntry } from '@shared'
+import { filesystem } from '@shared/bridge'
+import type { FsEntry } from '@shared/filesystem'
 
 export interface FileTreeNode {
   id: string

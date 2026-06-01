@@ -4,7 +4,7 @@ import { Folder, FolderOpen, File, RefreshCw, AlertCircle } from 'lucide-react'
 import { cn } from '@/utils'
 import { useFileTree } from '@/hooks/use-file-tree'
 import type { FileTreeNode, FileTreeProps } from './types'
-import type { FsEntry } from '@shared'
+import type { FsEntry } from '@shared/filesystem'
 
 // ── context ───────────────────────────────────────────────────────────────────
 

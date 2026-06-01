@@ -1,4 +1,4 @@
-import type { FsEntry } from '@shared'
+import type { FsEntry } from '@shared/filesystem'
 export type { FileTreeNode } from '@/hooks/use-file-tree'
 
 export interface FileTreeProps {

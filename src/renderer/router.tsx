@@ -6,17 +6,7 @@ import { RouteErrorBoundary } from '@renderer/core/ErrorBoundary'
 
 // ── dev ───────────────────────────────────────────────────────────────────────
 
-if (import.meta.env.DEV) {
-    console.log('[router] platform:', { isElectron, isWeb })
 
-    if (!isElectron && !isWeb) {
-        console.warn('[router] neither isElectron nor isWeb is true — check @shared/bridge')
-    }
-
-    if (isElectron && isWeb) {
-        console.warn('[router] both isElectron and isWeb are true — this is probably wrong')
-    }
-}
 
 // ── types ─────────────────────────────────────────────────────────────────────
 

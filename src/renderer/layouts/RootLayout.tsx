@@ -1,16 +1,11 @@
 import type { ReactNode } from 'react'
-import { Outlet, useLocation, NavLink } from 'react-router'
+import { Outlet, NavLink } from 'react-router'
 import { TopBar } from '@renderer/shell/TopBar'
 import { ThemeProvider } from '@renderer/providers/theme'
 import { navRoutes } from '@renderer/router'
 import { NotificationToast } from '@/components/notifications/NotificationToast'
 
 export default function RootLayout(): ReactNode {
-    const location = useLocation()
-
-    if (import.meta.env.DEV) {
-        console.log('[router] →', location.pathname)
-    }
 
     const navLinks = navRoutes
         .filter(route => route.handle?.inNav)

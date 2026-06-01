@@ -12,7 +12,7 @@ import { CommandMenu } from '@/components/overview/CommandMenu'
 import { HistoryPanel } from '@/components/overview/HistoryPanel'
 import { ArtifactPanel } from '@/components/overview/ArtifactPanel'
 import { MdNotification } from '@/components/overview/MdNotification'
-import SettingsPage from '../../shared/SettingsPage'
+import SettingsPage from '../../shared/settings/SettingsPage'
 import type { HistoryEntry } from '@shared/history'
 
 type PanelMode = 'none' | 'commands' | 'history' | 'settings'
