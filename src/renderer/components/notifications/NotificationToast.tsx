@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X, BellRing } from 'lucide-react'
-import { notifications as notificationsIpc } from '@shared/bridge'
-import { useNotifications, playAlarmBeep } from '@/store/notifications'
+import { alarms as alarmsIpc, notifications as notificationsIpc } from '@shared/bridge'
+import { useNotifications, playAlarmBeep, alarmAudio } from '@/store/notifications'
 import type { AppNotification } from '@shared/notifications'
 
 const CHANNEL_ICONS: Record<AppNotification['channel'], string> = {
@@ -19,9 +19,28 @@ function Toast({ item }: { item: AppNotification }) {
   const dismiss = useNotifications((s) => s.dismiss)
 
   useEffect(() => {
+    if (item.channel === 'alarm') return;
     const t = setTimeout(() => dismiss(item.id), AUTO_DISMISS_MS)
     return () => clearTimeout(t)
-  }, [item.id, dismiss])
+  }, [item.id, dismiss, item.channel])
+
+  useEffect(() => {
+    return () => {
+      if (item.channel === 'alarm') {
+        alarmAudio.stop(item.id)
+      }
+    }
+  }, [item.id, item.channel])
+
+  const handleAction = async (action: string) => {
+    if (item.channel === 'alarm' && action === 'snooze' && item.meta?.alarmId) {
+      const minutes = parseInt(item.meta.snoozeMinutes || '5', 10)
+      await alarmsIpc?.snooze(item.meta.alarmId, minutes)
+      dismiss(item.id)
+    } else if (action === 'dismiss') {
+      dismiss(item.id)
+    }
+  }
 
   return (
     <motion.div
@@ -35,10 +54,25 @@ function Toast({ item }: { item: AppNotification }) {
       <span className="mt-0.5 text-base leading-none select-none">
         {CHANNEL_ICONS[item.channel] ?? <BellRing size={14} />}
       </span>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-fg-primary truncate">{item.title}</p>
-        {item.body && (
-          <p className="text-xs text-fg-secondary mt-0.5 line-clamp-2">{item.body}</p>
+      <div className="flex-1 min-w-0 flex flex-col gap-2">
+        <div>
+          <p className="text-sm font-medium text-fg-primary truncate">{item.title}</p>
+          {item.body && (
+            <p className="text-xs text-fg-secondary mt-0.5 line-clamp-2">{item.body}</p>
+          )}
+        </div>
+        {item.actions && item.actions.length > 0 && (
+          <div className="flex items-center gap-2 mt-1">
+            {item.actions.map(action => (
+              <button
+                key={action}
+                onClick={() => handleAction(action)}
+                className="px-3 py-1.5 text-xs font-medium rounded-md bg-secondary text-fg-primary hover:bg-secondary/80 transition-colors capitalize cursor-pointer pointer-events-auto"
+              >
+                {action}
+              </button>
+            ))}
+          </div>
         )}
       </div>
       <button
@@ -61,7 +95,11 @@ export function NotificationToast() {
     if (!ipc) return
     return ipc.onReceived((n) => {
       add(n)
-      if (n.sound) playAlarmBeep()
+      if (n.sound && n.channel === 'alarm') {
+        alarmAudio.play(n.id)
+      } else if (n.sound) {
+        playAlarmBeep()
+      }
     })
   }, [add])
 
