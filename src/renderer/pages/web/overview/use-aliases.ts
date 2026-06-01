@@ -47,7 +47,7 @@ export function useAliases() {
   const commit = useCallback((next: JulesAlias[]) => {
     setAliases(next)
     if (isElectron && aliasesApi) {
-      aliasesApi.save(next)
+      aliasesApi.save(next).then(() => {})
     } else {
       localStorage.setItem(LS_KEY, JSON.stringify(next))
     }

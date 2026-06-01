@@ -14,8 +14,9 @@ import { MdNotification } from './MdNotification'
 import { buildPrompt } from './lib'
 import type { JulesAlias } from './types'
 import type { HistoryEntry } from '@shared/history'
+import SettingsPage from '../../shared/SettingsPage'
 
-type PanelMode = 'none' | 'aliases' | 'history'
+type PanelMode = 'none' | 'aliases' | 'history' | 'settings'
 
 export default function OverviewPage() {
   const { aliases } = useAliases()
@@ -56,12 +57,18 @@ export default function OverviewPage() {
 
   const handleChange = useCallback((val: string) => {
     setInput(val)
+    
+    if (val === '/settings') {
+      setPanelMode('settings')
+      return
+    }
+
     const trigger = TRIGGERS.find(t => val.startsWith(t))
     if (trigger && !val.includes(' ')) {
       setAliasQuery(val.slice(1))
       setPanelMode('aliases')
       setPanelIndex(0)
-    } else if (panelMode === 'aliases') {
+    } else if (panelMode === 'aliases' || panelMode === 'settings') {
       closePanel()
       setAliasQuery('')
     }
@@ -119,6 +126,10 @@ export default function OverviewPage() {
         if (sel) selectAlias(sel)
         return
       }
+      if (e.key === 'Escape') { closePanel(); return }
+    }
+
+    if (panelMode === 'settings') {
       if (e.key === 'Escape') { closePanel(); return }
     }
 
@@ -183,6 +194,11 @@ export default function OverviewPage() {
           )}
 
           <div className="relative">
+            {panelMode === 'settings' && (
+              <div className="absolute bottom-full left-0 right-0 mb-4 h-[60vh] bg-[var(--color-base,#0a0a0a)] border border-white/10 rounded-xl overflow-hidden shadow-2xl z-50">
+                <SettingsPage />
+              </div>
+            )}
             {panelMode === 'aliases' && (
               <AliasMenu
                 aliases={filteredAliases}

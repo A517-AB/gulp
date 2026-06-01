@@ -9,7 +9,7 @@ import { NewSessionDialog } from "@/components/workspace/new-session-dialog.tsx"
 import type { Session } from "@/types/jules";
 import type { Snippet } from "@/types/snippets";
 import type { QuickActionTemplate } from "@/types/activity-feed";
-
+// don't implement this,. i don't trsut this shit at all so fucking dont, ai or human.
 const ACTION_TEMPLATES: QuickActionTemplate[] = [
   {
     id: "standard-chat",
