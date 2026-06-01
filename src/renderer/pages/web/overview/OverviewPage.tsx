@@ -73,7 +73,13 @@ export default function OverviewPage() {
     const trigger = activeAlias.trigger ?? '/'
     const body = input.trim()
 
-    // empty + not action → display last md
+    // / trigger is display-only — never sends to Jules
+    if (trigger === '/') {
+      refresh()
+      return
+    }
+
+    // empty + non-action: refresh without sending
     if (body === '' && trigger !== '!') {
       refresh()
       return
