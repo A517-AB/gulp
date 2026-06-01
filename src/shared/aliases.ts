@@ -9,4 +9,6 @@ export interface JulesAlias {
   sessionId: string
   instructions?: string
   expects?: 'md' | 'zip'
+  /** Built-in panel action — when set, selectAlias opens the panel instead of sending to Jules. */
+  action?: 'settings'
 }

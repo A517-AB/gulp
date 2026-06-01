@@ -3,17 +3,19 @@ import { AnimatePresence } from 'framer-motion'
 import { sdkIpc } from '@shared/bridge'
 import type { JulesLocalGeneratedFile } from '@shared/electron'
 import { TRIGGERS } from '@shared/aliases'
+import type { HistoryEntry } from '@shared/history'
+import {
+  AliasMenu,
+  ArtifactPanel,
+  GhostInput,
+  HistoryPanel,
+  MdNotification,
+  buildPrompt,
+} from '@/components/overview'
+import type { JulesAlias } from '@/components/overview'
 import { useAliases } from './use-aliases'
 import { useHistory } from './use-history'
 import { useArtifactStream } from './use-artifact-stream'
-import { GhostInput } from './GhostInput'
-import { AliasMenu } from './AliasMenu'
-import { HistoryPanel } from './HistoryPanel'
-import { ArtifactPanel } from './ArtifactPanel'
-import { MdNotification } from './MdNotification'
-import { buildPrompt } from './lib'
-import type { JulesAlias } from './types'
-import type { HistoryEntry } from '@shared/history'
 import SettingsPage from '../../shared/SettingsPage'
 
 type PanelMode = 'none' | 'aliases' | 'history' | 'settings'
@@ -27,7 +29,6 @@ export default function OverviewPage() {
   const [panelIndex, setPanelIndex] = useState(0)
   const [isSending, setIsSending] = useState(false)
   const [dismissedSession, setDismissedSession] = useState<string | null>(null)
-
   const [aliasQuery, setAliasQuery] = useState('')
 
   const filteredAliases = panelMode === 'aliases'
@@ -43,6 +44,13 @@ export default function OverviewPage() {
   const closePanel = useCallback(() => { setPanelMode('none'); setPanelIndex(0) }, [])
 
   const selectAlias = useCallback((alias: JulesAlias) => {
+    if (alias.action === 'settings') {
+      setPanelMode('settings')
+      setActiveAlias(null)
+      setInput('')
+      setAliasQuery('')
+      return
+    }
     setActiveAlias(alias)
     setDismissedSession(null)
     setInput('')
@@ -57,12 +65,6 @@ export default function OverviewPage() {
 
   const handleChange = useCallback((val: string) => {
     setInput(val)
-    
-    if (val === '/settings') {
-      setPanelMode('settings')
-      return
-    }
-
     const trigger = TRIGGERS.find(t => val.startsWith(t))
     if (trigger && !val.includes(' ')) {
       setAliasQuery(val.slice(1))
@@ -109,7 +111,6 @@ export default function OverviewPage() {
   }, [activeAlias, files])
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Ctrl+Space → toggle alias picker
     if (e.code === 'Space' && e.ctrlKey && !e.shiftKey && !e.altKey) {
       e.preventDefault()
       if (panelMode === 'aliases') { closePanel(); setAliasQuery('') }
@@ -146,7 +147,6 @@ export default function OverviewPage() {
       if (e.key === 'Escape') { closePanel(); return }
     }
 
-    // Arrow Up from empty → open history
     if (e.key === 'ArrowUp' && input === '' && panelMode === 'none' && historyEntries.length > 0) {
       e.preventDefault()
       setPanelMode('history')
