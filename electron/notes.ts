@@ -5,7 +5,7 @@ import * as path from 'path'
 import chokidar from 'chokidar'
 import type { NoteMeta } from '../src/shared/notes'
 
-const NOTES_DIR = path.join(app.getAppPath(), 'notes')
+const NOTES_DIR = path.join(app.getPath('userData'), 'notes')
 
 interface NoteFile {
   meta: NoteMeta
@@ -70,6 +70,7 @@ export function registerNotesHandlers(getWebContents: () => WebContents | null):
     } catch { return false }
   })
 
+  fs.ensureDirSync(NOTES_DIR)
   const watcher = chokidar.watch(NOTES_DIR, {
     ignoreInitial: true,
     awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
