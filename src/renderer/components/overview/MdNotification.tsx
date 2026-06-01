@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface MdNotificationProps {
-  /** Bumps whenever fresh markdown arrives; any change > 0 triggers the toast. */
   trigger: number
 }
 
@@ -11,7 +10,6 @@ export function MdNotification({ trigger }: MdNotificationProps) {
 
   useEffect(() => {
     if (trigger <= 0) return
-    // setState only inside async callbacks — avoids synchronous setState in effect body.
     const show = requestAnimationFrame(() => { setVisible(true) })
     const hide = setTimeout(() => { setVisible(false) }, 3000)
     return () => { cancelAnimationFrame(show); clearTimeout(hide) }

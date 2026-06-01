@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { useAliases } from '../../../web/overview/use-aliases'
+import { useCommands } from '@/hooks/use-commands'
 import { SessionPicker } from './SessionPicker'
-import { TRIGGERS } from '@shared/aliases'
-import type { JulesAlias, AliasTrigger } from '@shared/aliases'
+import { TRIGGERS } from '@shared/commands'
+import type { Command, Trigger } from '@shared/commands'
 import { isElectron } from '@shared/bridge'
 
-type AliasForm = Omit<JulesAlias, 'id'>
+type CommandForm = Omit<Command, 'id'>
 
 type FormState = {
-  trigger: AliasTrigger
+  trigger: Trigger
   command: string
   sessionId: string
   label: string
@@ -18,7 +18,7 @@ type FormState = {
 
 const EMPTY_STATE: FormState = { trigger: '/', command: '', sessionId: '', label: '', instructions: '', expects: '' }
 
-const TRIGGER_DESC: Record<AliasTrigger, string> = {
+const TRIGGER_DESC: Record<Trigger, string> = {
   '/': 'display — show last md, no Jules call',
   '?': 'query — send text, get md back',
   '!': 'action — fires instructions on Enter, no text needed',
@@ -26,10 +26,11 @@ const TRIGGER_DESC: Record<AliasTrigger, string> = {
   '#': 'tag (reserved)',
 }
 
-function toForm(s: FormState): AliasForm {
+function toForm(s: FormState): CommandForm {
   return {
     trigger: s.trigger,
     command: s.command,
+    type: 'jules',
     sessionId: s.sessionId,
     ...(s.label        && { label: s.label }),
     ...(s.instructions && { instructions: s.instructions }),
@@ -37,11 +38,11 @@ function toForm(s: FormState): AliasForm {
   }
 }
 
-function fromAlias(a: JulesAlias): FormState {
+function fromAlias(a: Command): FormState {
   return {
     trigger:      a.trigger      ?? '/',
     command:      a.command,
-    sessionId:    a.sessionId,
+    sessionId:    a.sessionId    ?? '',
     label:        a.label        ?? '',
     instructions: a.instructions ?? '',
     expects:      a.expects      ?? '',
@@ -49,8 +50,8 @@ function fromAlias(a: JulesAlias): FormState {
 }
 
 function AliasRow({ alias, onEdit, onDelete }: {
-  alias: JulesAlias
-  onEdit: (a: JulesAlias) => void
+  alias: Command
+  onEdit: (a: Command) => void
   onDelete: (id: string) => void
 }) {
   return (
@@ -83,9 +84,9 @@ function Field({ label, value, onChange, placeholder, list }: {
   )
 }
 
-function AliasFormRow({ initial, onSave, onCancel }: {
+function CommandFormRow({ initial, onSave, onCancel }: {
   initial: FormState
-  onSave: (form: AliasForm) => void
+  onSave: (form: CommandForm) => void
   onCancel: () => void
 }) {
   const [s, setS] = useState<FormState>(initial)
@@ -156,9 +157,9 @@ function AliasFormRow({ initial, onSave, onCancel }: {
 }
 
 export function AliasesPanel() {
-  const { aliases, status, add, update, remove } = useAliases()
+  const { userCommands: aliases, status, add, update, remove } = useCommands()
   const [adding, setAdding] = useState(false)
-  const [editing, setEditing] = useState<JulesAlias | null>(null)
+  const [editing, setEditing] = useState<Command | null>(null)
 
   return (
     <div className="space-y-1">
@@ -171,9 +172,9 @@ export function AliasesPanel() {
         <p className="text-xs text-fg-ghost py-1">no aliases yet</p>
       )}
       <div className="divide-y divide-hair">
-        {aliases.map((a: JulesAlias) =>
+        {aliases.map((a: Command) =>
           editing?.id === a.id ? (
-            <AliasFormRow
+            <CommandFormRow
               key={a.id}
               initial={fromAlias(a)}
               onSave={form => { update({ ...form, id: a.id }); setEditing(null) }}
@@ -185,7 +186,7 @@ export function AliasesPanel() {
         )}
       </div>
       {adding ? (
-        <AliasFormRow
+        <CommandFormRow
           initial={EMPTY_STATE}
           onSave={form => { add(form); setAdding(false) }}
           onCancel={() => { setAdding(false) }}

@@ -1,6 +1,6 @@
 import type { FsEntry, FsStat, ReaddirOptions, FileFilter } from './filesystem'
 import type { FuseManifest, FuseChangeEvent } from './fuse'
-import type { JulesAlias } from './aliases'
+import type { Command } from './commands'
 import type { HistoryEntry } from './history'
 import type { NoteMeta } from './notes'
 import type { AlarmEntry } from './alarms'
@@ -288,9 +288,9 @@ export interface NotesAPI {
 }
 
 export interface AliasesAPI {
-  get:       () => Promise<{ aliases: JulesAlias[]; fileFound: boolean }>
-  save:      (aliases: JulesAlias[]) => Promise<boolean>
-  onChanged: (cb: (aliases: JulesAlias[] | null) => void) => () => void
+  get:       () => Promise<{ aliases: Command[]; fileFound: boolean }>
+  save:      (aliases: Command[]) => Promise<boolean>
+  onChanged: (cb: (aliases: Command[] | null) => void) => () => void
 }
 
 export interface SnippetsAPI {

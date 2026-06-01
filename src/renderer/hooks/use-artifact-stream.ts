@@ -6,16 +6,13 @@ const POLL_MS = 3000
 
 export interface ArtifactStream {
   files: JulesLocalGeneratedFile[]
-  /** Count of files that arrived after this session became active (drives the "md received" notification). */
   freshCount: number
-  /** Force an immediate fetch (used by display mode). */
   refresh: () => void
 }
 
 export function useArtifactStream(sessionId: string | null): ArtifactStream {
   const [files, setFiles] = useState<JulesLocalGeneratedFile[]>([])
   const [freshCount, setFreshCount] = useState(0)
-  // Paths present when the session became active — anything beyond this is "fresh".
   const baselineRef = useRef<Set<string> | null>(null)
 
   const fetchFiles = useCallback(async (isInitial: boolean) => {
@@ -38,8 +35,6 @@ export function useArtifactStream(sessionId: string | null): ArtifactStream {
 
   useEffect(() => {
     baselineRef.current = null
-    // Initial fetch + poll, both via timer callbacks so setState never runs
-    // synchronously in the effect body.
     const initial = setTimeout(() => { void fetchFiles(true) }, 0)
     const id = setInterval(() => { void fetchFiles(false) }, POLL_MS)
     return () => { clearTimeout(initial); clearInterval(id) }

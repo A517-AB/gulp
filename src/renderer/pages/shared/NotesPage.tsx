@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { isElectron, notes } from '@shared/bridge'
-import { MarkdownEditor } from '@/components/markdown'
-import type { NoteBlock, NotePartialBlock } from '@/components/markdown'
+import { MarkdownEditor } from '@/components/markdown/Editor'
+import type { NoteBlock, NotePartialBlock } from '@/components/markdown/types'
 
 const NOTE_ID = 'default'
 const LS_KEY = `note:${NOTE_ID}`

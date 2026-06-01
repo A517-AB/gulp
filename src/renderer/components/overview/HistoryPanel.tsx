@@ -5,7 +5,6 @@ interface HistoryPanelProps {
   entries: HistoryEntry[]
   activeIndex: number
   onSelect: (entry: HistoryEntry) => void
-
   onRemove: (id: string) => void
 }
 

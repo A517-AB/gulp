@@ -1,52 +1,63 @@
 import { useState, useCallback, type KeyboardEvent } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { sdkIpc } from '@shared/bridge'
+import { TRIGGERS } from '@shared/commands'
+import type { Command } from '@shared/commands'
 import type { JulesLocalGeneratedFile } from '@shared/electron'
-import { TRIGGERS } from '@shared/aliases'
-import { useAliases } from './use-aliases'
-import { useHistory } from './use-history'
-import { useArtifactStream } from './use-artifact-stream'
-import { GhostInput } from './GhostInput'
-import { AliasMenu } from './AliasMenu'
-import { HistoryPanel } from './HistoryPanel'
-import { ArtifactPanel } from './ArtifactPanel'
-import { MdNotification } from './MdNotification'
-import { buildPrompt } from './lib'
-import type { JulesAlias } from './types'
-import type { HistoryEntry } from '@shared/history'
+import { useCommands } from '@/hooks/use-commands'
+import { useHistory } from '@/hooks/use-history'
+import { useArtifactStream } from '@/hooks/use-artifact-stream'
+import { GhostInput } from '@/components/overview/GhostInput'
+import { CommandMenu } from '@/components/overview/CommandMenu'
+import { HistoryPanel } from '@/components/overview/HistoryPanel'
+import { ArtifactPanel } from '@/components/overview/ArtifactPanel'
+import { MdNotification } from '@/components/overview/MdNotification'
 import SettingsPage from '../../shared/SettingsPage'
+import type { HistoryEntry } from '@shared/history'
 
-type PanelMode = 'none' | 'aliases' | 'history' | 'settings'
+type PanelMode = 'none' | 'commands' | 'history' | 'settings'
+
+function buildPrompt(cmd: Command, body: string): string {
+  const mdDirective = cmd.expects === 'md' ? 'Report back in markdown.' : undefined
+  return [body.trim(), cmd.instructions, mdDirective]
+    .filter((p): p is string => Boolean(p?.trim()))
+    .join('\n\n')
+}
 
 export default function OverviewPage() {
-  const { aliases } = useAliases()
+  const { commands } = useCommands()
   const { entries: historyEntries, push: pushHistory, remove: removeHistory } = useHistory()
-  const [activeAlias, setActiveAlias] = useState<JulesAlias | null>(null)
+  const [activeCommand, setActiveCommand] = useState<Command | null>(null)
   const [input, setInput] = useState('')
   const [panelMode, setPanelMode] = useState<PanelMode>('none')
   const [panelIndex, setPanelIndex] = useState(0)
   const [isSending, setIsSending] = useState(false)
   const [dismissedSession, setDismissedSession] = useState<string | null>(null)
+  const [commandQuery, setCommandQuery] = useState('')
 
-  const [aliasQuery, setAliasQuery] = useState('')
-
-  const filteredAliases = panelMode === 'aliases'
-    ? aliases.filter(a => !aliasQuery || a.command.toLowerCase().startsWith(aliasQuery.toLowerCase()))
+  const filteredCommands = panelMode === 'commands'
+    ? commands.filter(c => !commandQuery || c.command.toLowerCase().startsWith(commandQuery.toLowerCase()))
     : []
 
-  const artifactSessionId = activeAlias && activeAlias.sessionId !== dismissedSession
-    ? activeAlias.sessionId : null
+  const artifactSessionId = activeCommand?.type === 'jules' && activeCommand.sessionId !== dismissedSession
+    ? (activeCommand.sessionId ?? null) : null
 
   const { files, freshCount, refresh } = useArtifactStream(artifactSessionId)
   const hasArtifacts = artifactSessionId !== null && files.length > 0
 
   const closePanel = useCallback(() => { setPanelMode('none'); setPanelIndex(0) }, [])
 
-  const selectAlias = useCallback((alias: JulesAlias) => {
-    setActiveAlias(alias)
+  const selectCommand = useCallback((cmd: Command) => {
+    if (cmd.type === 'local' && cmd.action) {
+      setPanelMode(cmd.action as PanelMode)
+      setInput('')
+      setCommandQuery('')
+      return
+    }
+    setActiveCommand(cmd)
     setDismissedSession(null)
     setInput('')
-    setAliasQuery('')
+    setCommandQuery('')
     closePanel()
   }, [closePanel])
 
@@ -57,73 +68,63 @@ export default function OverviewPage() {
 
   const handleChange = useCallback((val: string) => {
     setInput(val)
-    
-    if (val === '/settings') {
-      setPanelMode('settings')
-      return
-    }
-
     const trigger = TRIGGERS.find(t => val.startsWith(t))
     if (trigger && !val.includes(' ')) {
-      setAliasQuery(val.slice(1))
-      setPanelMode('aliases')
+      setCommandQuery(val.slice(1))
+      setPanelMode('commands')
       setPanelIndex(0)
-    } else if (panelMode === 'aliases' || panelMode === 'settings') {
+    } else if (panelMode === 'commands' || panelMode === 'settings') {
       closePanel()
-      setAliasQuery('')
+      setCommandQuery('')
     }
     if (panelMode === 'history') closePanel()
   }, [panelMode, closePanel])
 
   const handleSend = useCallback(async () => {
-    if (!activeAlias || isSending) return
-    const trigger = activeAlias.trigger ?? '/'
+    if (!activeCommand || isSending || activeCommand.type !== 'jules') return
     const body = input.trim()
 
-    // / trigger is display-only — never sends to Jules
-    if (trigger === '/') {
+    if (activeCommand.trigger === '/') {
       refresh()
       return
     }
 
-    // empty + non-action: refresh without sending
-    if (body === '' && trigger !== '!') {
+    if (body === '' && activeCommand.trigger !== '!') {
       refresh()
       return
     }
 
-    if (!sdkIpc) return
+    if (!sdkIpc || !activeCommand.sessionId) return
     setInput('')
     setIsSending(true)
     try {
-      await sdkIpc.sendMessage(activeAlias.sessionId, buildPrompt(activeAlias, body))
+      await sdkIpc.sendMessage(activeCommand.sessionId, buildPrompt(activeCommand, body))
       if (body) void pushHistory(body)
     } catch (e) { console.error('[overview] send failed:', e) }
     finally { setIsSending(false) }
-  }, [input, activeAlias, isSending, refresh, pushHistory])
+  }, [input, activeCommand, isSending, refresh, pushHistory])
 
   const handleZip = useCallback(async (): Promise<JulesLocalGeneratedFile[]> => {
-    if (!activeAlias || !sdkIpc) return files
-    try { return await sdkIpc.getGeneratedFiles(activeAlias.sessionId) }
+    if (!activeCommand?.sessionId || !sdkIpc) return files
+    try { return await sdkIpc.getGeneratedFiles(activeCommand.sessionId) }
     catch { return files }
-  }, [activeAlias, files])
+  }, [activeCommand, files])
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
-    // Ctrl+Space → toggle alias picker
     if (e.code === 'Space' && e.ctrlKey && !e.shiftKey && !e.altKey) {
       e.preventDefault()
-      if (panelMode === 'aliases') { closePanel(); setAliasQuery('') }
-      else { setPanelMode('aliases'); setAliasQuery(''); setPanelIndex(0) }
+      if (panelMode === 'commands') { closePanel(); setCommandQuery('') }
+      else { setPanelMode('commands'); setCommandQuery(''); setPanelIndex(0) }
       return
     }
 
-    if (panelMode === 'aliases') {
-      if (e.key === 'ArrowDown') { e.preventDefault(); setPanelIndex(i => Math.min(i + 1, filteredAliases.length - 1)); return }
+    if (panelMode === 'commands') {
+      if (e.key === 'ArrowDown') { e.preventDefault(); setPanelIndex(i => Math.min(i + 1, filteredCommands.length - 1)); return }
       if (e.key === 'ArrowUp')   { e.preventDefault(); setPanelIndex(i => Math.max(i - 1, 0)); return }
-      if ((e.key === 'Enter' || e.key === 'Tab') && filteredAliases.length > 0) {
+      if ((e.key === 'Enter' || e.key === 'Tab') && filteredCommands.length > 0) {
         e.preventDefault()
-        const sel = filteredAliases[panelIndex]
-        if (sel) selectAlias(sel)
+        const sel = filteredCommands[panelIndex]
+        if (sel) selectCommand(sel)
         return
       }
       if (e.key === 'Escape') { closePanel(); return }
@@ -146,7 +147,6 @@ export default function OverviewPage() {
       if (e.key === 'Escape') { closePanel(); return }
     }
 
-    // Arrow Up from empty → open history
     if (e.key === 'ArrowUp' && input === '' && panelMode === 'none' && historyEntries.length > 0) {
       e.preventDefault()
       setPanelMode('history')
@@ -158,7 +158,7 @@ export default function OverviewPage() {
       e.preventDefault()
       void handleSend()
     }
-  }, [panelMode, filteredAliases, historyEntries, panelIndex, selectAlias, selectHistory, removeHistory, closePanel, input, handleSend])
+  }, [panelMode, filteredCommands, historyEntries, panelIndex, selectCommand, selectHistory, removeHistory, closePanel, input, handleSend])
 
   return (
     <div className="flex h-full w-full overflow-hidden relative">
@@ -175,7 +175,7 @@ export default function OverviewPage() {
             <ArtifactPanel
               files={files}
               onZip={handleZip}
-              onDismiss={() => { if (activeAlias) setDismissedSession(activeAlias.sessionId) }}
+              onDismiss={() => { if (activeCommand) setDismissedSession(activeCommand.sessionId ?? null) }}
             />
           </div>
         )}
@@ -186,10 +186,10 @@ export default function OverviewPage() {
         style={{ width: hasArtifacts ? '50%' : '100%' }}
       >
         <div className="px-14 pb-10">
-          {activeAlias && (
+          {activeCommand && (
             <p className="text-[10px] font-mono text-fg-ghost mb-3">
-              {activeAlias.trigger ?? '/'}{activeAlias.command}
-              {activeAlias.label && <span className="ml-1.5 opacity-50">{activeAlias.label}</span>}
+              {activeCommand.trigger}{activeCommand.command}
+              {activeCommand.label && <span className="ml-1.5 opacity-50">{activeCommand.label}</span>}
             </p>
           )}
 
@@ -199,11 +199,11 @@ export default function OverviewPage() {
                 <SettingsPage />
               </div>
             )}
-            {panelMode === 'aliases' && (
-              <AliasMenu
-                aliases={filteredAliases}
+            {panelMode === 'commands' && (
+              <CommandMenu
+                commands={filteredCommands}
                 activeIndex={panelIndex}
-                onSelect={selectAlias}
+                onSelect={selectCommand}
               />
             )}
             {panelMode === 'history' && (

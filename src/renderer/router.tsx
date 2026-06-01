@@ -1,8 +1,8 @@
 import { createHashRouter, type RouteObject } from 'react-router'
 // RouteObject cast needed: exactOptionalPropertyTypes makes children?: X[] incompatible with RouteObject[]
 import { isElectron, isWeb } from '@shared/bridge'
-import { RootLayout } from '@renderer/layouts'
-import { RouteErrorBoundary } from '@renderer/core'
+import RootLayout from '@renderer/layouts/RootLayout'
+import { RouteErrorBoundary } from '@renderer/core/ErrorBoundary'
 
 // ── dev ───────────────────────────────────────────────────────────────────────
 

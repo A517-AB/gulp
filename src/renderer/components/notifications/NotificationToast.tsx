@@ -36,11 +36,11 @@ function Toast({ item }: { item: AppNotification }) {
 
   const handleAction = async (action: string) => {
     try {
-      if (item.channel === 'alarm' && action === 'snooze' && item.meta?.alarmId) {
-        const minutes = parseInt(item.meta.snoozeMinutes || '5', 10)
-        await alarmsIpc?.snooze(item.meta.alarmId, minutes)
-      } else if (item.channel === 'session' && action === 'open' && item.meta?.sessionId) {
-        navigate(`/activity/${item.meta.sessionId}`)
+      if (item.channel === 'alarm' && action === 'snooze' && item.meta?.['alarmId']) {
+        const minutes = parseInt(item.meta['snoozeMinutes'] || '5', 10)
+        await alarmsIpc?.snooze(item.meta['alarmId'], minutes)
+      } else if (item.channel === 'session' && action === 'open' && item.meta?.['sessionId']) {
+        navigate(`/activity/${item.meta['sessionId']}`)
       }
     } finally {
       dismiss(item.id)
