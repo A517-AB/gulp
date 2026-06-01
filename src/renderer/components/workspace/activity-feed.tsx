@@ -42,8 +42,6 @@ export function ActivityFeed({ session, onArchive, showCodeDiffs, onToggleCodeDi
 
   const submit = async () => { await api.handleSendMessage(message); setMessage(""); };
 
-  if (api.loading) return <div className="flex items-center justify-center h-full bg-base"><p className="text-[10px] font-mono text-fg-dim uppercase tracking-widest">Loading activities...</p></div>;
-
   return (
     <div className="flex flex-col h-full bg-base">
       <div className="border-b border-hair bg-surface px-4 py-3">

@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/ui/avatar.tsx";
 import { Button } from "@/ui/button.tsx";
 import { BashOutput } from "@/ui/bash-output.tsx";
 import { BorderGlow } from "@/ui/border-glow.tsx";
+import { CardSpotlight } from "@/ui/card-spotlight.tsx";
 import { PlanContent } from "./plan-content.tsx";
 import { formatDate, getActivityTypeColor } from "@/utils/activity.ts";
 import type { Activity, ActivityGroup, ActivityRole } from "@/types/activity-feed.ts";
@@ -35,10 +36,14 @@ function isPlanGeneratedMetadata(value: unknown): value is { approved?: boolean 
   return !("approved" in value) || typeof value["approved"] === "boolean";
 }
 
+function isEmpty(value: unknown): boolean {
+  return isRecord(value) && Object.keys(value).length === 0
+}
+
 function ContentRenderer({ content }: { content: string }) {
   const parsed = parseJsonContent(content);
 
-  if (parsed.ok) {
+  if (parsed.ok && !isEmpty(parsed.value)) {
     if (isPlanContentData(parsed.value)) {
       return <PlanContent content={parsed.value} />;
     }
@@ -84,7 +89,9 @@ interface ActivityItemProps {
 function AgentCard({ children }: { children: React.ReactNode }) {
   return (
     <BorderGlow className="flex-1" containerClassName="bg-zinc-950/50">
-      <Card className="border-0 bg-transparent"><CardContent className="p-3">{children}</CardContent></Card>
+      <CardSpotlight className="border-0 bg-transparent rounded-lg">
+        <CardContent className="p-3">{children}</CardContent>
+      </CardSpotlight>
     </BorderGlow>
   );
 }

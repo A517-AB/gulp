@@ -13,25 +13,32 @@ export function useSessionList(): UseSessionListReturn {
 
   useEffect(() => { setArchivedIds(getArchivedSessions()); }, []);
 
-  const loadSessions = useCallback(async () => {
-    if (!client) { setLoading(false); return; }
+  const loadSessions = useCallback(async (isInitial = false) => {
+    if (!client) { if (isInitial) setLoading(false); return; }
     try {
-      setLoading(true);
+      if (isInitial) setLoading(true);
       setError(null);
-      setSessions(await client.listSessions());
+      const data = await client.listSessions();
+      setSessions(data);
     } catch (err) {
       if (err instanceof Error && err.message.includes("Resource not found")) {
         setSessions([]);
       } else {
         setError(err instanceof Error ? err.message : "Failed to load sessions");
-        setSessions([]);
+        if (isInitial) setSessions([]);
       }
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   }, [client]);
 
-  useEffect(() => { loadSessions(); }, [loadSessions]);
+  useEffect(() => { void loadSessions(true); }, [loadSessions]);
+
+  // Background refresh every 10s — no loading flash
+  useEffect(() => {
+    const id = setInterval(() => { void loadSessions(false); }, 10_000);
+    return () => { clearInterval(id); };
+  }, [loadSessions]);
 
   const visibleSessions = useMemo(() =>
     sessions
@@ -44,5 +51,5 @@ export function useSessionList(): UseSessionListReturn {
     [sessions, archivedIds, searchQuery],
   );
 
-  return { sessions: visibleSessions, allSessions: sessions, loading, error, searchQuery, setSearchQuery, loadSessions };
+  return { sessions: visibleSessions, allSessions: sessions, loading, error, searchQuery, setSearchQuery, loadSessions: () => loadSessions(false) };
 }
