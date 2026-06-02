@@ -12,7 +12,6 @@ import { GhostInput } from '@/components/overview/GhostInput'
 import { CommandMenu } from '@/components/overview/CommandMenu'
 import { HistoryPanel } from '@/components/overview/HistoryPanel'
 import { ArtifactPanel } from '@/components/overview/ArtifactPanel'
-import { MdNotification } from '@/components/overview/MdNotification'
 import SettingsPage from '../../shared/settings/SettingsPage'
 import type { HistoryEntry } from '@shared/history'
 
@@ -46,7 +45,7 @@ export default function OverviewPage() {
   const artifactSessionId = activeCommand?.type === 'jules' && activeCommand.sessionId !== dismissedSession
     ? (activeCommand.sessionId ?? null) : null
 
-  const { files, freshCount, refresh } = useArtifactStream(artifactSessionId)
+  const { files, refresh } = useArtifactStream(artifactSessionId)
   const hasArtifacts = artifactSessionId !== null && files.length > 0
 
   const closePanel = useCallback(() => { setPanelMode('none'); setPanelIndex(0) }, [])
@@ -202,8 +201,6 @@ export default function OverviewPage() {
         className="pointer-events-none absolute top-0 left-0 right-0 h-16 z-10"
         style={{ background: 'linear-gradient(to bottom, var(--color-base, #0a0a0a) 0%, transparent 100%)' }}
       />
-
-      <MdNotification trigger={freshCount} />
 
       <AnimatePresence>
         {hasArtifacts && (

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const FUSE_ROOT = 'D:/fuse'
-
+// TOREVIEW: wtf is this anyways.
 export const FuseSnippetType = z.enum(['snippet', 'build'])
 export type FuseSnippetType = z.infer<typeof FuseSnippetType>
 

@@ -6,7 +6,7 @@ import type { NoteMeta } from './notes'
 import type { AlarmEntry, ReminderEntry, HubNotification } from './hub'
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
-
+// TODO: figure out the setup here. the diffrence between the types in electron.d.ts and the the rest of the files and bridge.
 export type ShellType =
   | "pwsh"
   | "powershell"
