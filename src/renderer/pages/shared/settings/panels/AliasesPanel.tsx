@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useCommands } from '@/hooks/use-commands'
 import { SessionPicker } from './SessionPicker'
-import { TRIGGERS } from '@shared/commands'
-import type { Command, Trigger } from '@shared/commands'
+import { TRIGGERS, TRIGGER_META } from '@shared/commands'
+import type { Command, CommandType, Trigger } from '@shared/commands'
 import { isElectron } from '@shared/bridge'
 
 type CommandForm = Omit<Command, 'id'>
@@ -10,38 +10,35 @@ type CommandForm = Omit<Command, 'id'>
 interface FormState {
   trigger: Trigger
   command: string
+  type: CommandType
   sessionId: string
   label: string
   instructions: string
   expects: 'md' | 'zip' | ''
 }
 
-const EMPTY_STATE: FormState = { trigger: '/', command: '', sessionId: '', label: '', instructions: '', expects: '' }
-
-const TRIGGER_DESC: Record<Trigger, string> = {
-  '/': 'display — show last md, no Jules call',
-  '?': 'query — send text, get md back',
-  '!': 'action — fires instructions on Enter, no text needed',
-  '@': 'context (reserved)',
-  '#': 'tag (reserved)',
-}
+const EMPTY_STATE: FormState = { trigger: '%', command: '', type: 'jules', sessionId: '', label: '', instructions: '', expects: '' }
 
 function toForm(s: FormState): CommandForm {
-  return {
+  const base: CommandForm = {
     trigger: s.trigger,
     command: s.command,
-    type: 'jules',
-    sessionId: s.sessionId,
+    type: s.type,
     ...(s.label        && { label: s.label }),
     ...(s.instructions && { instructions: s.instructions }),
-    ...(s.expects      && { expects: s.expects }),
   }
+  if (s.type === 'jules') {
+    base.sessionId = s.sessionId
+    if (s.expects) base.expects = s.expects
+  }
+  return base
 }
 
 function fromAlias(a: Command): FormState {
   return {
-    trigger:      a.trigger      ?? '/',
+    trigger:      a.trigger      ?? '%',
     command:      a.command,
+    type:         a.type         ?? 'jules',
     sessionId:    a.sessionId    ?? '',
     label:        a.label        ?? '',
     instructions: a.instructions ?? '',
@@ -91,7 +88,8 @@ function CommandFormRow({ initial, onSave, onCancel }: {
 }) {
   const [s, setS] = useState<FormState>(initial)
   const set = (k: keyof FormState) => (v: string) => { setS(f => ({ ...f, [k]: v })) }
-  const valid = s.command.trim() !== '' && s.sessionId.trim() !== ''
+  const isJules = TRIGGER_META[s.trigger].kind === 'jules'
+  const valid = s.command.trim() !== '' && (!isJules || s.sessionId.trim() !== '')
 
   return (
     <div className="py-3 space-y-3 border-t border-hair">
@@ -102,7 +100,10 @@ function CommandFormRow({ initial, onSave, onCancel }: {
           {TRIGGERS.map(t => (
             <button
               key={t}
-              onClick={() => { setS(f => ({ ...f, trigger: t })) }}
+              onClick={() => {
+                const kind = TRIGGER_META[t].kind
+                setS(f => ({ ...f, trigger: t, type: kind === 'local' ? 'local' : 'jules' }))
+              }}
               className={`px-2 py-0.5 rounded font-mono text-xs transition-colors ${
                 s.trigger === t
                   ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
@@ -113,36 +114,45 @@ function CommandFormRow({ initial, onSave, onCancel }: {
             </button>
           ))}
         </div>
-        <p className="text-[10px] text-fg-ghost">{TRIGGER_DESC[s.trigger]}</p>
+        <p className="text-[10px] text-fg-ghost">
+          <span className="text-fg-dim">{TRIGGER_META[s.trigger].label}</span>
+          {' — '}{TRIGGER_META[s.trigger].description}
+        </p>
       </div>
 
-      {/* Command + Session */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* Command + Session (session only for Jules) */}
+      <div className={isJules ? 'grid grid-cols-2 gap-2' : ''}>
         <Field label="command" value={s.command} onChange={set('command')} placeholder="e.g. notes" />
-        <SessionPicker value={s.sessionId} onChange={v => { setS(f => ({ ...f, sessionId: v })) }} />
+        {isJules && (
+          <SessionPicker value={s.sessionId} onChange={v => { setS(f => ({ ...f, sessionId: v })) }} />
+        )}
       </div>
 
       {/* Label + Instructions */}
       <Field label="label" value={s.label} onChange={set('label')} placeholder="display name (optional)" />
-      <Field label="instructions" value={s.instructions} onChange={set('instructions')} placeholder="hidden context appended on send" />
+      {isJules && (
+        <Field label="instructions" value={s.instructions} onChange={set('instructions')} placeholder="hidden context appended on send" />
+      )}
 
-      {/* Expects */}
-      <div className="flex items-center gap-3">
-        <span className="text-[10px] font-mono text-fg-ghost">expects</span>
-        {(['', 'md', 'zip'] as const).map(v => (
-          <label key={v} className="flex items-center gap-1 text-[10px] font-mono text-fg-dim cursor-pointer">
-            <input
-              type="radio"
-              name="expects"
-              value={v}
-              checked={s.expects === v}
-              onChange={() => { setS(f => ({ ...f, expects: v })) }}
-              className="accent-violet-500"
-            />
-            {v || 'none'}
-          </label>
-        ))}
-      </div>
+      {/* Expects — Jules only */}
+      {isJules && (
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-mono text-fg-ghost">expects</span>
+          {(['', 'md', 'zip'] as const).map(v => (
+            <label key={v} className="flex items-center gap-1 text-[10px] font-mono text-fg-dim cursor-pointer">
+              <input
+                type="radio"
+                name="expects"
+                value={v}
+                checked={s.expects === v}
+                onChange={() => { setS(f => ({ ...f, expects: v })) }}
+                className="accent-violet-500"
+              />
+              {v || 'none'}
+            </label>
+          ))}
+        </div>
+      )}
 
       <div className="flex gap-2 pt-1">
         <button

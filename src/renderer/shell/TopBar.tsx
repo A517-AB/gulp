@@ -1,10 +1,17 @@
+import { useState, useEffect } from 'react';
 import type { TopBarProps } from './types';
 import { isElectron, windowControls } from '@shared/bridge';
 import { ThemeToggle } from '@/ui/theme-toggle';
 
 export function TopBar({ left, center, right }: TopBarProps) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     return (
-        <header className="app-drag-region h-toolbar grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-3 shrink-0 bg-transparent">
+        <header className={`app-drag-region h-toolbar grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-3 shrink-0 bg-transparent hover:opacity-100 transition-opacity duration-500 hover:duration-200 hover:delay-0 ${mounted ? 'opacity-0 delay-[4000ms]' : 'opacity-100'}`}>
             <div className="flex items-center gap-2 min-w-0 justify-start">
                 {left}
             </div>

@@ -5,3 +5,4 @@
 - [ ] ci-report button — session inspector, session is failed/stuck, paste error log, one button sends formatted failure back to same session via `sendMessage`.
 - [ ] monitor button — start stream on a session, display live in activity list. no LLM, just the raw stream. already wired, just needs the button.
 - [ ] Windows Terminal CLI — bun/node CLI wrapping the same SDK. monitor streaming especially. run outside Electron.
+- [ ] mcp-serve entry point — boot `createMcpHandler` from `scripts/mcp-server.ts` on a port. needs a small `scripts/mcp-serve.ts` runner.

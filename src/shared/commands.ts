@@ -1,7 +1,20 @@
-export const TRIGGERS = ['/', '?', '!', '@', '#'] as const
+export const TRIGGERS = ['%', '?', '!', '@', '#', '/'] as const
 export type Trigger = typeof TRIGGERS[number]
 
 export type CommandType = 'jules' | 'local' | 'script'
+
+export const TRIGGER_META: Record<Trigger, { label: string; description: string; kind: 'jules' | 'local' }> = {
+  '%': { label: 'display',  description: 'Show last MD from Jules session — no message sent',   kind: 'jules'  },
+  '?': { label: 'query',    description: 'Send text to Jules session, get MD back',              kind: 'jules'  },
+  '!': { label: 'action',   description: 'Fire instructions to Jules immediately, no text needed', kind: 'jules' },
+  '@': { label: 'message',  description: 'Send a message to Jules session right away',           kind: 'jules'  },
+  '#': { label: 'stream',   description: 'Stream live session activities',                       kind: 'jules'  },
+  '/': { label: 'local',    description: 'Local command — no Jules, fires instantly',            kind: 'local'  },
+}
+
+export function isJulesTrigger(t: Trigger): boolean {
+  return TRIGGER_META[t].kind === 'jules'
+}
 
 export interface Command {
   id: string

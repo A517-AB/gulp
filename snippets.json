@@ -2,6 +2,16 @@
   "version": 1,
   "items": [
     {
+      "id": "5701968b-4a0f-46fa-992e-2d0545e2d155",
+      "title": "dark-pipe",
+      "languageId": "python",
+      "type": "snippet",
+      "file": "snippets/python/dark-pipe.py",
+      "tags": [],
+      "createdAt": "2026-06-02T17:22:55.786Z",
+      "updatedAt": "2026-06-02T17:23:39.907Z"
+    },
+    {
       "id": "891517f6-1c35-449d-8f8e-f6662897acd6",
       "title": "dark-drop",
       "languageId": "javascript",

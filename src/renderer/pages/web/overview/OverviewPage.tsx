@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { sdkIpc } from '@shared/bridge'
 import { TRIGGERS } from '@shared/commands'
 import type { Command } from '@shared/commands'
+import { TRIGGER_META } from '@shared/commands'
 import type { JulesLocalGeneratedFile } from '@shared/electron'
 import { useCommands } from '@/hooks/use-commands'
 import { useHistory } from '@/hooks/use-history'
@@ -69,7 +70,8 @@ export default function OverviewPage() {
   const handleChange = useCallback((val: string) => {
     setInput(val)
     const trigger = TRIGGERS.find(t => val.startsWith(t))
-    if (trigger && !val.includes(' ')) {
+    // don't open command menu while a send is in flight
+    if (trigger && !val.includes(' ') && !isSending) {
       setCommandQuery(val.slice(1))
       setPanelMode('commands')
       setPanelIndex(0)
@@ -78,30 +80,61 @@ export default function OverviewPage() {
       setCommandQuery('')
     }
     if (panelMode === 'history') closePanel()
-  }, [panelMode, closePanel])
+  }, [panelMode, closePanel, isSending])
 
   const handleSend = useCallback(async () => {
-    if (!activeCommand || isSending || activeCommand.type !== 'jules') return
+    if (!activeCommand || isSending) return
+    const { trigger, type, sessionId, action } = activeCommand
     const body = input.trim()
 
-    if (activeCommand.trigger === '/') {
+    // local — fire action, never touches Jules
+    if (type === 'local') {
+      console.log('[overview] local command:', activeCommand.command, action)
+      if (action) setPanelMode(action as PanelMode)
+      return
+    }
+
+    // % display — refresh artifact panel, nothing sent
+    if (trigger === '%') {
+      console.log('[overview] display:', sessionId)
       refresh()
       return
     }
 
-    if (body === '' && activeCommand.trigger !== '!') {
+    // # stream — live activity stream (wired later)
+    if (trigger === '#') {
+      console.log('[overview] stream requested:', sessionId)
       refresh()
       return
     }
 
-    if (!sdkIpc || !activeCommand.sessionId) return
-    setInput('')
-    setIsSending(true)
-    try {
-      await sdkIpc.sendMessage(activeCommand.sessionId, buildPrompt(activeCommand, body))
-      if (body) void pushHistory(body)
-    } catch (e) { console.error('[overview] send failed:', e) }
-    finally { setIsSending(false) }
+    // @ message — send immediately, body optional
+    if (trigger === '@' || trigger === '!') {
+      if (!sdkIpc || !sessionId) { console.warn(`[overview] ${trigger} command missing sdkIpc or sessionId`); return }
+      const prompt = buildPrompt(activeCommand, body)
+      console.log(`[overview] ${TRIGGER_META[trigger].label} → session:`, sessionId)
+      setIsSending(true)
+      try {
+        await sdkIpc.sendMessage(sessionId, prompt)
+        if (body) void pushHistory(body)
+      } catch (e) { console.error('[overview] send failed:', e) }
+      finally { setIsSending(false) }
+      return
+    }
+
+    // ? query — needs body
+    if (trigger === '?') {
+      if (body === '') { refresh(); return }
+      if (!sdkIpc || !sessionId) { console.warn('[overview] ? command missing sdkIpc or sessionId'); return }
+      console.log('[overview] query →', sessionId)
+      setInput('')
+      setIsSending(true)
+      try {
+        await sdkIpc.sendMessage(sessionId, buildPrompt(activeCommand, body))
+        void pushHistory(body)
+      } catch (e) { console.error('[overview] query failed:', e) }
+      finally { setIsSending(false) }
+    }
   }, [input, activeCommand, isSending, refresh, pushHistory])
 
   const handleZip = useCallback(async (): Promise<JulesLocalGeneratedFile[]> => {
