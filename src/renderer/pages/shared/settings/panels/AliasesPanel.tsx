@@ -36,9 +36,9 @@ function toForm(s: FormState): CommandForm {
 
 function fromAlias(a: Command): FormState {
   return {
-    trigger:      a.trigger      ?? '%',
+    trigger:      a.trigger,
     command:      a.command,
-    type:         a.type         ?? 'jules',
+    type:         a.type,
     sessionId:    a.sessionId    ?? '',
     label:        a.label        ?? '',
     instructions: a.instructions ?? '',
@@ -53,7 +53,7 @@ function AliasRow({ alias, onEdit, onDelete }: {
 }) {
   return (
     <div className="flex items-center gap-3 py-2">
-      <span className="font-mono text-xs text-fg-primary w-32 truncate">{alias.trigger ?? '/'}{alias.command}</span>
+      <span className="font-mono text-xs text-fg-primary w-32 truncate">{alias.trigger}{alias.command}</span>
       <span className="text-xs text-fg-muted flex-1 truncate">{alias.label ?? alias.sessionId}</span>
       {alias.expects && (
         <span className="text-[10px] font-mono text-fg-ghost border border-hair rounded px-1">{alias.expects}</span>

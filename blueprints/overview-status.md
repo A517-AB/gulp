@@ -7,17 +7,18 @@ Last worked: 2026-06-02. Branch `master`, all pushed (commit `5510eda`).
 
 ## Trigger system
 
-Each command has a `trigger` prefix. Defined in `src/shared/commands.ts` (`Command`, `Trigger`, `CommandType`).
+Each command has a `trigger` prefix. Defined in `src/shared/commands.ts` (`Command`, `Trigger`, `CommandType`, `TRIGGER_META`).
 
-| Trigger | Name | Behavior |
-|---------|------|----------|
-| `/cmd` | display | Shows last MD from session. **No Jules call.** Press Enter = surface last artifact. |
-| `?cmd` | query | Send typed text to Jules, get MD back. Needs body text. |
-| `!cmd` | action | Fires `instructions` immediately on Enter. No body needed (but can override). |
-| `@cmd` | local | Calls internal app action via `cmd.action` field. |
-| `#cmd` | tag | Reserved |
+| Trigger | Name | Kind | Behavior |
+|---------|------|------|----------|
+| `%cmd` | display | jules | Refresh artifact panel. No message sent. |
+| `?cmd` | query | jules | Send typed body to Jules, get MD back. Needs body text. |
+| `!cmd` | action | jules | Fire `instructions` immediately on Enter. Body optional. |
+| `@cmd` | message | jules | Send message to Jules right away. Body optional. |
+| `#cmd` | stream | jules | Live session stream (wired to refresh for now). |
+| `/cmd` | local | local | Fire `cmd.action`. Never touches Jules. |
 
-**Rule**: `/` never touches Jules. `!` fires without waiting for user input. `?` / `#` require a body. `@` dispatches to a local `PanelMode` (e.g. `action: 'settings'`).
+**Rules**: `/` is local-only (no Jules). `%` = read-only refresh. `?` needs a body. `!`/`@` send immediately. `#` is reserved for streaming. `TRIGGER_META` drives both AliasesPanel UI and OverviewPage dispatch.
 
 ## Command storage
 - **Electron**: `aliases/aliases.json` — written immediately on every mutation, watched by chokidar. External edits push to UI automatically.
@@ -25,11 +26,14 @@ Each command has a `trigger` prefix. Defined in `src/shared/commands.ts` (`Comma
 - **Schema**: `src/shared/commands.ts` → `Command` interface. `normalizeCommand()` for safe parsing.
 
 ## How it works now
-`/cmd` (or `?cmd`, `!cmd`, etc.) maps to a Jules session. Behavior decided by trigger + send time:
-- `/cmd` + Enter → **display mode**: calls `refresh()`, surfaces session's last MD. Nothing sent.
-- `!cmd` + Enter → **action mode**: fires `instructions` immediately (no body needed).
-- `?cmd <text>` + Enter → **send mode**: sends `text` + `cmd.instructions` + "Report back in markdown." if `expects: 'md'`.
-- `@cmd` + Enter → **local mode**: sets `panelMode` to `cmd.action` (e.g. opens settings panel). Needs `action` field in alias.
+`%cmd`, `?cmd`, `!cmd`, `@cmd`, `#cmd` map to Jules sessions. `/cmd` is local only.
+
+- `%cmd` + Enter → **display**: calls `refresh()`, surfaces last MD. Nothing sent.
+- `?cmd <text>` + Enter → **query**: sends `text + instructions + md-directive`. Clears input on send.
+- `!cmd` + Enter → **action**: fires `instructions` immediately. Body optional (appended if present).
+- `@cmd` + Enter → **message**: sends body (can be empty) to Jules immediately.
+- `#cmd` + Enter → **stream**: currently wired to `refresh()`, streaming not yet built.
+- `/cmd` + Enter → **local**: sets `panelMode` to `cmd.action` (e.g. opens settings panel). Needs `action` field.
 
 Affordances:
 - **MdNotification** — subtle "markdown received" toast, fires only on genuinely new MD.
@@ -69,9 +73,9 @@ Enter pressed → handleSend() → sdkIpc.sendMessage() (or refresh() if trigger
 ```
 
 ## Known gaps
-- `@sessions` alias has no `action` field → `selectCommand` falls through silently, does nothing
-- `type: local` commands without `action` are dead — need either `action` wired or a handler added
-- Single-letter triggers work (e.g. `!m`) but `Trigger` type is locked to `['/', '?', '!', '@', '#']`
+- `@sessions` alias: trigger `@` is now Jules-message, but it has `type: local` and no `action` → still broken
+- `/` local commands without `action` field are dead — `selectCommand` falls through silently
+- `#` stream trigger wired to `refresh()` only — actual streaming not built yet
 
 ## Deferred (designed, not built)
 - `#` trigger semantics (reserved, no behavior yet)
@@ -83,4 +87,4 @@ Enter pressed → handleSend() → sdkIpc.sendMessage() (or refresh() if trigger
 Windows, Electron. `npm start` (build + launch) or `npm run build` then `npm run run:e`.
 
 ## State
-typecheck ✓  lint ✓ — as of 2026-06-02.
+typecheck ✓  lint ✓ — trigger redesign complete as of 2026-06-02.

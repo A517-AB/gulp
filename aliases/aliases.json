@@ -10,7 +10,7 @@
   },
   {
     "id": "74c11ef8-b253-4262-8623-85b3ceb10656",
-    "trigger": "/",
+    "trigger": "%",
     "command": "testing",
     "type": "jules",
     "sessionId": "11366880273185694377"

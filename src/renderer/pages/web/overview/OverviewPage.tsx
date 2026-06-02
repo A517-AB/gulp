@@ -1,4 +1,4 @@
-import { useState, useCallback, type KeyboardEvent } from 'react'
+import { useState, useCallback, useMemo, type KeyboardEvent } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { sdkIpc } from '@shared/bridge'
 import { TRIGGERS } from '@shared/commands'
@@ -36,9 +36,12 @@ export default function OverviewPage() {
   const [dismissedSession, setDismissedSession] = useState<string | null>(null)
   const [commandQuery, setCommandQuery] = useState('')
 
-  const filteredCommands = panelMode === 'commands'
-    ? commands.filter(c => !commandQuery || c.command.toLowerCase().startsWith(commandQuery.toLowerCase()))
-    : []
+  const filteredCommands = useMemo(
+    () => panelMode === 'commands'
+      ? commands.filter(c => !commandQuery || c.command.toLowerCase().startsWith(commandQuery.toLowerCase()))
+      : [],
+    [panelMode, commands, commandQuery],
+  )
 
   const artifactSessionId = activeCommand?.type === 'jules' && activeCommand.sessionId !== dismissedSession
     ? (activeCommand.sessionId ?? null) : null
