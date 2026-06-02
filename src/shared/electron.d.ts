@@ -3,8 +3,7 @@ import type { FuseManifest, FuseChangeEvent } from './fuse'
 import type { Command } from './commands'
 import type { HistoryEntry } from './history'
 import type { NoteMeta } from './notes'
-import type { AlarmEntry } from './alarms'
-import type { AppNotification } from './notifications'
+import type { AlarmEntry, ReminderEntry, HubNotification } from './hub'
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
 
@@ -274,9 +273,18 @@ export interface AlarmsAPI {
   onChanged: (cb: () => void) => () => void
 }
 
+export interface RemindersAPI {
+  list:      () => Promise<ReminderEntry[]>
+  save:      (reminder: ReminderEntry) => Promise<boolean>
+  delete:    (id: string) => Promise<boolean>
+  toggle:    (id: string, enabled: boolean) => Promise<boolean>
+  done:      (id: string) => Promise<boolean>
+  onChanged: (cb: () => void) => () => void
+}
+
 export interface NotificationsAPI {
-  send:       (n: AppNotification) => void
-  onReceived: (cb: (n: AppNotification) => void) => () => void
+  send:       (n: HubNotification) => void
+  onReceived: (cb: (n: HubNotification) => void) => () => void
 }
 
 export interface NotesAPI {
@@ -332,6 +340,7 @@ export interface JulesLocalAPI {
     | { success: true; branch: string; commitMessage: string; dryRun?: boolean }
     | { success: false; error: string }
   >;
+  listSessions: (options?: { limit?: number; filter?: string }) => Promise<JulesLocalSessionInfo[]>;
 }
 
 // ── root ───────────────────────────────────────────────────────────────────────
@@ -349,6 +358,7 @@ export interface ElectronAPI {
   notes:         NotesAPI;
   alarms:        AlarmsAPI;
   notifications: NotificationsAPI;
+  reminders:     RemindersAPI;
   snippets:      SnippetsAPI;
   sdkIpc:   JulesLocalAPI;
 }

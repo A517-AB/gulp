@@ -169,7 +169,7 @@ export function uniqueID(): string {
   if (typeof window === 'undefined') return getUniqueID();
   
   const num = new Uint16Array(5);
-  const intCrypto = (window as any).msCrypto || window.crypto;
+  const intCrypto = (window as Window & { msCrypto?: Crypto }).msCrypto || window.crypto;
   intCrypto.getRandomValues(num);
   
   return Array.from(num).join('-');
@@ -245,7 +245,7 @@ export function setImmediate(handler: () => void): () => void {
   
   let unbind: () => void;
   const num = new Uint16Array(5);
-  const intCrypto = (window as any).msCrypto || window.crypto;
+  const intCrypto = (window as Window & { msCrypto?: Crypto }).msCrypto || window.crypto;
   intCrypto.getRandomValues(num);
   const secret = 'ca2' + Array.from(num).join('');
   
@@ -330,20 +330,24 @@ export function throwError(message: string): never {
 
 const INSTANCES_KEY = 'ca_instances';
 
+type InstanceElement<T = unknown> = HTMLElement & {
+  [INSTANCES_KEY]?: T[];
+};
+
 /**
  * Get component instance from an element.
  */
 export function getInstance<T>(
   element: string | HTMLElement, 
-  component: new (...args: any[]) => T
+  component: new (...args: never[]) => T
 ): T | null {
   const elem = typeof element === 'string' 
-    ? document.querySelector(element)!
-    : element;
+    ? document.querySelector<InstanceElement<T>>(element)
+    : element as InstanceElement<T>;
     
   if (!elem) return null;
   
-  const instances = (elem as any)[INSTANCES_KEY] as T[] | undefined;
+  const instances = elem[INSTANCES_KEY];
   
   if (instances) {
     for (const inst of instances) {
@@ -361,15 +365,15 @@ export function getInstance<T>(
  */
 export function addInstance(element: string | HTMLElement, instance: unknown): void {
   const elem = typeof element === 'string' 
-    ? document.querySelector(element)!
-    : element;
+    ? document.querySelector<InstanceElement>(element)
+    : element as InstanceElement;
     
   if (!elem) return;
   
-  if ((elem as any)[INSTANCES_KEY]) {
-    (elem as any)[INSTANCES_KEY].push(instance);
+  if (elem[INSTANCES_KEY]) {
+    elem[INSTANCES_KEY].push(instance);
   } else {
-    (elem as any)[INSTANCES_KEY] = [instance];
+    elem[INSTANCES_KEY] = [instance];
   }
 }
 

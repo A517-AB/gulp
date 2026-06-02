@@ -4,10 +4,6 @@ import { isElectron, isWeb } from '@shared/bridge'
 import RootLayout from '@renderer/layouts/RootLayout'
 import { RouteErrorBoundary } from '@renderer/core/ErrorBoundary'
 
-// ── dev ───────────────────────────────────────────────────────────────────────
-
-
-
 // ── types ─────────────────────────────────────────────────────────────────────
 
 export type AppRoute = Omit<RouteObject, 'handle'> & {
@@ -30,7 +26,7 @@ const electronRoutes: AppRoute[] = [
     { path: 'repos',        lazy: async () => ({ Component: (await import('@renderer/pages/electron/ReposPage')).default }), handle: { title: 'Repos',    inNav: true } },
     { path: 'queues',       lazy: async () => ({ Component: (await import('@renderer/pages/electron/QueuesPage')).default }), handle: { title: 'Queues',   inNav: true } },
     { path: 'snippets',     lazy: async () => ({ Component: (await import('@renderer/pages/electron/SnippetsPage')).SnippetsPage }), handle: { title: 'Snippets', inNav: true } },
-    { path: 'alarms',       lazy: async () => ({ Component: (await import('@renderer/pages/electron/AlarmsPage')).default }), handle: { title: 'Alarms',   inNav: true } },
+    { path: 'hub',           lazy: async () => ({ Component: (await import('@renderer/pages/electron/HubPage')).default }),    handle: { title: 'Hub',      inNav: true } },
     { path: 'activity/:id', lazy: async () => ({ Component: (await import('@renderer/pages/electron/ActivityPage')).default }) },
     { path: 'snapshot/:id', lazy: async () => ({ Component: (await import('@renderer/pages/electron/SnapshotPage')).default }) },
 ]
@@ -53,6 +49,7 @@ export const router = createHashRouter([
     {
         path: '/',
         Component: RootLayout,
+        HydrateFallback: () => null,
         errorElement: <RouteErrorBoundary />,
         children: navRoutes as RouteObject[],
     },

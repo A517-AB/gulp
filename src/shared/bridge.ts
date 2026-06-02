@@ -18,5 +18,6 @@ export const aliases       = el?.aliases       ?? null;
 export const notes         = el?.notes         ?? null;
 export const alarms        = el?.alarms        ?? null;
 export const notifications = el?.notifications ?? null;
+export const reminders     = el?.reminders     ?? null;
 export const snippets      = el?.snippets      ?? null;
 export const sdkIpc   = el?.sdkIpc   ?? null;

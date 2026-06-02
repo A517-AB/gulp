@@ -2,8 +2,7 @@ import { ipcMain, app } from 'electron'
 import type { WebContents } from 'electron'
 import fs from 'fs-extra'
 import * as path from 'path'
-import type { AlarmEntry } from '../src/shared/alarms'
-import type { AppNotification } from '../src/shared/notifications'
+import type { AlarmEntry, HubNotification } from '../../src/shared/hub'
 import { dispatchNotification } from './notifications'
 
 const ALARMS_PATH = path.join(app.getPath('userData'), 'alarms.json')
@@ -12,7 +11,7 @@ async function read(): Promise<AlarmEntry[]> {
   try {
     const exists = await fs.pathExists(ALARMS_PATH)
     if (!exists) return []
-    const raw = await fs.readJson(ALARMS_PATH)
+    const raw: unknown = await fs.readJson(ALARMS_PATH)
     return Array.isArray(raw) ? (raw as AlarmEntry[]) : []
   } catch { return [] }
 }
@@ -32,6 +31,7 @@ function shouldFire(alarm: AlarmEntry, now: Date): boolean {
     case 'daily':    return true
     case 'weekdays': return day >= 1 && day <= 5
     case 'weekly':   return day === alarm.dayOfWeek
+    default:         return false
   }
 }
 
@@ -47,14 +47,15 @@ export function registerAlarmsHandlers(getWebContents: () => WebContents | null)
       if (idx >= 0) alarms[idx] = alarm
       else alarms.push(alarm)
       await write(alarms)
+      getWebContents()?.send('alarms.changed')
       return true
     } catch { return false }
   })
 
   ipcMain.handle('alarms.delete', async (_e, id: string): Promise<boolean> => {
     try {
-      const alarms = (await read()).filter((a) => a.id !== id)
-      await write(alarms)
+      await write((await read()).filter((a) => a.id !== id))
+      getWebContents()?.send('alarms.changed')
       return true
     } catch { return false }
   })
@@ -67,6 +68,7 @@ export function registerAlarmsHandlers(getWebContents: () => WebContents | null)
       alarm.enabled = enabled
       if (enabled) delete alarm.lastFiredDate
       await write(alarms)
+      getWebContents()?.send('alarms.changed')
       return true
     } catch { return false }
   })
@@ -78,13 +80,16 @@ export function registerAlarmsHandlers(getWebContents: () => WebContents | null)
       if (!src) return false
       const fire = new Date(Date.now() + minutes * 60_000)
       const snooze: AlarmEntry = {
-        ...src,
-        id: crypto.randomUUID(),
-        label: `${src.label} (snoozed)`,
-        hour: fire.getHours(),
-        minute: fire.getMinutes(),
-        repeat: 'none',
-        createdAt: new Date().toISOString(),
+        id:            crypto.randomUUID(),
+        label:         `${src.label} (snoozed)`,
+        hour:          fire.getHours(),
+        minute:        fire.getMinutes(),
+        repeat:        'none',
+        dayOfWeek:     src.dayOfWeek,
+        enabled:       true,
+        sound:         src.sound,
+        snoozeMinutes: src.snoozeMinutes,
+        createdAt:     new Date().toISOString(),
       }
       alarms.push(snooze)
       await write(alarms)
@@ -93,8 +98,7 @@ export function registerAlarmsHandlers(getWebContents: () => WebContents | null)
     } catch { return false }
   })
 
-  // Check every 30s; fire if we're in the right minute window
-  setInterval(async () => {
+  setInterval(() => { void (async () => {
     const now = new Date()
     const alarms = await read()
     let dirty = false
@@ -105,15 +109,15 @@ export function registerAlarmsHandlers(getWebContents: () => WebContents | null)
       if (alarm.repeat === 'none') alarm.enabled = false
       dirty = true
 
-      const notification: AppNotification = {
-        id: crypto.randomUUID(),
-        channel: 'alarm',
-        title: alarm.label || 'Alarm',
-        body: `${String(alarm.hour).padStart(2, '0')}:${String(alarm.minute).padStart(2, '0')}`,
+      const notification: HubNotification = {
+        id:        crypto.randomUUID(),
+        channel:   'alarm',
+        title:     alarm.label || 'Alarm',
+        body:      `${String(alarm.hour).padStart(2, '0')}:${String(alarm.minute).padStart(2, '0')}`,
+        sound:     alarm.sound,
+        actions:   ['dismiss', 'snooze'],
+        meta:      { alarmId: alarm.id, snoozeMinutes: String(alarm.snoozeMinutes) },
         timestamp: now.toISOString(),
-        sound: alarm.sound,
-        actions: ['dismiss', 'snooze'],
-        meta: { alarmId: alarm.id, snoozeMinutes: String(alarm.snoozeMinutes) },
       }
       dispatchNotification(notification, getWebContents())
     }
@@ -122,5 +126,5 @@ export function registerAlarmsHandlers(getWebContents: () => WebContents | null)
       await write(alarms)
       getWebContents()?.send('alarms.changed')
     }
-  }, 30_000)
+  })() }, 10_000)
 }

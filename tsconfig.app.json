@@ -28,6 +28,8 @@
       "@/lib/*": ["./src/renderer/lib/*"],
       "@/utils": ["./src/renderer/utils/index.ts"],
       "@/utils/*": ["./src/renderer/utils/*"],
+      "@/features": ["./src/renderer/features"],
+      "@/features/*": ["./src/renderer/features/*"],
     },
 
     /* Bundler mode */

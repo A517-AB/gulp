@@ -1,5 +1,4 @@
 import { ipcMain, type WebContents } from 'electron'
-import { dispatchNotification } from './notifications'
 import {
   connect,
   jules,
@@ -9,7 +8,6 @@ import {
   type SessionResource,
   type Source,
 } from '@google/jules-sdk'
-import { randomUUID } from 'node:crypto'
 import { execFileSync } from 'child_process'
 import { writeFileSync, unlinkSync } from 'fs'
 import * as path from 'path'
@@ -123,7 +121,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 function getStreamKey(sender: WebContents, sessionId: string): string {
-  return `${sender.id}:${sessionId}`
+  return `${String(sender.id)}:${sessionId}`
 }
 
 function emitStreamState(
@@ -219,7 +217,7 @@ function serializeChangeSetArtifact(artifact: ChangeSetLike): JulesLocalArtifact
     type: 'changeSet',
     source: artifact.source,
     diff: artifact.gitPatch.unidiffPatch,
-    summary: `${parsed.summary.totalFiles} files changed`,
+    summary: `${String(parsed.summary.totalFiles)} files changed`,
     files,
   }
 }
@@ -265,10 +263,10 @@ function getPullRequestUrl(session: SessionResource): string | undefined {
 function serializeSessionInfo(session: SessionResource): JulesLocalSessionInfo {
   const source = session.source?.type === 'githubRepo'
     ? `${session.source.githubRepo.owner}/${session.source.githubRepo.repo}`
-    : session.sourceContext?.source
+    : session.sourceContext.source
   const branch =
-    session.sourceContext?.githubRepoContext?.startingBranch ??
-    session.sourceContext?.workingBranch
+    session.sourceContext.githubRepoContext?.startingBranch ??
+    session.sourceContext.workingBranch
   const pullRequestUrl = getPullRequestUrl(session)
 
   return {
@@ -389,7 +387,7 @@ function serializeActivity(activity: Activity): JulesLocalActivity {
     type: activity.type,
     createTime: activity.createTime,
     ...(originator ? { originator } : {}),
-    artifacts: (activity.artifacts ?? []).map(serializeArtifact),
+    artifacts: activity.artifacts.map(serializeArtifact),
   }
 
   switch (activity.type) {
@@ -474,21 +472,11 @@ async function finishStream(
     ...(info ? { info: serializeSessionInfo(info) } : {}),
   })
 
-  dispatchNotification({
-    id: randomUUID(),
-    channel: 'session',
-    title: state === 'completed' ? 'Jules Session Complete' : 'Jules Session Failed',
-    body: info?.title || `Session ${sessionId.slice(0, 8)}`,
-    timestamp: new Date().toISOString(),
-    sound: true,
-    actions: ['open', 'dismiss'],
-    meta: { sessionId }
-  }, sender)
 }
 
 export function registerJulesLocalHandlers() {
-  ipcMain.handle('jules.apiKey.set', async (_event, apiKey: string | null) => {
-    apiKeyOverride = apiKey && apiKey.trim() ? apiKey.trim() : null
+  ipcMain.handle('jules.apiKey.set', (_event, apiKey: string | null) => {
+    apiKeyOverride = apiKey?.trim() ? apiKey.trim() : null
     return true
   })
 
@@ -531,9 +519,7 @@ export function registerJulesLocalHandlers() {
       const sources: JulesLocalSource[] = []
 
       for await (const source of getClient().sources()) {
-        if (source.type === 'githubRepo') {
-          sources.push(serializeSource(source))
-        }
+        sources.push(serializeSource(source))
       }
 
       return sources.sort((left, right) => left.fullName.localeCompare(right.fullName))
@@ -592,7 +578,7 @@ export function registerJulesLocalHandlers() {
 
       const runs = await getClient().all(
         repositories,
-        async (repository) => ({
+        (repository) => ({
           prompt: issue,
           title: toFleetTitle(repository, issue, request.titlePrefix),
           source: {
@@ -664,7 +650,7 @@ export function registerJulesLocalHandlers() {
     },
   )
 
-  ipcMain.handle('jules.stream.start', async (event, sessionId: string) => {
+  ipcMain.handle('jules.stream.start', (event, sessionId: string) => {
     const key = getStreamKey(event.sender, sessionId)
     if (activeStreams.has(key)) {
       return
@@ -707,9 +693,23 @@ export function registerJulesLocalHandlers() {
     })()
   })
 
-  ipcMain.handle('jules.stream.stop', async (event, sessionId: string) => {
+  ipcMain.handle('jules.stream.stop', (event, sessionId: string) => {
     stopActiveStream(event.sender, sessionId)
   })
+
+  ipcMain.handle(
+    'jules.sessions.list',
+    async (_event, options?: { limit?: number; filter?: string }): Promise<JulesLocalSessionInfo[]> => {
+      const sessions: JulesLocalSessionInfo[] = []
+      for await (const session of getClient().sessions({
+        ...(options?.limit ? { limit: options.limit } : {}),
+        ...(options?.filter ? { filter: options.filter } : {}),
+      })) {
+        sessions.push(serializeSessionInfo(session))
+      }
+      return sessions
+    },
+  )
 
   ipcMain.handle('jules.applyPatch', async (_e, sessionId: string, opts: ApplyPatchOptions): Promise<ApplyPatchResult> => {
     try {
@@ -717,13 +717,13 @@ export function registerJulesLocalHandlers() {
       const snapshot = await session.snapshot()
       const changeSet = snapshot.changeSet()
 
-      if (!changeSet?.gitPatch?.unidiffPatch) {
+      if (!changeSet?.gitPatch.unidiffPatch) {
         return { success: false, error: 'No git patch found in this session.' }
       }
 
       const { unidiffPatch, suggestedCommitMessage } = changeSet.gitPatch
-      const branch = opts.branch ?? `jules-${sessionId.slice(0, 8)}-${Date.now()}`
-      const commitMessage = suggestedCommitMessage || `Jules: ${snapshot.title}`
+      const branch = opts.branch ?? `jules-${sessionId.slice(0, 8)}-${String(Date.now())}`
+      const commitMessage = suggestedCommitMessage ? suggestedCommitMessage : `Jules: ${snapshot.title}`
 
       if (opts.dryRun) {
         return { success: true, branch, commitMessage, dryRun: true }
@@ -738,14 +738,15 @@ export function registerJulesLocalHandlers() {
         unlinkSync(patchPath)
         execFileSync('git', ['add', '.'], { cwd: opts.cwd, stdio: 'pipe' })
         execFileSync('git', ['commit', '-m', commitMessage], { cwd: opts.cwd, stdio: 'pipe' })
-      } catch (e: any) {
-        try { unlinkSync(patchPath) } catch {}
-        return { success: false, error: e.stderr?.toString().trim() || e.message }
+      } catch (err: unknown) {
+        try { unlinkSync(patchPath) } catch { /* ignore cleanup error */ }
+        const execErr = err as { stderr?: Buffer; message?: string }
+        return { success: false, error: execErr.stderr?.toString().trim() ?? execErr.message ?? String(err) }
       }
 
       return { success: true, branch, commitMessage }
-    } catch (e: any) {
-      return { success: false, error: e.message ?? String(e) }
+    } catch (err: unknown) {
+      return { success: false, error: err instanceof Error ? err.message : String(err) }
     }
   })
 }
