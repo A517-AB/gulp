@@ -13,13 +13,14 @@ import { registerFilesystemHandlers } from "./filesystem/handlers";
 import { registerSnippetsHandlers } from "./snippets";
 import { registerGitHandlers } from "./git";
 import { registerGitHubHandlers } from "./github";
-import { registerJulesLocalHandlers } from "./julesLocal";
+import { registerJulesLocalHandlers } from "./juleslocal";
 import { registerAliasesHandlers } from "./aliases";
 import { registerHistoryHandlers } from "./history";
 import { registerNotesHandlers } from "./notes";
-import { registerAlarmsHandlers } from "./alarms";
-import { dispatchNotification } from "./notifications";
-import type { AppNotification } from "../src/shared/notifications";
+import { registerAlarmsHandlers } from "./hub/alarms";
+import { registerRemindersHandlers } from "./hub/reminders";
+import { dispatchNotification } from "./hub/notifications";
+import type { HubNotification } from "../src/shared/hub";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,12 +37,17 @@ let forceQuit = false;
 function buildTrayIcon(): ReturnType<typeof nativeImage.createFromBuffer> {
   const size = 16
   const buf = Buffer.alloc(size * size * 4, 0)
+  const R = 8.0
+  const sqrt3 = Math.sqrt(3)
+  
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      const dx = x - size / 2 + 0.5
-      const dy = y - size / 2 + 0.5
+      const dx = Math.abs(x - size / 2 + 0.5)
+      const dy = Math.abs(y - size / 2 + 0.5)
       const idx = (y * size + x) * 4
-      if (Math.sqrt(dx * dx + dy * dy) <= size / 2 - 1) {
+      
+      // Flat-topped hexagon equation
+      if (dy <= R * (sqrt3 / 2) && (dy + sqrt3 * dx <= sqrt3 * R)) {
         buf[idx] = 139; buf[idx + 1] = 92; buf[idx + 2] = 246; buf[idx + 3] = 255
       }
     }
@@ -58,6 +64,9 @@ function createWindow() {
     width: 1200,
     height: 800,
     titleBarStyle: "hidden",
+    icon: isDev 
+      ? path.join(__dirname, "../public/icon.png")
+      : path.join(__dirname, "../dist/icon.png"),
     webPreferences: {
       preload: preloadPath,
       contextIsolation: true,
@@ -130,7 +139,8 @@ app.whenReady().then(() => {
   registerHistoryHandlers();
   registerNotesHandlers(() => mainWindow?.webContents ?? null);
   registerAlarmsHandlers(() => mainWindow?.webContents ?? null);
-  ipcMain.on("notification.send", (_e, n: AppNotification) => {
+  registerRemindersHandlers(() => mainWindow?.webContents ?? null);
+  ipcMain.on("notification.send", (_e, n: HubNotification) => {
     dispatchNotification(n, mainWindow?.webContents ?? null);
   });
   createWindow();
