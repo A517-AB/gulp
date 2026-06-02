@@ -16,19 +16,22 @@ export interface Command {
   script?: string
 }
 
+function str(val: unknown, fallback = ''): string {
+  return typeof val === 'string' ? val : fallback
+}
+
 export function normalizeCommand(raw: Record<string, unknown>): Command {
-  const r = raw
   const out: Command = {
-    id:      String(r['id'] ?? crypto.randomUUID()),
-    trigger: (r['trigger'] as Trigger) ?? '/',
-    command: String(r['command'] ?? ''),
-    type:    (r['type'] as CommandType) ?? 'jules',
+    id:      str(raw['id']) || crypto.randomUUID(),
+    trigger: (raw['trigger'] as Trigger | undefined) ?? '/',
+    command: str(raw['command']),
+    type:    (raw['type'] as CommandType | undefined) ?? 'jules',
   }
-  if (r['label'])        out.label        = String(r['label'])
-  if (r['sessionId'])    out.sessionId    = String(r['sessionId'])
-  if (r['instructions']) out.instructions = String(r['instructions'])
-  if (r['expects'])      out.expects      = r['expects'] as 'md' | 'zip'
-  if (r['action'])       out.action       = String(r['action'])
-  if (r['script'])       out.script       = String(r['script'])
+  if (raw['label'])        out.label        = str(raw['label'])
+  if (raw['sessionId'])    out.sessionId    = str(raw['sessionId'])
+  if (raw['instructions']) out.instructions = str(raw['instructions'])
+  if (raw['expects'])      out.expects      = raw['expects'] as 'md' | 'zip'
+  if (raw['action'])       out.action       = str(raw['action'])
+  if (raw['script'])       out.script       = str(raw['script'])
   return out
 }

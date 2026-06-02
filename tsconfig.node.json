@@ -38,6 +38,7 @@
   "include": [
     "electron/**/*.ts",
     "electron/**/*.mts",
+    "scripts/**/*.ts",
     "vite.config.ts"
   ],
   "exclude": []

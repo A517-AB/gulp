@@ -1,0 +1,33 @@
+[
+  {
+    "id": "example-1",
+    "trigger": "?",
+    "command": "notes",
+    "type": "jules",
+    "label": "my notes",
+    "sessionId": "sessions/8320215904274774054",
+    "expects": "md"
+  },
+  {
+    "id": "74c11ef8-b253-4262-8623-85b3ceb10656",
+    "trigger": "/",
+    "command": "testing",
+    "type": "jules",
+    "sessionId": "11366880273185694377"
+  },
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "trigger": "@",
+    "command": "sessions",
+    "type": "local",
+    "label": "list sessions"
+  },
+  {
+    "trigger": "!",
+    "command": "m",
+    "type": "jules",
+    "sessionId": "5788330460560468349",
+    "label": "monitor session",
+    "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+  }
+]

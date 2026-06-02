@@ -123,6 +123,10 @@ export const localJules = {
   applyPatch(sessionId: string, opts: { branch?: string; dryRun?: boolean; cwd: string }) {
     return requireLocalBridge().applyPatch(sessionId, opts)
   },
+
+  listSessions(options?: { limit?: number; filter?: string }): Promise<JulesLocalSessionInfo[]> {
+    return requireLocalBridge().listSessions(options)
+  },
 }
 
 export function toMarkdownFiles(files: JulesLocalGeneratedFile[]): JulesLocalGeneratedFile[] {

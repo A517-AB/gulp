@@ -69,6 +69,18 @@ Copy `.env.example` to `.env`:
 
 - **"push"** always means: merge current work to `master` (the repo's default branch). Never just push to a feature branch and stop.
 
+## Working conventions
+
+**Exports** — always export types through an `index.ts` barrel in the folder they belong to. No `export *`, no ad-hoc re-exports scattered across files. If a type needs to be consumed elsewhere, it goes through the index.
+
+**Folder structure** — this is an active, evolving codebase. Some folders are intentionally flat or mid-refactor. When you're already inside a folder, tidy up what you touch. Don't add new mess on top of existing mess, and don't restructure folders you weren't asked to touch.
+
+**Lint** — if you open a file and spot a lint error you didn't cause, fix it anyway before moving on. Leave things cleaner than you found them.
+
+**Electron global** — `window.electron` is currently used broadly across the renderer. This is being cleaned up incrementally. Don't spread it further, but don't try to fix the whole thing at once either — wait for direction.
+
+**Locked files** — some files are off-limits. If you're unsure whether a file is safe to edit, ask before touching it. Do not silently work around a file you can't access — that's worse than asking.
+
 ## TypeScript config
 
 Two tsconfig roots composed by `tsconfig.json` (project references):

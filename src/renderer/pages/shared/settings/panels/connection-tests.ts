@@ -23,8 +23,21 @@ export function getConnectionTests(client: JulesClient | null): TestDef[] {
         if (!sdkIpc) throw new Error('sdkIpc is null')
         const s = await sdkIpc.listSources()
         return {
-          summary: `${s.length} sources`,
+          summary: `${String(s.length)} sources`,
           items: s.map(x => `${x.fullName} (${x.isPrivate ? 'private' : 'public'}, default: ${x.defaultBranch ?? 'n/a'})`),
+        }
+      },
+    },
+    {
+      key: 'sdk_sessions',
+      label: 'sdkIpc.listSessions()',
+      electronOnly: true,
+      fn: async () => {
+        if (!sdkIpc) throw new Error('sdkIpc is null')
+        const s = await sdkIpc.listSessions({ limit: 20 })
+        return {
+          summary: `${String(s.length)} sessions`,
+          items: s.map(x => `[${x.state}] ${x.title || 'Untitled'} — ${x.id}`),
         }
       },
     },
@@ -35,7 +48,7 @@ export function getConnectionTests(client: JulesClient | null): TestDef[] {
       fn: async () => {
         if (!client) throw new Error('no client — API key not set?')
         const s = await client.listSources()
-        return { summary: `${s.length} sources`, items: s.map(x => x.name) }
+        return { summary: `${String(s.length)} sources`, items: s.map(x => x.name) }
       },
     },
     {
@@ -45,7 +58,7 @@ export function getConnectionTests(client: JulesClient | null): TestDef[] {
         if (!client) throw new Error('no client')
         const s = await client.listSessions()
         return {
-          summary: `${s.length} sessions`,
+          summary: `${String(s.length)} sessions`,
           items: s.map(x => `[${x.status}] ${x.title || 'Untitled'} — ${x.id}`),
         }
       },
@@ -57,7 +70,7 @@ export function getConnectionTests(client: JulesClient | null): TestDef[] {
         if (!client) throw new Error('no client')
         const s = await client.listSessions({ filter: 'archived = true' })
         return {
-          summary: `${s.length} archived`,
+          summary: `${String(s.length)} archived`,
           items: s.map(x => `${x.title || 'Untitled'} — ${x.id}`),
         }
       },

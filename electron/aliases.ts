@@ -5,7 +5,7 @@ import * as path from 'path'
 import chokidar from 'chokidar'
 import type { Command } from '../src/shared/commands'
 
-const ALIASES_PATH = path.join(app.getAppPath(), 'aliases.json')
+const ALIASES_PATH = path.join(app.getAppPath(), 'aliases', 'aliases.json')
 
 export function registerAliasesHandlers(getWebContents: () => WebContents | null): void {
   console.log('[aliases] registering, path:', ALIASES_PATH)

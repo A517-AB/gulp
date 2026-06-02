@@ -203,6 +203,21 @@ const notifications: ElectronAPI["notifications"] = {
   },
 }
 
+// ── reminders ─────────────────────────────────────────────────────────────────
+
+const reminders: ElectronAPI["reminders"] = {
+  list:   () => ipcRenderer.invoke("reminders.list"),
+  save:   (reminder) => ipcRenderer.invoke("reminders.save", reminder),
+  delete: (id) => ipcRenderer.invoke("reminders.delete", id),
+  toggle: (id, enabled) => ipcRenderer.invoke("reminders.toggle", id, enabled),
+  done:   (id) => ipcRenderer.invoke("reminders.done", id),
+  onChanged: (cb) => {
+    const handler = () => { cb(); }
+    ipcRenderer.on("reminders.changed", handler)
+    return () => { ipcRenderer.off("reminders.changed", handler) }
+  },
+}
+
 // ── snippets ───────────────────────────────────────────────────────────────────
 
 const snippets: ElectronAPI["snippets"] = {
@@ -255,6 +270,7 @@ const julesLocal: ElectronAPI["sdkIpc"] = {
     }
   },
   applyPatch: (sessionId, opts) => ipcRenderer.invoke("jules.applyPatch", sessionId, opts),
+  listSessions: (options) => ipcRenderer.invoke("jules.sessions.list", options),
 };
 
 // ── expose ─────────────────────────────────────────────────────────────────────
@@ -272,6 +288,7 @@ const api: ElectronAPI = {
   notes,
   alarms,
   notifications,
+  reminders,
   snippets,
   sdkIpc: julesLocal,
 };
