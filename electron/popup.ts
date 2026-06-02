@@ -1,3 +1,5 @@
+// this is for a specific tool, do not touch
+
 import { BrowserWindow, ipcMain, screen } from "electron";
 import * as path from "path";
 import * as fs from "fs";
