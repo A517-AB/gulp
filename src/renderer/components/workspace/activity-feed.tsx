@@ -118,7 +118,6 @@ export function ActivityFeed({ session, onArchive, showCodeDiffs, onToggleCodeDi
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="p-3 space-y-2.5">
-            {api.activities.length === 0 && <div className="flex items-center justify-center min-h-[200px]"><p className="text-[10px] font-mono text-fg-dim uppercase tracking-widest">No activities yet</p></div>}
             {grouped.map((item, i) => (
               <ActivityItem key={Array.isArray(item) ? `group-${String(i)}` : item.id} item={item} expandedBash={expandedBash} onToggleBash={toggleBash} onApprovePlan={() => { void api.handleApprovePlan(); }} approvingPlan={api.approvingPlan} isNew={!Array.isArray(item) && api.newActivityIds.has(item.id)} />
             ))}

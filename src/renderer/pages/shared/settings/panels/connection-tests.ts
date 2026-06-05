@@ -63,17 +63,5 @@ export function getConnectionTests(client: JulesClient | null): TestDef[] {
         }
       },
     },
-    {
-      key: 'client_sessions_archived',
-      label: "client.listSessions({ filter: 'archived = true' })",
-      fn: async () => {
-        if (!client) throw new Error('no client')
-        const s = await client.listSessions({ filter: 'archived = true' })
-        return {
-          summary: `${String(s.length)} archived`,
-          items: s.map(x => `${x.title || 'Untitled'} — ${x.id}`),
-        }
-      },
-    },
   ].filter(t => !t.electronOnly || isElectron)
 }

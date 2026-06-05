@@ -6,7 +6,7 @@ import type { Session, UseSessionListReturn } from "@/types/activity-feed";
 export function useSessionList(): UseSessionListReturn {
   const { client } = useJules();
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [archivedIds, setArchivedIds] = useState<Set<string>>(new Set());
@@ -16,7 +16,6 @@ export function useSessionList(): UseSessionListReturn {
   const loadSessions = useCallback(async (isInitial = false) => {
     if (!client) { if (isInitial) setLoading(false); return; }
     try {
-      if (isInitial) setLoading(true);
       setError(null);
       const data = await client.listSessions();
       setSessions(data);
@@ -25,10 +24,8 @@ export function useSessionList(): UseSessionListReturn {
         setSessions([]);
       } else {
         setError(err instanceof Error ? err.message : "Failed to load sessions");
-        if (isInitial) setSessions([]);
       }
     } finally {
-      if (isInitial) setLoading(false);
     }
   }, [client]);
 
