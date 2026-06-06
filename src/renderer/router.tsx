@@ -13,7 +13,6 @@ import ReposPage from '@renderer/pages/electron/ReposPage'
 import SnapshotPage from '@renderer/pages/electron/SnapshotPage'
 import QueuesPage from '@renderer/pages/electron/QueuesPage'
 import { SnippetsPage } from '@renderer/pages/electron/SnippetsPage'
-import HubPage from '@renderer/pages/electron/HubPage'
 import SessionsPage from '@renderer/pages/electron/SessionsPage'
 import OverviewPage from '@renderer/pages/web/OverviewPage'
 
@@ -54,7 +53,6 @@ const electronRoutes: AppRoute[] = [
     { path: 'repos',        Component: ReposPage,    handle: { title: 'Repos',    inNav: true } },
     { path: 'queues',       Component: QueuesPage,   handle: { title: 'Queues',   inNav: true } },
     { path: 'snippets',     Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },
-    { path: 'hub',          Component: HubPage,      handle: { title: 'Hub',      inNav: true } },
     { path: 'sessions',     Component: SessionsPage, handle: { title: 'Sessions', inNav: true } },
     { path: 'activity/:id', Component: ActivityPage },
     { path: 'snapshot/:id', Component: SnapshotPage },

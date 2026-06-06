@@ -177,46 +177,7 @@ const notes: ElectronAPI["notes"] = {
   },
 }
 
-// ── alarms ─────────────────────────────────────────────────────────────────────
 
-const alarms: ElectronAPI["alarms"] = {
-  list:    () => ipcRenderer.invoke("alarms.list"),
-  save:    (alarm) => ipcRenderer.invoke("alarms.save", alarm),
-  delete:  (id) => ipcRenderer.invoke("alarms.delete", id),
-  toggle:  (id, enabled) => ipcRenderer.invoke("alarms.toggle", id, enabled),
-  snooze:  (id, minutes) => ipcRenderer.invoke("alarms.snooze", id, minutes),
-  onChanged: (cb) => {
-    const handler = () => { cb(); }
-    ipcRenderer.on("alarms.changed", handler)
-    return () => { ipcRenderer.off("alarms.changed", handler) }
-  },
-}
-
-// ── notifications ──────────────────────────────────────────────────────────────
-
-const notifications: ElectronAPI["notifications"] = {
-  send: (n) => { ipcRenderer.send("notification.send", n); },
-  onReceived: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => { cb(data); }
-    ipcRenderer.on("notification.received", handler)
-    return () => { ipcRenderer.off("notification.received", handler) }
-  },
-}
-
-// ── reminders ─────────────────────────────────────────────────────────────────
-
-const reminders: ElectronAPI["reminders"] = {
-  list:   () => ipcRenderer.invoke("reminders.list"),
-  save:   (reminder) => ipcRenderer.invoke("reminders.save", reminder),
-  delete: (id) => ipcRenderer.invoke("reminders.delete", id),
-  toggle: (id, enabled) => ipcRenderer.invoke("reminders.toggle", id, enabled),
-  done:   (id) => ipcRenderer.invoke("reminders.done", id),
-  onChanged: (cb) => {
-    const handler = () => { cb(); }
-    ipcRenderer.on("reminders.changed", handler)
-    return () => { ipcRenderer.off("reminders.changed", handler) }
-  },
-}
 
 // ── snippets ───────────────────────────────────────────────────────────────────
 
@@ -235,6 +196,7 @@ const snippets: ElectronAPI["snippets"] = {
 const julesLocal: ElectronAPI["sdkIpc"] = {
   setApiKey: (apiKey) => ipcRenderer.invoke("jules.apiKey.set", apiKey),
   createSession: (request) => ipcRenderer.invoke("jules.session.create", request),
+  startRun: (request) => ipcRenderer.invoke("jules.run.start", request),
   resumeSession: (sessionId) => ipcRenderer.invoke("jules.session.resume", sessionId),
   getSession: (sessionId) => ipcRenderer.invoke("jules.session.get", sessionId),
   hydrateSession: (sessionId) => ipcRenderer.invoke("jules.session.hydrate", sessionId),
@@ -286,9 +248,6 @@ const api: ElectronAPI = {
   history,
   aliases,
   notes,
-  alarms,
-  notifications,
-  reminders,
   snippets,
   sdkIpc: julesLocal,
 };

@@ -11,7 +11,8 @@ export function getConnectionTests(client: JulesClient | null): TestDef[] {
       electronOnly: true,
       fn: async () => {
         if (!sdkIpc) throw new Error('sdkIpc is null')
-        await sdkIpc.setApiKey(localStorage.getItem('jules-api-key'))
+        const apiKey = window.electron?.env?.getApiKey ? await window.electron.env.getApiKey() : null
+        await sdkIpc.setApiKey(apiKey)
         return { summary: 'reachable — key forwarded to main process' }
       },
     },

@@ -3,7 +3,6 @@ import { Outlet, NavLink } from 'react-router'
 import { TopBar } from '@renderer/shell/TopBar'
 import { ThemeProvider } from '@renderer/providers/theme'
 import { navRoutes } from '@renderer/router'
-import { HubToaster } from '@/features/hub'
 
 export default function RootLayout(): ReactNode {
 
@@ -35,8 +34,7 @@ export default function RootLayout(): ReactNode {
                 <main className="flex-1 overflow-hidden min-h-0 h-full">
                     <Outlet />
                 </main>
-                <HubToaster />
             </div>
         </ThemeProvider>
     )
-}
+}

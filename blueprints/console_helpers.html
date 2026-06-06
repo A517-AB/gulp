@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jules Debug Console Commands</title>
+  <style>
+    :root {
+      --bg-base: #09090b;
+      --bg-surface: #18181b;
+      --border-color: #27272a;
+      --text-primary: #f4f4f5;
+      --text-secondary: #a1a1aa;
+      --accent: #8b5cf6;
+      --accent-hover: #7c3aed;
+      --success: #10b981;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: #3f3f46;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .card-desc {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin: 0;
+      max-width: 85%;
+      line-height: 1.4;
+    }
+
+    .btn-copy {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn-copy:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-copy:active {
+      transform: scale(0.97);
+    }
+
+    .btn-copy.copied {
+      background-color: var(--success);
+    }
+
+    .code-container {
+      position: relative;
+      background-color: #0c0c0e;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin: 0;
+      overflow: hidden;
+    }
+
+    pre {
+      margin: 0;
+      padding: 1.2rem;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #e4e4e7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Jules Debug Commands</h1>
+      <p class="subtitle">Quick reference snippets to run directly in your browser's DevTools console.</p>
+    </header>
+
+    <!-- Card 1 -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">1. Verify Bridge Connection</h2>
+          <p class="card-desc">Checks if the context bridge is loaded and dumps the exposed Electron APIs.</p>
+        </div>
+        <button class="btn-copy" onclick="copySnippet('code-1', this)">Copy</button>
+      </div>
+      <div class="code-container">
+        <pre><code id="code-1">console.log({
+  isElectron: !!window.electron?.window,
+  bridgeAPI: window.electron
+});</code></pre>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">2. Load Saved Aliases</h2>
+          <p class="card-desc">Reads your loaded aliases.json list directly from the bridge and displays them in a clean table.</p>
+        </div>
+        <button class="btn-copy" onclick="copySnippet('code-2', this)">Copy</button>
+      </div>
+      <div class="code-container">
+        <pre><code id="code-2">window.electron.aliases.get().then(res => {
+  console.log("%cSaved Aliases List:", 'font-weight: bold; color: #3b82f6;');
+  console.table(res.aliases);
+});</code></pre>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">3. Retrieve Session Info</h2>
+          <p class="card-desc">Fetches live metadata (branch, repo, status, timestamp) of the active testing session.</p>
+        </div>
+        <button class="btn-copy" onclick="copySnippet('code-3', this)">Copy</button>
+      </div>
+      <div class="code-container">
+        <pre><code id="code-3">window.electron.sdkIpc.resumeSession("4021342359891090888")
+  .then(info => console.log("%c✓ Session Info:", 'color: #10b981; font-weight: bold;', info))
+  .catch(err => console.error("Failed to resume session:", err));</code></pre>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">4. Fetch Session Files (Markdown)</h2>
+          <p class="card-desc">Queries the session database for generated markdown logs and dumps their contents to the console.</p>
+        </div>
+        <button class="btn-copy" onclick="copySnippet('code-4', this)">Copy</button>
+      </div>
+      <div class="code-container">
+        <pre><code id="code-4">window.electron.sdkIpc.getMarkdownFiles("4021342359891090888")
+  .then(files => {
+    console.log(`%c✓ Found ${files.length} markdown files:`, 'color: #10b981; font-weight: bold;');
+    files.forEach(f => {
+      console.log(`%c[${f.path}]`, 'color: #8b5cf6; font-weight: bold;');
+      console.log(f.content);
+    });
+  })
+  .catch(err => console.error("Failed to fetch files:", err));</code></pre>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">5. Send Prompt to Jules</h2>
+          <p class="card-desc">Sends a test prompt message directly to the session running on Google's API.</p>
+        </div>
+        <button class="btn-copy" onclick="copySnippet('code-5', this)">Copy</button>
+      </div>
+      <div class="code-container">
+        <pre><code id="code-5">window.electron.sdkIpc.sendMessage("4021342359891090888", "Say hello in markdown please.")
+  .then(() => console.log("%c✓ Message sent successfully!", 'color: #10b981; font-weight: bold;'))
+  .catch(err => console.error("Send failed:", err));</code></pre>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function copySnippet(elementId, buttonElement) {
+      const textToCopy = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(textToCopy)
+        .then(() => {
+          buttonElement.innerText = "Copied!";
+          buttonElement.classList.add("copied");
+          
+          setTimeout(() => {
+            buttonElement.innerText = "Copy";
+            buttonElement.classList.remove("copied");
+          }, 1500);
+        })
+        .catch(err => {
+          console.error("Failed to copy text: ", err);
+        });
+    }
+  </script>
+</body>
+</html>

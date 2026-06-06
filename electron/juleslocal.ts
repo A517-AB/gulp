@@ -489,6 +489,14 @@ export function registerJulesLocalHandlers() {
   )
 
   ipcMain.handle(
+    'jules.run.start',
+    async (_event, request: JulesLocalSessionRequest): Promise<JulesLocalSessionInfo> => {
+      const run = await getClient().run(toSessionConfig(request))
+      return serializeSessionInfo(await getClient().session(run.id).info())
+    },
+  )
+
+  ipcMain.handle(
     'jules.session.resume',
     async (_event, sessionId: string): Promise<JulesLocalSessionInfo> => {
       return serializeSessionInfo(await getClient().session(sessionId).info())

@@ -46,6 +46,10 @@ export const localJules = {
     return requireLocalBridge().createSession(request)
   },
 
+  startRun(request: JulesLocalSessionRequest): Promise<JulesLocalSessionInfo> {
+    return requireLocalBridge().startRun(request)
+  },
+
   resumeSession(sessionId: string): Promise<JulesLocalSessionInfo> {
     return requireLocalBridge().resumeSession(sessionId)
   },
