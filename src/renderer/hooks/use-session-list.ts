@@ -6,15 +6,14 @@ import type { Session, UseSessionListReturn } from "@/types/activity-feed";
 export function useSessionList(): UseSessionListReturn {
   const { client } = useJules();
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [archivedIds, setArchivedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => { setArchivedIds(getArchivedSessions()); }, []);
 
-  const loadSessions = useCallback(async (isInitial = false) => {
-    if (!client) { if (isInitial) setLoading(false); return; }
+  const loadSessions = useCallback(async () => {
+    if (!client) return;
     try {
       setError(null);
       const data = await client.listSessions();
@@ -29,11 +28,11 @@ export function useSessionList(): UseSessionListReturn {
     }
   }, [client]);
 
-  useEffect(() => { void loadSessions(true); }, [loadSessions]);
+  useEffect(() => { void loadSessions(); }, [loadSessions]);
 
   // Background refresh every 10s — no loading flash
   useEffect(() => {
-    const id = setInterval(() => { void loadSessions(false); }, 10_000);
+    const id = setInterval(() => { void loadSessions(); }, 10_000);
     return () => { clearInterval(id); };
   }, [loadSessions]);
 
@@ -48,5 +47,5 @@ export function useSessionList(): UseSessionListReturn {
     [sessions, archivedIds, searchQuery],
   );
 
-  return { sessions: visibleSessions, allSessions: sessions, loading, error, searchQuery, setSearchQuery, loadSessions: () => loadSessions(false) };
+  return { sessions: visibleSessions, allSessions: sessions, error, searchQuery, setSearchQuery, loadSessions };
 }

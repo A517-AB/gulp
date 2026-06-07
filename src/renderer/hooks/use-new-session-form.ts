@@ -19,7 +19,6 @@ export function useNewSessionForm({
   const { client } = useJules();
   const [sources, setSources] = useState<Source[]>([]);
   const [formData, setFormData] = useState<SessionFormData>(DEFAULT_FORM);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadSources = useCallback(async () => {
@@ -54,7 +53,6 @@ export function useNewSessionForm({
     e.preventDefault();
     if (!client || !formData.sourceId || !formData.prompt) return;
     try {
-      setLoading(true);
       setError(null);
       await client.createSession({
         sourceId: formData.sourceId,
@@ -68,10 +66,8 @@ export function useNewSessionForm({
       onSessionCreated?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create workspace");
-    } finally {
-      setLoading(false);
     }
   }, [client, formData, onClose, onSessionCreated]);
 
-  return { sources, formData, setFormData, loading, error, handleSubmit };
+  return { sources, formData, setFormData, error, handleSubmit };
 }

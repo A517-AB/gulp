@@ -165,7 +165,6 @@ export function useActivityFeedApi({
 
   return {
     activities,
-    loading: false,
     error,
     sending,
     approvingPlan,
