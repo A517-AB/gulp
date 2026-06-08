@@ -52,7 +52,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
             asChild
             forceMount
             align="start"
-            className="w-48 p-0 overflow-hidden bg-transparent border-none"
+            className="w-[var(--radix-popover-trigger-width)] min-w-48 p-0 overflow-hidden bg-transparent border-none"
             sideOffset={8}
           >
             <motion.div

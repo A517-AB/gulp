@@ -108,11 +108,11 @@ export class JulesClient {
 
   async createSession(data: CreateSessionRequest): Promise<Session> {
     if (!sdkIpc) throw new JulesAPIError('SDK not available')
-    const github = data.sourceId.replace('sources/github/', '')
+    const ownerRepo = data.sourceId.replace(/^(?:sources\/)?github\//, '')
     const result = await sdkIpc.client.run({
       prompt: data.prompt,
       ...(data.title ? { title: data.title } : {}),
-      ...(github ? { source: { github, baseBranch: data.startingBranch || 'main' } } : {}),
+      ...(ownerRepo ? { source: { github: ownerRepo, baseBranch: data.startingBranch || 'main' } } : {}),
     })
     const resource = await sdkIpc.session.info(result.id)
     return mapResource(resource)

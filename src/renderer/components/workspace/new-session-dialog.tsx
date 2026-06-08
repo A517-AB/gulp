@@ -5,7 +5,7 @@ import { Button } from "@/ui/button.tsx";
 import { Input } from "@/ui/input.tsx";
 import { Textarea } from "@/ui/textarea.tsx";
 import { Label } from "@/ui/label.tsx";
-import { Combobox } from "@/ui/combobox.tsx";
+import { DynamicDropdown } from "@/components/shared/DynamicDropdown";
 import { useNewSessionForm } from "@/hooks/use-new-session-form.ts";
 import type { NewSessionDialogProps } from "@/types/activity-feed.ts";
 
@@ -15,7 +15,7 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
   const open = isControlled ? (controlledOpen ?? false) : internalOpen;
   const setOpen = isControlled ? (onOpenChange ?? setInternalOpen) : setInternalOpen;
 
-  const { sources, formData, setFormData, error, handleSubmit } = useNewSessionForm({
+  const { sources, branches, formData, setFormData, error, handleSubmit } = useNewSessionForm({
     open,
     ...(initialValues ? { initialValues } : {}),
     ...(onSessionCreated ? { onSessionCreated } : {}),
@@ -27,9 +27,11 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? <Button className="h-8 text-[10px] font-mono uppercase tracking-widest border-0"><Plus className="h-3.5 w-3.5 mr-1.5" />New Session</Button>}
-      </DialogTrigger>
+      {(!isControlled || trigger) && (
+        <DialogTrigger asChild>
+          {trigger ?? <Button className="h-8 text-[10px] font-mono uppercase tracking-widest border-0"><Plus className="h-3.5 w-3.5 mr-1.5" />New Session</Button>}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[480px] border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
         <DialogHeader>
           <DialogTitle>Create New Session</DialogTitle>
@@ -38,12 +40,14 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Source Repository *</Label>
-            <Combobox options={sources.map((s) => ({ value: s.id, label: s.name }))} value={formData.sourceId} onValueChange={(v) => { setFormData((p) => ({ ...p, sourceId: v })); }} placeholder={sources.length === 0 ? "No repositories available" : "Select a repository"} searchPlaceholder="Search repositories..." emptyMessage="No repositories found." className="text-xs" />
+            <DynamicDropdown items={sources.map(s => ({ id: s.id, label: s.name }))} value={formData.sourceId || null} onChange={(v) => { setFormData((p) => ({ ...p, sourceId: v })); }} placeholder={sources.length === 0 ? "No repositories available" : "Select a repository"} className="w-full h-9 justify-between px-3" />
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold">Branch (Optional)</Label>
-            <Input placeholder="main" value={formData.startingBranch} onChange={set("startingBranch")} className="h-9 text-xs" />
-          </div>
+          {branches.length > 0 && (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold">Branch (Optional)</Label>
+              <DynamicDropdown items={branches.map(b => ({ id: b, label: b }))} value={formData.startingBranch || null} onChange={(v) => { setFormData((p) => ({ ...p, startingBranch: v })); }} placeholder="main" className="w-full h-9 justify-between px-3" />
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Title (Optional)</Label>
             <Input placeholder="e.g., Fix authentication bug" value={formData.title} onChange={set("title")} className="h-9 text-xs" />

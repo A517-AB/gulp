@@ -1,49 +1,48 @@
 import { useState } from 'react'
 import { useCommands } from '@/hooks/use-commands'
 import { SessionPicker } from './SessionPicker'
-import { TRIGGERS, TRIGGER_META } from '@shared/commands'
-import type { Command, CommandType, Trigger } from '@shared/commands'
+import { TRIGGERS, TRIGGER_META, isJulesTrigger } from '@shared/commands'
+import type { Command, Trigger } from '@shared/commands'
 import { isElectron } from '@shared/bridge'
-
-type CommandForm = Omit<Command, 'id'>
 
 interface FormState {
   trigger: Trigger
   command: string
-  type: CommandType
-  sessionId: string
   label: string
+  sessionId: string
   instructions: string
-  expects: 'md' | 'zip' | ''
+  action: string
 }
 
-const EMPTY_STATE: FormState = { trigger: '%', command: '', type: 'jules', sessionId: '', label: '', instructions: '', expects: '' }
+const EMPTY_STATE: FormState = { trigger: '/', command: '', label: '', sessionId: '', instructions: '', action: '' }
 
-function toForm(s: FormState): CommandForm {
-  const base: CommandForm = {
-    trigger: s.trigger,
-    command: s.command,
-    type: s.type,
-    ...(s.label        && { label: s.label }),
-    ...(s.instructions && { instructions: s.instructions }),
+function toForm(s: FormState): Omit<Command, 'id'> {
+  const label = s.label || undefined
+  switch (s.trigger) {
+    case '/': return { trigger: '/', command: s.command, type: 'jules-display', ...(label && { label }), ...(s.sessionId && { sessionId: s.sessionId }) }
+    case '!': return { trigger: '!', command: s.command, type: 'jules-message', ...(label && { label }), ...(s.sessionId && { sessionId: s.sessionId }), ...(s.instructions && { instructions: s.instructions }) }
+    case '#': return { trigger: '#', command: s.command, type: 'jules-stream',  ...(label && { label }), ...(s.sessionId && { sessionId: s.sessionId }) }
+    case '@': return { trigger: '@', command: s.command, type: 'terminal',      ...(label && { label }) }
+    case '>': return { trigger: '>', command: s.command, type: 'palette',       ...(label && { label }), ...(s.action && { action: s.action }) }
   }
-  if (s.type === 'jules') {
-    base.sessionId = s.sessionId
-    if (s.expects) base.expects = s.expects
-  }
-  return base
 }
 
 function fromAlias(a: Command): FormState {
-  return {
-    trigger:      a.trigger,
-    command:      a.command,
-    type:         a.type,
-    sessionId:    a.sessionId    ?? '',
-    label:        a.label        ?? '',
-    instructions: a.instructions ?? '',
-    expects:      a.expects      ?? '',
+  const base: FormState = { trigger: a.trigger, command: a.command, label: a.label ?? '', sessionId: '', instructions: '', action: '' }
+  switch (a.type) {
+    case 'jules-display': return { ...base, sessionId: a.sessionId ?? '' }
+    case 'jules-message': return { ...base, sessionId: a.sessionId ?? '', instructions: a.instructions ?? '' }
+    case 'jules-stream':  return { ...base, sessionId: a.sessionId ?? '' }
+    case 'terminal':      return base
+    case 'palette':       return { ...base, action: a.action ?? '' }
   }
+}
+
+function aliasSubtext(a: Command): string {
+  if (a.label) return a.label
+  if (a.type === 'jules-display' || a.type === 'jules-message' || a.type === 'jules-stream') return a.sessionId ?? ''
+  if (a.type === 'palette') return a.action ?? ''
+  return ''
 }
 
 function AliasRow({ alias, onEdit, onDelete }: {
@@ -54,18 +53,15 @@ function AliasRow({ alias, onEdit, onDelete }: {
   return (
     <div className="flex items-center gap-3 py-2">
       <span className="font-mono text-xs text-fg-primary w-32 truncate">{alias.trigger}{alias.command}</span>
-      <span className="text-xs text-fg-muted flex-1 truncate">{alias.label ?? alias.sessionId}</span>
-      {alias.expects && (
-        <span className="text-[10px] font-mono text-fg-ghost border border-hair rounded px-1">{alias.expects}</span>
-      )}
+      <span className="text-xs text-fg-muted flex-1 truncate">{aliasSubtext(alias)}</span>
       <button onClick={() => { onEdit(alias) }} className="text-[10px] font-mono text-fg-dim hover:text-fg-primary transition-colors">edit</button>
       <button onClick={() => { onDelete(alias.id) }} className="text-[10px] font-mono text-fg-dim hover:text-red-400 transition-colors">del</button>
     </div>
   )
 }
 
-function Field({ label, value, onChange, placeholder, list }: {
-  label: string; value: string; onChange: (v: string) => void; placeholder?: string; list?: string
+function Field({ label, value, onChange, placeholder }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string
 }) {
   return (
     <div className="space-y-1">
@@ -74,7 +70,6 @@ function Field({ label, value, onChange, placeholder, list }: {
         value={value}
         onChange={e => { onChange(e.target.value) }}
         placeholder={placeholder}
-        list={list}
         className="w-full bg-surface border border-hair rounded px-2 py-1 text-xs font-mono text-fg-primary placeholder:text-fg-ghost focus:outline-none focus:border-subtle"
       />
     </div>
@@ -83,13 +78,16 @@ function Field({ label, value, onChange, placeholder, list }: {
 
 function CommandFormRow({ initial, onSave, onCancel }: {
   initial: FormState
-  onSave: (form: CommandForm) => void
+  onSave: (form: Omit<Command, 'id'>) => void
   onCancel: () => void
 }) {
   const [s, setS] = useState<FormState>(initial)
   const set = (k: keyof FormState) => (v: string) => { setS(f => ({ ...f, [k]: v })) }
-  const isJules = TRIGGER_META[s.trigger].kind === 'jules'
-  const valid = s.command.trim() !== '' && (!isJules || s.sessionId.trim() !== '')
+
+  const isJules   = isJulesTrigger(s.trigger)
+  const isMessage = s.trigger === '!'
+  const isPalette = s.trigger === '>'
+  const valid     = s.command.trim() !== '' && (!isJules || s.sessionId.trim() !== '')
 
   return (
     <div className="py-3 space-y-3 border-t border-hair">
@@ -100,10 +98,7 @@ function CommandFormRow({ initial, onSave, onCancel }: {
           {TRIGGERS.map(t => (
             <button
               key={t}
-              onClick={() => {
-                const kind = TRIGGER_META[t].kind
-                setS(f => ({ ...f, trigger: t, type: kind === 'local' ? 'local' : 'jules' }))
-              }}
+              onClick={() => { setS(f => ({ ...f, trigger: t })) }}
               className={`px-2 py-0.5 rounded font-mono text-xs transition-colors ${
                 s.trigger === t
                   ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
@@ -120,7 +115,7 @@ function CommandFormRow({ initial, onSave, onCancel }: {
         </p>
       </div>
 
-      {/* Command + Session (session only for Jules) */}
+      {/* Command + Session */}
       <div className={isJules ? 'grid grid-cols-2 gap-2' : ''}>
         <Field label="command" value={s.command} onChange={set('command')} placeholder="e.g. notes" />
         {isJules && (
@@ -128,30 +123,14 @@ function CommandFormRow({ initial, onSave, onCancel }: {
         )}
       </div>
 
-      {/* Label + Instructions */}
       <Field label="label" value={s.label} onChange={set('label')} placeholder="display name (optional)" />
-      {isJules && (
+
+      {isMessage && (
         <Field label="instructions" value={s.instructions} onChange={set('instructions')} placeholder="hidden context appended on send" />
       )}
 
-      {/* Expects — Jules only */}
-      {isJules && (
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] font-mono text-fg-ghost">expects</span>
-          {(['', 'md', 'zip'] as const).map(v => (
-            <label key={v} className="flex items-center gap-1 text-[10px] font-mono text-fg-dim cursor-pointer">
-              <input
-                type="radio"
-                name="expects"
-                value={v}
-                checked={s.expects === v}
-                onChange={() => { setS(f => ({ ...f, expects: v })) }}
-                className="accent-violet-500"
-              />
-              {v || 'none'}
-            </label>
-          ))}
-        </div>
+      {isPalette && (
+        <Field label="action" value={s.action} onChange={set('action')} placeholder="e.g. settings" />
       )}
 
       <div className="flex gap-2 pt-1">
@@ -187,7 +166,7 @@ export function AliasesPanel() {
             <CommandFormRow
               key={a.id}
               initial={fromAlias(a)}
-              onSave={form => { update({ ...form, id: a.id }); setEditing(null) }}
+              onSave={form => { update(Object.assign({}, form, { id: a.id }) as Command); setEditing(null) }}
               onCancel={() => { setEditing(null) }}
             />
           ) : (

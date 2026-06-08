@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Code, Send, Archive, Play, MoreVertical, Loader2, GitBranch } from "lucide-react";
+import { Code, Send, Archive, Play, MoreVertical, Loader2, GitBranch, Plus } from "lucide-react";
 import { sdkIpc, filesystem } from "@shared/bridge";
 import { ScrollArea } from "@/ui/scroll-area.tsx";
 import { Textarea } from "@/ui/textarea.tsx";
@@ -19,7 +19,7 @@ const QUICK_REVIEW_PROMPT =
 
 const EMPTY_ARRAY: Activity[] = [];
 
-export function ActivityFeed({ session, onArchive, showCodeDiffs, onToggleCodeDiffs, onActivitiesChange }: ActivityFeedProps) {
+export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, onToggleCodeDiffs, onActivitiesChange }: ActivityFeedProps) {
   const { client } = useJules();
   const activities = useStore(s => s.activities[session.id] || EMPTY_ARRAY);
   const error = useStore(s => s.activitiesError[session.id]);
@@ -152,6 +152,11 @@ export function ActivityFeed({ session, onArchive, showCodeDiffs, onToggleCodeDi
                   <DropdownMenuItem onClick={() => { void handleApplyLocally(); }} disabled={applyState.status === "applying"} className="focus:bg-hover text-xs cursor-pointer">
                     <GitBranch className="mr-2 h-3.5 w-3.5" />
                     <span>{applyState.status === "applying" ? "Applying…" : "Apply locally"}</span>
+                  </DropdownMenuItem>
+                )}
+                {onNewSession && (
+                  <DropdownMenuItem onClick={onNewSession} className="focus:bg-hover text-xs cursor-pointer">
+                    <Plus className="mr-2 h-3.5 w-3.5" /><span>New Session</span>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={() => { archiveSession(session.id); onArchive?.(); }} className="focus:bg-hover text-xs cursor-pointer text-red-400 focus:text-red-400">

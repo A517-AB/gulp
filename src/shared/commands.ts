@@ -1,50 +1,89 @@
-export const TRIGGERS = ['%', '?', '!', '@', '#', '/'] as const
+export const TRIGGERS = ['/', '!', '#', '@', '>'] as const
 export type Trigger = typeof TRIGGERS[number]
+export type JulesTrigger = '/' | '!' | '#'
 
-export type CommandType = 'jules' | 'local' | 'script'
-
-export const TRIGGER_META: Record<Trigger, { label: string; description: string; kind: 'jules' | 'local' }> = {
-  '%': { label: 'display',  description: 'Show last MD from Jules session — no message sent',   kind: 'jules'  },
-  '?': { label: 'query',    description: 'Send text to Jules session, get MD back',              kind: 'jules'  },
-  '!': { label: 'action',   description: 'Fire instructions to Jules immediately, no text needed', kind: 'jules' },
-  '@': { label: 'message',  description: 'Send a message to Jules session right away',           kind: 'jules'  },
-  '#': { label: 'stream',   description: 'Stream live session activities',                       kind: 'jules'  },
-  '/': { label: 'local',    description: 'Local command — no Jules, fires instantly',            kind: 'local'  },
+export const TRIGGER_META: Record<Trigger, { label: string; description: string }> = {
+  '/': { label: 'display',  description: 'Show last MD artifact from Jules session'          },
+  '!': { label: 'message',  description: 'Send message to Jules session, fire and forget'    },
+  '#': { label: 'stream',   description: 'Live stream from latest Jules session message'     },
+  '@': { label: 'terminal', description: 'Switch to terminal'                                },
+  '>': { label: 'palette',  description: 'Command palette — settings, alarms, in-tool items' },
 }
 
-export function isJulesTrigger(t: Trigger): boolean {
-  return TRIGGER_META[t].kind === 'jules'
+export function isJulesTrigger(t: Trigger): t is JulesTrigger {
+  return t === '/' || t === '!' || t === '#'
 }
 
-export interface Command {
+// ── types ─────────────────────────────────────────────────────────────────────
+
+export interface JulesDisplayCommand {
   id: string
-  trigger: Trigger
+  trigger: '/'
   command: string
-  type: CommandType
-  label?: string
+  type: 'jules-display'
   sessionId?: string
-  instructions?: string
-  expects?: 'md' | 'zip'
-  action?: string
-  script?: string
+  label?: string
 }
+
+export interface JulesMessageCommand {
+  id: string
+  trigger: '!'
+  command: string
+  type: 'jules-message'
+  sessionId?: string
+  label?: string
+  instructions?: string
+}
+
+export interface JulesStreamCommand {
+  id: string
+  trigger: '#'
+  command: string
+  type: 'jules-stream'
+  sessionId?: string
+  label?: string
+}
+
+export interface TerminalCommand {
+  id: string
+  trigger: '@'
+  command: string
+  type: 'terminal'
+  label?: string
+}
+
+export interface PaletteCommand {
+  id: string
+  trigger: '>'
+  command: string
+  type: 'palette'
+  label?: string
+  action?: string
+}
+
+export type JulesCommand = JulesDisplayCommand | JulesMessageCommand | JulesStreamCommand
+export type Command      = JulesCommand | TerminalCommand | PaletteCommand
+export type CommandType  = Command['type']
+
+// ── normalize ─────────────────────────────────────────────────────────────────
 
 function str(val: unknown, fallback = ''): string {
   return typeof val === 'string' ? val : fallback
 }
 
 export function normalizeCommand(raw: Record<string, unknown>): Command {
-  const out: Command = {
-    id:      str(raw['id']) || crypto.randomUUID(),
-    trigger: (raw['trigger'] as Trigger | undefined) ?? '/',
-    command: str(raw['command']),
-    type:    (raw['type'] as CommandType | undefined) ?? 'jules',
+  const trigger = (raw['trigger'] as Trigger | undefined) ?? '>'
+  const id      = str(raw['id']) || crypto.randomUUID()
+  const command = str(raw['command'])
+  const label   = raw['label'] ? str(raw['label']) : undefined
+  const sid     = raw['sessionId'] ? str(raw['sessionId']) : undefined
+
+  switch (trigger) {
+    case '/': { const c: JulesDisplayCommand = { id, trigger, command, type: 'jules-display' }; if (label) c.label = label; if (sid) c.sessionId = sid; return c }
+    case '!': { const c: JulesMessageCommand = { id, trigger, command, type: 'jules-message' }; if (label) c.label = label; if (sid) c.sessionId = sid; if (raw['instructions']) c.instructions = str(raw['instructions']); return c }
+    case '#': { const c: JulesStreamCommand  = { id, trigger, command, type: 'jules-stream'  }; if (label) c.label = label; if (sid) c.sessionId = sid; return c }
+    case '@': { const c: TerminalCommand     = { id, trigger, command, type: 'terminal'      }; if (label) c.label = label; return c }
+    case '>': { const c: PaletteCommand      = { id, trigger, command, type: 'palette'       }; if (label) c.label = label; if (raw['action']) c.action = str(raw['action']); return c }
+    default: { const c: PaletteCommand       = { id, trigger: '>', command, type: 'palette'  }; if (label) c.label = label; return c }
   }
-  if (raw['label'])        out.label        = str(raw['label'])
-  if (raw['sessionId'])    out.sessionId    = str(raw['sessionId'])
-  if (raw['instructions']) out.instructions = str(raw['instructions'])
-  if (raw['expects'])      out.expects      = raw['expects'] as 'md' | 'zip'
-  if (raw['action'])       out.action       = str(raw['action'])
-  if (raw['script'])       out.script       = str(raw['script'])
-  return out
 }

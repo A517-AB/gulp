@@ -11,9 +11,10 @@ import type { Activity, Session, SessionInitialValues } from "@/types/activity-f
 interface ActivityWorkspaceProps {
   session: Session;
   onArchive: () => void;
+  onNewSession: () => void;
 }
 
-function ActivityWorkspace({ session, onArchive }: ActivityWorkspaceProps) {
+function ActivityWorkspace({ session, onArchive, onNewSession }: ActivityWorkspaceProps) {
   const [showCodeDiffs, setShowCodeDiffs] = useState(false);
   const [codeDiffCollapsed, setCodeDiffCollapsed] = useState(false);
   const [currentActivities, setCurrentActivities] = useState<Activity[]>([]);
@@ -25,6 +26,7 @@ function ActivityWorkspace({ session, onArchive }: ActivityWorkspaceProps) {
         <ActivityFeed
           session={session}
           onArchive={onArchive}
+          onNewSession={onNewSession}
           showCodeDiffs={showCodeDiffs}
           onToggleCodeDiffs={setShowCodeDiffs}
           onActivitiesChange={setCurrentActivities}
@@ -101,7 +103,7 @@ export default function SessionsPage() {
       </aside>
 
       {selectedSession ? (
-        <ActivityWorkspace session={selectedSession} onArchive={handleArchive} />
+        <ActivityWorkspace session={selectedSession} onArchive={handleArchive} onNewSession={() => { openNewSession(); }} />
       ) : (
         <main className="flex-1 overflow-hidden flex flex-col">
           <div className="flex h-full items-center justify-center">

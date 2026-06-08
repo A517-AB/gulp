@@ -1,60 +1,50 @@
 [
   {
     "id": "example-1",
-    "trigger": "?",
+    "trigger": "/",
     "command": "notes",
-    "type": "jules",
+    "type": "jules-display",
     "label": "my notes",
-    "sessionId": "sessions/8320215904274774054",
-    "expects": "md"
+    "sessionId": "sessions/8320215904274774054"
   },
   {
     "id": "74c11ef8-b253-4262-8623-85b3ceb10656",
-    "trigger": "%",
+    "trigger": "/",
     "command": "testing",
-    "type": "jules",
-    "sessionId": "11366880273185694377"
+    "type": "jules-display",
+    "sessionId": "sessions/11366880273185694377"
   },
   {
-    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    "trigger": "@",
-    "command": "sessions",
-    "type": "local",
-    "label": "list sessions"
-  },
-  {
+    "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
     "trigger": "!",
     "command": "m",
-    "type": "jules",
-    "sessionId": "5788330460560468349",
-    "label": "monitor session",
-    "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+    "type": "jules-message",
+    "sessionId": "sessions/5788330460560468349",
+    "label": "monitor session"
   },
   {
     "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
-    "trigger": "?",
+    "trigger": "!",
     "command": "status",
-    "type": "jules",
+    "type": "jules-message",
     "label": "what are you doing",
-    "sessionId": "5788330460560468349",
-    "instructions": "Give me a brief status update on what you last worked on. Keep it short.",
-    "expects": "md"
+    "sessionId": "sessions/5788330460560468349",
+    "instructions": "Give me a brief status update on what you last worked on. Keep it short."
   },
   {
     "id": "d4e5f6a7-b8c9-0123-defa-234567890123",
     "trigger": "!",
     "command": "summarise",
-    "type": "jules",
+    "type": "jules-message",
     "label": "summarise session",
-    "sessionId": "5788330460560468349",
-    "instructions": "Summarise everything done in this session so far. Use markdown with headers.",
-    "expects": "md"
+    "sessionId": "sessions/5788330460560468349",
+    "instructions": "Summarise everything done in this session so far. Use markdown with headers."
   },
   {
     "id": "e5f6a7b8-c9d0-1234-efab-345678901234",
-    "trigger": "/",
+    "trigger": ">",
     "command": "history",
-    "type": "local",
+    "type": "palette",
     "label": "open history",
     "action": "history"
   }

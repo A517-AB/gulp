@@ -54,6 +54,7 @@ export default function JulesPage() {
           <ActivityFeed
             session={selectedSession}
             onArchive={handleArchive}
+            onNewSession={() => { openNewSession(); }}
             showCodeDiffs={showCodeDiffs}
             onToggleCodeDiffs={setShowCodeDiffs}
             onActivitiesChange={setCurrentActivities}

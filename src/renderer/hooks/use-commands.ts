@@ -6,7 +6,7 @@ import type { Command } from '@shared/commands'
 const LS_KEY = 'jules-commands'
 
 export const BUILT_IN_COMMANDS: Command[] = [
-  { id: '__settings', trigger: '/', command: 'settings', type: 'local', action: 'settings', label: 'Settings' },
+  { id: '__settings', trigger: '>', command: 'settings', type: 'palette', action: 'settings', label: 'Settings' },
 ]
 
 export type CommandsStatus = 'ok' | 'file-not-found' | 'loading'
@@ -59,7 +59,7 @@ export function useCommands() {
   }, [])
 
   const add    = useCallback((cmd: Omit<Command, 'id'>) =>
-    { commit([...userCommands, { ...cmd, id: crypto.randomUUID() }]); }, [userCommands, commit])
+    { commit([...userCommands, Object.assign({}, cmd, { id: crypto.randomUUID() }) as Command]); }, [userCommands, commit])
 
   const update = useCallback((updated: Command) =>
     { commit(userCommands.map(c => c.id === updated.id ? updated : c)); }, [userCommands, commit])

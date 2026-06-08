@@ -47,6 +47,7 @@ export interface QuickActionTemplate {
 export interface ActivityFeedProps {
   session: Session;
   onArchive?: () => void;
+  onNewSession?: () => void;
   showCodeDiffs: boolean;
   onToggleCodeDiffs: (show: boolean) => void;
   onActivitiesChange: (activities: Activity[]) => void;
@@ -104,6 +105,7 @@ export interface UseNewSessionFormProps {
 
 export interface UseNewSessionFormReturn {
   sources: Source[];
+  branches: string[];
   formData: SessionFormData;
   setFormData: Dispatch<SetStateAction<SessionFormData>>;
   error: string | null;

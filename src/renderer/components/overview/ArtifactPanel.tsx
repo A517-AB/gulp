@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Tabs, TabsList, TabsTrigger } from '@/ui/tabs'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import JSZip from 'jszip'
 import type { GeneratedFile } from '@/hooks/use-artifact-stream'
+import { BlockEditor } from './BlockEditor'
 
 interface ArtifactPanelProps {
   files: GeneratedFile[]
@@ -22,7 +21,7 @@ function triggerDownload(blob: Blob, filename: string): void {
 }
 
 function downloadFile(file: GeneratedFile) {
-  const blob = new Blob([file.content], { type: 'text/markdown' })
+  const blob = new Blob([file.content], { type: 'text/plain' })
   triggerDownload(blob, file.path.split('/').pop() ?? 'artifact.md')
 }
 
@@ -53,10 +52,7 @@ export function ArtifactPanel({ files, onDismiss, onZip }: ArtifactPanelProps) {
     >
       <div className="absolute top-6 right-6 z-10 flex gap-4 opacity-0 group-hover/panel:opacity-100 transition-opacity duration-300">
         {current && (
-          <button
-            onClick={() => { downloadFile(current) }}
-            className="text-xs text-fg-ghost hover:text-fg-secondary transition-colors"
-          >
+          <button onClick={() => { downloadFile(current) }} className="text-xs text-fg-ghost hover:text-fg-secondary transition-colors">
             save
           </button>
         )}
@@ -86,11 +82,9 @@ export function ArtifactPanel({ files, onDismiss, onZip }: ArtifactPanelProps) {
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-10 pt-16 pb-10" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex-1 overflow-hidden">
         {current && (
-          <div className="prose prose-sm max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{current.content}</ReactMarkdown>
-          </div>
+          <BlockEditor key={current.path} content={current.content} readOnly />
         )}
       </div>
     </motion.div>

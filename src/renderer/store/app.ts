@@ -1,6 +1,17 @@
 import { create } from 'zustand'
 import type { JulesClient } from '@/lib/jules/client'
-import type { Session, Activity } from '@/types/jules'
+import type { Session, Activity, Source } from '@/types/jules'
+import type { SessionFormData } from '@/types/activity-feed'
+
+export type { SessionFormData }
+
+const DEFAULT_FORM: SessionFormData = {
+  sourceId: '',
+  title: '',
+  prompt: '',
+  startingBranch: '',
+  autoCreatePr: false,
+}
 
 async function fetchSessions(client: JulesClient | null): Promise<Session[]> {
   if (!client) return []
@@ -12,10 +23,17 @@ export interface AppStore {
   activities: Record<string, Activity[]>
   activitiesLoading: Record<string, boolean>
   activitiesError: Record<string, string | null>
-  
+
+  sources: Source[]
+  sourcesLoaded: boolean
+  newSessionForm: SessionFormData
+  setNewSessionForm: (patch: Partial<SessionFormData>) => void
+  resetNewSessionForm: () => void
+  loadSources: (client: JulesClient | null) => Promise<void>
+
   loadSessions: (client: JulesClient | null) => Promise<void>
   startPolling: (client: JulesClient | null) => () => void
-  
+
   loadActivities: (client: JulesClient | null, sessionId: string) => Promise<void>
   sendMessage: (client: JulesClient | null, sessionId: string, content: string) => Promise<void>
   approvePlan: (client: JulesClient | null, sessionId: string) => Promise<void>
@@ -26,6 +44,29 @@ export const useStore = create<AppStore>((set, get) => ({
   activities: {},
   activitiesLoading: {},
   activitiesError: {},
+
+  sources: [],
+  sourcesLoaded: false,
+  newSessionForm: DEFAULT_FORM,
+  setNewSessionForm: (patch) => set(s => ({ newSessionForm: { ...s.newSessionForm, ...patch } })),
+  resetNewSessionForm: () => set({ newSessionForm: DEFAULT_FORM }),
+
+  loadSources: async (client) => {
+    if (!client || get().sourcesLoaded) return
+    try {
+      const data = await client.listSources()
+      set(s => ({
+        sources: data,
+        sourcesLoaded: true,
+        newSessionForm: {
+          ...s.newSessionForm,
+          sourceId: s.newSessionForm.sourceId || data.at(0)?.id || '',
+        },
+      }))
+    } catch {
+      // leave sources empty, caller can retry
+    }
+  },
 
   loadSessions: async (client) => {
     const data = await fetchSessions(client)

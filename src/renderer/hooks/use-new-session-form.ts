@@ -1,25 +1,7 @@
-import { useState, useCallback, useEffect, type FormEvent } from "react";
+import { useEffect, useMemo, useCallback, type FormEvent } from "react";
 import { useJules } from "@/lib/jules/provider";
-import type { Source, SessionFormData, UseNewSessionFormProps, UseNewSessionFormReturn } from "@/types/activity-feed";
-
-const DEFAULT_FORM: SessionFormData = {
-  sourceId: "",
-  title: "",
-  prompt: "",
-  startingBranch: "",
-  autoCreatePr: false,
-};
-
-// TODO: replace this whole form with a global session dispatch — one place to send
-// any message/task to Jules regardless of context (command bar, page, trigger, etc.)
-// this hook is a stopgap; when that exists, delete this.
-//
-// known issues:
-// - sources fetched locally on every open instead of reading from store
-// - branches not exposed (no data source wired)
-// - onSessionCreated doesn't receive the created session
-// - double-send: button onClick + form onSubmit both firing
-// - autoCreatePr renders wrong in the UI (check NewSessionDialog)
+import { useStore } from "@/store/app";
+import type { UseNewSessionFormProps, UseNewSessionFormReturn } from "@/types/activity-feed";
 
 export function useNewSessionForm({
   open,
@@ -28,43 +10,33 @@ export function useNewSessionForm({
   onClose,
 }: UseNewSessionFormProps): UseNewSessionFormReturn {
   const { client } = useJules();
-  const [sources, setSources] = useState<Source[]>([]);
-  const [formData, setFormData] = useState<SessionFormData>(DEFAULT_FORM);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadSources = useCallback(async () => {
-    if (!client) return;
-    try {
-      setError(null);
-      const data = await client.listSources();
-      setSources(data);
-      if (data.length === 0) {
-        setError("No repositories found. Connect a GitHub repository in the Jules web app first.");
-      } else {
-        setFormData((prev) => ({ ...prev, sourceId: prev.sourceId || data.at(0)?.id || "" }));
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load repositories");
-    }
-  }, [client]);
+  const sources       = useStore(s => s.sources);
+  const formData      = useStore(s => s.newSessionForm);
+  const setFormData   = useStore(s => s.setNewSessionForm);
+  const resetForm     = useStore(s => s.resetNewSessionForm);
+  const loadSources   = useStore(s => s.loadSources);
 
   useEffect(() => {
     if (!open) return;
-    setFormData((prev) => ({
-      ...prev,
-      sourceId: initialValues?.sourceId ?? prev.sourceId,
-      title: initialValues?.title ?? prev.title,
-      prompt: initialValues?.prompt ?? prev.prompt,
-      startingBranch: initialValues?.startingBranch ?? prev.startingBranch,
-    }));
-    loadSources();
-  }, [open, initialValues, loadSources]);
+    loadSources(client);
+    if (initialValues) setFormData(initialValues);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    setFormData({ startingBranch: '' });
+  }, [formData.sourceId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const branches = useMemo<string[]>(() => {
+    const selected = sources.find(s => s.id === formData.sourceId);
+    const repo = (selected?.metadata as Record<string, unknown> | undefined)?.['githubRepo'] as Record<string, unknown> | undefined;
+    const list = repo?.['branches'] as { displayName?: string }[] | undefined;
+    return list?.map(b => b.displayName ?? '').filter(Boolean) ?? [];
+  }, [sources, formData.sourceId]);
 
   const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
     if (!client || !formData.sourceId || !formData.prompt) return;
     try {
-      setError(null);
       await client.createSession({
         sourceId: formData.sourceId,
         prompt: formData.prompt,
@@ -72,13 +44,20 @@ export function useNewSessionForm({
         ...(formData.startingBranch ? { startingBranch: formData.startingBranch } : {}),
         autoCreatePr: formData.autoCreatePr,
       });
-      setFormData(DEFAULT_FORM);
+      resetForm();
       onClose();
       onSessionCreated?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create workspace");
+      console.error('[useNewSessionForm] createSession failed:', err);
     }
-  }, [client, formData, onClose, onSessionCreated]);
+  }, [client, formData, onClose, onSessionCreated, resetForm]);
 
-  return { sources, formData, setFormData, error, handleSubmit };
+  return {
+    sources,
+    branches,
+    formData,
+    setFormData: (patch) => setFormData(typeof patch === 'function' ? patch(formData) : patch),
+    error: null,
+    handleSubmit,
+  };
 }
