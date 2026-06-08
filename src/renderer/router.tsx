@@ -3,6 +3,32 @@ import { createHashRouter, type RouteObject } from 'react-router'
 import { isElectron, isWeb } from '@shared/bridge'
 import RootLayout from '@renderer/layouts/RootLayout'
 import { RouteErrorBoundary } from '@renderer/core/ErrorBoundary'
+import HomePage from '@renderer/pages/shared/HomePage'
+import SettingsPage from '@renderer/pages/shared/settings/SettingsPage'
+import JulesPage from '@renderer/pages/shared/JulesPage'
+import JuliePage from '@renderer/pages/shared/JuliePage'
+import NotesPage from '@renderer/pages/shared/NotesPage'
+import ActivityPage from '@renderer/pages/electron/ActivityPage'
+import ReposPage from '@renderer/pages/electron/ReposPage'
+import SnapshotPage from '@renderer/pages/electron/SnapshotPage'
+import QueuesPage from '@renderer/pages/electron/QueuesPage'
+import { SnippetsPage } from '@renderer/pages/electron/SnippetsPage'
+import SessionsPage from '@renderer/pages/electron/SessionsPage'
+import OverviewPage from '@renderer/pages/web/OverviewPage'
+
+// ── dev ───────────────────────────────────────────────────────────────────────
+
+if (import.meta.env.DEV) {
+    console.log('[router] platform:', { isElectron, isWeb })
+
+    if (!isElectron && !isWeb) {
+        console.warn('[router] neither isElectron nor isWeb is true — check @shared/bridge')
+    }
+
+    if (isElectron && isWeb) {
+        console.warn('[router] both isElectron and isWeb are true — this is probably wrong')
+    }
+}
 
 // ── types ─────────────────────────────────────────────────────────────────────
 
@@ -13,22 +39,23 @@ export type AppRoute = Omit<RouteObject, 'handle'> & {
 // ── shared ────────────────────────────────────────────────────────────────────
 
 const sharedRoutes: AppRoute[] = [
-    { index: true,       lazy: async () => ({ Component: (await import('@renderer/pages/shared/HomePage')).default }), handle: { title: 'Home',      inNav: true } },
-    { path: 'settings',  lazy: async () => ({ Component: (await import('@renderer/pages/shared/settings/SettingsPage')).default }), handle: { title: 'Settings',  inNav: true } },
-    { path: 'session',   lazy: async () => ({ Component: (await import('@renderer/pages/shared/JulesPage')).default }), handle: { title: 'Sessions',  inNav: true } },
-    { path: 'overview',  lazy: async () => ({ Component: (await import('@renderer/pages/web/overview/OverviewPage')).default }), handle: { title: 'Overview',  inNav: true } },
-    { path: 'notes',     lazy: async () => ({ Component: (await import('@renderer/pages/shared/NotesPage')).default }), handle: { title: 'Notes',     inNav: true } },
+    { index: true,       Component: HomePage,     handle: { title: 'Home',      inNav: true } },
+    { path: 'settings',  Component: SettingsPage, handle: { title: 'Settings',  inNav: true } },
+    { path: 'session',   Component: JulesPage,    handle: { title: 'Sessions',  inNav: true } },
+    { path: 'julie',     Component: JuliePage,    handle: { title: 'Julie',     inNav: true } },
+    { path: 'overview',  Component: OverviewPage, handle: { title: 'Overview',  inNav: true } },
+    { path: 'notes',     Component: NotesPage,    handle: { title: 'Notes',     inNav: true } },
 ]
 
 // ── electron ──────────────────────────────────────────────────────────────────
 
 const electronRoutes: AppRoute[] = [
-    { path: 'repos',        lazy: async () => ({ Component: (await import('@renderer/pages/electron/ReposPage')).default }), handle: { title: 'Repos',    inNav: true } },
-    { path: 'queues',       lazy: async () => ({ Component: (await import('@renderer/pages/electron/QueuesPage')).default }), handle: { title: 'Queues',   inNav: true } },
-    { path: 'snippets',     lazy: async () => ({ Component: (await import('@renderer/pages/electron/SnippetsPage')).SnippetsPage }), handle: { title: 'Snippets', inNav: true } },
-    { path: 'hub',           lazy: async () => ({ Component: (await import('@renderer/pages/electron/HubPage')).default }),    handle: { title: 'Hub',      inNav: true } },
-    { path: 'activity/:id', lazy: async () => ({ Component: (await import('@renderer/pages/electron/ActivityPage')).default }) },
-    { path: 'snapshot/:id', lazy: async () => ({ Component: (await import('@renderer/pages/electron/SnapshotPage')).default }) },
+    { path: 'repos',        Component: ReposPage,    handle: { title: 'Repos',    inNav: true } },
+    { path: 'queues',       Component: QueuesPage,   handle: { title: 'Queues',   inNav: true } },
+    { path: 'snippets',     Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },
+    { path: 'sessions',     Component: SessionsPage, handle: { title: 'Sessions', inNav: true } },
+    { path: 'activity/:id', Component: ActivityPage },
+    { path: 'snapshot/:id', Component: SnapshotPage },
 ]
 
 // ── web ───────────────────────────────────────────────────────────────────────
@@ -49,7 +76,6 @@ export const router = createHashRouter([
     {
         path: '/',
         Component: RootLayout,
-        HydrateFallback: () => null,
         errorElement: <RouteErrorBoundary />,
         children: navRoutes as RouteObject[],
     },

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/ui/dialog.tsx";
 import { Button } from "@/ui/button.tsx";
 import { Input } from "@/ui/input.tsx";
@@ -15,7 +15,7 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
   const open = isControlled ? (controlledOpen ?? false) : internalOpen;
   const setOpen = isControlled ? (onOpenChange ?? setInternalOpen) : setInternalOpen;
 
-  const { sources, formData, setFormData, loading, error, handleSubmit } = useNewSessionForm({
+  const { sources, formData, setFormData, error, handleSubmit } = useNewSessionForm({
     open,
     ...(initialValues ? { initialValues } : {}),
     ...(onSessionCreated ? { onSessionCreated } : {}),
@@ -59,8 +59,8 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
           {error && <div className="rounded bg-red-950/30 p-2.5"><p className="text-xs text-red-400">{error}</p></div>}
           <div className="flex gap-2 justify-end pt-2">
             <Button type="button" variant="outline" onClick={() => { setOpen(false); }} className="h-8 text-[10px] font-mono uppercase tracking-widest">Cancel</Button>
-            <Button type="submit" disabled={loading || !formData.sourceId || !formData.prompt} className="h-8 text-[10px] font-mono uppercase tracking-widest">
-              {loading ? <><Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />Creating...</> : "Create Session"}
+            <Button type="submit" disabled={!formData.sourceId || !formData.prompt} className="h-8 text-[10px] font-mono uppercase tracking-widest">
+              Create Session
             </Button>
           </div>
         </form>

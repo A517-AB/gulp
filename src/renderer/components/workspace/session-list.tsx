@@ -11,12 +11,11 @@ import type { SessionListProps } from "@/types/activity-feed.ts";
 const LIMIT = 100;
 
 export function SessionList({ onSelectSession, selectedSessionId }: SessionListProps) {
-  const { sessions, allSessions, loading, error, searchQuery, setSearchQuery, loadSessions } = useSessionList();
+  const { sessions, allSessions, error, searchQuery, setSearchQuery, loadSessions } = useSessionList();
 
   const dailyCount = allSessions.filter((s) => { try { return s.createdAt && isToday(parseISO(s.createdAt)); } catch { return false; } }).length;
   const pct = Math.min((dailyCount / LIMIT) * 100, 100);
 
-  if (loading) return <div className="flex items-center justify-center p-6"><p className="text-xs text-fg-dim">Loading sessions...</p></div>;
   if (error) return (
     <div className="flex flex-col items-center gap-3 p-6">
       <p className="text-xs text-red-400 text-center">{error}</p>

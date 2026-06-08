@@ -227,7 +227,7 @@ describe("localJules", () => {
       expected: [sessionInfo],
     },
   ])("should delegate $method to sdkIpc", async ({ method, args, expected }) => {
-    const result = await (localModule.localJules as Record<string, (...values: unknown[]) => unknown>)[method]!(...args);
+    const result = await (localModule.localJules as Record<string, (...values: unknown[]) => unknown>)[method]?.(...args);
 
     expect((bridge as Record<string, ReturnType<typeof vi.fn>>)[method]).toHaveBeenCalledWith(...args);
     expect(result).toBe(expected);

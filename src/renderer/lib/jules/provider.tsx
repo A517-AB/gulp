@@ -22,48 +22,19 @@ export function JulesProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
-      let stored = localStorage.getItem("jules-api-key");
-      console.log("[JulesProvider] stored api key:", stored ? "found" : "not found");
-
-      // Check Vite environment variables (injected by vite.config.ts)
-      if (!stored && import.meta.env['VITE_JULES_API_KEY']) {
-        const envKey = import.meta.env['VITE_JULES_API_KEY'];
-        console.log("[JulesProvider] env api key:", envKey ? "found" : "not found");
-        if (envKey) {
-          stored = envKey;
-        }
-      }
-
-      // Fallback to electron environment variable
-      if (!stored && window.electron?.env?.getApiKey) {
+      if (window.electron?.env?.getApiKey) {
         const envKey = await window.electron.env.getApiKey();
-        console.log("[JulesProvider] electron api key:", envKey ? "found" : "not found");
         if (envKey) {
-          stored = envKey;
+          setApiKeyState(envKey);
+          setClient(new JulesClient(envKey));
         }
-      }
-
-      if (stored) {
-        setApiKeyState(stored);
-        setClient(new JulesClient(stored));
       }
     }
     void init();
   }, []);
 
-  const setApiKey = (key: string) => {
-    console.log("[JulesProvider] setting api key");
-    localStorage.setItem("jules-api-key", key);
-    setApiKeyState(key);
-    setClient(new JulesClient(key));
-  };
-
-  const clearApiKey = () => {
-    console.log("[JulesProvider] clearing api key");
-    localStorage.removeItem("jules-api-key");
-    setApiKeyState(null);
-    setClient(null);
-  };
+  const setApiKey = () => {};
+  const clearApiKey = () => {};
 
   return (
     <JulesContext.Provider

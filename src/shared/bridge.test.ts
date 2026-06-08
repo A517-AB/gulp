@@ -46,9 +46,6 @@ describe("bridge", () => {
     const history = { get: vi.fn() };
     const aliases = { get: vi.fn() };
     const notes = { get: vi.fn() };
-    const alarms = { list: vi.fn() };
-    const notifications = { send: vi.fn() };
-    const reminders = { list: vi.fn() };
     const snippets = { get: vi.fn() };
     const terminal = { start: vi.fn() };
     const queues = { getTasks: vi.fn() };
@@ -67,9 +64,6 @@ describe("bridge", () => {
         history,
         aliases,
         notes,
-        alarms,
-        notifications,
-        reminders,
         snippets,
         sdkIpc,
       },
@@ -83,9 +77,6 @@ describe("bridge", () => {
     expect(bridge.history).toBe(history);
     expect(bridge.aliases).toBe(aliases);
     expect(bridge.notes).toBe(notes);
-    expect(bridge.alarms).toBe(alarms);
-    expect(bridge.notifications).toBe(notifications);
-    expect(bridge.reminders).toBe(reminders);
     expect(bridge.snippets).toBe(snippets);
     expect(bridge.terminal).toBe(terminal);
     expect(bridge.queues).toBe(queues);

@@ -7,7 +7,7 @@ interface SessionPickerProps {
 }
 
 export function SessionPicker({ value, onChange }: SessionPickerProps) {
-  const { sessions, loading } = useSessionList()
+  const { sessions } = useSessionList()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
@@ -40,7 +40,7 @@ export function SessionPicker({ value, onChange }: SessionPickerProps) {
         className="w-full bg-surface border border-hair rounded px-2 py-1 text-xs font-mono text-left flex items-center justify-between gap-2 hover:border-subtle transition-colors"
       >
         <span className={selected ? 'text-fg-primary truncate' : 'text-fg-ghost'}>
-          {loading ? 'loading...' : (selected?.title ?? (value || 'pick or paste id'))}
+          {selected?.title ?? (value || 'pick or paste id')}
         </span>
         <span className="text-fg-ghost shrink-0">{open ? '▴' : '▾'}</span>
       </button>

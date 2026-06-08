@@ -3,7 +3,7 @@ import type { FuseManifest, FuseChangeEvent } from './fuse'
 import type { Command } from './commands'
 import type { HistoryEntry } from './history'
 import type { NoteMeta } from './notes'
-import type { AlarmEntry, ReminderEntry, HubNotification } from './hub'
+
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
 // TODO: figure out the setup here. the diffrence between the types in electron.d.ts and the the rest of the files and bridge.
@@ -264,28 +264,7 @@ export interface HistoryAPI {
   remove: (id: string) => Promise<HistoryEntry[]>
 }
 
-export interface AlarmsAPI {
-  list:    () => Promise<AlarmEntry[]>
-  save:    (alarm: AlarmEntry) => Promise<boolean>
-  delete:  (id: string) => Promise<boolean>
-  toggle:  (id: string, enabled: boolean) => Promise<boolean>
-  snooze:  (id: string, minutes: number) => Promise<boolean>
-  onChanged: (cb: () => void) => () => void
-}
 
-export interface RemindersAPI {
-  list:      () => Promise<ReminderEntry[]>
-  save:      (reminder: ReminderEntry) => Promise<boolean>
-  delete:    (id: string) => Promise<boolean>
-  toggle:    (id: string, enabled: boolean) => Promise<boolean>
-  done:      (id: string) => Promise<boolean>
-  onChanged: (cb: () => void) => () => void
-}
-
-export interface NotificationsAPI {
-  send:       (n: HubNotification) => void
-  onReceived: (cb: (n: HubNotification) => void) => () => void
-}
 
 export interface NotesAPI {
   get:       (id: string) => Promise<object[] | null>
@@ -310,6 +289,7 @@ export interface SnippetsAPI {
 export interface JulesLocalAPI {
   setApiKey: (apiKey: string | null) => Promise<boolean>;
   createSession: (request: JulesLocalSessionRequest) => Promise<JulesLocalSessionInfo>;
+  startRun: (request: JulesLocalSessionRequest) => Promise<JulesLocalSessionInfo>;
   resumeSession: (sessionId: string) => Promise<JulesLocalSessionInfo>;
   getSession: (sessionId: string) => Promise<JulesLocalSessionInfo>;
   hydrateSession: (sessionId: string) => Promise<number>;
@@ -356,9 +336,7 @@ export interface ElectronAPI {
   history:       HistoryAPI;
   aliases:       AliasesAPI;
   notes:         NotesAPI;
-  alarms:        AlarmsAPI;
-  notifications: NotificationsAPI;
-  reminders:     RemindersAPI;
+
   snippets:      SnippetsAPI;
   sdkIpc:   JulesLocalAPI;
 }

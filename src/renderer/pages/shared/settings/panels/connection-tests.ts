@@ -11,7 +11,8 @@ export function getConnectionTests(client: JulesClient | null): TestDef[] {
       electronOnly: true,
       fn: async () => {
         if (!sdkIpc) throw new Error('sdkIpc is null')
-        await sdkIpc.setApiKey(localStorage.getItem('jules-api-key'))
+        const apiKey = window.electron?.env?.getApiKey ? await window.electron.env.getApiKey() : null
+        await sdkIpc.setApiKey(apiKey)
         return { summary: 'reachable — key forwarded to main process' }
       },
     },
@@ -60,18 +61,6 @@ export function getConnectionTests(client: JulesClient | null): TestDef[] {
         return {
           summary: `${String(s.length)} sessions`,
           items: s.map(x => `[${x.status}] ${x.title || 'Untitled'} — ${x.id}`),
-        }
-      },
-    },
-    {
-      key: 'client_sessions_archived',
-      label: "client.listSessions({ filter: 'archived = true' })",
-      fn: async () => {
-        if (!client) throw new Error('no client')
-        const s = await client.listSessions({ filter: 'archived = true' })
-        return {
-          summary: `${String(s.length)} archived`,
-          items: s.map(x => `${x.title || 'Untitled'} — ${x.id}`),
         }
       },
     },
