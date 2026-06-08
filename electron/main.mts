@@ -13,10 +13,10 @@ import { registerFilesystemHandlers } from "./filesystem/handlers";
 import { registerSnippetsHandlers } from "./snippets";
 import { registerGitHandlers } from "./git";
 import { registerGitHubHandlers } from "./github";
-import { registerJulesLocalHandlers } from "./juleslocal";
 import { registerAliasesHandlers } from "./aliases";
 import { registerHistoryHandlers } from "./history";
 import { registerNotesHandlers } from "./notes";
+import { registerUINotificationHandlers } from "./notification";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -131,10 +131,10 @@ app.whenReady().then(() => {
   registerSnippetsHandlers(() => mainWindow?.webContents ?? null);
   registerGitHandlers();
   registerGitHubHandlers();
-  registerJulesLocalHandlers();
   registerAliasesHandlers(() => mainWindow?.webContents ?? null);
   registerHistoryHandlers();
   registerNotesHandlers(() => mainWindow?.webContents ?? null);
+  registerUINotificationHandlers(() => mainWindow?.webContents ?? null);
   createWindow();
 
   tray = new Tray(buildTrayIcon());

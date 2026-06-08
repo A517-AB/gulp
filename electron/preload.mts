@@ -191,48 +191,21 @@ const snippets: ElectronAPI["snippets"] = {
   },
 };
 
-// ── jules local ────────────────────────────────────────────────────────────────
+// ── uiNotification ─────────────────────────────────────────────────────────────
 
-const julesLocal: ElectronAPI["sdkIpc"] = {
-  setApiKey: (apiKey) => ipcRenderer.invoke("jules.apiKey.set", apiKey),
-  createSession: (request) => ipcRenderer.invoke("jules.session.create", request),
-  startRun: (request) => ipcRenderer.invoke("jules.run.start", request),
-  resumeSession: (sessionId) => ipcRenderer.invoke("jules.session.resume", sessionId),
-  getSession: (sessionId) => ipcRenderer.invoke("jules.session.get", sessionId),
-  hydrateSession: (sessionId) => ipcRenderer.invoke("jules.session.hydrate", sessionId),
-  getHistory: (sessionId) => ipcRenderer.invoke("jules.session.history", sessionId),
-  listSources: () => ipcRenderer.invoke("jules.sources.list"),
-  getSource: (github) => ipcRenderer.invoke("jules.sources.get", github),
-  getResult: (sessionId) => ipcRenderer.invoke("jules.session.result", sessionId),
-  getSnapshot: (sessionId) => ipcRenderer.invoke("jules.session.snapshot", sessionId),
-  dispatchFleetIssueFix: (request) => ipcRenderer.invoke("jules.fleet.issueFix", request),
-  approve: (sessionId) => ipcRenderer.invoke("jules.session.approve", sessionId),
-  sendMessage: (sessionId, prompt) => ipcRenderer.invoke("jules.session.send", sessionId, prompt),
-  ask: (sessionId, prompt) => ipcRenderer.invoke("jules.session.ask", sessionId, prompt),
-  getGeneratedFiles: (sessionId, filter) => ipcRenderer.invoke("jules.session.files", sessionId, filter),
-  getMarkdownFiles: (sessionId) => ipcRenderer.invoke("jules.session.files.markdown", sessionId),
-  startStream: (sessionId) => ipcRenderer.invoke("jules.stream.start", sessionId),
-  stopStream: (sessionId) => ipcRenderer.invoke("jules.stream.stop", sessionId),
-  onActivity: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => {
-      cb(data)
-    }
-    ipcRenderer.on("jules.stream.activity", handler)
-    return () => {
-      ipcRenderer.off("jules.stream.activity", handler)
-    }
+const uiNotification: ElectronAPI["uiNotification"] = {
+  show:    (payload) => { ipcRenderer.send("uikit:notification", payload); },
+  destroy: ()        => { ipcRenderer.send("uikit:notification", null); },
+  onClicked: (cb) => {
+    const handler = (_event: IpcRendererEvent, data: unknown) => { cb(data); };
+    ipcRenderer.on("uinotification.click", handler);
+    return () => { ipcRenderer.off("uinotification.click", handler); };
   },
-  onStreamState: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => {
-      cb(data)
-    }
-    ipcRenderer.on("jules.stream.state", handler)
-    return () => {
-      ipcRenderer.off("jules.stream.state", handler)
-    }
+  onCancelled: (cb) => {
+    const handler = (_event: IpcRendererEvent, data: unknown) => { cb(data); };
+    ipcRenderer.on("uinotification.cancel", handler);
+    return () => { ipcRenderer.off("uinotification.cancel", handler); };
   },
-  applyPatch: (sessionId, opts) => ipcRenderer.invoke("jules.applyPatch", sessionId, opts),
-  listSessions: (options) => ipcRenderer.invoke("jules.sessions.list", options),
 };
 
 // ── expose ─────────────────────────────────────────────────────────────────────
@@ -249,7 +222,7 @@ const api: ElectronAPI = {
   aliases,
   notes,
   snippets,
-  sdkIpc: julesLocal,
+  uiNotification,
 };
 
 contextBridge.exposeInMainWorld("electron", api);

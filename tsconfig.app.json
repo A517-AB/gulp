@@ -6,7 +6,9 @@
     "module": "esnext",
     "types": ["vite/client"],
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/renderer/*"],
+      "@/types": ["./src/types"],
+      "@/types/*": ["./src/types/*"],
       "@renderer": ["./src/renderer/index.ts"],
       "@renderer/*": ["./src/renderer/*"],
       "@shared": ["./src/shared/index.ts"],

@@ -9,11 +9,11 @@ import JulesPage from '@renderer/pages/shared/JulesPage'
 import JuliePage from '@renderer/pages/shared/JuliePage'
 import NotesPage from '@renderer/pages/shared/NotesPage'
 import ActivityPage from '@renderer/pages/electron/ActivityPage'
-import ReposPage from '@renderer/pages/electron/ReposPage'
 import SnapshotPage from '@renderer/pages/electron/SnapshotPage'
 import QueuesPage from '@renderer/pages/electron/QueuesPage'
 import { SnippetsPage } from '@renderer/pages/electron/SnippetsPage'
 import SessionsPage from '@renderer/pages/electron/SessionsPage'
+import LibraryPage from '@renderer/pages/electron/LibraryPage'
 import OverviewPage from '@renderer/pages/web/OverviewPage'
 
 // ── dev ───────────────────────────────────────────────────────────────────────
@@ -50,16 +50,16 @@ const sharedRoutes: AppRoute[] = [
 // ── electron ──────────────────────────────────────────────────────────────────
 
 const electronRoutes: AppRoute[] = [
-    { path: 'repos',        Component: ReposPage,    handle: { title: 'Repos',    inNav: true } },
     { path: 'queues',       Component: QueuesPage,   handle: { title: 'Queues',   inNav: true } },
     { path: 'snippets',     Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },
     { path: 'sessions',     Component: SessionsPage, handle: { title: 'Sessions', inNav: true } },
+    { path: 'library',       Component: LibraryPage,  handle: { title: 'Library',  inNav: true } },
     { path: 'activity/:id', Component: ActivityPage },
     { path: 'snapshot/:id', Component: SnapshotPage },
 ]
 
 // ── web ───────────────────────────────────────────────────────────────────────
-
+// keeping the web idea for just backup, don't remove or fickle or didle iwth
 const webRoutes: AppRoute[] = []
 
 // ── nav export ────────────────────────────────────────────────────────────────
@@ -76,6 +76,7 @@ export const router = createHashRouter([
     {
         path: '/',
         Component: RootLayout,
+        HydrateFallback: () => null,
         errorElement: <RouteErrorBoundary />,
         children: navRoutes as RouteObject[],
     },
