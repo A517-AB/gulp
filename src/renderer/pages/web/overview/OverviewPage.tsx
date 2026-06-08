@@ -1,13 +1,13 @@
 import { useState, useCallback, useMemo, type KeyboardEvent } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { sdkIpc } from '@shared/bridge'
 import { TRIGGERS } from '@shared/commands'
 import type { Command } from '@shared/commands'
 import { TRIGGER_META } from '@shared/commands'
-import type { JulesLocalGeneratedFile } from '@shared/electron'
+import { useJules } from '@/lib/jules/provider'
 import { useCommands } from '@/hooks/use-commands'
 import { useHistory } from '@/hooks/use-history'
 import { useArtifactStream } from '@/hooks/use-artifact-stream'
+import type { GeneratedFile } from '@/hooks/use-artifact-stream'
 import { GhostInput } from '@/components/overview/GhostInput'
 import { CommandMenu } from '@/components/overview/CommandMenu'
 import { HistoryPanel } from '@/components/overview/HistoryPanel'
@@ -25,6 +25,7 @@ function buildPrompt(cmd: Command, body: string): string {
 }
 
 export default function OverviewPage() {
+  const { client } = useJules()
   const { commands } = useCommands()
   const { entries: historyEntries, push: pushHistory, remove: removeHistory } = useHistory()
   const [activeCommand, setActiveCommand] = useState<Command | null>(null)
@@ -112,12 +113,12 @@ export default function OverviewPage() {
 
     // @ message — send immediately, body optional
     if (trigger === '@' || trigger === '!') {
-      if (!sdkIpc || !sessionId) { console.warn(`[overview] ${trigger} command missing sdkIpc or sessionId`); return }
+      if (!client || !sessionId) { console.warn(`[overview] ${trigger} command missing client or sessionId`); return }
       const prompt = buildPrompt(activeCommand, body)
       console.log(`[overview] ${TRIGGER_META[trigger].label} → session:`, sessionId)
       setIsSending(true)
       try {
-        await sdkIpc.sendMessage(sessionId, prompt)
+        await client.createActivity({ sessionId, content: prompt })
         if (body) void pushHistory(body)
       } catch (e) { console.error('[overview] send failed:', e) }
       finally { setIsSending(false) }
@@ -127,23 +128,19 @@ export default function OverviewPage() {
     // ? query — needs body
     if (trigger === '?') {
       if (body === '') { refresh(); return }
-      if (!sdkIpc || !sessionId) { console.warn('[overview] ? command missing sdkIpc or sessionId'); return }
+      if (!client || !sessionId) { console.warn('[overview] ? command missing client or sessionId'); return }
       console.log('[overview] query →', sessionId)
       setInput('')
       setIsSending(true)
       try {
-        await sdkIpc.sendMessage(sessionId, buildPrompt(activeCommand, body))
+        await client.createActivity({ sessionId, content: buildPrompt(activeCommand, body) })
         void pushHistory(body)
       } catch (e) { console.error('[overview] query failed:', e) }
       finally { setIsSending(false) }
     }
   }, [input, activeCommand, isSending, refresh, pushHistory])
 
-  const handleZip = useCallback(async (): Promise<JulesLocalGeneratedFile[]> => {
-    if (!activeCommand?.sessionId || !sdkIpc) return files
-    try { return await sdkIpc.getGeneratedFiles(activeCommand.sessionId) }
-    catch { return files }
-  }, [activeCommand, files])
+  const handleZip = useCallback((): GeneratedFile[] => files, [files])
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.code === 'Space' && e.ctrlKey && !e.shiftKey && !e.altKey) {

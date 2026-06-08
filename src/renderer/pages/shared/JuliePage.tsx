@@ -2,7 +2,7 @@ import {
   useState, useEffect, useRef, useCallback, useMemo, type ReactNode,
 } from 'react'
 import { RefreshCw, Send, CheckCircle2, AlertTriangle } from 'lucide-react'
-import { useJules } from '@renderer/lib/jules/provider'
+import { useJules } from '@/lib/jules/provider'
 import type { Source, Session, Activity } from '@/types/jules'
 import { cn } from '@/utils'
 

@@ -11,6 +11,8 @@ export default defineConfig([
     'dist-electron',
     'references/**',
     'scripts/**',
+    'check.ts',
+    'scratch/**',
     // excluded from tsconfig — Jules example files not part of this project
     'src/electron/ipc/advanced-workspace.ts',
     'src/electron/ipc/agent.ts',
@@ -53,6 +55,15 @@ export default defineConfig([
     files: ['src/electron/**/*.{ts,mts}', 'vite.config.ts'],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  {
+    // transport/ is Jules-agnostic — no SDK, no jules references allowed
+    files: ['src/renderer/transport/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: ['*jules*', '*sdk*', '@google/*'],
+      }],
     },
   },
   {

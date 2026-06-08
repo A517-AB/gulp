@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import { useSessionList } from '@renderer/hooks/use-session-list'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { useSessionList } from '@/hooks/use-session-list'
 
 interface SessionPickerProps {
   value: string
@@ -12,16 +12,20 @@ export function SessionPicker({ value, onChange }: SessionPickerProps) {
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
 
-  const recent = sessions
-    .slice()
-    .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''))
-    .slice(0, 10)
+  const recent = useMemo(() =>
+    sessions
+      .slice()
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      .slice(0, 10),
+    [sessions],
+  )
 
-  const filtered = query
-    ? recent.filter(s => s.title.toLowerCase().includes(query.toLowerCase()))
-    : recent
+  const filtered = useMemo(() =>
+    query ? recent.filter(s => s.title.toLowerCase().includes(query.toLowerCase())) : recent,
+    [recent, query],
+  )
 
-  const selected = sessions.find(s => s.id === value)
+  const selected = useMemo(() => sessions.find(s => s.id === value), [sessions, value])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -63,9 +67,7 @@ export function SessionPicker({ value, onChange }: SessionPickerProps) {
                 key={s.id}
                 type="button"
                 onMouseDown={() => { onChange(s.id); setOpen(false) }}
-                className={`w-full text-left px-2 py-1.5 text-xs font-mono truncate hover:bg-hover transition-colors ${
-                  s.id === value ? 'text-fg-primary' : 'text-fg-muted'
-                }`}
+                className={`w-full text-left px-2 py-1.5 text-xs font-mono truncate hover:bg-hover transition-colors ${s.id === value ? 'text-fg-primary' : 'text-fg-muted'}`}
               >
                 {s.title}
               </button>

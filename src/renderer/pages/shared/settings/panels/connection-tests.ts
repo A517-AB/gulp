@@ -1,48 +1,22 @@
-import { sdkIpc, isElectron } from '@shared/bridge'
+import { isElectron } from '@shared/bridge'
 import type { JulesClient } from '@/lib/jules/client'
 import type { TestDef } from '../types'
 
-export function getConnectionTests(client: JulesClient | null): TestDef[] {
+function getConnectionTests(client: JulesClient | null): TestDef[] {
   return [
-    // ── sdkIpc (Electron only) ─────────────────────────────────────────────
+    // ── electron env ──────────────────────────────────────────────────────────
     {
-      key: 'sdk_key',
-      label: 'sdkIpc.setApiKey()',
+      key: 'electron_key',
+      label: 'electron env.getApiKey()',
       electronOnly: true,
       fn: async () => {
-        if (!sdkIpc) throw new Error('sdkIpc is null')
-        const apiKey = window.electron?.env?.getApiKey ? await window.electron.env.getApiKey() : null
-        await sdkIpc.setApiKey(apiKey)
-        return { summary: 'reachable — key forwarded to main process' }
+        const key = await window.electron?.env.getApiKey()
+        if (!key) return { summary: 'null — no key found in env or ~/.jules' }
+        const masked = `${key.slice(0, 6)}…${key.slice(-4)} (${key.length} chars)`
+        return { summary: masked }
       },
     },
-    {
-      key: 'sdk_sources',
-      label: 'sdkIpc.listSources()',
-      electronOnly: true,
-      fn: async () => {
-        if (!sdkIpc) throw new Error('sdkIpc is null')
-        const s = await sdkIpc.listSources()
-        return {
-          summary: `${String(s.length)} sources`,
-          items: s.map(x => `${x.fullName} (${x.isPrivate ? 'private' : 'public'}, default: ${x.defaultBranch ?? 'n/a'})`),
-        }
-      },
-    },
-    {
-      key: 'sdk_sessions',
-      label: 'sdkIpc.listSessions()',
-      electronOnly: true,
-      fn: async () => {
-        if (!sdkIpc) throw new Error('sdkIpc is null')
-        const s = await sdkIpc.listSessions({ limit: 20 })
-        return {
-          summary: `${String(s.length)} sessions`,
-          items: s.map(x => `[${x.state}] ${x.title || 'Untitled'} — ${x.id}`),
-        }
-      },
-    },
-    // ── HTTP client ────────────────────────────────────────────────────────
+    // ── HTTP client ───────────────────────────────────────────────────────────
     {
       key: 'client_sources',
       label: 'client.listSources()',
@@ -64,5 +38,23 @@ export function getConnectionTests(client: JulesClient | null): TestDef[] {
         }
       },
     },
+    {
+      key: 'client_first_activities',
+      label: 'client.listActivities(first session)',
+      fn: async () => {
+        if (!client) throw new Error('no client')
+        const sessions = await client.listSessions()
+        const [s] = sessions
+        if (!s) return { summary: 'no sessions' }
+        const acts = await client.listActivities(s.id)
+        return {
+          summary: `${String(acts.length)} activities — "${s.title || s.id}"`,
+          items: acts.map(a => `[${a.type}] ${a.content.slice(0, 100)}`),
+        }
+      },
+    },
+   
   ].filter(t => !t.electronOnly || isElectron)
 }
+
+export default getConnectionTests

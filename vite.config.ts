@@ -61,13 +61,17 @@ export default defineConfig({
           },
         },
         preload: {
-          input: 'electron/preload.mts',
+          input: {
+            preload: 'electron/preload.mts',
+            'notification-preload': 'electron/notification-preload.ts',
+          },
           vite: {
             build: {
               rolldownOptions: {
                 external: nodeExternal,
                 output: {
                   entryFileNames: '[name].mjs',
+                  codeSplitting:  true,
                 },
               },
             },

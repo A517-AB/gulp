@@ -208,7 +208,7 @@ export class JulesClient {
 
     do {
       const params = new URLSearchParams();
-      params.set("pageSize", "100"); // Request max page size
+      params.set("pageSize", "10");
       if (pageToken) {
         params.set("pageToken", pageToken);
       }

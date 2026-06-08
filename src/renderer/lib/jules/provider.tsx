@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { JulesClient } from "./client";
+import { useStore } from "@/store/app";
 
 interface JulesContextType {
   client: JulesClient | null;
@@ -19,19 +20,24 @@ const JulesContext = createContext<JulesContextType | undefined>(undefined);
 export function JulesProvider({ children }: { children: ReactNode }) {
   const [apiKey, setApiKeyState] = useState<string | null>(null);
   const [client, setClient] = useState<JulesClient | null>(null);
+  const startPolling = useStore(s => s.startPolling);
 
   useEffect(() => {
     async function init() {
+      let resolved: JulesClient | null = null;
       if (window.electron?.env?.getApiKey) {
         const envKey = await window.electron.env.getApiKey();
         if (envKey) {
           setApiKeyState(envKey);
-          setClient(new JulesClient(envKey));
+          resolved = new JulesClient(envKey);
+          setClient(resolved);
         }
       }
+      return startPolling(resolved);
     }
-    void init();
-  }, []);
+    const cleanup = init();
+    return () => { void cleanup.then(stop => stop()); };
+  }, [startPolling]);
 
   const setApiKey = () => {};
   const clearApiKey = () => {};

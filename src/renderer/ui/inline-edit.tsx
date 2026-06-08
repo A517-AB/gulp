@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { cn } from "@/renderer/utils/utils";
+import { cn } from "@/utils/utils";
 
 interface InlineEditProps {
   value: string;

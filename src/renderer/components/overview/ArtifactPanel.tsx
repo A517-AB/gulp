@@ -4,12 +4,12 @@ import { Tabs, TabsList, TabsTrigger } from '@/ui/tabs'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import JSZip from 'jszip'
-import type { JulesLocalGeneratedFile } from '@shared/electron'
+import type { GeneratedFile } from '@/hooks/use-artifact-stream'
 
 interface ArtifactPanelProps {
-  files: JulesLocalGeneratedFile[]
+  files: GeneratedFile[]
   onDismiss: () => void
-  onZip?: () => Promise<JulesLocalGeneratedFile[]> | JulesLocalGeneratedFile[]
+  onZip?: () => Promise<GeneratedFile[]> | GeneratedFile[]
 }
 
 function triggerDownload(blob: Blob, filename: string): void {
@@ -21,12 +21,12 @@ function triggerDownload(blob: Blob, filename: string): void {
   URL.revokeObjectURL(url)
 }
 
-function downloadFile(file: JulesLocalGeneratedFile) {
+function downloadFile(file: GeneratedFile) {
   const blob = new Blob([file.content], { type: 'text/markdown' })
   triggerDownload(blob, file.path.split('/').pop() ?? 'artifact.md')
 }
 
-async function downloadZip(files: JulesLocalGeneratedFile[], name = 'artifacts'): Promise<void> {
+async function downloadZip(files: GeneratedFile[], name = 'artifacts'): Promise<void> {
   if (files.length === 0) return
   const zip = new JSZip()
   for (const file of files) zip.file(file.path, file.content)

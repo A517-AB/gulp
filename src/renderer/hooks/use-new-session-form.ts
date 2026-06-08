@@ -10,6 +10,17 @@ const DEFAULT_FORM: SessionFormData = {
   autoCreatePr: false,
 };
 
+// TODO: replace this whole form with a global session dispatch — one place to send
+// any message/task to Jules regardless of context (command bar, page, trigger, etc.)
+// this hook is a stopgap; when that exists, delete this.
+//
+// known issues:
+// - sources fetched locally on every open instead of reading from store
+// - branches not exposed (no data source wired)
+// - onSessionCreated doesn't receive the created session
+// - double-send: button onClick + form onSubmit both firing
+// - autoCreatePr renders wrong in the UI (check NewSessionDialog)
+
 export function useNewSessionForm({
   open,
   initialValues,

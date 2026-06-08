@@ -4,4 +4,8 @@ import '@renderer/index.css'
 const root = document.getElementById('root')
 if (!root) throw new Error('[main] Root element #root not found in DOM')
 
-createRoot(root).render(<App />)
+console.info(`[main] DOM parsed. Mounting React application to #${root.id}...`)
+
+createRoot(root).render(
+  <App />
+)

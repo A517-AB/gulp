@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useJules } from '@/lib/jules/provider'
 import { isElectron } from '@shared/bridge'
-import { getConnectionTests } from './connection-tests'
+import getConnectionTests from './connection-tests'
 import { TestRow } from './TestRow'
 import type { TestResult } from '../types'
 

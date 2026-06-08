@@ -34,13 +34,11 @@ describe("bridge", () => {
 
     expect(bridge.isElectron).toBe(false);
     expect(bridge.isWeb).toBe(true);
-    expect(bridge.sdkIpc).toBeNull();
     expect(bridge.filesystem).toBeNull();
     expect(bridge.windowControls).toBeNull();
   });
 
   it("should expose electron APIs from window.electron", async () => {
-    const sdkIpc = { listSources: vi.fn() };
     const filesystem = { readFile: vi.fn() };
     const windowControls = { minimize: vi.fn() };
     const history = { get: vi.fn() };
@@ -65,13 +63,11 @@ describe("bridge", () => {
         aliases,
         notes,
         snippets,
-        sdkIpc,
       },
     } as unknown as Window);
 
     expect(bridge.isElectron).toBe(true);
     expect(bridge.isWeb).toBe(false);
-    expect(bridge.sdkIpc).toBe(sdkIpc);
     expect(bridge.filesystem).toBe(filesystem);
     expect(bridge.windowControls).toBe(windowControls);
     expect(bridge.history).toBe(history);
