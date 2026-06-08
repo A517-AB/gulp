@@ -1,6 +1,7 @@
 import type { IpcRendererEvent } from "electron";
 import { contextBridge, ipcRenderer } from "electron";
 import type { ShellType, PopupNotification, ElectronAPI } from "../src/shared/electron";
+import { sdk } from "./ipc/bridge";
 // ── terminal ───────────────────────────────────────────────────────────────────
 
 const terminal: ElectronAPI["terminal"] = {
@@ -208,9 +209,24 @@ const uiNotification: ElectronAPI["uiNotification"] = {
   },
 };
 
+// ── scheduler ─────────────────────────────────────────────────────────────────
+
+const scheduler: ElectronAPI["scheduler"] = {
+  list:   ()                   => ipcRenderer.invoke("scheduler.list"),
+  add:    (item)               => ipcRenderer.invoke("scheduler.add", item),
+  remove: (id)                 => ipcRenderer.invoke("scheduler.remove", id),
+  toggle: (id, enabled)        => ipcRenderer.invoke("scheduler.toggle", id, enabled),
+  snooze: (id, minutes)        => ipcRenderer.invoke("scheduler.snooze", id, minutes),
+  onFired: (cb) => {
+    const handler = (_event: IpcRendererEvent, item: Parameters<typeof cb>[0]) => { cb(item) }
+    ipcRenderer.on("scheduler.fired", handler)
+    return () => { ipcRenderer.off("scheduler.fired", handler) }
+  },
+}
+
 // ── expose ─────────────────────────────────────────────────────────────────────
 
-const api: ElectronAPI = {
+const api: Omit<ElectronAPI, 'sdk'> = {
   terminal,
   queues,
   window:  window_,
@@ -223,6 +239,7 @@ const api: ElectronAPI = {
   notes,
   snippets,
   uiNotification,
+  scheduler,
 };
 
-contextBridge.exposeInMainWorld("electron", api);
+contextBridge.exposeInMainWorld("electron", { ...api, sdk });

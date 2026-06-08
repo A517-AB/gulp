@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+> Last updated: 2026-06-08
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Commands
@@ -32,15 +34,18 @@ Dual-deployment app: runs as an **Electron desktop app** or a **web app** in a b
 - Pages split under `pages/electron/`, `pages/web/`, `pages/shared/`
 - Data via React Query hooks (`hooks/use-session*`)
 - Global session stream/outcome state in Zustand (`store/app.ts`)
-- Jules access goes through `JulesClient` (`lib/jules/client.ts`), provided to the tree by `useJules()` / `JulesProvider` (`lib/jules/provider.tsx`). The API key is read from `localStorage`, `VITE_JULES_API_KEY`, or the Electron env.
+- Jules access: two transports — see `blueprints/jules-architecture.md` for the full picture
+  - HTTP client (`lib/jules/client.ts`) — works in both modes, accessed via `useJules().client`
+  - SDK via IPC (`sdkIpc` in `src/shared/bridge.ts`) — Electron only, for streaming / patch apply
 
 **2. Electron main** (`electron/` — at the repo **root**, not under `src/`) — Node.js context, never imported by the renderer
 - `main.mts`: window lifecycle, tray, global shortcut, power monitoring
 - `preload.mts`: context-isolated bridge exposing IPC to the renderer via `contextBridge`
-- IPC handlers: `Terminal.ts` (node-pty), `queues.ts`, `filesystem.ts`, `git.ts`, `github.ts`, `snippets.ts`, `popup.ts`
-- Built by `vite-plugin-electron` → `dist-electron/main.mjs`
+  - Also builds `notification-preload.ts` as a second preload entry
+- IPC handlers: `Terminal.ts` (node-pty), `queues.ts`, `filesystem.ts/`, `git.ts`, `github.ts`, `snippets.ts`, `popup.ts`, `aliases.ts`, `history.ts`, `notes.ts`, `notification.ts`, `ipc/handlers.ts` (Jules SDK)
+- Built by `vite-plugin-electron` (rolldown) → `dist-electron/main.mjs`
 
-> The standalone **Bun/Hono sidecar server is removed** (there is no `server/` dir). `hono` and `@hono/*` linger in `package.json` but are unused/orphaned. The web-mode HTTP backend is being rebuilt as a Node server hosted by the Electron main process.
+> The standalone **Bun/Hono sidecar server is removed** (there is no `server/` dir). `hono` and `@hono/*` linger in `package.json` but are unused. The web-mode HTTP backend is being rebuilt as a Node server hosted by the Electron main process.
 
 ### Data flow
 
@@ -49,15 +54,36 @@ Dual-deployment app: runs as an **Electron desktop app** or a **web app** in a b
 
 The switch is `isElectron` in `src/shared/bridge.ts`; hooks/store branch on it.
 
-### Path aliases
+Web mode also has a Vite dev proxy: `/api/jules` → `https://jules.googleapis.com/v1alpha`.
 
-Single flat prefix:
+## Path aliases
+
+### Renderer tsconfig (`tsconfig.app.json`) — `include: ["src"]`, excludes `electron/`
 
 | Alias | Resolves to |
 |---|---|
-| `@/` | `src/renderer/` |
+| `@/*` | `src/renderer/*` |
+| `@/types`, `@/types/*` | `src/types/*` |
+| `@/components/*` | `src/renderer/components/*` |
+| `@/ui/*` | `src/renderer/ui/*` |
+| `@/store/*` | `src/renderer/store/*` |
+| `@/hooks/*` | `src/renderer/hooks/*` |
+| `@/lib/*` | `src/renderer/lib/*` |
+| `@/utils`, `@/utils/*` | `src/renderer/utils/*` |
+| `@/features/*` | `src/renderer/features/*` |
+| `@shared`, `@shared/*` | `src/shared/*` |
+| `@renderer`, `@renderer/*` | `src/renderer/*` |
+| `@electron/*` | `electron/*` |
 
-Import as `@/components/...`, `@/ui/...`, `@/hooks/...`, `@/utils`. Declared in `tsconfig.app.json` and `vite.config.ts`. Electron code lives at the root `electron/` and uses relative imports (it's in the Node tsconfig, not the renderer alias space). Older imports may still use legacy prefixes (`@renderer/`, `@shared/`, `@electron/`, `@api`) — migrate those to `@/`.
+Prefer `@/` for renderer-internal imports. Use `@shared/` to import from `src/shared/`. `@renderer/` still resolves but treat as legacy — migrate to `@/`. `@api` is dead.
+
+### Node tsconfig (`tsconfig.node.json`) — covers `electron/`, `scripts/`, `vite.config.ts`
+
+| Alias | Resolves to |
+|---|---|
+| `@/*` | `src/*` |
+| `@shared`, `@shared/*` | `src/shared/*` |
+| `@electron/*` | `electron/*` |
 
 ## Environment
 
@@ -81,10 +107,14 @@ Copy `.env.example` to `.env`:
 
 **Locked files** — some files are off-limits. If you're unsure whether a file is safe to edit, ask before touching it. Do not silently work around a file you can't access — that's worse than asking.
 
+**Blueprints** — `blueprints/` contains design docs for subsystems. Read the relevant one before touching that subsystem. Currently: `blueprints/jules-architecture.md`.
+
 ## TypeScript config
 
 Two tsconfig roots composed by `tsconfig.json` (project references):
-- `tsconfig.app.json` — renderer (browser; excludes `electron`)
+- `tsconfig.app.json` — renderer (browser; excludes `electron/`)
 - `tsconfig.node.json` — Electron main + Vite config (Node types)
 
-Run `typecheck` against the root. The project is on **TypeScript 6** — `baseUrl` is deprecated, so `paths` entries are self-prefixed (`./src/...`) with no `baseUrl`.
+Run `typecheck` against the root. The project is on **TypeScript 6** — `baseUrl` is deprecated; all path mappings are self-prefixed (`./src/...`) with no `baseUrl`.
+
+Strict mode is on in both configs. Notable extra flags in the renderer: `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `noPropertyAccessFromIndexSignature`.

@@ -12,6 +12,8 @@ import type {
 } from '@google/jules-sdk'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { Buffer } from 'node:buffer'
+import { execFileSync } from 'node:child_process'
 
 type StreamActivitiesOptions = Parameters<SessionClient['stream']>[0]
 type SyncOptions = Omit<NonNullable<Parameters<JulesClient['sync']>[0]>, 'onProgress' | 'signal'>
@@ -19,6 +21,19 @@ type SelectOptions = Parameters<SessionClient['activities']['select']>[0]
 type ListOptions = Parameters<SessionClient['activities']['list']>[0]
 
 // ── helpers ───────────────────────────────────────────────────────────────────
+
+function resolveGitSource(cwd?: string): { github: string | null; baseBranch: string } {
+    const baseBranch = process.env['BASE_BRANCH'] ?? 'main'
+    const fromEnv = process.env['GITHUB_REPO']
+    if (fromEnv) return { github: fromEnv, baseBranch }
+    try {
+        const url = execFileSync('git', ['remote', 'get-url', 'origin'], { cwd, encoding: 'utf-8' }).trim()
+        const match = url.match(/github\.com[:/](.+?)(?:\.git)?$/)
+        return { github: match?.[1] ?? null, baseBranch }
+    } catch {
+        return { github: null, baseBranch }
+    }
+}
 
 type Sender = Electron.WebContents
 
@@ -119,6 +134,43 @@ export function registerSdkHandlers() {
         serialize(await jules.session(id).activities.hydrate())
     )
 
+    ipcMain.handle('sdk:session.applyPatch', async (_, id: string, options: { cwd: string }) => {
+        const branchName = `jules-patch-${Date.now()}`;
+        let patchPath: string | null = null;
+        try {
+            const snapshot = await jules.session(id).snapshot();
+            const gitPatch = snapshot.changeSet()?.gitPatch;
+            if (!gitPatch || !gitPatch.unidiffPatch) {
+                return { success: false, error: 'No ChangeSet artifact with gitPatch data found in this session.' };
+            }
+
+            const commitMessage = gitPatch.suggestedCommitMessage || 'Applied changes from Jules';
+
+            // Checkout a new branch to apply the changes
+            execFileSync('git', ['checkout', '-b', branchName], { cwd: options.cwd, stdio: 'pipe' });
+
+            // Save the patch to disk
+            patchPath = path.join(options.cwd, 'jules_changes.patch');
+            fs.writeFileSync(patchPath, gitPatch.unidiffPatch);
+
+            // Apply the patch
+            execFileSync('git', ['apply', patchPath], { cwd: options.cwd, stdio: 'pipe' });
+
+            // Commit the applied changes
+            execFileSync('git', ['add', '.'], { cwd: options.cwd, stdio: 'pipe' });
+            execFileSync('git', ['commit', '-m', commitMessage], { cwd: options.cwd, stdio: 'pipe' });
+
+            return { success: true, branch: branchName };
+        } catch (error) {
+            console.error('[sdk:session.applyPatch] error:', error);
+            return { success: false, error: error instanceof Error ? error.message : String(error) };
+        } finally {
+            if (patchPath) {
+                try { fs.unlinkSync(patchPath); } catch (e) { /* ignore */ }
+            }
+        }
+    })
+
     ipcMain.handle('sdk:session.stream.start', async (event, id: string, options?: StreamActivitiesOptions) => {
         for await (const item of jules.session(id).stream(options)) {
             if (event.sender.isDestroyed()) break
@@ -187,8 +239,20 @@ export function registerSdkHandlers() {
 
     // ── sources ───────────────────────────────────────────────────────────────────
 
+    ipcMain.handle('sdk:sources.list', async (_) => {
+        const sources = []
+        for await (const src of jules.sources()) {
+            sources.push(src)
+        }
+        return serialize(sources)
+    })
+
     ipcMain.handle('sdk:sources.get', async (_, filter: { github: string }) =>
         serialize(await jules.sources.get(filter))
+    )
+
+    ipcMain.handle('sdk:sources.resolve', (_,  cwd?: string) =>
+        resolveGitSource(cwd)
     )
 
     // ── artifact ──────────────────────────────────────────────────────────────────

@@ -53,6 +53,21 @@ function getOrCreateWindow(): BrowserWindow {
   return win
 }
 
+export function dispatchNotification(payload: unknown): void {
+  const w = getOrCreateWindow()
+  if (w.isVisible()) {
+    w.webContents.send('notification:show', payload)
+  } else {
+    w.once('ready-to-show', () => {
+      w.webContents.send('notification:show', payload)
+      w.showInactive()
+    })
+    if (w.webContents.isLoading()) return
+    w.webContents.send('notification:show', payload)
+    w.showInactive()
+  }
+}
+
 export function registerUINotificationHandlers(getWebContents: () => WebContents | null): void {
   ipcMain.on('uikit:notification', (_e, info) => {
     if (!info) {

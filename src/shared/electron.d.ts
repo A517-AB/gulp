@@ -3,6 +3,7 @@ import type { FuseManifest, FuseChangeEvent } from './fuse'
 import type { Command } from './commands'
 import type { HistoryEntry } from './history'
 import type { NoteMeta } from './notes'
+import type { SdkIpc } from '../jules/sdk-ipc'
 
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
@@ -130,6 +131,40 @@ export interface UINotificationAPI {
   onCancelled: (cb: (extraData: unknown) => void) => () => void;
 }
 
+// ── scheduler ─────────────────────────────────────────────────────────────────
+
+type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6
+
+interface AlarmSchedule { kind: 'alarm';    time: string; days: WeekDay[] }
+interface OnceSchedule { kind: 'once';     at: string }
+interface DailySchedule { kind: 'daily';    time: string }
+interface WeeklySchedule { kind: 'weekly';   time: string; dayOfWeek: WeekDay }
+interface MonthlySchedule { kind: 'monthly';  time: string; dayOfMonth: number }
+interface IntervalSchedule { kind: 'interval'; everyMinutes: number }
+
+export type ScheduleInput =
+  | AlarmSchedule | OnceSchedule | DailySchedule
+  | WeeklySchedule | MonthlySchedule | IntervalSchedule
+
+export interface ScheduledItem {
+  id:           string
+  label:        string
+  schedule:     ScheduleInput
+  enabled:      boolean
+  sound?:       string
+  createdAt:    string
+  lastFiredAt?: string
+}
+
+export interface SchedulerAPI {
+  list:    ()                                  => Promise<ScheduledItem[]>
+  add:     (item: ScheduledItem)               => Promise<ScheduledItem>
+  remove:  (id: string)                        => Promise<void>
+  toggle:  (id: string, enabled: boolean)      => Promise<ScheduledItem>
+  snooze:  (id: string, minutes: number)       => Promise<ScheduledItem>
+  onFired: (cb: (item: ScheduledItem) => void) => () => void
+}
+
 // ── root ───────────────────────────────────────────────────────────────────────
 
 export interface ElectronAPI {
@@ -145,6 +180,9 @@ export interface ElectronAPI {
   notes:           NotesAPI;
   snippets:        SnippetsAPI;
   uiNotification:  UINotificationAPI;
+  scheduler:       SchedulerAPI;
+  // TODO: temporary — will be moved to transport layer someday in a sunny shiny day
+  sdk:             SdkIpc;
 }
 
 // ── global augments ────────────────────────────────────────────────────────────

@@ -32,6 +32,8 @@
       "@/utils/*": ["./src/renderer/utils/*"],
       "@/features": ["./src/renderer/features"],
       "@/features/*": ["./src/renderer/features/*"],
+      "@jules": ["./src/jules/index.ts"],
+      "@jules/*": ["./src/jules/*"],
     },
 
     /* Bundler mode */

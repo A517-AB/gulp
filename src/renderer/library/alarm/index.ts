@@ -23,6 +23,7 @@ export type {
 	AlarmClockState,
 	AlarmEntry,
 	AlarmFiredEvent,
+	AlarmSound,
 	UseAlarmClockOptions,
 	UseAlarmClockResult,
 	WeekDay as AlarmWeekDay,

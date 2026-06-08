@@ -1,30 +1,31 @@
 import { create } from 'zustand'
 import type { JulesClient } from '@/lib/jules/client'
-import type { Activity, Session } from '@/types/jules'
-
+import type { Session, Activity } from '@/types/jules'
 
 async function fetchSessions(client: JulesClient | null): Promise<Session[]> {
   if (!client) return []
   return client.listSessions()
 }
 
-export interface SessionSlice {
-  activities: Activity[]
-  status: 'connecting' | 'connected' | 'disconnected'
-  error: Error | null
-}
-
 export interface AppStore {
   sessionList: Session[]
-  sessions: Record<string, SessionSlice>
+  activities: Record<string, Activity[]>
+  activitiesLoading: Record<string, boolean>
+  activitiesError: Record<string, string | null>
+  
   loadSessions: (client: JulesClient | null) => Promise<void>
   startPolling: (client: JulesClient | null) => () => void
-  watch: (id: string, client: JulesClient) => () => void
+  
+  loadActivities: (client: JulesClient | null, sessionId: string) => Promise<void>
+  sendMessage: (client: JulesClient | null, sessionId: string, content: string) => Promise<void>
+  approvePlan: (client: JulesClient | null, sessionId: string) => Promise<void>
 }
 
 export const useStore = create<AppStore>((set, get) => ({
   sessionList: [],
-  sessions: {},
+  activities: {},
+  activitiesLoading: {},
+  activitiesError: {},
 
   loadSessions: async (client) => {
     const data = await fetchSessions(client)
@@ -38,54 +39,64 @@ export const useStore = create<AppStore>((set, get) => ({
     })
   },
 
+  loadActivities: async (client, sessionId) => {
+    if (!client) return;
+    set(state => ({ activitiesLoading: { ...state.activitiesLoading, [sessionId]: true }, activitiesError: { ...state.activitiesError, [sessionId]: null } }))
+    try {
+      const data = await client.listActivities(sessionId)
+      set(state => ({
+        activities: { ...state.activities, [sessionId]: data },
+        activitiesLoading: { ...state.activitiesLoading, [sessionId]: false }
+      }))
+    } catch (err) {
+      set(state => ({
+        activitiesError: { ...state.activitiesError, [sessionId]: err instanceof Error ? err.message : 'Failed to load activities' },
+        activitiesLoading: { ...state.activitiesLoading, [sessionId]: false }
+      }))
+    }
+  },
+
+  sendMessage: async (client, sessionId, content) => {
+    if (!client || !content.trim()) return;
+    try {
+      await client.createActivity({ sessionId, content })
+      await get().loadActivities(client, sessionId)
+    } catch (err) {
+      console.error('[AppStore] sendMessage error:', err)
+      throw err;
+    }
+  },
+
+  approvePlan: async (client, sessionId) => {
+    if (!client) return;
+    try {
+      await client.approvePlan(sessionId)
+      await get().loadActivities(client, sessionId)
+    } catch (err) {
+      console.error('[AppStore] approvePlan error:', err)
+      throw err;
+    }
+  },
+
   startPolling: (client) => {
     let stopped = false
     const tick = () => {
       if (stopped) return
       get().loadSessions(client).catch(() => {})
+      
+      // Also poll activities for any currently active session we have loaded
+      const state = get();
+      state.sessionList.forEach(session => {
+         if (session.status === 'active' || session.status === 'planning') {
+            state.loadActivities(client, session.id).catch(() => {});
+         }
+      })
     }
     tick()
-    const id = setInterval(tick, 10_000)
+    const id = setInterval(tick, 5000)
     return () => {
       stopped = true
       clearInterval(id)
-    }
-  },
-
-  watch: (id, client) => {
-    const existing = get().sessions[id]
-    if (!existing) {
-      set(state => ({
-        sessions: { ...state.sessions, [id]: { activities: [], status: 'connecting', error: null } },
-      }))
-    }
-
-    let stopped = false
-
-    const poll = async () => {
-      try {
-        const activities = await client.listActivities(id)
-        if (stopped) return
-        set(state => ({
-          sessions: { ...state.sessions, [id]: { activities, status: 'connected', error: null } },
-        }))
-      } catch (err) {
-        if (stopped) return
-        set(state => ({
-          sessions: {
-            ...state.sessions,
-            [id]: { ...state.sessions[id] ?? { activities: [], status: 'disconnected' }, error: err as Error },
-          },
-        }))
-      }
-    }
-
-    void poll()
-    const timer = setInterval(() => { void poll() }, 5_000)
-
-    return () => {
-      stopped = true
-      clearInterval(timer)
     }
   },
 }))

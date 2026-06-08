@@ -18,3 +18,5 @@ export const aliases       = el?.aliases       ?? null;
 export const notes         = el?.notes         ?? null;
 export const snippets        = el?.snippets        ?? null;
 export const uiNotification  = el?.uiNotification  ?? null;
+export const scheduler       = el?.scheduler       ?? null;
+export const sdkIpc          = el?.sdk             ?? null;

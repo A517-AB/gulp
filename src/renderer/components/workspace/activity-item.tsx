@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ChevronDown, ChevronRight, Terminal, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Terminal } from "lucide-react";
 import { Card, CardContent } from "@/ui/card.tsx";
 import { Badge } from "@/ui/badge.tsx";
 import { Avatar, AvatarFallback } from "@/ui/avatar.tsx";
@@ -132,7 +132,7 @@ function SingleActivity({ activity, expandedBash, onToggleBash, onApprovePlan, a
           {isPlanPending && (
             <div className="mt-3 pt-3 border-t border-white/[0.08]">
               <Button onClick={onApprovePlan} disabled={approvingPlan} size="sm" className="h-7 px-3 text-[9px] font-mono uppercase tracking-widest border-0">
-                {approvingPlan ? <><Loader2 className="mr-1.5 h-3 w-3 animate-spin" />Approving...</> : "Approve Plan"}
+                {approvingPlan ? "Approving..." : "Approve Plan"}
               </Button>
             </div>
           )}

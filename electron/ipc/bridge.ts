@@ -122,6 +122,9 @@ export const sdk = {
         hydrate: (id: string): Promise<number> =>
             ipcRenderer.invoke('sdk:session.hydrate', id),
 
+        applyPatch: (id: string, options: { cwd: string }): Promise<{ success: boolean; branch?: string; error?: string }> =>
+            ipcRenderer.invoke('sdk:session.applyPatch', id, options),
+
         stream: (id: string, onItem: (item: Activity) => void, onDone?: () => void, options?: StreamActivitiesOptions): Unsubscribe => {
             ipcRenderer.invoke('sdk:session.stream.start', id, options).catch(console.error)
             return onStream(`sdk:session.stream:${id}`, `sdk:session.stream.done:${id}`, onItem, onDone)
@@ -171,8 +174,14 @@ export const sdk = {
     // ── sources ───────────────────────────────────────────────────────────────────
 
     sources: {
+        list: (): Promise<Source[]> =>
+            ipcRenderer.invoke('sdk:sources.list'),
+
         get: (filter: { github: string }): Promise<Source | undefined> =>
             ipcRenderer.invoke('sdk:sources.get', filter),
+
+        resolve: (cwd?: string): Promise<{ github: string | null; baseBranch: string }> =>
+            ipcRenderer.invoke('sdk:sources.resolve', cwd),
     },
 
     // ── artifact ──────────────────────────────────────────────────────────────────

@@ -1,3 +1,5 @@
+// Jules session notification panel — not a general-purpose notification system.
+// Tied to popup.html and the Jules session flow. Do not repurpose.
 import { BrowserWindow, ipcMain, screen } from "electron";
 import * as path from "path";
 import * as fs from "fs";

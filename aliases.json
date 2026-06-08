@@ -1,0 +1,17 @@
+[
+  {
+    "trigger": "?",
+    "command": "notes",
+    "sessionId": "sessions/8320215904274774054",
+    "label": "my notes",
+    "expects": "md",
+    "id": "example-1"
+  },
+  {
+    "trigger": "/",
+    "command": "testing",
+    "sessionId": "8320215904274774054",
+    "expects": "md",
+    "id": "74c11ef8-b253-4262-8623-85b3ceb10656"
+  }
+]

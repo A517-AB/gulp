@@ -3,7 +3,7 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
-import { isAbsolute } from 'node:path'
+import { isAbsolute, resolve } from 'node:path'
 
 
 const nodeExternal = (id: string) =>
@@ -32,6 +32,14 @@ export default defineConfig({
         target: 'https://jules.googleapis.com/v1alpha',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/jules\?path=/, '/'),
+      },
+    },
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        index:        resolve(__dirname, 'index.html'),
+        notification: resolve(__dirname, 'notification.html'),
       },
     },
   },

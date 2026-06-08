@@ -110,21 +110,3 @@ export interface UseNewSessionFormReturn {
   handleSubmit: (e: SyntheticEvent<HTMLFormElement>) => Promise<void>;
 }
 
-// ---- Activity feed hook contract ----
-
-export interface UseActivityFeedApiProps {
-  session: Session;
-  onActivitiesChange?: (activities: Activity[]) => void;
-}
-
-export interface UseActivityFeedApiReturn {
-  activities: Activity[];
-  error: string | null;
-  sending: boolean;
-  approvingPlan: boolean;
-  newActivityIds: Set<string>;
-  loadActivities: (isInitialLoad?: boolean) => Promise<void>;
-  handleApprovePlan: () => Promise<void>;
-  handleSendMessage: (message: string) => Promise<void>;
-  handleQuickReview: () => Promise<void>;
-}

@@ -1,11 +1,14 @@
 export type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
+export type AlarmSound = 'none' | 'beep' | 'chime' | 'bell' | 'pulse'
+
 export interface AlarmEntry {
   id: string
   label: string
   time: string
   days: WeekDay[]
   enabled: boolean
+  sound?: AlarmSound
   createdAt: string
   updatedAt?: string
   snoozeUntil?: string

@@ -17,6 +17,8 @@ import { registerAliasesHandlers } from "./aliases";
 import { registerHistoryHandlers } from "./history";
 import { registerNotesHandlers } from "./notes";
 import { registerUINotificationHandlers } from "./notification";
+import { registerSchedulerHandlers } from "./scheduler";
+import { registerSdkHandlers } from "./ipc/handlers";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -135,6 +137,8 @@ app.whenReady().then(() => {
   registerHistoryHandlers();
   registerNotesHandlers(() => mainWindow?.webContents ?? null);
   registerUINotificationHandlers(() => mainWindow?.webContents ?? null);
+  registerSchedulerHandlers(() => mainWindow?.webContents ?? null);
+  registerSdkHandlers();
   createWindow();
 
   tray = new Tray(buildTrayIcon());

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { format } from 'date-fns'
 import {
@@ -8,6 +8,8 @@ import {
 } from '@/library/alarm'
 import type { AlarmEntry, ReminderEntry, SoundId } from '@/library/alarm'
 import { useNotification } from '@/library/notification'
+import { scheduler } from '@shared/bridge'
+import type { ScheduledItem } from '@shared/electron'
 
 function randomId() {
   return Math.random().toString(36).slice(2, 10)
@@ -305,6 +307,94 @@ function ReminderSection() {
   )
 }
 
+// ── Main-process scheduler section ───────────────────────────────────────────
+
+function SchedulerSection() {
+  const [items, setItems]   = useState<ScheduledItem[]>([])
+  const [fired, setFired]   = useState<string[]>([])
+  const loaded              = useRef(false)
+
+  useEffect(() => {
+    if (!scheduler || loaded.current) return
+    loaded.current = true
+    void scheduler.list().then(setItems)
+    return scheduler.onFired((item) => {
+      setFired(p => [`fired: ${item.label} @ ${format(new Date(), 'HH:mm:ss')}`, ...p].slice(0, 5))
+      setItems(p => p.filter(i => i.id !== item.id))
+    })
+  }, [])
+
+  if (!scheduler) {
+    return (
+      <Section label="Main-process scheduler">
+        <p className="text-xs text-zinc-600">Electron only — not available in web mode.</p>
+      </Section>
+    )
+  }
+
+  async function addOnce() {
+    if (!scheduler) return
+    const item: ScheduledItem = {
+      id:        randomId(),
+      label:     'Test (5s)',
+      schedule:  { kind: 'once', at: new Date(Date.now() + 5_000).toISOString() },
+      enabled:   true,
+      sound:     'chime',
+      createdAt: new Date().toISOString(),
+    }
+    const saved = await scheduler.add(item)
+    setItems(p => [...p, saved])
+  }
+
+  async function addInterval() {
+    if (!scheduler) return
+    const item: ScheduledItem = {
+      id:        randomId(),
+      label:     'Interval (1 min)',
+      schedule:  { kind: 'interval', everyMinutes: 1 },
+      enabled:   true,
+      createdAt: new Date().toISOString(),
+    }
+    const saved = await scheduler.add(item)
+    setItems(p => [...p, saved])
+  }
+
+  async function remove(id: string) {
+    if (!scheduler) return
+    await scheduler.remove(id)
+    setItems(p => p.filter(i => i.id !== id))
+  }
+
+  return (
+    <Section label="Main-process scheduler (survives minimize)">
+      <p className="text-xs text-zinc-600">Runs in Electron main via croner — fires even when window is hidden.</p>
+      <Row label="Create">
+        <Btn onClick={() => { void addOnce() }}>Once (5s)</Btn>
+        <Btn onClick={() => { void addInterval() }}>Interval (1 min)</Btn>
+      </Row>
+      {items.length > 0 && (
+        <Row label="Pending">
+          <ul className="space-y-1 w-full">
+            {items.map(i => (
+              <li key={i.id} className="flex items-center gap-2 text-xs text-zinc-600 font-mono">
+                <span className="flex-1">⏱ {i.label}</span>
+                <Btn muted onClick={() => { void remove(i.id) }}>remove</Btn>
+              </li>
+            ))}
+          </ul>
+        </Row>
+      )}
+      {fired.length > 0 && (
+        <ul className="space-y-0.5">
+          {fired.map((entry, i) => (
+            <li key={i} className="text-xs text-zinc-500 font-mono">{entry}</li>
+          ))}
+        </ul>
+      )}
+    </Section>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function LibraryPage() {
@@ -319,6 +409,7 @@ export default function LibraryPage() {
       <ActionSection />
       <AlarmSection />
       <ReminderSection />
+      <SchedulerSection />
     </div>
   )
 }

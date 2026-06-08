@@ -1,598 +1,147 @@
-import type {
-  Source,
-  Session,
-  Activity,
-  CreateSessionRequest,
-  CreateActivityRequest,
-} from "@/types/jules";
-
-interface ApiSource {
-  source?: string;
-  name?: string;
-  [key: string]: unknown;
-}
-
-interface ApiSession {
-  id: string;
-  sourceContext?: {
-    source?: string;
-    githubRepoContext?: {
-      startingBranch?: string;
-    };
-  };
-  title?: string;
-  state?: string;
-  createTime: string;
-  updateTime: string;
-  lastActivityAt?: string;
-  [key: string]: unknown;
-}
-
-interface Plan {
-  description?: string;
-  summary?: string;
-  title?: string;
-  steps?: unknown[];
-  [key: string]: unknown;
-}
-
-interface Artifact {
-  changeSet?: {
-    gitPatch?: {
-      unidiffPatch?: string;
-    };
-    unidiffPatch?: string;
-    [key: string]: unknown;
-  };
-  bashOutput?: {
-    output?: string;
-    [key: string]: unknown;
-  };
-  [key: string]: unknown;
-}
-
-interface ApiActivity {
-  name?: string;
-  id?: string;
-  createTime: string;
-  originator?: string;
-  planGenerated?: {
-    plan?: Plan;
-    description?: string;
-    summary?: string;
-    title?: string;
-    steps?: unknown[];
-    [key: string]: unknown;
-  };
-  planApproved?: boolean;
-  progressUpdated?: {
-    progressDescription?: string;
-    description?: string;
-    message?: string;
-    artifacts?: Artifact[];
-    [key: string]: unknown;
-  };
-  sessionCompleted?: {
-    summary?: string;
-    message?: string;
-    artifacts?: Artifact[];
-    [key: string]: unknown;
-  };
-  agentMessaged?: {
-    agentMessage?: string;
-    message?: string;
-    [key: string]: unknown;
-  };
-  userMessage?: { message?: string; content?: string; [key: string]: unknown };
-  artifacts?: Artifact[];
-  message?: string;
-  content?: string;
-  text?: string;
-  description?: string;
-  diff?: string;
-  bashOutput?: string;
-  [key: string]: unknown;
-}
+import { sdkIpc } from '@shared/bridge'
+import type { Source, Session, Activity, CreateSessionRequest, CreateActivityRequest } from '@/types/jules'
+import type { SessionResource, Activity as SdkActivity } from '@jules'
 
 export class JulesAPIError extends Error {
   status?: number
-  response?: unknown
-  constructor(message: string, status?: number, response?: unknown) {
-    super(message);
-    this.name = "JulesAPIError";
-    if (status !== undefined) this.status = status;
-    if (response !== undefined) this.response = response;
+  constructor(message: string, status?: number) {
+    super(message)
+    this.name = 'JulesAPIError'
+    if (status !== undefined) this.status = status
   }
+}
+
+function mapState(state: string): Session['status'] {
+  const m: Record<string, Session['status']> = {
+    queued: 'queued',
+    planning: 'planning',
+    awaitingPlanApproval: 'awaitingApproval',
+    awaitingUserFeedback: 'awaitingFeedback',
+    inProgress: 'active',
+    paused: 'paused',
+    failed: 'failed',
+    completed: 'completed',
+  }
+  return m[state] ?? 'active'
+}
+
+function mapResource(r: SessionResource): Session {
+  const sourceContext = r.sourceContext || ({} as any);
+  const sourceRaw = sourceContext.source || (r as any).source?.name || (r as any).source?.id || '';
+  const sourceId = sourceRaw.replace('sources/github/', '');
+  const branch = sourceContext.githubRepoContext?.startingBranch || (r as any).source?.githubRepo?.defaultBranch || 'main';
+
+  return {
+    id: r.id || 'unknown',
+    sourceId: sourceId || 'unknown',
+    title: r.title || 'Untitled',
+    status: mapState(r.state || 'unspecified'),
+    createdAt: r.createTime || (r as any).createdAt || '',
+    updatedAt: r.updateTime || (r as any).updatedAt || '',
+    branch,
+    archived: Boolean(r.archived),
+  }
+}
+
+function mapActivity(a: SdkActivity, sessionId: string): Activity {
+  let content = ''
+  let role: Activity['role'] = 'agent'
+  let type: Activity['type'] = 'message'
+  let diff: string | undefined = undefined;
+  let bashOutput: string | undefined = undefined;
+
+  switch (a.type) {
+    case 'agentMessaged':   content = a.message || ''; break
+    case 'userMessaged':    content = a.message || ''; role = 'user'; break
+    case 'planGenerated':   content = (a.plan?.steps || []).map((s: any, i: number) => `${i + 1}. ${s.title}`).join('\n'); type = 'plan'; break
+    case 'planApproved':    content = 'Plan approved'; type = 'plan'; break
+    case 'progressUpdated': content = (a.title || '') + (a.description ? `\n${a.description}` : ''); type = 'progress'; break
+    case 'sessionCompleted': content = 'Session completed'; type = 'result'; break
+    case 'sessionFailed':   content = a.reason || 'Failed'; type = 'error'; break
+  }
+
+  // Extract artifacts (diffs and bash logs)
+  const artifacts = (a as any).artifacts || [];
+  for (const artifact of artifacts) {
+    if (artifact.type === 'changeSet' || artifact.changeSet) {
+      diff = artifact.changeSet?.gitPatch?.unidiffPatch || artifact.gitPatch?.unidiffPatch;
+    } else if (artifact.type === 'bashOutput' || artifact.bashOutput) {
+      const output = artifact.bashOutput?.output || artifact.stdout || '';
+      const command = artifact.bashOutput?.command || artifact.command || '';
+      bashOutput = `$ ${command}\n${output}`.trim();
+    }
+  }
+
+  const createdAt = (a as any).createTime || (a as any).createdAt || '';
+
+  const mapped: Activity = { id: a.id || 'unknown', sessionId, type, role, content, createdAt };
+  if (diff) mapped.diff = diff;
+  if (bashOutput) mapped.bashOutput = bashOutput;
+  
+  return mapped;
+}
+
+function mapSource(s: import('@google/jules-sdk').Source): Source {
+  return {
+    id: s.id,
+    name: s.name,
+    type: 'github',
+    metadata: s.type === 'githubRepo' ? (s as any).githubRepo : undefined,
+  };
 }
 
 export class JulesClient {
-  private baseURL = "https://jules.googleapis.com/v1alpha";
-  private apiKey: string;
+  constructor(_apiKey: string) {}
 
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
+  async listSessions(): Promise<Session[]> {
+    if (!sdkIpc) return []
+    const resources = await sdkIpc.client.sessions({ limit: 20 })
+    console.log('[JulesClient] sessions:', resources.length)
+    return resources.map(mapResource)
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {},
-  ): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`;
-    console.log(`[JulesClient] ${options.method ?? "GET"} ${endpoint}`);
-
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": this.apiKey,
-          ...options.headers,
-        },
-      });
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        console.error(`[JulesClient] error ${response.status} on ${endpoint}:`, error);
-
-        // Handle common HTTP errors with helpful messages
-        if (response.status === 401) {
-          throw new JulesAPIError(
-            "Invalid API key. Please check your Jules API key in settings.",
-            response.status,
-            error,
-          );
-        }
-
-        if (response.status === 403) {
-          throw new JulesAPIError(
-            "Access forbidden. Please ensure your API key has the correct permissions.",
-            response.status,
-            error,
-          );
-        }
-
-        if (response.status === 404) {
-          // For activities endpoint, 404 just means no activities yet (new session)
-          // Return empty array instead of throwing error
-          if (endpoint.includes("/activities")) {
-            return { activities: [] } as T;
-          }
-
-          throw new JulesAPIError(
-            "Resource not found. The requested endpoint may not exist.",
-            response.status,
-            error,
-          );
-        }
-
-        throw new JulesAPIError(
-          error.message || `Request failed with status ${response.status}`,
-          response.status,
-          error,
-        );
-      }
-
-      const data = await response.json() as T;
-      console.log(`[JulesClient] response ${endpoint}:`, data);
-      return data;
-    } catch (error) {
-      if (error instanceof JulesAPIError) {
-        throw error;
-      }
-
-      console.error(`[JulesClient] network error on ${endpoint}:`, error);
-      if (error instanceof TypeError && error.message === "Failed to fetch") {
-        throw new JulesAPIError(
-          "Unable to connect to the server. Please check your internet connection and try again.",
-          undefined,
-          error,
-        );
-      }
-
-      // Generic network error
-      throw new JulesAPIError(
-        error instanceof Error
-          ? error.message
-          : "Network request failed. Please try again.",
-        undefined,
-        error,
-      );
-    }
-  }
-
-  // Sources
   async listSources(): Promise<Source[]> {
-    // Fetch all sources with pagination support
-    let allSources: ApiSource[] = [];
-    let pageToken: string | undefined;
-
-    do {
-      const params = new URLSearchParams();
-      params.set("pageSize", "10");
-      if (pageToken) {
-        params.set("pageToken", pageToken);
-      }
-
-      const endpoint = `/sources?${params.toString()}`;
-      const response = await this.request<{
-        sources?: ApiSource[];
-        nextPageToken?: string;
-      }>(endpoint);
-
-      if (response.sources) {
-        allSources = allSources.concat(response.sources);
-      }
-
-      pageToken = response.nextPageToken;
-    } while (pageToken);
-
-    // Transform API response to extract repository info
-    const sources = allSources.map((source: ApiSource) => {
-      // Extract repo name from source field (e.g., "sources/github/owner/repo")
-      const sourcePath = source.source || source.name || "";
-      const match = sourcePath.match(/sources\/github\/(.+)/);
-      const repoPath = match ? match[1] : sourcePath;
-
-      return {
-        id: sourcePath, // Keep full path for API calls
-        name: repoPath ?? '', // Use short name for display
-        type: "github" as const,
-        metadata: source as Record<string, unknown>,
-      };
-    });
-
-    // Temporary fix: Add missing repo if not present
-    const missingRepo = "sbhavani/dgx-spark-playbooks";
-    const missingRepoId = `sources/github/${missingRepo}`;
-    if (!sources.some((s) => s.id === missingRepoId)) {
-      sources.push({
-        id: missingRepoId,
-        name: missingRepo,
-        type: "github",
-        metadata: { source: missingRepoId, name: missingRepoId },
-      });
-    }
-
-    // Fetch all sessions to determine latest activity per source
-    try {
-      const allSessions = await this.listSessions();
-
-      // Create a map of sourceId to the most recent activity timestamp
-      const latestActivityMap = new Map<string, string>();
-
-      for (const session of allSessions) {
-        const sourceId = `sources/github/${session.sourceId}`;
-        const activityTime =
-          session.lastActivityAt || session.updatedAt || session.createdAt;
-
-        if (
-          !latestActivityMap.has(sourceId) ||
-          (activityTime && activityTime > latestActivityMap.get(sourceId)!)
-        ) {
-          latestActivityMap.set(sourceId, activityTime);
-        }
-      }
-
-      // Sort sources by latest activity (most recent first)
-      sources.sort((a, b) => {
-        const aTime = latestActivityMap.get(a.id) || "";
-        const bTime = latestActivityMap.get(b.id) || "";
-
-        // Sources with activity come before those without
-        if (aTime && !bTime) return -1;
-        if (!aTime && bTime) return 1;
-
-        // Compare timestamps (descending - most recent first)
-        return bTime.localeCompare(aTime);
-      });
-
-      console.log(
-        "[Jules Client] Loaded sources (sorted by activity):",
-        sources.length,
-        sources,
-      );
-    } catch (error) {
-      console.error(
-        "[Jules Client] Failed to sort sources by activity:",
-        error,
-      );
-      // Continue with unsorted sources if session fetch fails
-    }
-
-    return sources;
-  }
-
-  async getSource(id: string): Promise<Source> {
-    return this.request<Source>(`/sources/${id}`);
-  }
-
-  // Sessions
-  async listSessions(sourceId?: string): Promise<Session[]> {
-    const params = sourceId ? `?sourceId=${sourceId}` : "";
-    const response = await this.request<{ sessions: ApiSession[] }>(
-      `/sessions${params}`,
-    );
-
-    // Transform API response to match our Session type
-    return (response.sessions || []).map((session: ApiSession) => ({
-      id: session.id,
-      sourceId:
-        session.sourceContext?.source?.replace("sources/github/", "") || "",
-      title: session.title || "",
-      status: this.mapState(session.state || ""),
-      createdAt: session.createTime,
-      updatedAt: session.updateTime,
-      ...(session.lastActivityAt ? { lastActivityAt: session.lastActivityAt } : {}),
-      branch:
-        session.sourceContext?.githubRepoContext?.startingBranch || "main",
-      archived: false,
-    }));
-  }
-
-  private mapState(state: string): Session["status"] {
-    const stateMap: Record<string, Session["status"]> = {
-      COMPLETED: "completed",
-      ACTIVE: "active",
-      PLANNING: "active",
-      QUEUED: "active",
-      FAILED: "failed",
-      PAUSED: "paused",
-    };
-    return stateMap[state] || "active";
-  }
-
-  async getSession(id: string): Promise<Session> {
-    return this.request<Session>(`/sessions/${id}`);
+    if (!sdkIpc) return []
+    const sources = await sdkIpc.sources.list()
+    return sources.map(mapSource)
   }
 
   async createSession(data: CreateSessionRequest): Promise<Session> {
-    // Jules API requires specific structure per https://developers.google.com/jules/api
-    let prompt = data.prompt;
-    if (data.autoCreatePr) {
-      prompt +=
-        "\n\nIMPORTANT: Automatically create a pull request when code changes are ready.";
-    }
-
-    const requestBody = {
-      prompt: prompt,
-      sourceContext: {
-        source: data.sourceId,
-        githubRepoContext: {
-          startingBranch: data.startingBranch || "main", // Default to main branch
-        },
-      },
-      title: data.title || "Untitled Session",
-      requirePlanApproval: false, // Auto-approve plans by default
-    };
-
-    console.log("[Jules Client] Creating session with:", requestBody);
-
-    return this.request<Session>("/sessions", {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-    });
-  }
-
-  async deleteSession(id: string): Promise<void> {
-    await this.request<void>(`/sessions/${id}`, {
-      method: "DELETE",
-    });
+    if (!sdkIpc) throw new JulesAPIError('SDK not available')
+    const github = data.sourceId.replace('sources/github/', '')
+    const result = await sdkIpc.client.run({
+      prompt: data.prompt,
+      ...(data.title ? { title: data.title } : {}),
+      ...(github ? { source: { github, baseBranch: data.startingBranch || 'main' } } : {}),
+    })
+    const resource = await sdkIpc.session.info(result.id)
+    return mapResource(resource)
   }
 
   async approvePlan(sessionId: string): Promise<void> {
-    await this.request<void>(`/sessions/${sessionId}:approvePlan`, {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
-  }
-
-  // Activities
-  async listActivities(sessionId: string): Promise<Activity[]> {
-    const response = await this.request<{ activities: ApiActivity[] }>(
-      `/sessions/${sessionId}/activities`,
-    );
-
-    // Transform API response to match our Activity type
-    return (response.activities || []).map((activity: ApiActivity) => {
-      // Extract ID from name field (e.g., "sessions/ID/activities/ACTIVITY_ID")
-      const id = activity.name?.split("/").pop() || activity.id || "";
-
-      // Determine type and content based on activity structure
-      let type: Activity["type"] = "message";
-      let content = "";
-
-      // Extract content from various possible fields
-      if (activity.planGenerated) {
-        type = "plan";
-        const plan = activity.planGenerated.plan || activity.planGenerated;
-        content =
-          plan.description ||
-          plan.summary ||
-          plan.title ||
-          JSON.stringify(plan.steps || plan, null, 2);
-      } else if (activity.planApproved) {
-        type = "plan";
-        content = "Plan approved";
-      } else if (activity.progressUpdated) {
-        type = "progress";
-        content =
-          activity.progressUpdated.progressDescription ||
-          activity.progressUpdated.description ||
-          activity.progressUpdated.message ||
-          JSON.stringify(activity.progressUpdated, null, 2);
-      } else if (activity.sessionCompleted) {
-        type = "result";
-        const result = activity.sessionCompleted;
-        content = result.summary || result.message || "Session completed";
-      }
-
-      // Extract artifacts from top-level artifacts array (applies to all activity types)
-      if (activity.artifacts && activity.artifacts.length > 0) {
-        for (const artifact of activity.artifacts) {
-          // Handle both gitPatch.unidiffPatch and direct unidiffPatch formats
-          if (artifact.changeSet?.gitPatch?.unidiffPatch) {
-            activity.diff = artifact.changeSet.gitPatch.unidiffPatch;
-          } else if (artifact.changeSet?.unidiffPatch) {
-            activity.diff = artifact.changeSet.unidiffPatch;
-          }
-          if (artifact.bashOutput?.output) {
-            activity.bashOutput = artifact.bashOutput.output;
-          }
-        }
-      } else if (activity.agentMessaged) {
-        type = "message";
-        content =
-          activity.agentMessaged.agentMessage ||
-          activity.agentMessaged.message ||
-          "";
-      } else if (activity.userMessage) {
-        type = "message";
-        content =
-          activity.userMessage.message || activity.userMessage.content || "";
-      }
-
-      // Fallback: try common content fields
-      if (!content) {
-        content =
-          activity.message ||
-          activity.content ||
-          activity.text ||
-          activity.description ||
-          (activity.artifacts
-            ? JSON.stringify(activity.artifacts, null, 2)
-            : "") ||
-          "";
-      }
-
-      // Last resort: show activity type
-      if (!content) {
-        content = `[${Object.keys(activity)
-          .filter(
-            (k) => !["name", "createTime", "originator", "id"].includes(k),
-          )
-          .join(", ")}]`;
-      }
-
-      return {
-        id,
-        sessionId,
-        type,
-        role: (activity.originator === "agent"
-          ? "agent"
-          : "user") as Activity["role"],
-        content,
-        ...(activity.diff ? { diff: activity.diff } : {}),
-        ...(activity.bashOutput ? { bashOutput: activity.bashOutput } : {}),
-        createdAt: activity.createTime,
-        metadata: activity as Record<string, unknown>,
-      };
-    });
-  }
-
-  async getActivity(sessionId: string, activityId: string): Promise<Activity> {
-    const response = await this.request<ApiActivity>(
-      `/sessions/${sessionId}/activities/${activityId}`,
-    );
-
-    // Transform similar to listActivities
-    const id = response.name?.split("/").pop() || activityId;
-    let type: Activity["type"] = "message";
-    let content = "";
-
-    if (response.planGenerated) {
-      type = "plan";
-      const plan = response.planGenerated.plan || response.planGenerated;
-      content =
-        plan.description ||
-        plan.summary ||
-        plan.title ||
-        JSON.stringify(plan.steps || plan, null, 2);
-    } else if (response.planApproved) {
-      type = "plan";
-      content = "Plan approved";
-    } else if (response.progressUpdated) {
-      type = "progress";
-      content =
-        response.progressUpdated.progressDescription ||
-        response.progressUpdated.description ||
-        response.progressUpdated.message ||
-        JSON.stringify(response.progressUpdated, null, 2);
-    } else if (response.sessionCompleted) {
-      type = "result";
-      const result = response.sessionCompleted;
-      content = result.summary || result.message || "Session completed";
-    }
-
-    // Extract artifacts from top-level artifacts array (applies to all activity types)
-    if (response.artifacts && response.artifacts.length > 0) {
-      for (const artifact of response.artifacts) {
-        // Handle both gitPatch.unidiffPatch and direct unidiffPatch formats
-        if (artifact.changeSet?.gitPatch?.unidiffPatch) {
-          response.diff = artifact.changeSet.gitPatch.unidiffPatch;
-        } else if (artifact.changeSet?.unidiffPatch) {
-          response.diff = artifact.changeSet.unidiffPatch;
-        }
-        if (artifact.bashOutput?.output) {
-          response.bashOutput = artifact.bashOutput.output;
-        }
-      }
-    } else if (response.agentMessaged) {
-      type = "message";
-      content =
-        response.agentMessaged.agentMessage ||
-        response.agentMessaged.message ||
-        "";
-    } else if (response.userMessage) {
-      type = "message";
-      content =
-        response.userMessage.message || response.userMessage.content || "";
-    }
-
-    if (!content) {
-      content =
-        response.message ||
-        response.content ||
-        response.text ||
-        response.description ||
-        "";
-    }
-
-    return {
-      id,
-      sessionId,
-      type,
-      role: (response.originator === "agent"
-        ? "agent"
-        : "user") as Activity["role"],
-      content,
-      ...(response.diff ? { diff: response.diff } : {}),
-      ...(response.bashOutput ? { bashOutput: response.bashOutput } : {}),
-      createdAt: response.createTime,
-      metadata: response as Record<string, unknown>,
-    };
+    if (!sdkIpc) return
+    await sdkIpc.session.approve(sessionId)
   }
 
   async createActivity(data: CreateActivityRequest): Promise<Activity> {
-    // Jules API uses :sendMessage endpoint for sending messages
-    // Response is empty - agent response will appear in next activity
-    await this.request(`/sessions/${data.sessionId}:sendMessage`, {
-      method: "POST",
-      body: JSON.stringify({ prompt: data.content }),
-    });
-
-    // Return a placeholder activity since response is empty
+    if (sdkIpc) await sdkIpc.session.send(data.sessionId, data.content)
     return {
-      id: "pending",
+      id: 'pending',
       sessionId: data.sessionId,
-      type: "message",
-      role: "user",
+      type: 'message',
+      role: 'user',
       content: data.content,
       createdAt: new Date().toISOString(),
-    };
+    }
+  }
+
+  async listActivities(sessionId: string): Promise<Activity[]> {
+    if (!sdkIpc) return []
+    const { activities } = await sdkIpc.activities.list(sessionId)
+    return activities.map((a: SdkActivity) => mapActivity(a, sessionId))
   }
 }
 
-// Helper to create a client instance
 export function createJulesClient(apiKey: string): JulesClient {
-  return new JulesClient(apiKey);
+  return new JulesClient(apiKey)
 }

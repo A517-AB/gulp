@@ -10,6 +10,7 @@ export type {
   AlarmClockState,
   AlarmEntry,
   AlarmFiredEvent,
+  AlarmSound,
   WeekDay,
 } from './types'
 export type { UseAlarmClockOptions, UseAlarmClockResult } from './use-alarm-clock'

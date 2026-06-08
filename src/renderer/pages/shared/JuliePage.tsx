@@ -43,7 +43,6 @@ export default function JuliePage(): ReactNode {
   const [sessions,      setSessions]      = useState<Session[]>([])
   const [activeSession, setActiveSession] = useState<Session | null>(null)
   const [activities,    setActivities]    = useState<Activity[]>([])
-  const [loadingActs,   setLoadingActs]   = useState(false)
   const [error,         setError]         = useState<string | null>(null)
 
   // form state
@@ -77,7 +76,6 @@ export default function JuliePage(): ReactNode {
 
   const loadActivities = useCallback(async (isInitial: boolean) => {
     if (!client || !activeSession) return
-    if (isInitial) setLoadingActs(true)
     setError(null)
     try {
       const data = await client.listActivities(activeSession.id)
@@ -99,8 +97,6 @@ export default function JuliePage(): ReactNode {
     } catch (e) {
       console.error('[JulesPage] activities error', e)
       if (isInitial) setError(e instanceof Error ? e.message : 'Failed to load')
-    } finally {
-      if (isInitial) setLoadingActs(false)
     }
   }, [client, activeSession])
 
@@ -292,14 +288,7 @@ export default function JuliePage(): ReactNode {
 
             {/* feed */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 min-h-0">
-              {loadingActs && (
-                <div className="flex items-center gap-2 text-fg-ghost">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span className="text-xs">Loading…</span>
-                </div>
-              )}
-
-              {!loadingActs && filtered.length === 0 && (
+              {filtered.length === 0 && (
                 <div className="flex items-center gap-2 text-fg-ghost py-4">
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                   <span className="text-xs">Waiting for Jules…</span>
