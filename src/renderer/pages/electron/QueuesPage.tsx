@@ -1,15 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import {useCallback, useEffect, useRef, useState} from "react";
+import {AnimatePresence, motion} from "framer-motion";
 import {
-  ListTodo, ChevronRight, ChevronDown, Send, Loader2,
-  Plus, Folder, Trash2, CheckSquare, ListTree,
+    CheckSquare,
+    ChevronDown,
+    ChevronRight,
+    Folder,
+    ListTodo,
+    ListTree,
+    Loader2,
+    Plus,
+    Send,
+    Trash2,
 } from "lucide-react";
-import { useJules } from "@renderer/lib/jules/provider";
-import { queues as electronQueues, isElectron } from "@shared/bridge";
-import { InlineEdit } from "@renderer/ui/inline-edit";
-import type { Source, FleetTask, FleetTaskGroup } from "@/types/jules";
+import {isElectron, queues as electronQueues, sdkIpc} from "@shared/bridge";
+import {InlineEdit} from "@renderer/ui/inline-edit";
+import type {FleetTask, FleetTaskGroup, Source} from "@/types/jules";
 
 const TASKS_STORAGE_KEY = "workspace:fleet-tasks";
 
@@ -115,7 +122,6 @@ function SourcePicker({ value, sources, onChange }: {
 // ── QueuesView ─────────────────────────────────────────────────────────────────
 
 export default function QueuesView() {
-  const { client } = useJules();
   const [sources, setSources] = useState<Source[]>([]);
   const [tasks, setTasks] = useState<FleetTaskGroup[]>([]);
   const [queue, setQueue] = useState<unknown[]>([]);
@@ -147,9 +153,9 @@ export default function QueuesView() {
   }, []);
 
   useEffect(() => {
-    if (!client) return;
-    void client.listSources().then(setSources).catch(console.error);
-  }, [client]);
+      if (!sdkIpc) return;
+      void sdkIpc.sources.list().then(setSources).catch(console.error);
+  }, []);
 
   const save = useCallback(async (updated: FleetTaskGroup[]) => {
     setTasks(updated);
@@ -205,15 +211,15 @@ export default function QueuesView() {
 
   const handleSendTask = async (group: FleetTaskGroup, task: FleetTask, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!client) return;
+      if (!sdkIpc) return;
     const key = `${group.group}-${task.folder}`;
+      const github = group.repo.replace(/^(?:sources\/)?github\//, '')
     setSendingStates((p) => ({ ...p, [key]: true }));
     try {
-      await client.createSession({
+        await sdkIpc.client.run({
         prompt: task.task,
         title: `${task.topic} (${task.folder})`,
-        sourceId: group.repo,
-        startingBranch: group.baseBranch ?? "main",
+            ...(github ? {source: {github, baseBranch: group.baseBranch ?? 'main'}} : {}),
       });
     } catch (err) {
       console.error("Failed to start workspace:", err);
@@ -224,17 +230,17 @@ export default function QueuesView() {
 
   const handleSendGroup = async (group: FleetTaskGroup, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!client) return;
+      if (!sdkIpc) return;
     const key = `group-${group.group}`;
+      const github = group.repo.replace(/^(?:sources\/)?github\//, '')
     setSendingStates((p) => ({ ...p, [key]: true }));
     try {
       await Promise.all(
         group.tasks.map((task) =>
-          client.createSession({
+            sdkIpc!.client.run({
             prompt: task.task,
             title: `${task.topic} (${task.folder})`,
-            sourceId: group.repo,
-            startingBranch: group.baseBranch ?? "main",
+                ...(github ? {source: {github, baseBranch: group.baseBranch ?? 'main'}} : {}),
           })
         )
       );
@@ -246,7 +252,7 @@ export default function QueuesView() {
   };
 
   const handleSendSelected = async () => {
-    if (!client || selectedTasks.size === 0) return;
+      if (!sdkIpc || selectedTasks.size === 0) return;
     const byRepo: Record<string, { repo: string; baseBranch: string; tasks: FleetTask[] }> = {};
     tasks.forEach((group, gIdx) => {
       group.tasks.forEach((task, tIdx) => {
@@ -262,11 +268,11 @@ export default function QueuesView() {
         const prompt = `I need you to perform the following combined tasks:\n\n${
           selected.map((t, i) => `${(i + 1).toString()}. **${t.topic}** (${t.folder})\n   ${t.task}`).join("\n")
         }`;
-        await client.createSession({
+          const github = repo.replace(/^(?:sources\/)?github\//, '')
+          await sdkIpc!.client.run({
           prompt,
           title: `Combined Tasks (${selected.length.toString()})`,
-          sourceId: repo,
-          startingBranch: baseBranch,
+              ...(github ? {source: {github, baseBranch}} : {}),
         });
       }
       setSelectedTasks(new Set());
@@ -322,7 +328,7 @@ export default function QueuesView() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.13 }}
                 onClick={() => { void handleSendSelected(); }}
-                disabled={sendingStates["selected"] ?? !client}
+                disabled={sendingStates["selected"] ?? !sdkIpc}
                 className="bg-active border border-subtle text-fg-primary text-2xs px-3 py-1.5 rounded-md flex items-center gap-2 hover:bg-hover transition-colors disabled:opacity-40"
               >
                 {sendingStates["selected"] ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
@@ -406,7 +412,7 @@ export default function QueuesView() {
 
                 <button
                   onClick={(e) => { void handleSendGroup(group, e); }}
-                  disabled={groupSending || !client}
+                  disabled={groupSending || !sdkIpc}
                   className="opacity-0 group-hover/header:opacity-100 flex items-center gap-1.5 px-2.5 py-1 rounded border border-hair text-2xs font-mono text-fg-muted hover:text-fg-primary hover:border-subtle transition-all disabled:opacity-40"
                 >
                   {groupSending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
@@ -488,7 +494,7 @@ export default function QueuesView() {
                                 </button>
                                 <button
                                   onClick={(e) => { void handleSendTask(group, task, e); }}
-                                  disabled={taskSending || !client}
+                                  disabled={taskSending || !sdkIpc}
                                   aria-label={`Send ${task.topic}`}
                                   className="flex items-center justify-center h-7 w-7 rounded border border-hair text-fg-muted hover:text-fg-primary hover:border-subtle transition-all disabled:opacity-40"
                                 >

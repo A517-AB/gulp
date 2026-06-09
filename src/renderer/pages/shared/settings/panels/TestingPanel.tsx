@@ -1,13 +1,11 @@
-import { useState } from 'react'
-import { useJules } from '@/lib/jules/provider'
-import { isElectron } from '@shared/bridge'
+import {useState} from 'react'
+import {isElectron} from '@shared/bridge'
 import getConnectionTests from './connection-tests'
-import { TestRow } from './TestRow'
-import type { TestResult } from '../types'
+import {TestRow} from './TestRow'
+import type {TestResult} from '../types'
 
 export function TestingPanel() {
-  const { client } = useJules()
-  const tests = getConnectionTests(client)
+    const tests = getConnectionTests()
 
   const [results, setResults] = useState<Record<string, TestResult>>(() =>
     Object.fromEntries(tests.map(t => [t.key, { status: 'idle', summary: '' }]))

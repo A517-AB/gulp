@@ -2,7 +2,7 @@ import {type KeyboardEvent, useCallback, useMemo, useState} from 'react'
 import {AnimatePresence} from 'framer-motion'
 import type {Command} from '@shared/commands'
 import {TRIGGERS} from '@shared/commands'
-import {useJules} from '@/lib/jules/provider'
+import {sdkIpc} from '@shared/bridge'
 import {useHistory} from '@/hooks/use-history'
 import {useArtifactStream} from '@/hooks/use-artifact-stream'
 import type {HistoryEntry} from '@shared/history'
@@ -14,7 +14,6 @@ import {ArtifactPanel} from './ArtifactPanel'
 import SettingsPage from '@/pages/shared/settings/SettingsPage'
 
 export function Overview() {
-  const { client } = useJules()
     const commands: Command[] = []
   const { entries: historyEntries, push: pushHistory, remove: removeHistory } = useHistory()
   const [activeCommand, setActiveCommand] = useState<Command | null>(null)
@@ -108,11 +107,14 @@ export function Overview() {
       if (activeCommand.trigger === '!') {
       if (!body) return
       const { sessionId, command, instructions } = activeCommand
-      if (!client || !sessionId) { flash(`${command} — no session`); return }
+          if (!sdkIpc || !sessionId) {
+              flash(`${command} — no session`);
+              return
+          }
       const prompt = [body, instructions].filter(Boolean).join('\n\n')
       setIsSending(true)
       try {
-        await client.createActivity({ sessionId, content: prompt })
+          await sdkIpc.session.send(sessionId, prompt)
         void pushHistory(body)
         flash(`sent to ${command}`)
       } catch (e) {
@@ -120,7 +122,7 @@ export function Overview() {
         console.error('[cmd !] send failed:', e)
       } finally { setIsSending(false) }
     }
-  }, [input, activeCommand, isSending, refresh, pushHistory, client])
+  }, [input, activeCommand, isSending, refresh, pushHistory])
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.code === 'Space' && e.ctrlKey && !e.shiftKey && !e.altKey) {

@@ -1,13 +1,11 @@
 import {useMemo, useState} from "react";
 import {useStore} from "@/store/app";
-import {useJules} from "@/lib/jules/provider";
 import {getArchivedSessions} from "@/lib/archive";
 import type {UseSessionListReturn} from "@/types/activity-feed";
 
 export function useSessionList(): UseSessionListReturn {
   const sessions = useStore(s => s.sessionList)
   const loadSessions = useStore(s => s.loadSessions)
-  const { client } = useJules()
   const [searchQuery, setSearchQuery] = useState("")
   const [archivedIds] = useState(() => getArchivedSessions())
 
@@ -31,6 +29,6 @@ export function useSessionList(): UseSessionListReturn {
     error: null,
     searchQuery,
     setSearchQuery,
-    loadSessions: () => loadSessions(client),
+      loadSessions,
   }
 }

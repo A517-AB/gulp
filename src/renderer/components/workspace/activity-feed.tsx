@@ -12,7 +12,6 @@ import {archiveSession} from "@/lib/archive.ts";
 import {ActivityItem} from "./activity-item.tsx";
 import {useStore} from "@/store/app.ts";
 import {useWatcherStore} from "@/library/jules-watcher";
-import {useJules} from "@/lib/jules/provider.tsx";
 import type {Activity, ActivityFeedProps} from "@/types/activity-feed.ts";
 
 const QUICK_REVIEW_PROMPT =
@@ -21,7 +20,6 @@ const QUICK_REVIEW_PROMPT =
 const EMPTY_ARRAY: Activity[] = [];
 
 export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, onToggleCodeDiffs, onActivitiesChange }: ActivityFeedProps) {
-  const { client } = useJules();
     const activities = useStore(s => s.activities[session.id] ?? EMPTY_ARRAY);
   const error = useStore(s => s.activitiesError[session.id]);
   const loadActivities = useStore(s => s.loadActivities);
@@ -45,8 +43,8 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
 
   useEffect(() => {
       initialLoadDoneRef.current = false;
-    void loadActivities(client, session.id);
-  }, [client, session.id, loadActivities]);
+      void loadActivities(session.id);
+  }, [session.id, loadActivities]);
 
   useEffect(() => {
     const newIds = activities.filter(a => !prevIdsRef.current.has(a.id)).map(a => a.id);
@@ -85,20 +83,20 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
   };
 
   const handleApprovePlan = async () => {
-    if (!client || approving) return;
+      if (approving) return;
     try {
         setApproving(true);
-        await approvePlan(client, session.id);
+        await approvePlan(session.id);
     } finally {
         setApproving(false);
     }
   };
 
   const submit = async () => {
-    if (!client || !message.trim() || sending) return;
+      if (!message.trim() || sending) return;
     try {
       setSending(true);
-      await sendMessage(client, session.id, message);
+        await sendMessage(session.id, message);
       setMessage("");
     } finally {
       setSending(false);
@@ -106,10 +104,10 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
   };
 
   const handleQuickReview = () => {
-      if (!client || sending) return;
+      if (sending) return;
       try {
           setSending(true);
-          void sendMessage(client, session.id, QUICK_REVIEW_PROMPT);
+          void sendMessage(session.id, QUICK_REVIEW_PROMPT);
       } finally {
           setSending(false);
       }
@@ -199,7 +197,10 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
       {error && (
         <div className="border-b border-hair bg-red-950/20 px-4 py-3 flex items-center justify-between gap-2">
           <p className="text-[11px] font-mono text-red-400 uppercase">{error}</p>
-          <Button variant="outline" size="sm" onClick={() => { void loadActivities(client, session.id); }} className="h-7 text-[10px] font-mono uppercase border-hair hover:bg-hover text-fg-secondary">Retry</Button>
+            <Button variant="outline" size="sm" onClick={() => {
+                void loadActivities(session.id);
+            }}
+                    className="h-7 text-[10px] font-mono uppercase border-hair hover:bg-hover text-fg-secondary">Retry</Button>
         </div>
       )}
       {applyState.status === "done" && (

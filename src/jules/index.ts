@@ -74,6 +74,11 @@ export type { ListSessionsOptions, ListSessionsResponse } from '@google/jules-sd
 
 export type { SdkIpc } from './sdk-ipc'
 
+// ── Stream helpers ────────────────────────────────────────────────────────────
+
+export type {StreamHandlers} from './stream'
+export {dispatchActivity} from './stream'
+
 // ── App-level types ───────────────────────────────────────────────────────────
 
 export type {

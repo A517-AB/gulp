@@ -19,7 +19,7 @@ import {
     toSummary,
     validateQuery
 } from '@google/jules-sdk'
-import type {SelectOptions, StreamActivitiesOptions, SyncOptions as SdkSyncOptions} from '@google/jules-sdk/types'
+import type {SelectOptions, StreamActivitiesOptions, SyncOptions} from '@google/jules-sdk/types'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import {Buffer} from 'node:buffer'
@@ -31,17 +31,15 @@ interface ListOptions {
     filter?: string
 }
 
-type SyncOptions = Omit<SdkSyncOptions, 'onProgress' | 'signal'>
-
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 function resolveGitSource(cwd?: string): { github: string | null; baseBranch: string } {
-    const baseBranch = process.env['BASE_BRANCH'] ?? 'main'
-    const fromEnv = process.env['GITHUB_REPO']
+    const baseBranch = process.env.BASE_BRANCH ?? 'main'
+    const fromEnv = process.env.GITHUB_REPO
     if (fromEnv) return { github: fromEnv, baseBranch }
     try {
         const url = execFileSync('git', ['remote', 'get-url', 'origin'], { cwd, encoding: 'utf-8' }).trim()
-        const match = url.match(/github\.com[:/](.+?)(?:\.git)?$/)
+        const match = /github\.com[:/](.+?)(?:\.git)?$/.exec(url)
         return { github: match?.[1] ?? null, baseBranch }
     } catch {
         return { github: null, baseBranch }
@@ -56,7 +54,7 @@ function serialize<T>(data: T): T {
 }
 
 function send(sender: Sender, ch: string, payload?: unknown) {
-    if (!sender.isDestroyed()) sender.send(ch, serialize(payload))
+    if (!sender.isDestroyed()) sender.send(ch, payload)
 }
 
 // ── registration ──────────────────────────────────────────────────────────────
@@ -78,7 +76,7 @@ export function registerSdkHandlers() {
         send(event.sender, 'sdk:client.sessions.done')
     })
 
-    ipcMain.handle('sdk:client.sync', async (event, options?: SyncOptions) =>
+    ipcMain.handle('sdk:client.sync', async (event, options?: Omit<SyncOptions, 'onProgress' | 'signal'>) =>
         serialize(await jules.sync({
             ...options,
             onProgress: (p) => { send(event.sender, 'sdk:client.sync.progress', p); },
@@ -97,9 +95,11 @@ export function registerSdkHandlers() {
         serialize(await jules.run(config))
     )
 
-    ipcMain.handle('sdk:client.with', async (_, options: JulesOptions) =>
+    ipcMain.handle('sdk:client.with', async (_, options: JulesOptions) => {
+        if (!process.env['JULES_API_KEY'] && !options.apiKey)
+            console.warn('[sdk:client.with] no API key in env or options — requests will fail')
         serialize(await jules.with(options))
-    )
+    })
 
     ipcMain.handle('sdk:client.all', async (_, configs: SessionConfig[], options?: {
         concurrency?: number;
@@ -168,7 +168,7 @@ export function registerSdkHandlers() {
 
             const commitMessage = gitPatch.suggestedCommitMessage || 'Applied changes from Jules';
 
-            // Checkout a new braskinch to apply the changes
+            // Checkout a new branch to apply the changes
             execFileSync('git', ['checkout', '-b', branchName], { cwd: options.cwd, stdio: 'pipe' });
 
             // Save the patch to disk

@@ -1,4 +1,4 @@
-import type {Dispatch, FC, ReactNode, SetStateAction, SVGProps, SyntheticEvent} from "react";
+import type {Dispatch, ReactNode, SetStateAction, SyntheticEvent} from "react";
 import type {Activity, Session, Source} from "./jules";
 
 export type { Activity, Session, Source };
@@ -23,23 +23,6 @@ export interface SessionInitialValues {
   title?: string;
   prompt?: string;
   startingBranch?: string;
-}
-
-// ---- Smart Action / Automation Types ---- doesn't work ignroe it
-
-export type ActionDestination = "current_session" | "new_session";
-
-export interface QuickActionTemplate {
-  id: string;
-  label: string;
-  description?: string;
-  icon?: FC<SVGProps<SVGSVGElement>>;
-  defaultPrompt: string;
-  allowedDestinations: ActionDestination[];
-  /** If true, this action is only available when the workspace is completely finished */
-  requiresCompletedSession?: boolean;
-  /** Pass this flag to the new workspace to natively trigger a PR */
-  autoCreatePr?: boolean;
 }
 
 // ---- Component props ----
@@ -94,6 +77,7 @@ export interface SessionFormData {
   prompt: string;
   startingBranch: string;
   autoCreatePr: boolean;
+    interactive: boolean;
 }
 
 export interface UseNewSessionFormProps {

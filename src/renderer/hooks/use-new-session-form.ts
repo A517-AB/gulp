@@ -1,6 +1,6 @@
 import {type FormEvent, useCallback, useEffect, useMemo} from "react";
-import {useJules} from "@/lib/jules/provider";
 import {useStore} from "@/store/app";
+import {sdkIpc} from "@shared/bridge";
 import type {UseNewSessionFormProps, UseNewSessionFormReturn} from "@/types/activity-feed";
 
 export function useNewSessionForm({
@@ -9,22 +9,21 @@ export function useNewSessionForm({
   onSessionCreated,
   onClose,
 }: UseNewSessionFormProps): UseNewSessionFormReturn {
-  const { client } = useJules();
-  const sources       = useStore(s => s.sources);
-  const formData      = useStore(s => s.newSessionForm);
-  const setFormData   = useStore(s => s.setNewSessionForm);
-  const resetForm     = useStore(s => s.resetNewSessionForm);
-  const loadSources   = useStore(s => s.loadSources);
+    const sources = useStore(s => s.sources);
+    const formData = useStore(s => s.newSessionForm);
+    const setFormData = useStore(s => s.setNewSessionForm);
+    const resetForm = useStore(s => s.resetNewSessionForm);
+    const loadSources = useStore(s => s.loadSources);
 
   useEffect(() => {
     if (!open) return;
-    loadSources(client);
+      void loadSources();
     if (initialValues) setFormData(initialValues);
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, loadSources, initialValues, setFormData]);
 
   useEffect(() => {
     setFormData({ startingBranch: '' });
-  }, [formData.sourceId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [formData.sourceId, setFormData]);
 
   const branches = useMemo<string[]>(() => {
     const selected = sources.find(s => s.id === formData.sourceId);
@@ -32,24 +31,28 @@ export function useNewSessionForm({
       return selected.githubRepo.branches ?? [];
   }, [sources, formData.sourceId]);
 
-  const handleSubmit = useCallback(async (e: FormEvent) => {
+    const handleSubmit = useCallback(async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!client || !formData.sourceId || !formData.prompt) return;
+        if (!sdkIpc || !formData.prompt) return;
     try {
-      await client.createSession({
-        sourceId: formData.sourceId,
+        const ownerRepo = formData.sourceId.replace(/^(?:sources\/)?github\//, '')
+        const config = {
         prompt: formData.prompt,
-          startingBranch: formData.startingBranch,
         ...(formData.title ? { title: formData.title } : {}),
-        autoCreatePr: formData.autoCreatePr,
-      });
+            ...(formData.autoCreatePr ? {autoPr: true} : {}),
+            ...(ownerRepo ? {source: {github: ownerRepo, baseBranch: formData.startingBranch || 'main'}} : {}),
+        }
+        const result = formData.interactive
+            ? await sdkIpc.session.create(config)
+            : await sdkIpc.client.run(config)
+        await sdkIpc.session.info(result.id);
       resetForm();
       onClose();
       onSessionCreated?.();
     } catch (err) {
       console.error('[useNewSessionForm] createSession failed:', err);
     }
-  }, [client, formData, onClose, onSessionCreated, resetForm]);
+    }, [formData, onClose, onSessionCreated, resetForm]);
 
   return {
     sources,

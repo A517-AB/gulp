@@ -1,9 +1,8 @@
-import {isElectron} from '@shared/bridge'
-import type {JulesClient} from '@/lib/jules/client'
+import {isElectron, sdkIpc} from '@shared/bridge'
 import {activityText} from '@/utils/activity'
 import type {TestDef} from '../types'
 
-function getConnectionTests(client: JulesClient | null): TestDef[] {
+function getConnectionTests(): TestDef[] {
   return [
     // ── electron env ──────────────────────────────────────────────────────────
     {
@@ -17,22 +16,22 @@ function getConnectionTests(client: JulesClient | null): TestDef[] {
         return { summary: masked }
       },
     },
-    // ── HTTP client ───────────────────────────────────────────────────────────
+      // ── sdk ───────────────────────────────────────────────────────────────────
     {
       key: 'client_sources',
-      label: 'client.listSources()',
+        label: 'sdkIpc.sources.list()',
       fn: async () => {
-        if (!client) throw new Error('no client — API key not set?')
-        const s = await client.listSources()
+          if (!sdkIpc) throw new Error('no sdkIpc — Electron only')
+          const s = await sdkIpc.sources.list()
         return { summary: `${String(s.length)} sources`, items: s.map(x => x.name) }
       },
     },
     {
       key: 'client_sessions',
-      label: 'client.listSessions()',
+        label: 'sdkIpc.client.sessions()',
       fn: async () => {
-        if (!client) throw new Error('no client')
-        const s = await client.listSessions()
+          if (!sdkIpc) throw new Error('no sdkIpc')
+          const s = await sdkIpc.client.sessions()
         return {
           summary: `${String(s.length)} sessions`,
             items: s.map(x => `[${x.state}] ${x.title || 'Untitled'} — ${x.id}`),
@@ -41,20 +40,19 @@ function getConnectionTests(client: JulesClient | null): TestDef[] {
     },
     {
       key: 'client_first_activities',
-      label: 'client.listActivities(first session)',
+        label: 'sdkIpc.activities.list(first session)',
       fn: async () => {
-        if (!client) throw new Error('no client')
-        const sessions = await client.listSessions()
+          if (!sdkIpc) throw new Error('no sdkIpc')
+          const sessions = await sdkIpc.client.sessions()
         const [s] = sessions
         if (!s) return { summary: 'no sessions' }
-        const acts = await client.listActivities(s.id)
+          const {activities: acts} = await sdkIpc.activities.list(s.id)
         return {
           summary: `${String(acts.length)} activities — "${s.title || s.id}"`,
             items: acts.map(a => `[${a.type}] ${activityText(a).slice(0, 100)}`),
         }
       },
     },
-   
   ].filter(t => !t.electronOnly || isElectron)
 }
 
