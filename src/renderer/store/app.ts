@@ -1,7 +1,7 @@
-import { create } from 'zustand'
-import type { JulesClient } from '@/lib/jules/client'
-import type { Session, Activity, Source } from '@/types/jules'
-import type { SessionFormData } from '@/types/activity-feed'
+import {create} from 'zustand'
+import type {JulesClient} from '@/lib/jules/client'
+import type {Activity, SessionResource, Source} from '@google/jules-sdk'
+import type {SessionFormData} from '@/types/activity-feed'
 
 export type { SessionFormData }
 
@@ -13,13 +13,13 @@ const DEFAULT_FORM: SessionFormData = {
   autoCreatePr: false,
 }
 
-async function fetchSessions(client: JulesClient | null): Promise<Session[]> {
+async function fetchSessions(client: JulesClient | null): Promise<SessionResource[]> {
   if (!client) return []
   return client.listSessions()
 }
 
 export interface AppStore {
-  sessionList: Session[]
+    sessionList: SessionResource[]
   activities: Record<string, Activity[]>
   activitiesLoading: Record<string, boolean>
   activitiesError: Record<string, string | null>
@@ -74,7 +74,7 @@ export const useStore = create<AppStore>((set, get) => ({
       const prev = state.sessionList
       if (
         prev.length === data.length &&
-        prev.every((s, i) => data[i] !== undefined && s.id === data[i].id && s.status === data[i].status && s.updatedAt === data[i].updatedAt)
+          prev.every((s, i) => data[i] !== undefined && s.id === data[i].id && s.state === data[i].state && s.updateTime === data[i].updateTime)
       ) return state
       return { sessionList: data }
     })
@@ -124,13 +124,13 @@ export const useStore = create<AppStore>((set, get) => ({
     const tick = () => {
       if (stopped) return
       get().loadSessions(client).catch(() => {})
-      
-      // Also poll activities for any currently active session we have loaded
+
       const state = get();
       state.sessionList.forEach(session => {
-         if (session.status === 'active' || session.status === 'planning') {
-            state.loadActivities(client, session.id).catch(() => {});
-         }
+          if (session.state === 'inProgress' || session.state === 'planning') {
+              state.loadActivities(client, session.id).catch(() => {
+              });
+          }
       })
     }
     tick()

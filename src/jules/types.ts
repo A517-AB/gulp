@@ -1,4 +1,4 @@
-import type { Activity, Source } from '@google/jules-sdk/types'
+import type {Activity, Source} from '@google/jules-sdk/types'
 
 // ── HTTP response wrappers (not in SDK) ───────────────────────────────────────
 
@@ -16,7 +16,7 @@ export interface ListSourcesResponse {
 
 export interface CreateSessionRequest {
   sourceId: string
-  startingBranch: string
+    startingBranch?: string
   prompt: string
   title?: string
   requireApproval?: boolean

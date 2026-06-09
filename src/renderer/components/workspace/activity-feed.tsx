@@ -1,18 +1,19 @@
-import { useState, useEffect, useRef } from "react";
-import { Code, Send, Archive, Play, MoreVertical, Loader2, GitBranch, Plus } from "lucide-react";
-import { sdkIpc, filesystem } from "@shared/bridge";
-import { ScrollArea } from "@/ui/scroll-area.tsx";
-import { Textarea } from "@/ui/textarea.tsx";
-import { Button } from "@/ui/button.tsx";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/ui/dropdown-menu.tsx";
-import { useActivityGroups } from "@/hooks/use-activity-groups.ts";
-import { getStatusInfo, getSessionDuration } from "./session-status.ts";
-import { formatDate } from "@/utils/activity.ts";
-import { archiveSession } from "@/lib/archive.ts";
-import { ActivityItem } from "./activity-item.tsx";
-import { useStore } from "@/store/app.ts";
-import { useJules } from "@/lib/jules/provider.tsx";
-import type { ActivityFeedProps, Activity } from "@/types/activity-feed.ts";
+import {useEffect, useRef, useState} from "react";
+import {Archive, Bell, BellOff, Code, GitBranch, Loader2, MoreVertical, Play, Plus, Send} from "lucide-react";
+import {filesystem, sdkIpc} from "@shared/bridge";
+import {ScrollArea} from "@/ui/scroll-area.tsx";
+import {Textarea} from "@/ui/textarea.tsx";
+import {Button} from "@/ui/button.tsx";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/ui/dropdown-menu.tsx";
+import {useActivityGroups} from "@/hooks/use-activity-groups.ts";
+import {getSessionDuration, getStatusInfo} from "./session-status.ts";
+import {activityText, formatDate} from "@/utils/activity.ts";
+import {archiveSession} from "@/lib/archive.ts";
+import {ActivityItem} from "./activity-item.tsx";
+import {useStore} from "@/store/app.ts";
+import {useWatcherStore} from "@/library/jules-watcher";
+import {useJules} from "@/lib/jules/provider.tsx";
+import type {Activity, ActivityFeedProps} from "@/types/activity-feed.ts";
 
 const QUICK_REVIEW_PROMPT =
   "Please perform a comprehensive code review of the repository. Look for bugs, security issues, and opportunities for refactoring. Provide a detailed summary of your findings.";
@@ -21,38 +22,47 @@ const EMPTY_ARRAY: Activity[] = [];
 
 export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, onToggleCodeDiffs, onActivitiesChange }: ActivityFeedProps) {
   const { client } = useJules();
-  const activities = useStore(s => s.activities[session.id] || EMPTY_ARRAY);
+    const activities = useStore(s => s.activities[session.id] ?? EMPTY_ARRAY);
   const error = useStore(s => s.activitiesError[session.id]);
   const loadActivities = useStore(s => s.loadActivities);
   const sendMessage = useStore(s => s.sendMessage);
   const approvePlan = useStore(s => s.approvePlan);
 
   const { grouped, latest } = useActivityGroups(activities);
+    const isWatched = useWatcherStore(s => s.isWatched(session.id))
+    const watch = useWatcherStore(s => s.watch)
+    const unwatch = useWatcherStore(s => s.unwatch)
   const [message, setMessage] = useState("");
   const [expandedBash, setExpandedBash] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
   const [approving, setApproving] = useState(false);
   const [applyState, setApplyState] = useState<{ status: "idle" | "applying" | "done" | "error"; message?: string }>({ status: "idle" });
-  
+
   const [newActivityIds, setNewActivityIds] = useState<Set<string>>(new Set());
   const prevIdsRef = useRef<Set<string>>(new Set());
+    const initialLoadDoneRef = useRef(false);
+    const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Load activities on mount
   useEffect(() => {
+      initialLoadDoneRef.current = false;
     void loadActivities(client, session.id);
   }, [client, session.id, loadActivities]);
 
-  // Track new items for animation
   useEffect(() => {
     const newIds = activities.filter(a => !prevIdsRef.current.has(a.id)).map(a => a.id);
     prevIdsRef.current = new Set(activities.map(a => a.id));
     if (!newIds.length) return;
+      if (!initialLoadDoneRef.current) {
+          initialLoadDoneRef.current = true;
+          bottomRef.current?.scrollIntoView();
+          return;
+      }
     setNewActivityIds(new Set(newIds));
+      bottomRef.current?.scrollIntoView({behavior: 'smooth'});
     const t = setTimeout(() => { setNewActivityIds(new Set()); }, 500);
     return () => clearTimeout(t);
   }, [activities]);
 
-  // Notify parent of updates (for diffs)
   useEffect(() => {
     onActivitiesChange?.(activities);
   }, [activities, onActivitiesChange]);
@@ -70,17 +80,17 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
     if (result.success) {
       setApplyState({ status: "done", message: `Applied to branch: ${result.branch}` });
     } else {
-      setApplyState({ status: "error", message: result.error || "Unknown error" });
+        setApplyState({status: "error", message: result.error ?? "Unknown error"});
     }
   };
 
   const handleApprovePlan = async () => {
     if (!client || approving) return;
     try {
-       setApproving(true);
-       await approvePlan(client, session.id);
+        setApproving(true);
+        await approvePlan(client, session.id);
     } finally {
-       setApproving(false);
+        setApproving(false);
     }
   };
 
@@ -96,18 +106,22 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
   };
 
   const handleQuickReview = () => {
-     if (!client || sending) return;
-     try {
-       setSending(true);
-       void sendMessage(client, session.id, QUICK_REVIEW_PROMPT);
-     } finally {
-       setSending(false);
-     }
+      if (!client || sending) return;
+      try {
+          setSending(true);
+          void sendMessage(client, session.id, QUICK_REVIEW_PROMPT);
+      } finally {
+          setSending(false);
+      }
   };
 
-  const statusInfo = getStatusInfo(session.status);
-  const hasDiffs = activities.some((a) => a.diff);
-  const canApplyLocally = sdkIpc !== null && session.status === "completed" && hasDiffs;
+    const branch = session.sourceContext?.workingBranch
+        ?? session.sourceContext?.githubRepoContext?.startingBranch
+        ?? "main";
+
+    const statusInfo = getStatusInfo(session.state);
+    const hasDiffs = activities.some(a => a.artifacts.some(x => x.type === 'changeSet'));
+    const canApplyLocally = sdkIpc !== null && session.state === "completed" && hasDiffs;
 
   return (
     <div className="flex flex-col h-full bg-base">
@@ -121,18 +135,30 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
               </div>
             </div>
             <div className="flex items-center gap-3 text-[9px] font-mono text-fg-dim uppercase tracking-wide">
-              <span>Started {formatDate(session.createdAt)}</span>
-              <span>•</span><span>{session.branch ?? "main"}</span>
-              {session.status === "active" && <><span>•</span><span>Running {String(getSessionDuration(session.createdAt))}m</span></>}
+                <span>Started {formatDate(session.createTime)}</span>
+                <span>•</span><span>{branch}</span>
+                {session.state === "inProgress" && <>
+                    <span>•</span><span>Running {String(getSessionDuration(session.createTime))}m</span></>}
             </div>
-            {session.status === "active" && latest && (
+              {session.state === "inProgress" && latest && (
               <div className="mt-2 pt-2 border-t border-hair">
                 <div className="text-[9px] font-bold uppercase tracking-widest text-purple-400 mb-1">Latest</div>
-                <div className="text-[11px] text-fg-secondary line-clamp-2 font-mono">{latest.content.slice(0, 150)}</div>
+                  <div
+                      className="text-[11px] text-fg-secondary line-clamp-2 font-mono">{activityText(latest).slice(0, 150)}</div>
               </div>
             )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
+              <Button
+                  variant="ghost" size="icon"
+                  onClick={() => {
+                      isWatched ? unwatch(session.id) : watch({id: session.id, title: session.title})
+                  }}
+                  className={`h-7 w-7 hover:bg-hover ${isWatched ? 'text-purple-400' : 'text-fg-muted'}`}
+                  title={isWatched ? 'Stop watching' : 'Watch for replies'}
+              >
+                  {isWatched ? <BellOff className="h-3.5 w-3.5"/> : <Bell className="h-3.5 w-3.5"/>}
+              </Button>
             {hasDiffs && (
               <Button variant="ghost" size="icon" onClick={() => { onToggleCodeDiffs(!showCodeDiffs); }} className={`h-7 w-7 hover:bg-hover ${showCodeDiffs ? "bg-purple-500/20 text-purple-400" : "text-fg-muted"}`}>
                 <Code className="h-3.5 w-3.5" />
@@ -143,7 +169,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
                 <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-hover text-fg-muted"><MoreVertical className="h-3.5 w-3.5" /></Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-surface border-hair text-fg-secondary">
-                {session.status === "active" && (
+                  {session.state === "inProgress" && (
                   <DropdownMenuItem onClick={() => { void handleQuickReview(); }} disabled={sending} className="focus:bg-hover text-xs cursor-pointer">
                     <Play className="mr-2 h-3.5 w-3.5" /><span>Start Code Review</span>
                   </DropdownMenuItem>
@@ -155,7 +181,9 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
                   </DropdownMenuItem>
                 )}
                 {onNewSession && (
-                  <DropdownMenuItem onClick={onNewSession} className="focus:bg-hover text-xs cursor-pointer">
+                    <DropdownMenuItem onClick={() => {
+                        setTimeout(onNewSession, 0);
+                    }} className="focus:bg-hover text-xs cursor-pointer">
                     <Plus className="mr-2 h-3.5 w-3.5" /><span>New Session</span>
                   </DropdownMenuItem>
                 )}
@@ -189,10 +217,11 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
 
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="p-3 space-y-2.5">
+            <div className="p-3 flex flex-col space-y-2.5">
             {grouped.map((item, i) => (
               <ActivityItem key={Array.isArray(item) ? `group-${String(i)}` : item.id} item={item} expandedBash={expandedBash} onToggleBash={toggleBash} onApprovePlan={() => { void handleApprovePlan(); }} approvingPlan={approving} isNew={!Array.isArray(item) && newActivityIds.has(item.id)} />
             ))}
+                <div ref={bottomRef}/>
           </div>
         </ScrollArea>
       </div>

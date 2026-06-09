@@ -1,11 +1,17 @@
-import { useMemo } from "react";
-import { FileCode } from "lucide-react";
-import { ScrollArea } from "@/ui/scroll-area.tsx";
-import { DiffViewer } from "@/ui/diff-viewer.tsx";
-import type { CodeDiffSidebarProps } from "@/types/activity-feed.ts";
+import {useMemo} from "react";
+import {FileCode} from "lucide-react";
+import {ScrollArea} from "@/ui/scroll-area.tsx";
+import {DiffViewer} from "@/ui/diff-viewer.tsx";
+import type {ChangeSetArtifact} from "@google/jules-sdk";
+import type {CodeDiffSidebarProps} from "@/types/activity-feed.ts";
 
 export function CodeDiffSidebar({ activities, repoUrl }: CodeDiffSidebarProps) {
-  const finalDiff = useMemo(() => activities.filter((a) => a.diff).slice(-1), [activities]);
+    const finalDiff = useMemo(() => activities
+        .flatMap(a => {
+            const cs = a.artifacts.find((art): art is ChangeSetArtifact => art.type === 'changeSet');
+            return cs ? [{id: a.id, patch: cs.gitPatch.unidiffPatch}] : [];
+        })
+        .slice(-1), [activities]);
 
   if (finalDiff.length === 0) {
     return (
@@ -24,7 +30,7 @@ export function CodeDiffSidebar({ activities, repoUrl }: CodeDiffSidebarProps) {
   return (
     <ScrollArea className="h-full">
       <div className="p-4">
-        {finalDiff.map((a) => <DiffViewer key={a.id} diff={a.diff ?? ""} {...(repoUrl ? { repoUrl } : {})} branch="main" />)}
+          {finalDiff.map((x) => <DiffViewer key={x.id} diff={x.patch} {...(repoUrl ? {repoUrl} : {})} branch="main"/>)}
       </div>
     </ScrollArea>
   );

@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { Plus } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/ui/dialog.tsx";
-import { Button } from "@/ui/button.tsx";
-import { Input } from "@/ui/input.tsx";
-import { Textarea } from "@/ui/textarea.tsx";
-import { Label } from "@/ui/label.tsx";
-import { DynamicDropdown } from "@/components/shared/DynamicDropdown";
-import { useNewSessionForm } from "@/hooks/use-new-session-form.ts";
-import type { NewSessionDialogProps } from "@/types/activity-feed.ts";
+import {useState} from "react";
+import {Plus} from "lucide-react";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger} from "@/ui/dialog.tsx";
+import {Button} from "@/ui/button.tsx";
+import {Input} from "@/ui/input.tsx";
+import {Textarea} from "@/ui/textarea.tsx";
+import {Label} from "@/ui/label.tsx";
+import {DynamicDropdown} from "@/components/shared/DynamicDropdown";
+import {useNewSessionForm} from "@/hooks/use-new-session-form.ts";
+import type {NewSessionDialogProps} from "@/types/activity-feed.ts";
 
 export function NewSessionDialog({ onSessionCreated, initialValues, trigger, open: controlledOpen, onOpenChange }: NewSessionDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
@@ -40,7 +40,11 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold">Source Repository *</Label>
-            <DynamicDropdown items={sources.map(s => ({ id: s.id, label: s.name }))} value={formData.sourceId || null} onChange={(v) => { setFormData((p) => ({ ...p, sourceId: v })); }} placeholder={sources.length === 0 ? "No repositories available" : "Select a repository"} className="w-full h-9 justify-between px-3" />
+              <DynamicDropdown items={sources.map(s => ({id: s.id, label: s.name.replace(/^sources\/github\//, '')}))}
+                               value={formData.sourceId || null} onChange={(v) => {
+                  setFormData((p) => ({...p, sourceId: v}));
+              }} placeholder={sources.length === 0 ? "No repositories available" : "Select a repository"}
+                               className="w-full h-9 justify-between px-3"/>
           </div>
           {branches.length > 0 && (
             <div className="space-y-1.5">

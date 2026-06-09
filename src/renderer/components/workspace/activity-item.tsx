@@ -1,58 +1,49 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ChevronDown, ChevronRight, Terminal } from "lucide-react";
-import { Card, CardContent } from "@/ui/card.tsx";
-import { Badge } from "@/ui/badge.tsx";
-import { Avatar, AvatarFallback } from "@/ui/avatar.tsx";
-import { Button } from "@/ui/button.tsx";
-import { BashOutput } from "@/ui/bash-output.tsx";
-import { BorderGlow } from "@/ui/border-glow.tsx";
-import { CardSpotlight } from "@/ui/card-spotlight.tsx";
-import { PlanContent } from "./plan-content.tsx";
-import { formatDate, getActivityTypeColor } from "@/utils/activity.ts";
-import type { Activity, ActivityGroup, ActivityRole } from "@/types/activity-feed.ts";
+import {ChevronDown, ChevronRight, Terminal} from "lucide-react";
+import {Card, CardContent} from "@/ui/card.tsx";
+import {Badge} from "@/ui/badge.tsx";
+import {Avatar, AvatarFallback} from "@/ui/avatar.tsx";
+import {Button} from "@/ui/button.tsx";
+import {BashOutput} from "@/ui/bash-output.tsx";
+import {BorderGlow} from "@/ui/border-glow.tsx";
+import {CardSpotlight} from "@/ui/card-spotlight.tsx";
+import {formatDistanceToNow, isValid, parseISO} from "date-fns";
+import {PlanContent} from "./plan-content.tsx";
+import {activityText, getActivityTypeColor} from "@/utils/activity.ts";
+import type {BashArtifact, MediaArtifact} from "@google/jules-sdk";
+import type {Activity, ActivityGroup, ActivityRole, ActivityType} from "@/types/activity-feed.ts";
 
-function parseJsonContent(content: string): { ok: true; value: unknown } | { ok: false } {
+export {getActivityTypeColor};
+
+export function formatDate(dateString: string): string {
+    if (!dateString) return "Unknown date";
   try {
-    return { ok: true, value: JSON.parse(content) as unknown };
+      const date = parseISO(dateString);
+      if (!isValid(date)) return "Unknown date";
+      return formatDistanceToNow(date, {addSuffix: true});
   } catch {
-    return { ok: false };
+      return "Unknown date";
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function isPlanContentData(value: unknown): value is { description?: string; steps: unknown[] } | unknown[] {
-  return Array.isArray(value) || (isRecord(value) && Array.isArray(value["steps"]));
-}
-
-function isPlanGeneratedMetadata(value: unknown): value is { approved?: boolean } {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  return !("approved" in value) || typeof value["approved"] === "boolean";
-}
-
-function isEmpty(value: unknown): boolean {
-  return isRecord(value) && Object.keys(value).length === 0
-}
-
+//if a problem happens later, it's this bitch.
 function ContentRenderer({ content }: { content: string }) {
-  const parsed = parseJsonContent(content);
-
-  if (parsed.ok && !isEmpty(parsed.value)) {
-    if (isPlanContentData(parsed.value)) {
-      return <PlanContent content={parsed.value} />;
+    try {
+        const parsed: unknown = JSON.parse(content);
+        if (parsed !== null && typeof parsed === "object" && Object.keys(parsed as object).length > 0) {
+            if (Array.isArray(parsed) || (typeof parsed === "object" && "steps" in (parsed as object))) {
+                return <PlanContent content={parsed}/>;
+            }
+            return <pre
+                className="text-[11px] overflow-x-auto font-mono bg-muted/50 p-2 rounded">{JSON.stringify(parsed, null, 2)}</pre>;
+        }
+    } catch {
+        // not JSON
     }
-
-    return <pre className="text-[11px] overflow-x-auto font-mono bg-muted/50 p-2 rounded">{JSON.stringify(parsed.value, null, 2)}</pre>;
-  }
-
   return (
-    <div className="prose prose-sm dark:prose-invert max-w-none break-words prose-p:text-xs prose-headings:text-xs prose-code:text-[11px] prose-pre:text-[11px]">
+      <div
+          className="prose prose-sm dark:prose-invert max-w-none break-words prose-p:text-xs prose-headings:text-xs prose-code:text-[11px] prose-pre:text-[11px] prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   );
@@ -60,8 +51,9 @@ function ContentRenderer({ content }: { content: string }) {
 
 function Av({ role }: { role: ActivityRole }) {
   return (
-    <Avatar className="h-6 w-6 shrink-0 mt-0.5 bg-zinc-900 border border-white/10">
-      <AvatarFallback className={`text-[9px] font-bold uppercase tracking-wider ${role === "user" ? "bg-purple-500 text-white" : "bg-white text-black"}`}>
+      <Avatar className="h-6 w-6 shrink-0 mt-0.5 bg-surface border border-hair">
+          <AvatarFallback
+              className={`text-[9px] font-bold uppercase tracking-wider ${role === "user" ? "bg-purple-500 text-white" : "bg-foreground text-background"}`}>
         {role === "user" ? "U" : "J"}
       </AvatarFallback>
     </Avatar>
@@ -88,7 +80,7 @@ interface ActivityItemProps {
 
 function AgentCard({ children }: { children: React.ReactNode }) {
   return (
-    <BorderGlow className="flex-1" containerClassName="bg-zinc-950/50">
+      <BorderGlow className="max-w-[90%] md:max-w-[80%]" containerClassName="bg-surface/50">
       <CardSpotlight className="border-0 bg-transparent rounded-lg">
         <CardContent className="p-3">{children}</CardContent>
       </CardSpotlight>
@@ -96,43 +88,73 @@ function AgentCard({ children }: { children: React.ReactNode }) {
   );
 }
 
+function ActivityArtifacts({activity, expandedBash, onToggleBash}: {
+    activity: Activity;
+    expandedBash: Set<string>;
+    onToggleBash: (id: string) => void
+}) {
+    const bash = activity.artifacts.find((a): a is BashArtifact => a.type === 'bashOutput');
+    const media = activity.artifacts.find((a): a is MediaArtifact => a.type === 'media');
+    return (
+        <>
+            {bash && (
+                <div className="mt-3 pt-3 border-t border-hair">
+                    <BashToggle id={activity.id} expanded={expandedBash.has(activity.id)} onToggle={onToggleBash}/>
+                    {expandedBash.has(activity.id) && (
+                        <BashOutput
+                            output={`$ ${bash.command}\n${bash.stdout}${bash.stderr ? '\n' + bash.stderr : ''}`.trim()}/>
+                    )}
+                </div>
+            )}
+            {media && (
+                <div className="mt-3 pt-3 border-t border-hair">
+                    <img
+                        src={`data:${media.format};base64,${media.data}`}
+                        alt="Jules media artifact"
+                        className="max-w-full rounded border border-hair shadow-md"
+                    />
+                </div>
+            )}
+        </>
+    );
+}
+
 function SingleActivity({ activity, expandedBash, onToggleBash, onApprovePlan, approvingPlan, isNew }: Omit<ActivityItemProps, "item"> & { activity: Activity }) {
-  const isUser = activity.role === "user";
-  const planGenerated = activity.metadata?.["planGenerated"];
-  const isPlanPending = activity.type === "plan" &&
-    isPlanGeneratedMetadata(planGenerated) &&
-    planGenerated.approved !== true;
+    const isUser = activity.originator === "user";
+    const isPlanPending = activity.type === "planGenerated";
+    const content = activityText(activity);
+    const typeLabel = activity.type as ActivityType;
 
   return (
     <div className={`flex gap-2.5 ${isUser ? "flex-row-reverse" : ""} ${isNew ? "animate-in fade-in slide-in-from-bottom-2 duration-500" : ""}`}>
-      <Av role={activity.role} />
+        <Av role={activity.originator}/>
       {isUser ? (
-        <Card className="flex-1 border-white/[0.08] bg-purple-950/20 border-purple-500/20">
+          <Card
+              className="max-w-[85%] md:max-w-[70%] border-purple-500/10 dark:border-purple-500/20 bg-purple-500/5 dark:bg-purple-950/20">
           <CardContent className="p-3">
             <div className="flex items-center gap-2 mb-2">
-              <Badge variant="outline" className={`text-[9px] h-4 px-1.5 font-mono uppercase tracking-wider ${getActivityTypeColor(activity.type)} border-transparent text-black font-bold`}>{activity.type}</Badge>
-              <span className="text-[9px] font-mono text-white/40">{formatDate(activity.createdAt)}</span>
+                <Badge variant="outline"
+                       className={`text-[9px] h-4 px-1.5 font-mono uppercase tracking-wider ${getActivityTypeColor(typeLabel)} border-transparent text-black font-bold`}>{typeLabel}</Badge>
+                <span className="text-[9px] font-mono text-fg-dim">{formatDate(activity.createTime)}</span>
             </div>
-            <div className="text-[11px] leading-relaxed text-white/90 break-words"><ContentRenderer content={activity.content} /></div>
+              <div className="text-[11px] leading-relaxed text-fg-secondary break-words"><ContentRenderer
+                  content={content}/></div>
           </CardContent>
         </Card>
       ) : (
         <AgentCard>
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant="outline" className={`text-[9px] h-4 px-1.5 font-mono uppercase tracking-wider ${getActivityTypeColor(activity.type)} border-transparent text-black font-bold`}>{activity.type}</Badge>
-            <span className="text-[9px] font-mono text-white/40">{formatDate(activity.createdAt)}</span>
+              <Badge variant="outline"
+                     className={`text-[9px] h-4 px-1.5 font-mono uppercase tracking-wider ${getActivityTypeColor(typeLabel)} border-transparent text-black font-bold`}>{typeLabel}</Badge>
+              <span className="text-[9px] font-mono text-fg-dim">{formatDate(activity.createTime)}</span>
           </div>
-          <div className="text-[11px] leading-relaxed text-white/90 break-words"><ContentRenderer content={activity.content} /></div>
-          {activity.bashOutput && (
-            <div className="mt-3 pt-3 border-t border-white/[0.08]">
-              <BashToggle id={activity.id} expanded={expandedBash.has(activity.id)} onToggle={onToggleBash} />
-              {expandedBash.has(activity.id) && <BashOutput output={activity.bashOutput} />}
-            </div>
-          )}
+            <div className="text-[11px] leading-relaxed text-fg-secondary break-words"><ContentRenderer
+                content={content}/></div>
+            <ActivityArtifacts activity={activity} expandedBash={expandedBash} onToggleBash={onToggleBash}/>
           {isPlanPending && (
-            <div className="mt-3 pt-3 border-t border-white/[0.08]">
+              <div className="mt-3 pt-3 border-t border-hair">
               <Button onClick={onApprovePlan} disabled={approvingPlan} size="sm" className="h-7 px-3 text-[9px] font-mono uppercase tracking-widest border-0">
-                {approvingPlan ? "Approving..." : "Approve Plan"}
+                  Approve Plan
               </Button>
             </div>
           )}
@@ -148,23 +170,19 @@ export function ActivityItem({ item, expandedBash, onToggleBash, onApprovePlan, 
     if (!first) return null;
     return (
       <div className="flex gap-2.5">
-        <Av role={first.role} />
+          <Av role={first.originator}/>
         <AgentCard>
           <div className="flex items-center gap-2 mb-2">
             <Badge variant="outline" className="text-[9px] h-4 px-1.5 font-mono uppercase tracking-wider bg-yellow-500/90 border-transparent text-black font-bold">progress</Badge>
-            <span className="text-[9px] font-mono text-white/40">{item.length} update{item.length > 1 ? "s" : ""}</span>
+              <span className="text-[9px] font-mono text-fg-dim">{item.length} update{item.length > 1 ? "s" : ""}</span>
           </div>
           <div className="space-y-2">
             {item.map((a, i) => (
-              <div key={a.id} className={i > 0 ? "pt-2 border-t border-white/[0.08]" : ""}>
-                <div className="text-[8px] font-mono text-white/30 mb-1 uppercase">{formatDate(a.createdAt)}</div>
-                <div className="text-[11px] leading-relaxed text-white/90 break-words"><ContentRenderer content={a.content} /></div>
-                {a.bashOutput && (
-                  <div className="mt-2 pt-2 border-t border-white/[0.05]">
-                    <BashToggle id={a.id} expanded={expandedBash.has(a.id)} onToggle={onToggleBash} />
-                    {expandedBash.has(a.id) && <BashOutput output={a.bashOutput} />}
-                  </div>
-                )}
+                <div key={a.id} className={i > 0 ? "pt-2 border-t border-hair" : ""}>
+                    <div className="text-[8px] font-mono text-fg-dim mb-1 uppercase">{formatDate(a.createTime)}</div>
+                    <div className="text-[11px] leading-relaxed text-fg-secondary break-words"><ContentRenderer
+                        content={activityText(a)}/></div>
+                    <ActivityArtifacts activity={a} expandedBash={expandedBash} onToggleBash={onToggleBash}/>
               </div>
             ))}
           </div>

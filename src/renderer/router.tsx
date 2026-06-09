@@ -1,19 +1,18 @@
-import { createHashRouter, type RouteObject } from 'react-router'
+import {createHashRouter, type RouteObject} from 'react-router'
 // RouteObject cast needed: exactOptionalPropertyTypes makes children?: X[] incompatible with RouteObject[]
-import { isElectron, isWeb } from '@shared/bridge'
+import {isElectron, isWeb} from '@shared/bridge'
 import RootLayout from '@renderer/layouts/RootLayout'
-import { RouteErrorBoundary } from '@renderer/core/ErrorBoundary'
+import {RouteErrorBoundary} from '@renderer/core/ErrorBoundary'
 import HomePage from '@renderer/pages/shared/HomePage'
 import SettingsPage from '@renderer/pages/shared/settings/SettingsPage'
 import JulesPage from '@renderer/pages/shared/JulesPage'
-import JuliePage from '@renderer/pages/shared/JuliePage'
 import NotesPage from '@renderer/pages/shared/NotesPage'
 import ActivityPage from '@renderer/pages/electron/ActivityPage'
 import SnapshotPage from '@renderer/pages/electron/SnapshotPage'
 import QueuesPage from '@renderer/pages/electron/QueuesPage'
-import { SnippetsPage } from '@renderer/pages/electron/SnippetsPage'
-import SessionsPage from '@renderer/pages/electron/SessionsPage'
+import {SnippetsPage} from '@renderer/pages/electron/SnippetsPage'
 import TimePage from '@renderer/pages/electron/TimePage'
+import TardisPage from '@renderer/pages/electron/TardisPage'
 import OverviewPage from '@renderer/pages/web/OverviewPage'
 
 // ── dev ───────────────────────────────────────────────────────────────────────
@@ -42,7 +41,6 @@ const sharedRoutes: AppRoute[] = [
     { index: true,       Component: HomePage,     handle: { title: 'Home',      inNav: true } },
     { path: 'settings',  Component: SettingsPage, handle: { title: 'Settings',  inNav: true } },
     { path: 'session',   Component: JulesPage,    handle: { title: 'Sessions',  inNav: true } },
-    { path: 'julie',     Component: JuliePage,    handle: { title: 'Julie',     inNav: true } },
     { path: 'overview',  Component: OverviewPage, handle: { title: 'Overview',  inNav: true } },
     { path: 'notes',     Component: NotesPage,    handle: { title: 'Notes',     inNav: true } },
 ]
@@ -52,8 +50,8 @@ const sharedRoutes: AppRoute[] = [
 const electronRoutes: AppRoute[] = [
     { path: 'queues',       Component: QueuesPage,   handle: { title: 'Queues',   inNav: true } },
     { path: 'snippets',     Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },
-    { path: 'sessions',     Component: SessionsPage, handle: { title: 'Sessions', inNav: true } },
     { path: 'library',       Component: TimePage,     handle: { title: 'Time',     inNav: true } },
+    {path: 'tardis', Component: TardisPage, handle: {title: 'Tardis', inNav: true}},
     { path: 'activity/:id', Component: ActivityPage },
     { path: 'snapshot/:id', Component: SnapshotPage },
 ]

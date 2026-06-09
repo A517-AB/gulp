@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router'
-import { sdkIpc } from '@shared/bridge'
-import type { Activity, PlanStep } from '@google/jules-sdk/types'
-import { ScrollArea } from '@/ui/scroll-area'
-import { Input } from '@/ui/input'
-import { Button } from '@/ui/button'
-import { CheckCircle2, FileText, Loader2, Send, XCircle } from 'lucide-react'
+import {useEffect, useRef, useState} from 'react'
+import {useParams} from 'react-router'
+import {sdkIpc} from '@shared/bridge'
+import type {Activity, PlanStep} from '@google/jules-sdk/types'
+import {Input} from '@/ui/input'
+import {Button} from '@/ui/button'
+import {CheckCircle2, FileText, Loader2, Send, XCircle} from 'lucide-react'
 
 function ActivityItem({ a, onApprove, approving }: { a: Activity; onApprove: () => void; approving: boolean }) {
   switch (a.type) {
@@ -88,11 +87,24 @@ export default function ActivityPage() {
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [approving, setApproving] = useState(false)
-  const endRef = useRef<HTMLDivElement>(null)
+    const viewportRef = useRef<HTMLDivElement>(null)
+    const hasScrolled = useRef(false)
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+      if (activities.length === 0) return
+      const el = viewportRef.current
+      if (!el) return
+      if (hasScrolled.current) {
+          el.scrollTo({top: el.scrollHeight, behavior: 'smooth'})
+      } else {
+          el.scrollTop = el.scrollHeight
+      }
+      hasScrolled.current = true
   }, [activities])
+
+    useEffect(() => {
+        hasScrolled.current = false
+    }, [id])
 
   useEffect(() => {
     if (!sdkIpc || !id) return
@@ -146,7 +158,7 @@ export default function ActivityPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1">
+        <div ref={viewportRef} className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-2 max-w-2xl mx-auto">
           {activities.length === 0 && (
             <p className="text-fg-ghost text-xs font-mono text-center pt-16 select-none">No activities yet</p>
@@ -154,9 +166,8 @@ export default function ActivityPage() {
           {activities.map((a, i) => (
             <ActivityItem key={i} a={a} onApprove={approve} approving={approving} />
           ))}
-          <div ref={endRef} />
         </div>
-      </ScrollArea>
+        </div>
 
       <div className="p-3 border-t border-hair shrink-0">
         <div className="flex gap-1.5 max-w-2xl mx-auto">

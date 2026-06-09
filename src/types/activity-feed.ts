@@ -1,11 +1,11 @@
-import type { Dispatch, FC, ReactNode, SetStateAction, SVGProps, SyntheticEvent } from "react";
-import type { Activity, Session, Source } from "./jules";
+import type {Dispatch, FC, ReactNode, SetStateAction, SVGProps, SyntheticEvent} from "react";
+import type {Activity, Session, Source} from "./jules";
 
 export type { Activity, Session, Source };
 
 export type ActivityType = Activity["type"];
-export type ActivityRole = Activity["role"];
-export type SessionStatus = Session["status"];
+export type ActivityRole = Activity["originator"];
+export type SessionStatus = Session["state"];
 
 // Consecutive agent progress activities collapse into an array for grouped rendering
 export type ActivityGroup = Activity | Activity[];
@@ -25,7 +25,7 @@ export interface SessionInitialValues {
   startingBranch?: string;
 }
 
-// ---- Smart Action / Automation Types ----
+// ---- Smart Action / Automation Types ---- doesn't work ignroe it
 
 export type ActionDestination = "current_session" | "new_session";
 

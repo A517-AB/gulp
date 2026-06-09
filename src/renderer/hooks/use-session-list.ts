@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
-import { useStore } from "@/store/app";
-import { useJules } from "@/lib/jules/provider";
-import { getArchivedSessions } from "@/lib/archive";
-import type { UseSessionListReturn } from "@/types/activity-feed";
+import {useMemo, useState} from "react";
+import {useStore} from "@/store/app";
+import {useJules} from "@/lib/jules/provider";
+import {getArchivedSessions} from "@/lib/archive";
+import type {UseSessionListReturn} from "@/types/activity-feed";
 
 export function useSessionList(): UseSessionListReturn {
   const sessions = useStore(s => s.sessionList)
@@ -17,7 +17,10 @@ export function useSessionList(): UseSessionListReturn {
       .filter(s => {
         if (!searchQuery) return true
         const q = searchQuery.toLowerCase()
-        return s.title.toLowerCase().includes(q) || s.sourceId.toLowerCase().includes(q)
+          const sourceStr = s.source?.githubRepo
+              ? `${s.source.githubRepo.owner}/${s.source.githubRepo.repo}`
+              : ''
+          return s.title.toLowerCase().includes(q) || sourceStr.toLowerCase().includes(q)
       }),
     [sessions, archivedIds, searchQuery],
   )

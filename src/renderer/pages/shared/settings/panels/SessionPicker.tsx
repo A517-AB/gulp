@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useMemo } from 'react'
-import { useSessionList } from '@/hooks/use-session-list'
+import {useEffect, useMemo, useRef, useState} from 'react'
+import {useSessionList} from '@/hooks/use-session-list'
 
 interface SessionPickerProps {
   value: string
@@ -15,7 +15,7 @@ export function SessionPicker({ value, onChange }: SessionPickerProps) {
   const recent = useMemo(() =>
     sessions
       .slice()
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+        .sort((a, b) => b.updateTime.localeCompare(a.updateTime))
       .slice(0, 10),
     [sessions],
   )

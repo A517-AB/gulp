@@ -1,7 +1,6 @@
-import { Section } from './Section'
-import { GeneralPanel } from './panels/GeneralPanel'
-import { TestingPanel } from './panels/TestingPanel'
-import { AliasesPanel } from './panels/AliasesPanel'
+import {Section} from './Section'
+import {GeneralPanel} from './panels/GeneralPanel'
+import {TestingPanel} from './panels/TestingPanel'
 
 export default function SettingsPage() {
   return (
@@ -10,8 +9,8 @@ export default function SettingsPage() {
         <Section title="General">
           <GeneralPanel />
         </Section>
-        <Section title="Aliases" defaultOpen>
-          <AliasesPanel />
+          <Section title="Commands">
+              <p className="text-xs text-fg-ghost font-mono">coming soon</p>
         </Section>
         <Section title="Jules Connection">
           <TestingPanel />

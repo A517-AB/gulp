@@ -1,22 +1,21 @@
-import { useState, useCallback, useMemo, type KeyboardEvent } from 'react'
-import { AnimatePresence } from 'framer-motion'
-import { TRIGGERS } from '@shared/commands'
-import type { Command } from '@shared/commands'
-import { useJules } from '@/lib/jules/provider'
-import { useCommands } from '@/hooks/use-commands'
-import { useHistory } from '@/hooks/use-history'
-import { useArtifactStream } from '@/hooks/use-artifact-stream'
-import type { HistoryEntry } from '@shared/history'
-import type { PanelMode } from './types'
-import { GhostInput } from './GhostInput'
-import { CommandMenu } from './CommandMenu'
-import { HistoryPanel } from './HistoryPanel'
-import { ArtifactPanel } from './ArtifactPanel'
+import {type KeyboardEvent, useCallback, useMemo, useState} from 'react'
+import {AnimatePresence} from 'framer-motion'
+import type {Command} from '@shared/commands'
+import {TRIGGERS} from '@shared/commands'
+import {useJules} from '@/lib/jules/provider'
+import {useHistory} from '@/hooks/use-history'
+import {useArtifactStream} from '@/hooks/use-artifact-stream'
+import type {HistoryEntry} from '@shared/history'
+import type {PanelMode} from './types'
+import {GhostInput} from './GhostInput'
+import {CommandMenu} from './CommandMenu'
+import {HistoryPanel} from './HistoryPanel'
+import {ArtifactPanel} from './ArtifactPanel'
 import SettingsPage from '@/pages/shared/settings/SettingsPage'
 
 export function Overview() {
   const { client } = useJules()
-  const { commands } = useCommands()
+    const commands: Command[] = []
   const { entries: historyEntries, push: pushHistory, remove: removeHistory } = useHistory()
   const [activeCommand, setActiveCommand] = useState<Command | null>(null)
   const [input, setInput] = useState('')
@@ -39,8 +38,8 @@ export function Overview() {
     [panelMode, commands, commandQuery],
   )
 
-  const artifactSessionId = activeCommand?.type === 'jules-display' && activeCommand.sessionId !== dismissedSession
-    ? (activeCommand.sessionId ?? null) : null
+    const artifactSessionId = activeCommand?.trigger === '/' && activeCommand.sessionId !== dismissedSession
+        ? activeCommand.sessionId : null
 
   const { files, refresh } = useArtifactStream(artifactSessionId)
   const hasArtifacts = artifactSessionId !== null && files.length > 0
@@ -48,7 +47,7 @@ export function Overview() {
   const closePanel = useCallback(() => { setPanelMode('none'); setPanelIndex(0) }, [])
 
   const selectCommand = useCallback((cmd: Command) => {
-    if (cmd.type === 'palette' && cmd.action) {
+      if (cmd.trigger === '>' && cmd.action) {
       setPanelMode(cmd.action as PanelMode)
       setInput('')
       setCommandQuery('')
@@ -82,32 +81,31 @@ export function Overview() {
 
   const handleSend = useCallback(async () => {
     if (!activeCommand || isSending) return
-    const { type } = activeCommand
     const body = input.trim()
 
-    if (type === 'palette') {
+      if (activeCommand.trigger === '>') {
       if (activeCommand.action) setPanelMode(activeCommand.action as PanelMode)
       return
     }
 
-    if (type === 'terminal') {
+      if (activeCommand.trigger === '@') {
       flash(`@ ${activeCommand.command} — terminal not wired yet`)
       return
     }
 
-    if (type === 'jules-display') {
+      if (activeCommand.trigger === '/') {
       flash(`loading ${activeCommand.command}…`)
       refresh()
       return
     }
 
-    if (type === 'jules-stream') {
+      if (activeCommand.trigger === '#') {
       flash(`streaming ${activeCommand.command}…`)
       refresh()
       return
     }
 
-    if (type === 'jules-message') {
+      if (activeCommand.trigger === '!') {
       if (!body) return
       const { sessionId, command, instructions } = activeCommand
       if (!client || !sessionId) { flash(`${command} — no session`); return }
@@ -187,7 +185,9 @@ export function Overview() {
             <ArtifactPanel
               files={files}
               onZip={() => files}
-              onDismiss={() => { if (activeCommand?.type === 'jules-display') setDismissedSession(activeCommand.sessionId ?? null) }}
+              onDismiss={() => {
+                  if (activeCommand?.trigger === '/') setDismissedSession(activeCommand.sessionId)
+              }}
             />
           </div>
         )}

@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { ActivityFeed } from "@/components/workspace/activity-feed.tsx";
-import { SessionList } from "@/components/workspace/session-list.tsx";
-import { CodeDiffSidebar } from "@/components/workspace/code-diff-sidebar.tsx";
-import { NewSessionDialog } from "@/components/workspace/new-session-dialog.tsx";
-import { GridBackground } from "@/ui/grid-background";
-import { BackgroundBeams } from "@/ui/background-beams";
-import { useResizable } from "@renderer/hooks/use-resizable";
-import type { Activity, Session, SessionInitialValues } from "@/types/activity-feed";
+import {useState} from "react";
+import {ActivityFeed} from "@/components/workspace/activity-feed.tsx";
+import {SessionList} from "@/components/workspace/session-list.tsx";
+import {CodeDiffSidebar} from "@/components/workspace/code-diff-sidebar.tsx";
+import {NewSessionDialog} from "@/components/workspace/new-session-dialog.tsx";
+import {GridBackground} from "@/ui/grid-background";
+import {BackgroundBeams} from "@/ui/background-beams";
+import {useResizable} from "@renderer/hooks/use-resizable";
+import type {Activity, Session, SessionInitialValues} from "@/types/activity-feed";
 
 export default function JulesPage() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
@@ -90,7 +90,8 @@ export default function JulesPage() {
               </button>
             </div>
             {!codeDiffCollapsed && (
-              <CodeDiffSidebar activities={currentActivities} repoUrl={`https://github.com/${selectedSession.sourceId}`} />
+                <CodeDiffSidebar
+                    activities={currentActivities} {...(selectedSession.source ? {repoUrl: `https://github.com/${selectedSession.source.githubRepo.owner}/${selectedSession.source.githubRepo.repo}`} : {})} />
             )}
           </aside>
         </>

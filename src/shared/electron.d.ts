@@ -1,9 +1,9 @@
-import type { FsEntry, FsStat, ReaddirOptions, FileFilter } from './filesystem'
-import type { FuseManifest, FuseChangeEvent } from './fuse'
-import type { Command } from './commands'
-import type { HistoryEntry } from './history'
-import type { NoteMeta } from './notes'
-import type { SdkIpc } from '../jules/sdk-ipc'
+import type {FileFilter, FsEntry, FsStat, ReaddirOptions} from './filesystem'
+import type {FuseChangeEvent, FuseManifest} from './fuse'
+import type {Command} from './commands'
+import type {HistoryEntry} from './history'
+import type {NoteMeta} from './notes'
+import type {SdkIpc} from '../jules/sdk-ipc'
 
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
@@ -142,9 +142,17 @@ interface WeeklySchedule { kind: 'weekly';   time: string; dayOfWeek: WeekDay }
 interface MonthlySchedule { kind: 'monthly';  time: string; dayOfMonth: number }
 interface IntervalSchedule { kind: 'interval'; everyMinutes: number }
 
+interface WindowedSchedule {
+    kind: 'windowed';
+    everyMinutes: number;
+    fromHour: number;
+    toHour: number;
+    days: WeekDay[]
+}
+
 export type ScheduleInput =
   | AlarmSchedule | OnceSchedule | DailySchedule
-  | WeeklySchedule | MonthlySchedule | IntervalSchedule
+    | WeeklySchedule | MonthlySchedule | IntervalSchedule | WindowedSchedule
 
 export interface ScheduledItem {
   id:           string
@@ -152,6 +160,7 @@ export interface ScheduledItem {
   schedule:     ScheduleInput
   enabled:      boolean
   sound?:       string
+    category?: string
   createdAt:    string
   lastFiredAt?: string
 }

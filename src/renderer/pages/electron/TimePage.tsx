@@ -1,15 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
-import { format } from 'date-fns'
-import {
-  BrowserSoundController,
-  useAlarmClock,
-  useReminderClock,
-} from '@/library/alarm'
-import type { AlarmEntry, ReminderEntry, SoundId } from '@/library/alarm'
-import { useNotification } from '@/library/notification'
-import { scheduler } from '@shared/bridge'
-import type { ScheduledItem } from '@shared/electron'
+import type {ReactNode} from 'react'
+import {useEffect, useMemo, useRef, useState} from 'react'
+import {format} from 'date-fns'
+import type {SoundId} from '@/library/alarm'
+import {BrowserSoundController, useAlarmClock, useReminderClock,} from '@/library/alarm'
+import {useNotification} from '@/library/notification'
+import {scheduler} from '@shared/bridge'
+import type {ScheduledItem} from '@shared/electron'
+import {useTimeStore} from '@/store/time'
 
 function randomId() {
   return Math.random().toString(36).slice(2, 10)
@@ -149,21 +146,18 @@ function ActionSection() {
 // ── Alarm section ─────────────────────────────────────────────────────────────
 
 function AlarmSection() {
-  const [alarms, setAlarms] = useState<AlarmEntry[]>([])
+    const {alarms, addAlarm, removeAlarm, snoozeAlarm, clearAlarms} = useTimeStore()
 
   const { notify } = useNotification({
     onClick: (d) => {
       const extra = d as { source?: string; id?: string }
       if (extra.source !== 'alarm' || !extra.id) return
-      setAlarms(prev => prev.filter(a => a.id !== extra.id))
+        removeAlarm(extra.id)
     },
     onCancel: (d) => {
       const extra = d as { source?: string; id?: string }
       if (extra.source !== 'alarm' || !extra.id) return
-      const snoozeUntil = new Date(Date.now() + 60_000).toISOString()
-      setAlarms(prev => prev.map(a =>
-        a.id === extra.id ? { ...a, snoozeUntil } : a,
-      ))
+        snoozeAlarm(extra.id, new Date(Date.now() + 60_000).toISOString())
     },
   })
 
@@ -182,27 +176,24 @@ function AlarmSection() {
     },
   })
 
-  function addAlarm() {
+    function add() {
     const now = new Date()
-    setAlarms(prev => [
-      ...prev,
-      {
-        id:        randomId(),
-        label:     'Test alarm',
-        time:      format(now, 'HH:mm'),
-        days:      [],
-        enabled:   true,
-        createdAt: now.toISOString(),
-      },
-    ])
+        addAlarm({
+            id: randomId(),
+            label: 'Test alarm',
+            time: format(now, 'HH:mm'),
+            days: [],
+            enabled: true,
+            createdAt: now.toISOString(),
+        })
   }
 
   return (
     <Section label="Alarms">
       <p className="text-xs text-zinc-600">Fires within ~10s. Dismiss removes it, Snooze delays 1 min.</p>
       <Row label="Controls">
-        <Btn onClick={addAlarm}>Add (now)</Btn>
-        <Btn muted onClick={() => { setAlarms([]) }}>Clear all</Btn>
+          <Btn onClick={add}>Add (now)</Btn>
+          <Btn muted onClick={clearAlarms}>Clear all</Btn>
         {alarms.length > 0 && (
           <span className="text-xs text-zinc-600">{alarms.length} pending</span>
         )}
@@ -224,21 +215,18 @@ function AlarmSection() {
 // ── Reminder section ──────────────────────────────────────────────────────────
 
 function ReminderSection() {
-  const [reminders, setReminders] = useState<ReminderEntry[]>([])
+    const {reminders, addReminder, removeReminder, snoozeReminder, clearReminders} = useTimeStore()
 
   const { notify } = useNotification({
     onClick: (d) => {
       const extra = d as { source?: string; id?: string }
       if (extra.source !== 'reminder' || !extra.id) return
-      setReminders(prev => prev.filter(r => r.id !== extra.id))
+        removeReminder(extra.id)
     },
     onCancel: (d) => {
       const extra = d as { source?: string; id?: string }
       if (extra.source !== 'reminder' || !extra.id) return
-      const snoozeUntil = new Date(Date.now() + 60_000).toISOString()
-      setReminders(prev => prev.map(r =>
-        r.id === extra.id ? { ...r, snoozeUntil } : r,
-      ))
+        snoozeReminder(extra.id, new Date(Date.now() + 60_000).toISOString())
     },
   })
 
@@ -257,41 +245,31 @@ function ReminderSection() {
     },
   })
 
-  function addOnce() {
-    setReminders(prev => [
-      ...prev,
-      {
-        id:        randomId(),
-        title:     'Test reminder',
-        note:      'Fires within ~5 seconds',
-        schedule:  { type: 'once', at: new Date().toISOString() },
-        enabled:   true,
-        createdAt: new Date().toISOString(),
-      },
-    ])
-  }
-
-  function addInterval() {
-    setReminders(prev => [
-      ...prev,
-      {
-        id:        randomId(),
-        title:     'Interval reminder',
-        note:      'Every 1 min',
-        schedule:  { type: 'interval', anchorAt: new Date().toISOString(), everyMinutes: 1 },
-        enabled:   true,
-        createdAt: new Date().toISOString(),
-      },
-    ])
-  }
-
-  return (
-    <Section label="Reminders">
-      <p className="text-xs text-zinc-600">Once fires in ~5s. Done removes it, Snooze delays 1 min.</p>
-      <Row label="Create">
-        <Btn onClick={addOnce}>Once (now)</Btn>
-        <Btn onClick={addInterval}>Interval (1 min)</Btn>
-        <Btn muted onClick={() => { setReminders([]) }}>Clear all</Btn>
+    return (
+        <Section label="Reminders">
+            <p className="text-xs text-zinc-600">Once fires in ~5s. Done removes it, Snooze delays 1 min.</p>
+            <Row label="Create">
+                <Btn onClick={() => {
+                    addReminder({
+                        id: randomId(),
+                        title: 'Test reminder',
+                        note: 'Fires within ~5 seconds',
+                        schedule: {type: 'once', at: new Date().toISOString()},
+                        enabled: true,
+                        createdAt: new Date().toISOString(),
+                    })
+                }}>Once (now)</Btn>
+                <Btn onClick={() => {
+                    addReminder({
+                        id: randomId(),
+                        title: 'Interval reminder',
+                        note: 'Every 1 min',
+                        schedule: {type: 'interval', anchorAt: new Date().toISOString(), everyMinutes: 1},
+                        enabled: true,
+                        createdAt: new Date().toISOString(),
+                    })
+                }}>Interval (1 min)</Btn>
+                <Btn muted onClick={clearReminders}>Clear all</Btn>
       </Row>
       {reminders.length > 0 && (
         <ul className="space-y-1">
@@ -399,7 +377,7 @@ function SchedulerSection() {
 
 export default function LibraryPage() {
   return (
-    <div className="p-6 space-y-10 max-w-xl">
+      <div className="p-4 space-y-6 max-w-xl">
       <div>
         <h1 className="text-base font-semibold text-white">Library test bed</h1>
         <p className="text-xs text-zinc-600 mt-1">Off-screen notifications · Sounds · Alarms · Reminders</p>

@@ -1,12 +1,12 @@
-import { BrowserWindow, ipcMain, screen } from 'electron'
+import type {WebContents} from 'electron'
+import {BrowserWindow, ipcMain, screen} from 'electron'
 import * as path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import type { WebContents } from 'electron'
+import {fileURLToPath} from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const WIDTH    = 340
-const HEIGHT   = 96
+const HEIGHT = 360
 const OFFSET   = 12
 
 let win: BrowserWindow | null = null

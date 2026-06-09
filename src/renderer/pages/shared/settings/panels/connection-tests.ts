@@ -1,6 +1,7 @@
-import { isElectron } from '@shared/bridge'
-import type { JulesClient } from '@/lib/jules/client'
-import type { TestDef } from '../types'
+import {isElectron} from '@shared/bridge'
+import type {JulesClient} from '@/lib/jules/client'
+import {activityText} from '@/utils/activity'
+import type {TestDef} from '../types'
 
 function getConnectionTests(client: JulesClient | null): TestDef[] {
   return [
@@ -34,7 +35,7 @@ function getConnectionTests(client: JulesClient | null): TestDef[] {
         const s = await client.listSessions()
         return {
           summary: `${String(s.length)} sessions`,
-          items: s.map(x => `[${x.status}] ${x.title || 'Untitled'} — ${x.id}`),
+            items: s.map(x => `[${x.state}] ${x.title || 'Untitled'} — ${x.id}`),
         }
       },
     },
@@ -49,7 +50,7 @@ function getConnectionTests(client: JulesClient | null): TestDef[] {
         const acts = await client.listActivities(s.id)
         return {
           summary: `${String(acts.length)} activities — "${s.title || s.id}"`,
-          items: acts.map(a => `[${a.type}] ${a.content.slice(0, 100)}`),
+            items: acts.map(a => `[${a.type}] ${activityText(a).slice(0, 100)}`),
         }
       },
     },

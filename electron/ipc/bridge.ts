@@ -1,31 +1,39 @@
-import type { IpcRendererEvent } from 'electron';
-import { ipcRenderer } from 'electron'
+import type {IpcRendererEvent} from 'electron';
+import {ipcRenderer} from 'electron'
 import type {
-    SessionResource,
-    SessionConfig,
-    SessionState,
-    SerializedSnapshot,
     Activity,
     ActivityAgentMessaged,
-    Source,
+    ActivitySummary,
+    DomainSchema,
+    JulesDomain,
     JulesOptions,
     JulesQuery,
-    JulesDomain,
     ListSessionsOptions,
-    JulesClient,
-    SessionClient,
     Outcome,
+    ParsedFile,
+    SerializedSnapshot,
+    SessionConfig,
+    SessionResource,
+    SessionState,
+    Source,
+    ValidationResult,
 } from '@google/jules-sdk'
+import type {
+    SelectOptions,
+    StreamActivitiesOptions,
+    SyncOptions as SdkSyncOptions,
+    SyncProgress,
+    SyncStats
+} from '@google/jules-sdk/types'
+
+interface ListOptions {
+    pageSize?: number;
+    pageToken?: string;
+    filter?: string
+}
 
 type Unsubscribe = () => void
-
-type _SyncOpts = NonNullable<Parameters<JulesClient['sync']>[0]>
-type SyncStats = Awaited<ReturnType<JulesClient['sync']>>
-type SyncProgress = Parameters<NonNullable<_SyncOpts['onProgress']>>[0]
-type SyncOptions = Omit<_SyncOpts, 'onProgress' | 'signal'>
-type SelectOptions = Parameters<SessionClient['activities']['select']>[0]
-type ListOptions = Parameters<SessionClient['activities']['list']>[0]
-type StreamActivitiesOptions = Parameters<SessionClient['stream']>[0]
+type SyncOptions = Omit<SdkSyncOptions, 'onProgress' | 'signal'>
 type IpcSessionOutcome = Omit<Outcome, 'generatedFiles' | 'changeSet'>
 
 // ── stream helper ─────────────────────────────────────────────────────────────
@@ -79,11 +87,18 @@ export const sdk = {
         getSessionResource: (id: string): Promise<SessionResource> =>
             ipcRenderer.invoke('sdk:client.getSessionResource', id),
 
-        run: (config: SessionConfig): Promise<Pick<Awaited<ReturnType<JulesClient['run']>>, 'id'>> =>
+        run: (config: SessionConfig): Promise<{ id: string }> =>
             ipcRenderer.invoke('sdk:client.run', config),
 
         with: (options: JulesOptions): Promise<void> =>
             ipcRenderer.invoke('sdk:client.with', options),
+
+        all: (configs: SessionConfig[], options?: {
+            concurrency?: number;
+            stopOnError?: boolean;
+            delayMs?: number
+        }): Promise<{ id: string }[]> =>
+            ipcRenderer.invoke('sdk:client.all', configs, options),
     },
 
     // ── session ──────────────────────────────────────────────────────────────────
@@ -189,6 +204,38 @@ export const sdk = {
     artifact: {
         save: (data: string, filepath: string): Promise<string> =>
             ipcRenderer.invoke('sdk:artifact.save', data, filepath),
+
+        parseUnidiff: (patch?: string | null): Promise<ParsedFile[]> =>
+            ipcRenderer.invoke('sdk:artifact.parseUnidiff', patch),
+    },
+
+    // ── util ──────────────────────────────────────────────────────────────────────
+
+    util: {
+        toSummary: (activity: Activity): Promise<ActivitySummary> =>
+            ipcRenderer.invoke('sdk:util.toSummary', activity),
+    },
+
+    // ── query ─────────────────────────────────────────────────────────────────────
+
+    query: {
+        validate: (query: unknown): Promise<ValidationResult> =>
+            ipcRenderer.invoke('sdk:query.validate', query),
+
+        format: (result: ValidationResult): Promise<string> =>
+            ipcRenderer.invoke('sdk:query.format', result),
+
+        schema: (domain: 'sessions' | 'activities'): Promise<DomainSchema> =>
+            ipcRenderer.invoke('sdk:query.schema', domain),
+
+        schemas: (): Promise<{ sessions: DomainSchema; activities: DomainSchema }> =>
+            ipcRenderer.invoke('sdk:query.schemas'),
+
+        typeDef: (domain: 'sessions' | 'activities'): Promise<string> =>
+            ipcRenderer.invoke('sdk:query.typeDef', domain),
+
+        markdownDocs: (): Promise<string> =>
+            ipcRenderer.invoke('sdk:query.markdownDocs'),
     },
 }
 

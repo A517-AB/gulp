@@ -1,21 +1,35 @@
-import { isToday, parseISO } from "date-fns";
-import { Search } from "lucide-react";
-import { ScrollArea } from "@/ui/scroll-area.tsx";
-import { Input } from "@/ui/input.tsx";
-import { Badge } from "@/ui/badge.tsx";
-import { Button } from "@/ui/button.tsx";
-import { useSessionList } from "@/hooks/use-session-list.ts";
-import { STATE_DOT } from "./session-status.ts";
-import type { SessionListProps } from "@/types/activity-feed.ts";
+import {isToday, parseISO} from "date-fns";
+import {Search} from "lucide-react";
+import {ScrollArea} from "@/ui/scroll-area.tsx";
+import {Input} from "@/ui/input.tsx";
+import {Badge} from "@/ui/badge.tsx";
+import {Button} from "@/ui/button.tsx";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/ui/tooltip.tsx";
+import {CardSpotlight} from "@/ui/card-spotlight.tsx";
+import {formatDate} from "./activity-item.tsx";
+import {useSessionList} from "@/hooks/use-session-list.ts";
+import {STATE_BADGE, STATE_DOT} from "./session-status.ts";
+import type {SessionListProps} from "@/types/activity-feed.ts";
+
+function truncateText(text: string, maxLength: number) {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + "...";
+}
 
 const LIMIT = 100;
 
 export function SessionList({ onSelectSession, selectedSessionId }: SessionListProps) {
   const { sessions, allSessions, error, searchQuery, setSearchQuery, loadSessions } = useSessionList();
 
-  const dailyCount = allSessions.filter((s) => { try { return s.createdAt && isToday(parseISO(s.createdAt)); } catch { return false; } }).length;
+    const dailyCount = allSessions.filter((s) => {
+        try {
+            return s.createTime ? isToday(parseISO(s.createTime)) : false;
+        } catch {
+            return false;
+        }
+    }).length;
   const pct = Math.min((dailyCount / LIMIT) * 100, 100);
-
   if (error) return (
     <div className="flex flex-col items-center gap-3 p-6">
       <p className="text-xs text-red-400 text-center">{error}</p>
@@ -24,7 +38,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
   );
 
   return (
-    <div className="h-full flex flex-col bg-surface overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col bg-surface overflow-hidden">
       <div className="px-3 py-2 border-b border-hair shrink-0">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-fg-ghost" />
@@ -35,25 +49,99 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
         <div className="p-2 space-y-1">
           {sessions.length === 0 ? (
             <p className="text-xs text-fg-dim text-center p-6">{searchQuery ? "No sessions match." : "No sessions yet."}</p>
-          ) : sessions.map((s) => (
-            <button key={s.id} onClick={() => { onSelectSession(s); }} className={`w-full flex items-start gap-2.5 px-3 py-2.5 text-left rounded hover:bg-hover transition-colors ${selectedSessionId === s.id ? "bg-purple-500/10 border border-purple-500/20" : ""}`}>
-              <div className={`flex-shrink-0 mt-1 w-2 h-2 rounded-full ${STATE_DOT[s.status]}`} />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-[10px] font-bold text-fg-primary uppercase tracking-wide truncate">{s.title || "Untitled"}</span>
-                  {s.sourceId && <Badge className="shrink-0 text-[9px] px-1.5 h-4 bg-raised text-fg-muted border-0">{s.sourceId.split("/").pop()}</Badge>}
-                </div>
-              </div>
-            </button>
-          ))}
+          ) : (
+              <TooltipProvider>
+                  {sessions.map((s) => (
+                      <CardSpotlight
+                          key={s.id}
+                          radius={200}
+                          color="var(--spotlight-color)"
+                          className={`relative rounded-md overflow-hidden transition-all border ${
+                              selectedSessionId === s.id ? "bg-purple-500/10 border-purple-500/20" : "bg-transparent border-transparent hover:border-hair"
+                          }`}
+                      >
+                          <button
+                              onClick={() => {
+                                  onSelectSession(s);
+                              }}
+                              className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left relative z-10 cursor-pointer outline-none"
+                          >
+                              <Tooltip>
+                                  <TooltipTrigger asChild>
+                                      <div
+                                          className={`flex-shrink-0 mt-1 w-2 h-2 rounded-full cursor-help ${STATE_DOT[s.state]}`}/>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="right"
+                                                  className="bg-overlay border-hair text-fg-secondary text-[10px] z-[60]">
+                                      <span className="capitalize">{s.state.replace(/([A-Z])/g, ' $1')}</span>
+                                  </TooltipContent>
+                              </Tooltip>
+                              <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between gap-2 mb-0.5 w-full min-w-0">
+                                      <Tooltip>
+                                          <TooltipTrigger asChild>
+                                              <div
+                                                  className="text-[10px] font-bold leading-tight text-fg-primary uppercase tracking-wide flex-1 min-w-0 block overflow-hidden text-ellipsis whitespace-nowrap">
+                                                  {truncateText(s.title || "Untitled", 28)}
+                                              </div>
+                                          </TooltipTrigger>
+                                          <TooltipContent side="bottom" align="start"
+                                                          className="bg-overlay border-hair text-fg-secondary text-[10px] max-w-[200px] break-words z-[60]">
+                                              <p>{s.title || "Untitled"}</p>
+                                          </TooltipContent>
+                                      </Tooltip>
+                                  </div>
+                                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <span className="text-[9px] text-fg-dim font-mono tracking-wide leading-none">
+                          {formatDate(s.createTime)}
+                        </span>
+                                      {s.source?.githubRepo && (
+                                          <>
+                                              <span className="text-[9px] text-fg-ghost font-mono">•</span>
+                                              <Badge
+                                                  className={`shrink-0 text-[8px] px-1 h-3.5 border rounded-sm uppercase tracking-wider leading-none ${STATE_BADGE[s.state]}`}>
+                                                  {s.source.githubRepo.owner}/{s.source.githubRepo.repo}
+                                              </Badge>
+                                          </>
+                                      )}
+                                      {(() => {
+                                          const branch = s.sourceContext?.workingBranch ?? s.sourceContext?.githubRepoContext?.startingBranch
+                                          return branch ? (
+                                              <Badge
+                                                  className={`shrink-0 text-[8px] px-1 h-3.5 border rounded-sm tracking-wide leading-none font-mono ${STATE_BADGE[s.state]}`}>
+                                                  {branch}
+                                              </Badge>
+                                          ) : null
+                                      })()}
+                                  </div>
+                              </div>
+                          </button>
+                      </CardSpotlight>
+                  ))}
+              </TooltipProvider>
+          )}
         </div>
       </ScrollArea>
       <div className="border-t border-hair px-3 py-2.5 bg-raised shrink-0">
-        <div className="flex justify-between mb-1.5">
-          <span className="text-[9px] font-bold text-fg-ghost uppercase tracking-widest">Daily</span>
+          <div className="flex justify-between items-center mb-1.5">
+              <span className="text-[9px] font-bold text-fg-ghost uppercase tracking-widest">Daily Limit</span>
           <span className="text-[10px] font-mono font-bold text-fg-dim">{dailyCount}/{LIMIT}</span>
         </div>
-        <div className="w-full h-1 bg-raised"><div className="h-full bg-fg-secondary transition-all" style={{ width: `${String(pct)}%` }} /></div>
+          <div className="w-full h-1 bg-surface overflow-hidden rounded-full">
+              <div
+                  className={`h-full transition-all duration-300 ${
+                      dailyCount >= LIMIT ? "bg-red-500" : dailyCount >= LIMIT * 0.8 ? "bg-yellow-500" : "bg-primary"
+                  }`}
+                  style={{width: `${String(pct)}%`}}
+              />
+          </div>
+          {dailyCount >= LIMIT * 0.8 && (
+              <p className={`text-[8px] font-mono mt-1 leading-tight uppercase tracking-wider font-bold ${
+                  dailyCount >= LIMIT ? "text-red-500" : "text-yellow-500"
+              }`}>
+                  {dailyCount >= LIMIT ? "Limit Reached" : "Approaching Limit"}
+              </p>
+          )}
       </div>
     </div>
   );

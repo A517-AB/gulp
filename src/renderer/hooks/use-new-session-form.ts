@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useCallback, type FormEvent } from "react";
-import { useJules } from "@/lib/jules/provider";
-import { useStore } from "@/store/app";
-import type { UseNewSessionFormProps, UseNewSessionFormReturn } from "@/types/activity-feed";
+import {type FormEvent, useCallback, useEffect, useMemo} from "react";
+import {useJules} from "@/lib/jules/provider";
+import {useStore} from "@/store/app";
+import type {UseNewSessionFormProps, UseNewSessionFormReturn} from "@/types/activity-feed";
 
 export function useNewSessionForm({
   open,
@@ -28,9 +28,8 @@ export function useNewSessionForm({
 
   const branches = useMemo<string[]>(() => {
     const selected = sources.find(s => s.id === formData.sourceId);
-    const repo = (selected?.metadata as Record<string, unknown> | undefined)?.['githubRepo'] as Record<string, unknown> | undefined;
-    const list = repo?.['branches'] as { displayName?: string }[] | undefined;
-    return list?.map(b => b.displayName ?? '').filter(Boolean) ?? [];
+      if (!selected || selected.type !== 'githubRepo') return [];
+      return selected.githubRepo.branches ?? [];
   }, [sources, formData.sourceId]);
 
   const handleSubmit = useCallback(async (e: FormEvent) => {
@@ -40,8 +39,8 @@ export function useNewSessionForm({
       await client.createSession({
         sourceId: formData.sourceId,
         prompt: formData.prompt,
+          startingBranch: formData.startingBranch,
         ...(formData.title ? { title: formData.title } : {}),
-        ...(formData.startingBranch ? { startingBranch: formData.startingBranch } : {}),
         autoCreatePr: formData.autoCreatePr,
       });
       resetForm();

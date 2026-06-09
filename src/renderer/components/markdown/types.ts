@@ -1,4 +1,4 @@
-import type { Block, PartialBlock, BlockNoteEditor } from "@blocknote/core";
+import type {Block, BlockNoteEditor, PartialBlock} from "@blocknote/core";
 
 export type { Block, PartialBlock, BlockNoteEditor };
 

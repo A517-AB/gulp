@@ -1,5 +1,5 @@
-import { parseISO, isValid, formatDistanceToNow } from "date-fns";
-import type { Activity, ActivityGroup, ActivityType } from '@/utils/types'
+import {formatDistanceToNow, isValid, parseISO} from "date-fns";
+import type {Activity, ActivityGroup, ActivityType} from '@/utils/types'
 
 export function formatDate(dateString: string): string {
   if (!dateString) return "Unknown date";
@@ -12,33 +12,39 @@ export function formatDate(dateString: string): string {
   }
 }
 
+export function activityText(a: Activity): string {
+    switch (a.type) {
+        case 'agentMessaged':
+        case 'userMessaged':
+            return a.message
+        case 'planGenerated':
+            return a.plan.steps.map((s, i) => `${i + 1}. ${s.title}`).join('\n')
+        case 'planApproved':
+            return 'Plan approved'
+        case 'progressUpdated':
+            return a.title + (a.description ? `\n${a.description}` : '')
+        case 'sessionCompleted':
+            return 'Session completed'
+        case 'sessionFailed':
+            return a.reason || 'Session failed'
+    }
+}
+
 export function getActivityTypeColor(type: ActivityType): string {
   const map: Record<ActivityType, string> = {
-    message: "bg-blue-500",
-    plan: "bg-purple-500",
-    progress: "bg-yellow-500",
-    result: "bg-green-500",
-    error: "bg-red-500",
+      agentMessaged: "bg-blue-500",
+      userMessaged: "bg-purple-500",
+      planGenerated: "bg-indigo-500",
+      planApproved: "bg-indigo-400",
+      progressUpdated: "bg-yellow-500",
+      sessionCompleted: "bg-green-500",
+      sessionFailed: "bg-red-500",
   };
-  return map[type];
+    return map[type] ?? "bg-gray-500";
 }
 
 export function filterActivities(activities: Activity[]): Activity[] {
-  return activities.filter((activity) => {
-    if (activity.bashOutput || activity.diff) return true;
-    const content = activity.content.trim();
-    if (!content) return false;
-    if (content === "{}" || content === "[]") return false;
-    if (/^\[[\w,\s]+\]$/.test(content)) return false;
-    try {
-      const parsed: unknown = JSON.parse(content);
-      if (parsed != null && typeof parsed === "object" && !Array.isArray(parsed) && Object.keys(parsed).length === 0) return false;
-      if (Array.isArray(parsed) && parsed.length === 0) return false;
-    } catch {
-      // not JSON, keep it
-    }
-    return true;
-  });
+    return activities;
 }
 
 export function groupActivities(filtered: Activity[]): ActivityGroup[] {
@@ -46,9 +52,9 @@ export function groupActivities(filtered: Activity[]): ActivityGroup[] {
   let currentGroup: Activity[] | null = null;
 
   filtered.forEach((activity, index) => {
-    const shouldGroup = activity.type === "progress" && activity.role === "agent";
+      const shouldGroup = activity.type === "progressUpdated" && activity.originator === "agent";
     const prev = index > 0 ? filtered[index - 1] : null;
-    const prevShouldGroup = prev?.type === "progress" && prev.role === "agent";
+      const prevShouldGroup = prev?.type === "progressUpdated" && prev.originator === "agent";
 
     if (shouldGroup) {
       if (prevShouldGroup && currentGroup) {
@@ -68,14 +74,17 @@ export function groupActivities(filtered: Activity[]): ActivityGroup[] {
 
 export function getOutputBranch(activities: Activity[], fallback = "main"): string {
   for (const activity of [...activities].reverse()) {
-    if (activity.bashOutput) {
-      const checkout = /git checkout -b\s+([\w-./]+)/.exec(activity.bashOutput);
+      const bash = activity.artifacts.find(a => a.type === 'bashOutput');
+      if (bash) {
+          const output = `${bash.command}\n${bash.stdout}`;
+          const checkout = /git checkout -b\s+([\w-./]+)/.exec(output);
       if (checkout?.[1]) return checkout[1];
-      const push = /git push\s+(?:-u\s+)?(?:origin\s+)?([\w-./]+)/.exec(activity.bashOutput);
+          const push = /git push\s+(?:-u\s+)?(?:origin\s+)?([\w-./]+)/.exec(output);
       if (push?.[1]) return push[1];
     }
-    if (activity.role === "agent" && (activity.type === "message" || activity.type === "result")) {
-      const match = /(?:created|pushed|on|switched to) branch ['"`]?([\w-./]+)['"`]?/i.exec(activity.content);
+      if (activity.originator === "agent" && (activity.type === "agentMessaged" || activity.type === "sessionCompleted")) {
+          const text = activityText(activity);
+          const match = /(?:created|pushed|on|switched to) branch ['"`]?([\w-./]+)['"`]?/i.exec(text);
       if (match?.[1]) return match[1];
     }
   }

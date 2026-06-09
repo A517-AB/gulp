@@ -1,17 +1,18 @@
-import { useState, useCallback } from 'react'
+import {useCallback, useState} from 'react'
 import {
-  getPresets,
-  savePresets,
-  createPreset,
-  updatePreset,
-  deletePreset,
-  type Preset,
-  type PresetAfter,
+    createPreset,
+    deletePreset,
+    getPresets,
+    type Preset,
+    type PresetAfter,
+    savePresets,
+    updatePreset,
 } from '@/lib/presets'
+
 //not used yet, i'm tinking at some4 point to find the codeeeciew button in rennder see how ti works attach it source viewer and this and be able ti stick it in different shit via buttons either repoless or jues autmatated
 export function usePresets() {
   const [presets, setPresets] = useState<Preset[]>(() => getPresets())
-
+//i'll use it one day, but actually fix it up
   const add = useCallback((p: Omit<Preset, 'id'>) => {
     const next = [...getPresets(), createPreset(p)]
     savePresets(next)

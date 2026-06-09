@@ -1,23 +1,23 @@
 import type {
-  SessionResource,
-  SessionConfig,
-  SessionState,
-  SerializedSnapshot,
-  Activity,
-  ActivityAgentMessaged,
-  Source,
-  JulesOptions,
-  JulesQuery,
-  JulesDomain,
-  JulesClient,
-  SessionOutcome,
-  SelectOptions,
-  StreamActivitiesOptions,
-  SyncStats,
-  SyncProgress,
-  SyncOptions as _SyncOptions,
+    Activity,
+    ActivityAgentMessaged,
+    JulesClient,
+    JulesDomain,
+    JulesOptions,
+    JulesQuery,
+    SelectOptions,
+    SerializedSnapshot,
+    SessionConfig,
+    SessionOutcome,
+    SessionResource,
+    SessionState,
+    Source,
+    StreamActivitiesOptions,
+    SyncOptions as _SyncOptions,
+    SyncProgress,
+    SyncStats,
 } from '@google/jules-sdk/types'
-import type { ListSessionsOptions } from '@google/jules-sdk'
+import type {ActivitySummary, DomainSchema, ListSessionsOptions, ParsedFile, ValidationResult} from '@google/jules-sdk'
 
 type Unsubscribe = () => void
 type SyncOptions = Omit<_SyncOptions, 'onProgress' | 'signal'>
@@ -66,6 +66,18 @@ export interface SdkIpc {
     get: (filter: { github: string }) => Promise<Source | undefined>
   }
   artifact: {
-    save: (data: string, filepath: string) => Promise<string>
+      save: (data: string, filepath: string) => Promise<string>
+      parseUnidiff: (patch?: string | null) => Promise<ParsedFile[]>
+  }
+    util: {
+        toSummary: (activity: Activity) => Promise<ActivitySummary>
+    }
+    query: {
+        validate: (query: unknown) => Promise<ValidationResult>
+        format: (result: ValidationResult) => Promise<string>
+        schema: (domain: 'sessions' | 'activities') => Promise<DomainSchema>
+        schemas: () => Promise<{ sessions: DomainSchema; activities: DomainSchema }>
+        typeDef: (domain: 'sessions' | 'activities') => Promise<string>
+        markdownDocs: () => Promise<string>
   }
 }

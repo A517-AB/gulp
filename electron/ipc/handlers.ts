@@ -1,24 +1,37 @@
-import { ipcMain } from 'electron'
-import { jules } from '@google/jules-sdk'
+import {ipcMain} from 'electron'
 import type {
-    ListSessionsOptions,
-    JulesOptions,
-    SessionConfig,
-    JulesQuery,
+    Activity,
     JulesDomain,
+    JulesOptions,
+    JulesQuery,
+    ListSessionsOptions,
+    SessionConfig,
     SessionState,
-    SessionClient,
-    JulesClient,
 } from '@google/jules-sdk'
+import {
+    formatValidationResult,
+    generateMarkdownDocs,
+    generateTypeDefinition,
+    getAllSchemas,
+    getSchema,
+    jules,
+    parseUnidiff,
+    toSummary,
+    validateQuery
+} from '@google/jules-sdk'
+import type {SelectOptions, StreamActivitiesOptions, SyncOptions as SdkSyncOptions} from '@google/jules-sdk/types'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import { Buffer } from 'node:buffer'
-import { execFileSync } from 'node:child_process'
+import {Buffer} from 'node:buffer'
+import {execFileSync} from 'node:child_process'
 
-type StreamActivitiesOptions = Parameters<SessionClient['stream']>[0]
-type SyncOptions = Omit<NonNullable<Parameters<JulesClient['sync']>[0]>, 'onProgress' | 'signal'>
-type SelectOptions = Parameters<SessionClient['activities']['select']>[0]
-type ListOptions = Parameters<SessionClient['activities']['list']>[0]
+interface ListOptions {
+    pageSize?: number;
+    pageToken?: string;
+    filter?: string
+}
+
+type SyncOptions = Omit<SdkSyncOptions, 'onProgress' | 'signal'>
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -88,6 +101,15 @@ export function registerSdkHandlers() {
         serialize(await jules.with(options))
     )
 
+    ipcMain.handle('sdk:client.all', async (_, configs: SessionConfig[], options?: {
+        concurrency?: number;
+        stopOnError?: boolean;
+        delayMs?: number
+    }) => {
+        const sessions = await jules.all(configs, (c) => c, options)
+        return serialize(sessions.map(s => ({id: s.id})))
+    })
+
     // ── session ──────────────────────────────────────────────────────────────────
 
     ipcMain.handle('sdk:session.send', async (_, id: string, prompt: string) =>
@@ -140,13 +162,13 @@ export function registerSdkHandlers() {
         try {
             const snapshot = await jules.session(id).snapshot();
             const gitPatch = snapshot.changeSet()?.gitPatch;
-            if (!gitPatch || !gitPatch.unidiffPatch) {
+            if (!gitPatch?.unidiffPatch) {
                 return { success: false, error: 'No ChangeSet artifact with gitPatch data found in this session.' };
             }
 
             const commitMessage = gitPatch.suggestedCommitMessage || 'Applied changes from Jules';
 
-            // Checkout a new branch to apply the changes
+            // Checkout a new braskinch to apply the changes
             execFileSync('git', ['checkout', '-b', branchName], { cwd: options.cwd, stdio: 'pipe' });
 
             // Save the patch to disk
@@ -264,4 +286,40 @@ export function registerSdkHandlers() {
         await fs.promises.writeFile(resolved, Buffer.from(data, 'base64'))
         return resolved
     })
+
+    ipcMain.handle('sdk:artifact.parseUnidiff', (_, patch?: string | null) =>
+        serialize(parseUnidiff(patch))
+    )
+
+    // ── utils ─────────────────────────────────────────────────────────────────────
+
+    ipcMain.handle('sdk:util.toSummary', (_, activity: Activity) =>
+        serialize(toSummary(activity))
+    )
+
+    // ── query ─────────────────────────────────────────────────────────────────────
+
+    ipcMain.handle('sdk:query.validate', (_, query: unknown) =>
+        serialize(validateQuery(query))
+    )
+
+    ipcMain.handle('sdk:query.format', (_, result: ReturnType<typeof validateQuery>) =>
+        formatValidationResult(result)
+    )
+
+    ipcMain.handle('sdk:query.schema', (_, domain: 'sessions' | 'activities') =>
+        serialize(getSchema(domain))
+    )
+
+    ipcMain.handle('sdk:query.schemas', () =>
+        serialize(getAllSchemas())
+    )
+
+    ipcMain.handle('sdk:query.typeDef', (_, domain: 'sessions' | 'activities') =>
+        generateTypeDefinition(domain)
+    )
+
+    ipcMain.handle('sdk:query.markdownDocs', () =>
+        generateMarkdownDocs()
+    )
 }
