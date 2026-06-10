@@ -52,9 +52,9 @@ export function groupActivities(filtered: Activity[]): ActivityGroup[] {
   let currentGroup: Activity[] | null = null;
 
   filtered.forEach((activity, index) => {
-      const shouldGroup = activity.type === "progressUpdated" && activity.originator === "agent";
+      const shouldGroup = activity.type === "progressUpdated";
     const prev = index > 0 ? filtered[index - 1] : null;
-      const prevShouldGroup = prev?.type === "progressUpdated" && prev.originator === "agent";
+      const prevShouldGroup = prev?.type === "progressUpdated";
 
     if (shouldGroup) {
       if (prevShouldGroup && currentGroup) {
@@ -74,15 +74,7 @@ export function groupActivities(filtered: Activity[]): ActivityGroup[] {
 
 export function getOutputBranch(activities: Activity[], fallback = "main"): string {
   for (const activity of [...activities].reverse()) {
-      const bash = activity.artifacts.find(a => a.type === 'bashOutput');
-      if (bash) {
-          const output = `${bash.command}\n${bash.stdout}`;
-          const checkout = /git checkout -b\s+([\w-./]+)/.exec(output);
-      if (checkout?.[1]) return checkout[1];
-          const push = /git push\s+(?:-u\s+)?(?:origin\s+)?([\w-./]+)/.exec(output);
-      if (push?.[1]) return push[1];
-    }
-      if (activity.originator === "agent" && (activity.type === "agentMessaged" || activity.type === "sessionCompleted")) {
+      if (activity.type === "agentMessaged" || activity.type === "sessionCompleted") {
           const text = activityText(activity);
           const match = /(?:created|pushed|on|switched to) branch ['"`]?([\w-./]+)['"`]?/i.exec(text);
       if (match?.[1]) return match[1];

@@ -39,12 +39,34 @@ self.MonacoEnvironment = {
 loader.config({ monaco })
 
 // ── TypeScript / JavaScript compiler options ───────────────────────────────
+// monaco-editor 0.55 deprecated the languages.typescript enum namespace.
+// Raw numeric values: ScriptTarget.ESNext=99, ModuleKind.ESNext=99,
+// ModuleResolutionKind.Bundler=100, JsxEmit.ReactJSX=4
 
-const sharedCompilerOptions: monaco.languages.typescript.CompilerOptions = {
-  target: monaco.languages.typescript.ScriptTarget.ESNext,
-  module: monaco.languages.typescript.ModuleKind.ESNext,
-  moduleResolution: monaco.languages.typescript.ModuleResolutionKind.Bundler,
-  jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
+interface TsLangDefaults {
+  setCompilerOptions(opts: Record<string, unknown>): void
+  setDiagnosticsOptions(opts: {
+    noSemanticValidation: boolean
+    noSyntaxValidation: boolean
+    diagnosticCodesToIgnore: number[]
+  }): void
+  setEagerModelSync(val: boolean): void
+}
+
+interface TsLang {
+  typescriptDefaults: TsLangDefaults
+  javascriptDefaults: TsLangDefaults
+}
+
+const { typescriptDefaults: tsDefaults, javascriptDefaults: jsDefaults } = (
+  monaco.languages as unknown as { typescript: TsLang }
+).typescript
+
+const sharedCompilerOptions: Record<string, unknown> = {
+  target: 99,
+  module: 99,
+  moduleResolution: 100,
+  jsx: 4,
   strict: true,
   exactOptionalPropertyTypes: true,
   noUncheckedIndexedAccess: true,
@@ -53,9 +75,6 @@ const sharedCompilerOptions: monaco.languages.typescript.CompilerOptions = {
   allowImportingTsExtensions: true,
   lib: ['lib.esnext.d.ts', 'lib.dom.d.ts', 'lib.dom.iterable.d.ts'],
 }
-
-const tsDefaults = monaco.languages.typescript.typescriptDefaults
-const jsDefaults = monaco.languages.typescript.javascriptDefaults
 
 tsDefaults.setCompilerOptions(sharedCompilerOptions)
 jsDefaults.setCompilerOptions({ ...sharedCompilerOptions, strict: false, exactOptionalPropertyTypes: false, noUncheckedIndexedAccess: false })

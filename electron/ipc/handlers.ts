@@ -50,7 +50,7 @@ type Sender = Electron.WebContents
 
 function serialize<T>(data: T): T {
     if (data === undefined || data === null) return data
-    return JSON.parse(JSON.stringify(data))
+    return JSON.parse(JSON.stringify(data)) as T
 }
 
 function send(sender: Sender, ch: string, payload?: unknown) {
@@ -95,10 +95,10 @@ export function registerSdkHandlers() {
         serialize(await jules.run(config))
     )
 
-    ipcMain.handle('sdk:client.with', async (_, options: JulesOptions) => {
-        if (!process.env['JULES_API_KEY'] && !options.apiKey)
+    ipcMain.handle('sdk:client.with', (_, options: JulesOptions) => {
+        if (!process.env.JULES_API_KEY && !options.apiKey)
             console.warn('[sdk:client.with] no API key in env or options — requests will fail')
-        serialize(await jules.with(options))
+        serialize(jules.with(options))
     })
 
     ipcMain.handle('sdk:client.all', async (_, configs: SessionConfig[], options?: {
@@ -112,8 +112,12 @@ export function registerSdkHandlers() {
 
     // ── session ──────────────────────────────────────────────────────────────────
 
+    ipcMain.handle('sdk:session.create', async (_, config: SessionConfig) =>
+        serialize({ id: (await jules.session(config)).id })
+    )
+
     ipcMain.handle('sdk:session.send', async (_, id: string, prompt: string) =>
-        { serialize(await jules.session(id).send(prompt)); }
+        jules.session(id).send(prompt)
     )
 
     ipcMain.handle('sdk:session.ask', async (_, id: string, prompt: string) =>
@@ -121,7 +125,7 @@ export function registerSdkHandlers() {
     )
 
     ipcMain.handle('sdk:session.approve', async (_, id: string) =>
-        { serialize(await jules.session(id).approve()); }
+        jules.session(id).approve()
     )
 
     ipcMain.handle('sdk:session.info', async (_, id: string) =>
@@ -133,7 +137,7 @@ export function registerSdkHandlers() {
     )
 
     ipcMain.handle('sdk:session.waitFor', async (_, id: string, state: SessionState) =>
-        { serialize(await jules.session(id).waitFor(state)); }
+        jules.session(id).waitFor(state)
     )
 
     ipcMain.handle('sdk:session.snapshot', async (_, id: string, options?: { activities?: boolean }) =>
@@ -141,15 +145,15 @@ export function registerSdkHandlers() {
     )
 
     ipcMain.handle('sdk:session.archive', async (_, id: string) =>
-        { serialize(await jules.session(id).archive()); }
+        jules.session(id).archive()
     )
 
     ipcMain.handle('sdk:session.unarchive', async (_, id: string) =>
-        { serialize(await jules.session(id).unarchive()); }
+        jules.session(id).unarchive()
     )
 
     ipcMain.handle('sdk:session.select', async (_, id: string, options?: SelectOptions) =>
-        serialize(await jules.session(id).select(options))
+        serialize(await jules.session(id).activities.select(options))
     )
 
     ipcMain.handle('sdk:session.hydrate', async (_, id: string) =>
@@ -157,7 +161,7 @@ export function registerSdkHandlers() {
     )
 
     ipcMain.handle('sdk:session.applyPatch', async (_, id: string, options: { cwd: string }) => {
-        const branchName = `jules-patch-${Date.now()}`;
+        const branchName = `jules-patch-${String(Date.now())}`;
         let patchPath: string | null = null;
         try {
             const snapshot = await jules.session(id).snapshot();
@@ -188,7 +192,7 @@ export function registerSdkHandlers() {
             return { success: false, error: error instanceof Error ? error.message : String(error) };
         } finally {
             if (patchPath) {
-                try { fs.unlinkSync(patchPath); } catch (e) { /* ignore */ }
+                try { fs.unlinkSync(patchPath); } catch { /* ignore */ }
             }
         }
     })
@@ -261,7 +265,7 @@ export function registerSdkHandlers() {
 
     // ── sources ───────────────────────────────────────────────────────────────────
 
-    ipcMain.handle('sdk:sources.list', async (_) => {
+    ipcMain.handle('sdk:sources.list', async () => {
         const sources = []
         for await (const src of jules.sources()) {
             sources.push(src)

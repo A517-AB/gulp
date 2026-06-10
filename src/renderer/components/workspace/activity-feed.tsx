@@ -92,25 +92,18 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
     }
   };
 
-  const submit = async () => {
+  const submit = () => {
       if (!message.trim() || sending) return;
-    try {
-      setSending(true);
-        await sendMessage(session.id, message);
+      const msg = message;
       setMessage("");
-    } finally {
-      setSending(false);
-    }
+      setSending(true);
+      void sendMessage(session.id, msg).finally(() => { setSending(false); });
   };
 
   const handleQuickReview = () => {
       if (sending) return;
-      try {
-          setSending(true);
-          void sendMessage(session.id, QUICK_REVIEW_PROMPT);
-      } finally {
-          setSending(false);
-      }
+      setSending(true);
+      void sendMessage(session.id, QUICK_REVIEW_PROMPT).finally(() => { setSending(false); });
   };
 
     const branch = session.sourceContext?.workingBranch
@@ -118,7 +111,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
         ?? "main";
 
     const statusInfo = getStatusInfo(session.state);
-    const hasDiffs = activities.some(a => a.artifacts.some(x => x.type === 'changeSet'));
+    const hasDiffs = session.outputs?.some(o => o.type === 'changeSet') ?? false;
     const canApplyLocally = sdkIpc !== null && session.state === "completed" && hasDiffs;
 
   return (
@@ -229,7 +222,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
 
       <form onSubmit={(e) => { e.preventDefault(); void submit(); }} className="border-t border-hair bg-surface p-3">
         <div className="flex gap-2">
-          <Textarea value={message} onChange={(e) => { setMessage(e.target.value); }} placeholder="Send a message to Jules..." className="min-h-[56px] resize-none text-[11px] bg-raised border-hair text-fg-primary placeholder:text-fg-ghost focus:border-purple-500/50" onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void submit(); } }} disabled={sending} />
+          <Textarea value={message} onChange={(e) => { setMessage(e.target.value); }} placeholder="Send a message to Jules..." className="min-h-[56px] resize-none text-[11px] bg-raised border-hair text-fg-primary placeholder:text-fg-ghost focus:border-purple-500/50" onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }} />
           <Button type="submit" size="icon" disabled={!message.trim() || sending} className="h-9 w-9">
             {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
           </Button>

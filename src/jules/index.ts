@@ -82,11 +82,6 @@ export {dispatchActivity} from './stream'
 // ── App-level types ───────────────────────────────────────────────────────────
 
 export type {
-  CreateSessionRequest,
-  CreateActivityRequest,
-  ListActivitiesResponse,
-  ListSourcesResponse,
   FleetTask,
   FleetTaskGroup,
-  SessionTemplate,
 } from './types'

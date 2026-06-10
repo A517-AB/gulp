@@ -24,7 +24,6 @@ export type {
     ParsedChangeSet,
     FleetTask,
     FleetTaskGroup,
-    SessionTemplate,
 } from '@jules'
 
 // Session is an alias for SessionResource used throughout the renderer

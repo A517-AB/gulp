@@ -4,15 +4,15 @@ import type {SdkIpc} from '@/jules/sdk-ipc'
 
 type Unsubscribe = () => void
 
-function onStream<T>(
+function onStream(
     itemCh: string,
     doneCh: string,
-    onItem: (item: T) => void,
+    onItem: (item: unknown) => void,
     onDone?: () => void,
 ): Unsubscribe {
-    const onItemEv = (_: IpcRendererEvent, item: T) => onItem(item)
+    const onItemEv = (_: IpcRendererEvent, item: unknown) => { onItem(item) }
     const onDoneEv = () => {
-        ipcRenderer.removeListener(itemCh, onItemEv);
+        ipcRenderer.removeListener(itemCh, onItemEv)
         onDone?.()
     }
     ipcRenderer.on(itemCh, onItemEv)
@@ -31,11 +31,11 @@ export const sdk: SdkIpc = {
         sessions: (options?) => ipcRenderer.invoke('sdk:client.sessions', options),
         streamSessions: (onItem, onDone?, options?) => {
             ipcRenderer.invoke('sdk:client.sessions.stream.start', options).catch(console.error)
-            return onStream('sdk:client.sessions.item', 'sdk:client.sessions.done', onItem, onDone)
+            return onStream('sdk:client.sessions.item', 'sdk:client.sessions.done', onItem as (item: unknown) => void, onDone)
         },
         sync: (options?) => ipcRenderer.invoke('sdk:client.sync', options),
         onSyncProgress: (cb) => {
-            const handler = (_: IpcRendererEvent, p: Parameters<typeof cb>[0]) => cb(p)
+            const handler = (_: IpcRendererEvent, p: Parameters<typeof cb>[0]) => { cb(p) }
             ipcRenderer.on('sdk:client.sync.progress', handler)
             return () => ipcRenderer.removeListener('sdk:client.sync.progress', handler)
         },
@@ -62,15 +62,15 @@ export const sdk: SdkIpc = {
         applyPatch: (id, options) => ipcRenderer.invoke('sdk:session.applyPatch', id, options),
         stream: (id, onItem, onDone?, options?) => {
             ipcRenderer.invoke('sdk:session.stream.start', id, options).catch(console.error)
-            return onStream(`sdk:session.stream:${id}`, `sdk:session.stream.done:${id}`, onItem, onDone)
+            return onStream(`sdk:session.stream:${id}`, `sdk:session.stream.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
         history: (id, onItem, onDone?) => {
             ipcRenderer.invoke('sdk:session.history.start', id).catch(console.error)
-            return onStream(`sdk:session.history:${id}`, `sdk:session.history.done:${id}`, onItem, onDone)
+            return onStream(`sdk:session.history:${id}`, `sdk:session.history.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
         updates: (id, onItem, onDone?) => {
             ipcRenderer.invoke('sdk:session.updates.start', id).catch(console.error)
-            return onStream(`sdk:session.updates:${id}`, `sdk:session.updates.done:${id}`, onItem, onDone)
+            return onStream(`sdk:session.updates:${id}`, `sdk:session.updates.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
     },
 
@@ -81,15 +81,15 @@ export const sdk: SdkIpc = {
         get: (id, activityId) => ipcRenderer.invoke('sdk:activities.get', id, activityId),
         history: (id, onItem, onDone?) => {
             ipcRenderer.invoke('sdk:activities.history.start', id).catch(console.error)
-            return onStream(`sdk:activities.history:${id}`, `sdk:activities.history.done:${id}`, onItem, onDone)
+            return onStream(`sdk:activities.history:${id}`, `sdk:activities.history.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
         updates: (id, onItem, onDone?) => {
             ipcRenderer.invoke('sdk:activities.updates.start', id).catch(console.error)
-            return onStream(`sdk:activities.updates:${id}`, `sdk:activities.updates.done:${id}`, onItem, onDone)
+            return onStream(`sdk:activities.updates:${id}`, `sdk:activities.updates.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
         stream: (id, onItem, onDone?) => {
             ipcRenderer.invoke('sdk:activities.stream.start', id).catch(console.error)
-            return onStream(`sdk:activities.stream:${id}`, `sdk:activities.stream.done:${id}`, onItem, onDone)
+            return onStream(`sdk:activities.stream:${id}`, `sdk:activities.stream.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
     },
 
