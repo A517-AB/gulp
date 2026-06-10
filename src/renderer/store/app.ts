@@ -44,8 +44,8 @@ export const useStore = create<AppStore>((set, get) => ({
   sources: [],
   sourcesLoaded: false,
   newSessionForm: DEFAULT_FORM,
-  setNewSessionForm: (patch) => set(s => ({ newSessionForm: { ...s.newSessionForm, ...patch } })),
-  resetNewSessionForm: () => set({ newSessionForm: DEFAULT_FORM }),
+  setNewSessionForm: (patch) => { set(s => ({ newSessionForm: { ...s.newSessionForm, ...patch } })) },
+  resetNewSessionForm: () => { set({ newSessionForm: DEFAULT_FORM }) },
 
     loadSources: async () => {
         if (!sdkIpc || get().sourcesLoaded) return
@@ -56,7 +56,7 @@ export const useStore = create<AppStore>((set, get) => ({
         sourcesLoaded: true,
         newSessionForm: {
           ...s.newSessionForm,
-          sourceId: s.newSessionForm.sourceId || data.at(0)?.id || '',
+          sourceId: s.newSessionForm.sourceId !== '' ? s.newSessionForm.sourceId : (data.at(0)?.id ?? ''),
         },
       }))
     } catch {
@@ -71,7 +71,11 @@ export const useStore = create<AppStore>((set, get) => ({
       const prev = state.sessionList
       if (
         prev.length === data.length &&
-          prev.every((s, i) => data[i] !== undefined && s.id === data[i].id && s.state === data[i].state && s.updateTime === data[i].updateTime)
+          prev.every((s, i) => {
+            const d = data[i]
+            if (d === undefined) return false
+            return s.id === d.id && s.state === d.state && s.updateTime === d.updateTime
+          })
       ) return state
       return { sessionList: data }
     })
@@ -120,13 +124,11 @@ export const useStore = create<AppStore>((set, get) => ({
     let stopped = false
     const tick = () => {
       if (stopped) return
-        get().loadSessions().catch(() => {
-        })
+        get().loadSessions().catch(console.error)
         const state = get()
       state.sessionList.forEach(session => {
           if (session.state === 'inProgress' || session.state === 'planning') {
-              state.loadActivities(session.id).catch(() => {
-              })
+              state.loadActivities(session.id).catch(console.error)
           }
       })
     }

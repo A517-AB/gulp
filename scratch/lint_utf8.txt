@@ -1,0 +1,449 @@
+﻿
+> last@1.0 lint
+> eslint .
+
+
+D:\LAST\electron\aliases.ts
+  17:13  error  Unsafe assignment of an `any` value                                     @typescript-eslint/no-unsafe-assignment
+  42:24  error  Promise returned in function argument where a void return was expected  @typescript-eslint/no-misused-promises
+  45:13  error  Unsafe assignment of an `any` value                                     @typescript-eslint/no-unsafe-assignment
+
+D:\LAST\electron\filesystem\handlers.ts
+  129:83  error  Async arrow function has no 'await' expression                                                      @typescript-eslint/require-await
+  155:38  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\electron\git.ts
+   47:37  error  Invalid type "any" of template literal expression                           @typescript-eslint/restrict-template-expressions
+   95:14  error  Unsafe argument of type `any[]` assigned to a parameter of type `string[]`  @typescript-eslint/no-unsafe-argument
+   99:14  error  Unsafe argument of type `any[]` assigned to a parameter of type `string[]`  @typescript-eslint/no-unsafe-argument
+  103:14  error  Unsafe argument of type `any[]` assigned to a parameter of type `string[]`  @typescript-eslint/no-unsafe-argument
+  133:14  error  Unsafe argument of type `any[]` assigned to a parameter of type `string[]`  @typescript-eslint/no-unsafe-argument
+
+D:\LAST\electron\github.ts
+   25:50  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+   42:28  error  Invalid type "any" of template literal expression              @typescript-eslint/restrict-template-expressions
+   42:45  error  Invalid type "any" of template literal expression              @typescript-eslint/restrict-template-expressions
+   59:50  error  Invalid type "URLSearchParams" of template literal expression  @typescript-eslint/restrict-template-expressions
+   69:41  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+   85:45  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+   88:41  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+   92:41  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+   96:41  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+  110:42  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+  127:46  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+  130:42  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+  140:53  error  Invalid type "string | number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  144:53  error  Invalid type "string | number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  148:53  error  Invalid type "string | number" of template literal expression  @typescript-eslint/restrict-template-expressions
+  148:81  error  Invalid type "any" of template literal expression              @typescript-eslint/restrict-template-expressions
+  152:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+  156:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+  160:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+  164:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+  168:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+  172:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
+
+D:\LAST\electron\history.ts
+  13:11  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
+
+D:\LAST\electron\ipc\bridge.ts
+  33:19  error  Type parameter T is used only once in the function signature                                                        @typescript-eslint/no-unnecessary-type-parameters
+  39:59  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  71:71  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\electron\ipc\handlers.ts
+   27:5   error  Unsafe return of a value of type `any`                                                                  @typescript-eslint/no-unsafe-return
+   73:19  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                              @typescript-eslint/await-thenable
+   79:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+   87:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+   99:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+  107:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+  111:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
+  115:43  error  `select` is deprecated. Use `session.activities.select()` instead                                       @typescript-eslint/no-deprecated
+
+D:\LAST\electron\juleslocal.ts
+  252:28  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  254:26  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  255:26  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\electron\main.mts
+   77:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   81:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   92:18  error  Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
+  126:1   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  153:46  error  Unnecessary optional chain on a non-nullish value                                                                                                                   @typescript-eslint/no-unnecessary-condition
+  177:44  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+
+D:\LAST\electron\popup.ts
+  68:3  error  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read  @typescript-eslint/prefer-nullish-coalescing
+
+D:\LAST\electron\queues.ts
+  38:38  error  '_event' is defined but never used     @typescript-eslint/no-unused-vars
+  38:46  error  '_jsonPath' is defined but never used  @typescript-eslint/no-unused-vars
+  42:38  error  '_event' is defined but never used     @typescript-eslint/no-unused-vars
+  42:46  error  '_jsonPath' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\LAST\electron\snippets.ts
+  24:13  error  Unsafe assignment of an `any` value                                                                 @typescript-eslint/no-unsafe-assignment
+  30:43  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
+  39:38  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
+  39:38  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  39:48  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\base\utils.ts
+   33:31  error  Type parameter T is used only once in the function signature                                                                                                                                                                                                                                                                                @typescript-eslint/no-unnecessary-type-parameters
+   34:18  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+   51:26  error  Type parameter T is used only once in the function signature                                                                                                                                                                                                                                                                                @typescript-eslint/no-unnecessary-type-parameters
+   56:48  error  Forbidden non-null assertion                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-non-null-assertion
+   66:26  error  Type parameter T is used only once in the function signature                                                                                                                                                                                                                                                                                @typescript-eslint/no-unnecessary-type-parameters
+   76:17  error  Forbidden non-null assertion                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-non-null-assertion
+   84:22  error  Prefer using nullish coalescing operator (`??`) instead of a ternary expression, as it is simpler to read                                                                                                                                                                                                                                   @typescript-eslint/prefer-nullish-coalescing
+   99:14  error  Do not delete dynamically computed property keys                                                                                                                                                                                                                                                                                            @typescript-eslint/no-dynamic-delete
+  110:19  error  Unnecessary conditional, value is always truthy                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unnecessary-condition
+  127:55  error  Unsafe spread of an `any` value in an array                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unsafe-assignment
+  141:23  error  Type parameter T is used only once in the function signature                                                                                                                                                                                                                                                                                @typescript-eslint/no-unnecessary-type-parameters
+  162:23  error  Invalid type "number" of template literal expression                                                                                                                                                                                                                                                                                        @typescript-eslint/restrict-template-expressions
+  172:73  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                   @typescript-eslint/prefer-nullish-coalescing
+  186:46  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  186:56  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  208:46  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  208:56  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
+  226:12  error  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read                                                                                                                                                                                                                              @typescript-eslint/prefer-nullish-coalescing
+  243:18  error  Unexpected empty arrow function                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-empty-function
+  248:73  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                   @typescript-eslint/prefer-nullish-coalescing
+
+D:\LAST\src\renderer\components\shared\DynamicDropdown.tsx
+   36:43  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   37:34  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+   99:47  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  110:64  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+D:\LAST\src\renderer\components\shared\SmartActionInput.tsx
+  62:83  error  Forbidden non-null assertion                                                                         @typescript-eslint/no-non-null-assertion
+  91:16  error  Unnecessary conditional, comparison is always true, since `"new_session" === "new_session"` is true  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\shared\SnippetPicker.tsx
+  127:63  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+D:\LAST\src\renderer\components\workspace\new-session-dialog.tsx
+  15:32  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  38:24  error  Promise-returning function provided to attribute where a void return was expected                   @typescript-eslint/no-misused-promises
+
+D:\LAST\src\renderer\hooks\use-activity-feed-api.ts
+   96:20  error  Unexpected empty arrow function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-empty-function
+   98:48  error  Unexpected empty arrow function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-empty-function
+  113:7   error  Forbidden non-null assertion                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-non-null-assertion
+  113:50  error  Unexpected empty arrow function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-empty-function
+  120:10  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\hooks\use-activity-feed-api.ts:120:10
+  118 |   useEffect(() => {
+  119 |     if (isElectron) return;
+> 120 |     void loadActivities(true);
+      |          ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  121 |     const isLive = ["active", "queued", "planning", "awaitingApproval", "awaitingFeedback"].includes(session.status);
+  122 |     if (!isLive) return;
+  123 |     const id = setInterval(() => { void loadActivities(false); }, 2000);  react-hooks/set-state-in-effect
+
+D:\LAST\src\renderer\hooks\use-commands.ts
+  29:7   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-floating-promises
+  34:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\hooks\use-commands.ts:34:7
+  32 |       })
+  33 |     } else {
+> 34 |       setUserCommands(lsLoad())
+     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  35 |       setStatus('ok')
+  36 |     }
+  37 |   }, [])  react-hooks/set-state-in-effect
+  55:7   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-floating-promises
+  55:49  error  Unexpected empty arrow function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-empty-function
+
+D:\LAST\src\renderer\hooks\use-file-tree.ts
+  57:26  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\hooks\use-file-tree.ts:57:26
+  55 |   }, [root, loadDir])
+  56 |
+> 57 |   useEffect(() => { void refresh() }, [refresh])
+     |                          ^^^^^^^ Avoid calling setState() directly within an effect
+  58 |
+  59 |   const loadChildren = useCallback(async (node: FileTreeNode) => {
+  60 |     if (node.loaded || !node.isDir) return  react-hooks/set-state-in-effect
+
+D:\LAST\src\renderer\hooks\use-history.ts
+  26:7  error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-floating-promises
+  28:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\hooks\use-history.ts:28:7
+  26 |       historyApi.get().then(setEntries)
+  27 |     } else {
+> 28 |       setEntries(lsLoad())
+     |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |     }
+  30 |   }, [])
+  31 |  react-hooks/set-state-in-effect
+
+D:\LAST\src\renderer\hooks\use-new-session-form.ts
+  33:85  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/prefer-nullish-coalescing
+  42:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\hooks\use-new-session-form.ts:42:5
+  40 |   useEffect(() => {
+  41 |     if (!open) return;
+> 42 |     setFormData((prev) => ({
+     |     ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  43 |       ...prev,
+  44 |       sourceId: initialValues?.sourceId ?? prev.sourceId,
+  45 |       title: initialValues?.title ?? prev.title,  react-hooks/set-state-in-effect
+  49:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                @typescript-eslint/no-floating-promises
+  52:46  error  `FormEvent` is deprecated. FormEvent doesn't actually exist.
+You probably meant to use {@link ChangeEvent}, {@link InputEvent}, {@link SubmitEvent}, or just {@link SyntheticEvent} instead
+depending on the event type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-deprecated
+
+D:\LAST\src\renderer\hooks\use-presets.ts
+  20:12  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+D:\LAST\src\renderer\hooks\use-queues.ts
+  30:26  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\hooks\use-queues.ts:30:26
+  28 |   }, []);
+  29 |
+> 30 |   useEffect(() => { void load(); }, [load]);
+     |                          ^^^^ Avoid calling setState() directly within an effect
+  31 |
+  32 |   const sendTask = useCallback(async (group: FleetTaskGroup, task: FleetTask) => {
+  33 |     if (!client) { setError("Jules client not ready"); return; }  react-hooks/set-state-in-effect
+
+D:\LAST\src\renderer\hooks\use-snippets.ts
+  20:26  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\hooks\use-snippets.ts:20:26
+  18 |   }, [])
+  19 |
+> 20 |   useEffect(() => { void load() }, [load])
+     |                          ^^^^ Avoid calling setState() directly within an effect
+  21 |
+  22 |   useEffect(() => {
+  23 |     return snippetsApi?.onChanged(() => {  react-hooks/set-state-in-effect
+
+D:\LAST\src\renderer\lib\archive.test.ts
+   15:26  error  Calling a string's .toString() method does not change the type or value of the string  @typescript-eslint/no-unnecessary-type-conversion
+   21:20  error  Do not delete dynamically computed property keys                                       @typescript-eslint/no-dynamic-delete
+   89:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+   89:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
+   98:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+   98:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
+   99:21  error  Unsafe member access .length on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+  108:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  108:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
+  123:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  123:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
+  136:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
+  136:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
+
+D:\LAST\src\renderer\lib\archive.ts
+  13:29  error  Unsafe argument of type `any` assigned to a parameter of type `Iterable<string> | null | undefined`  @typescript-eslint/no-unsafe-argument
+
+D:\LAST\src\renderer\lib\jules\client.test.ts
+  0:0  error  Parsing error: D:\LAST\src\renderer\lib\jules\client.test.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\src\renderer\lib\jules\client.ts
+  129:11  error  Using the spread operator on an array in an object will result in a list of indices                        @typescript-eslint/no-misused-spread
+  134:15  error  Unsafe assignment of an `any` value                                                                        @typescript-eslint/no-unsafe-assignment
+  135:46  error  Invalid type "number" of template literal expression                                                       @typescript-eslint/restrict-template-expressions
+  169:11  error  Unsafe argument of type `any` assigned to a parameter of type `string`                                     @typescript-eslint/no-unsafe-argument
+  169:17  error  Unsafe member access .message on an `any` value                                                            @typescript-eslint/no-unsafe-member-access
+  169:25  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  169:58  error  Invalid type "number" of template literal expression                                                       @typescript-eslint/restrict-template-expressions
+  232:40  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  232:55  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  233:32  error  Use the `RegExp#exec()` method instead                                                                     @typescript-eslint/prefer-regexp-exec
+  240:19  error  This assertion is unnecessary since the receiver accepts the original type of the expression               @typescript-eslint/no-unnecessary-type-assertion
+  266:34  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  270:43  error  Forbidden non-null assertion                                                                               @typescript-eslint/no-non-null-assertion
+  278:51  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  279:51  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  317:13  error  Unnecessary conditional, value is always truthy                                                            @typescript-eslint/no-unnecessary-condition
+  320:71  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  321:28  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  322:43  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  327:66  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  341:28  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  361:47  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  364:25  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  377:24  error  void is only valid as a return type or generic type argument                                               @typescript-eslint/no-invalid-void-type
+  383:24  error  void is only valid as a return type or generic type argument                                               @typescript-eslint/no-invalid-void-type
+  396:13  error  Unnecessary conditional, value is always truthy                                                            @typescript-eslint/no-unnecessary-condition
+  398:50  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  398:65  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  407:50  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  409:28  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  410:24  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  411:22  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  412:37  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  419:56  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  420:48  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  421:44  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  426:34  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  426:52  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  445:47  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  446:42  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  451:40  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  451:72  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  457:28  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  458:28  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  459:25  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  460:32  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  480:15  error  This assertion is unnecessary since it does not change the type of the expression                          @typescript-eslint/no-unnecessary-type-assertion
+  487:19  error  This assertion is unnecessary since the receiver accepts the original type of the expression               @typescript-eslint/no-unnecessary-type-assertion
+  498:48  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  504:48  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  506:26  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  507:22  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  508:20  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  509:35  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  516:54  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  517:46  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  518:42  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  523:32  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  523:50  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  542:45  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  543:40  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  548:38  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  548:70  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  553:26  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  554:26  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  555:23  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  556:30  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  564:13  error  This assertion is unnecessary since it does not change the type of the expression                          @typescript-eslint/no-unnecessary-type-assertion
+  571:17  error  This assertion is unnecessary since the receiver accepts the original type of the expression               @typescript-eslint/no-unnecessary-type-assertion
+
+D:\LAST\src\renderer\lib\jules\local.test.ts
+  3:27  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+
+D:\LAST\src\renderer\lib\jules\provider.tsx
+  28:31  error  Unnecessary optional chain on a non-nullish value                                                                               @typescript-eslint/no-unnecessary-condition
+  39:46  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+  42:27  error  Unexpected empty arrow function                                                                                                 @typescript-eslint/no-empty-function
+  43:29  error  Unexpected empty arrow function                                                                                                 @typescript-eslint/no-empty-function
+  54:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\LAST\src\renderer\pages\electron\SnippetsPage.tsx
+  23:13  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  23:18  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  27:35  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
+
+D:\LAST\src\renderer\pages\shared\NotesPage.tsx
+  28:7   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-floating-promises
+  29:20  error  Prefer using nullish coalescing operator (`??`) instead of a ternary expression, as it is simpler to read                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/prefer-nullish-coalescing
+  33:9   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-floating-promises
+  34:22  error  Prefer using nullish coalescing operator (`??`) instead of a ternary expression, as it is simpler to read                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/prefer-nullish-coalescing
+  39:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\pages\shared\NotesPage.tsx:39:5
+  37 |       })
+  38 |     }
+> 39 |     setContent(lsLoad())
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  40 |     setReady(true)
+  41 |     return undefined
+  42 |   }, [])  react-hooks/set-state-in-effect
+  49:9   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-floating-promises
+
+D:\LAST\src\renderer\pages\shared\settings\panels\TestRow.tsx
+  19:31  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
+  62:54  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
+  62:54  error  Forbidden non-null assertion                                      @typescript-eslint/no-non-null-assertion
+  74:24  error  Forbidden non-null assertion                                      @typescript-eslint/no-non-null-assertion
+
+D:\LAST\src\renderer\pages\shared\settings\panels\connection-tests.ts
+  14:44  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\shell\TopBar.tsx
+  10:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\shell\TopBar.tsx:10:9
+   8 |
+   9 |     useEffect(() => {
+> 10 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  11 |     }, []);
+  12 |
+  13 |     return (  react-hooks/set-state-in-effect
+
+D:\LAST\src\renderer\store\app.ts
+   63:30  error  Prefer using an optional chain expression instead, as it's more concise and easier to read  @typescript-eslint/prefer-optional-chain
+   73:46  error  Unexpected empty arrow function                                                             @typescript-eslint/no-empty-function
+   85:60  error  Unexpected empty arrow function                                                             @typescript-eslint/no-empty-function
+  124:23  error  '_' is assigned a value but never used                                                      @typescript-eslint/no-unused-vars
+
+D:\LAST\src\shared\bridge.test.ts
+  3:28  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
+
+D:\LAST\src\shared\fuse.ts
+   9:26  error  `uuid` is deprecated. Use `z.uuid()` instead              @typescript-eslint/no-deprecated
+  15:26  error  `datetime` is deprecated. Use `z.iso.datetime()` instead  @typescript-eslint/no-deprecated
+  16:26  error  `datetime` is deprecated. Use `z.iso.datetime()` instead  @typescript-eslint/no-deprecated
+
+✖ 224 problems (224 errors, 0 warnings)
+  10 errors and 0 warnings potentially fixable with the `--fix` option.
+

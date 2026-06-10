@@ -13,7 +13,6 @@ import { registerFilesystemHandlers } from "./filesystem/handlers";
 import { registerSnippetsHandlers } from "./snippets";
 import { registerGitHandlers } from "./git";
 import { registerGitHubHandlers } from "./github";
-import { registerAliasesHandlers } from "./aliases";
 import { registerHistoryHandlers } from "./history";
 import { registerNotesHandlers } from "./notes";
 import { registerUINotificationHandlers } from "./notification";
@@ -133,7 +132,6 @@ app.whenReady().then(() => {
   registerSnippetsHandlers(() => mainWindow?.webContents ?? null);
   registerGitHandlers();
   registerGitHubHandlers();
-  registerAliasesHandlers(() => mainWindow?.webContents ?? null);
   registerHistoryHandlers();
   registerNotesHandlers(() => mainWindow?.webContents ?? null);
   registerUINotificationHandlers(() => mainWindow?.webContents ?? null);

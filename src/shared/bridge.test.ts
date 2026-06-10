@@ -42,7 +42,6 @@ describe("bridge", () => {
     const filesystem = { readFile: vi.fn() };
     const windowControls = { minimize: vi.fn() };
     const history = { get: vi.fn() };
-    const aliases = { get: vi.fn() };
     const notes = { get: vi.fn() };
     const snippets = { get: vi.fn() };
     const terminal = { start: vi.fn() };
@@ -60,7 +59,6 @@ describe("bridge", () => {
         filesystem,
         env: { getApiKey: vi.fn() },
         history,
-        aliases,
         notes,
         snippets,
       },
@@ -71,7 +69,6 @@ describe("bridge", () => {
     expect(bridge.filesystem).toBe(filesystem);
     expect(bridge.windowControls).toBe(windowControls);
     expect(bridge.history).toBe(history);
-    expect(bridge.aliases).toBe(aliases);
     expect(bridge.notes).toBe(notes);
     expect(bridge.snippets).toBe(snippets);
     expect(bridge.terminal).toBe(terminal);

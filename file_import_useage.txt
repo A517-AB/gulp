@@ -1,0 +1,348 @@
+Unused files (66)
+check.ts                                            
+electron/aliases.ts                                 
+electron/filesystem/handlers.ts                     
+electron/filesystem/types.ts                        
+electron/git.ts                                     
+electron/github.ts                                  
+electron/history.ts                                 
+electron/ipc/bridge.ts                              
+electron/ipc/handlers.ts                            
+electron/main.mts                                   
+electron/notes.ts                                   
+electron/notification-preload.ts                    
+electron/notification.ts                            
+electron/popup.ts                                   
+electron/preload.mts                                
+electron/queues.ts                                  
+electron/scheduler.ts                               
+electron/snippets.ts                                
+electron/Terminal.ts                                
+scratch/clean-index.mjs                             
+scratch/fix-opacities.mjs                           
+scratch/not sys.ts                                  
+scratch/setting.ts                                  
+scratch/style-repos.mjs                             
+scratch/xref-types.ts                               
+scripts/mcp-server.ts                               
+scripts/monitor.ts                                  
+src/notification/bridge.ts                          
+src/notification/main.tsx                           
+src/notification/NotificationWindow.tsx             
+src/renderer/base/types.ts                          
+src/renderer/base/utils.ts                          
+src/renderer/components/shared/FileTree/FileTree.tsx
+src/renderer/components/shared/FileTree/index.ts    
+src/renderer/components/shared/FileTree/types.ts    
+src/renderer/components/shared/SmartActionInput.tsx 
+src/renderer/components/shared/SnippetPicker.tsx    
+src/renderer/components/workspace/index.ts          
+src/renderer/hooks/use-file-tree.ts                 
+src/renderer/hooks/use-presets.ts                   
+src/renderer/hooks/use-queues.ts                    
+src/renderer/hooks/use-todos.ts                     
+src/renderer/lib/monaco.ts                          
+src/renderer/lib/presets.ts                         
+src/renderer/lib/todos.ts                           
+src/renderer/store/time.ts                          
+src/renderer/transport/_context.ts                  
+src/renderer/transport/context.tsx                  
+src/renderer/transport/fetch.ts                     
+src/renderer/transport/index.ts                     
+src/renderer/transport/ipc.ts                       
+src/renderer/transport/mock/handlers.ts             
+src/renderer/transport/mock/index.ts                
+src/renderer/transport/mock/worker.ts               
+src/renderer/transport/types.ts                     
+src/renderer/transport/use-transport.ts             
+src/renderer/ui/chat-panel.tsx                      
+src/renderer/ui/combobox.tsx                        
+src/renderer/ui/command.tsx                         
+src/renderer/ui/select.tsx                          
+src/renderer/ui/separator.tsx                       
+src/renderer/ui/sheet.tsx                           
+src/renderer/ui/toggle.tsx                          
+src/renderer/ui/tooltip.tsx                         
+src/types/css.d.ts                                  
+src/types/jules-sdk.ts                              
+Unused dependencies (40)
+@clack/prompts             package.json:24:6
+@dnd-kit/core              package.json:25:6
+@dnd-kit/modifiers         package.json:26:6
+@dnd-kit/sortable          package.json:27:6
+@dnd-kit/utilities         package.json:28:6
+@gsap/react                package.json:30:6
+@hono/swagger-ui           package.json:31:6
+@hono/zod-openapi          package.json:32:6
+@modelcontextprotocol/sdk  package.json:33:6
+@radix-ui/react-icons      package.json:38:6
+@radix-ui/react-select     package.json:42:6
+@radix-ui/react-separator  package.json:43:6
+@radix-ui/react-tooltip    package.json:46:6
+@tanstack/react-query      package.json:49:6
+@trpc/client               package.json:50:6
+@trpc/server               package.json:51:6
+@xterm/addon-fit           package.json:52:6
+@xterm/addon-search        package.json:53:6
+@xterm/addon-web-links     package.json:54:6
+@xterm/xterm               package.json:55:6
+chokidar                   package.json:56:6
+cmdk                       package.json:59:6
+croner                     package.json:60:6
+electron-log               package.json:62:6
+electron-trpc              package.json:63:6
+fs-extra                   package.json:65:6
+gsap                       package.json:66:6
+hono                       package.json:67:6
+ignore                     package.json:68:6
+mitt                       package.json:71:6
+motion                     package.json:73:6
+msw                        package.json:74:6
+next-themes                package.json:75:6
+node-pty                   package.json:76:6
+openapi-fetch              package.json:77:6
+react-arborist             package.json:79:6
+react-router-dom           package.json:84:6
+recharts                   package.json:85:6
+sonner                     package.json:88:6
+tunnel-rat                 package.json:90:6
+Unused devDependencies (6)
+@types/fs-extra         package.json:100:6
+@types/jszip            package.json:101:6
+@types/path-browserify  package.json:103:6
+@vitest/coverage-v8     package.json:107:6
+bun-types               package.json:109:6
+path-browserify         package.json:117:6
+Unresolved imports (1)
+tslib  tsconfig.app.json
+Unused exports (71)
+STATE_COLOR                          src/renderer/components/workspace/session-status.ts:3:14            
+ErrorBoundary              class     src/renderer/core/ErrorBoundary.tsx:102:14                          
+BUILT_IN_COMMANDS                    src/renderer/hooks/use-commands.ts:8:14                             
+createJulesClient          function  src/renderer/lib/jules/client.ts:145:17                             
+AlarmScheduler                       src/renderer/library/alarm/alarms/index.ts:2:3                      
+createAlarmClockBackup               src/renderer/library/alarm/alarms/index.ts:3:3                      
+getNextAlarmOccurrence               src/renderer/library/alarm/alarms/index.ts:4:3                      
+normalizeAlarmEntry                  src/renderer/library/alarm/alarms/index.ts:5:3                      
+parseAlarmTime                       src/renderer/library/alarm/alarms/index.ts:6:3                      
+parseAlarmTime             function  src/renderer/library/alarm/alarms/scheduler.ts:27:17                
+normalizeAlarmEntry        function  src/renderer/library/alarm/alarms/scheduler.ts:37:17                
+createAlarmClockBackup     function  src/renderer/library/alarm/alarms/scheduler.ts:60:17                
+getNextAlarmOccurrence     function  src/renderer/library/alarm/alarms/scheduler.ts:78:17                
+AlarmScheduler                       src/renderer/library/alarm/index.ts:2:2                             
+createAlarmClockBackup               src/renderer/library/alarm/index.ts:3:2                             
+getNextAlarmOccurrence               src/renderer/library/alarm/index.ts:4:2                             
+normalizeAlarmEntry                  src/renderer/library/alarm/index.ts:5:2                             
+parseAlarmTime                       src/renderer/library/alarm/index.ts:6:2                             
+hasWebAudioSupport                   src/renderer/library/alarm/index.ts:11:2                            
+ReminderScheduler                    src/renderer/library/alarm/index.ts:14:2                            
+createReminderBackup                 src/renderer/library/alarm/index.ts:15:2                            
+getNextReminderOccurrence            src/renderer/library/alarm/index.ts:16:2                            
+normalizeReminderEntry               src/renderer/library/alarm/index.ts:17:2                            
+parseClockTime                       src/renderer/library/alarm/index.ts:18:2                            
+ReminderScheduler                    src/renderer/library/alarm/reminders/index.ts:2:3                   
+createReminderBackup                 src/renderer/library/alarm/reminders/index.ts:3:3                   
+getNextReminderOccurrence            src/renderer/library/alarm/reminders/index.ts:4:3                   
+normalizeReminderEntry               src/renderer/library/alarm/reminders/index.ts:5:3                   
+parseClockTime                       src/renderer/library/alarm/reminders/index.ts:6:3                   
+parseClockTime             function  src/renderer/library/alarm/reminders/scheduler.ts:34:17             
+normalizeReminderEntry     function  src/renderer/library/alarm/reminders/scheduler.ts:44:17             
+createReminderBackup       function  src/renderer/library/alarm/reminders/scheduler.ts:59:17             
+getNextReminderOccurrence  function  src/renderer/library/alarm/reminders/scheduler.ts:77:17             
+hasWebAudioSupport         function  src/renderer/library/alarm/sounds/browser-sound-controller.ts:141:17
+hasWebAudioSupport                   src/renderer/library/alarm/sounds/index.ts:1:34                     
+AvatarImage                          src/renderer/ui/avatar.tsx:52:18                                    
+badgeVariants                        src/renderer/ui/badge.tsx:46:17                                     
+buttonVariants                       src/renderer/ui/button.tsx:60:18                                    
+CardHeader                           src/renderer/ui/card.tsx:86:3                                       
+CardFooter                           src/renderer/ui/card.tsx:87:3                                       
+CardTitle                            src/renderer/ui/card.tsx:88:3                                       
+CardAction                           src/renderer/ui/card.tsx:89:3                                       
+CardDescription                      src/renderer/ui/card.tsx:90:3                                       
+DialogClose                          src/renderer/ui/dialog.tsx:133:3                                    
+DialogOverlay                        src/renderer/ui/dialog.tsx:138:3                                    
+DialogPortal                         src/renderer/ui/dialog.tsx:139:3                                    
+DropdownMenuPortal                   src/renderer/ui/dropdown-menu.tsx:242:3                             
+DropdownMenuGroup                    src/renderer/ui/dropdown-menu.tsx:245:3                             
+DropdownMenuLabel                    src/renderer/ui/dropdown-menu.tsx:246:3                             
+DropdownMenuCheckboxItem             src/renderer/ui/dropdown-menu.tsx:248:3                             
+DropdownMenuRadioGroup               src/renderer/ui/dropdown-menu.tsx:249:3                             
+DropdownMenuRadioItem                src/renderer/ui/dropdown-menu.tsx:250:3                             
+DropdownMenuSeparator                src/renderer/ui/dropdown-menu.tsx:251:3                             
+DropdownMenuShortcut                 src/renderer/ui/dropdown-menu.tsx:252:3                             
+DropdownMenuSub                      src/renderer/ui/dropdown-menu.tsx:253:3                             
+DropdownMenuSubTrigger               src/renderer/ui/dropdown-menu.tsx:254:3                             
+DropdownMenuSubContent               src/renderer/ui/dropdown-menu.tsx:255:3                             
+PopoverAnchor                        src/renderer/ui/popover.tsx:30:51                                   
+ScrollBar                            src/renderer/ui/scroll-area.tsx:57:22                               
+TabsContent                          src/renderer/ui/tabs.tsx:65:39                                      
+getOutputBranch            function  src/renderer/utils/activity.ts:69:17                                
+formatDate                           src/renderer/utils/index.ts:1:10                                    
+getActivityTypeColor                 src/renderer/utils/index.ts:1:22                                    
+filterActivities                     src/renderer/utils/index.ts:1:44                                    
+groupActivities                      src/renderer/utils/index.ts:1:62                                    
+getOutputBranch                      src/renderer/utils/index.ts:1:79                                    
+compilePromptWithSnippets            src/renderer/utils/index.ts:2:10                                    
+cx                                   src/renderer/utils/index.ts:4:14                                    
+compilePromptWithSnippets  function  src/renderer/utils/snippets.ts:8:17                                 
+cx                         function  src/renderer/utils/utils.ts:10:17                                   
+FUSE_ROOT                            src/shared/fuse.ts:3:14                                             
+Unused exported types (158)
+SessionState                   type       src/jules/index.ts:5:3                                 
+SessionOutcome                 type       src/jules/index.ts:7:3                                 
+SessionClient                  type       src/jules/index.ts:8:3                                 
+SessionConfig                  type       src/jules/index.ts:9:3                                 
+SessionOutput                  type       src/jules/index.ts:10:3                                
+SessionSnapshot                type       src/jules/index.ts:11:3                                
+SessionInsights                type       src/jules/index.ts:12:3                                
+SerializedSnapshot             type       src/jules/index.ts:13:3                                
+SnapshotField                  type       src/jules/index.ts:14:3                                
+ToJSONOptions                  type       src/jules/index.ts:15:3                                
+TimelineEntry                  type       src/jules/index.ts:16:3                                
+AutomatedSession               type       src/jules/index.ts:17:3                                
+ActivityAgentMessaged          type       src/jules/index.ts:20:3                                
+ActivityUserMessaged           type       src/jules/index.ts:21:3                                
+ActivityPlanGenerated          type       src/jules/index.ts:22:3                                
+ActivityPlanApproved           type       src/jules/index.ts:23:3                                
+ActivityProgressUpdated        type       src/jules/index.ts:24:3                                
+ActivitySessionCompleted       type       src/jules/index.ts:25:3                                
+ActivitySessionFailed          type       src/jules/index.ts:26:3                                
+ActivitySummary                type       src/jules/index.ts:27:3                                
+LightweightActivity            type       src/jules/index.ts:28:3                                
+LightweightArtifact            type       src/jules/index.ts:29:3                                
+SelectOptions                  type       src/jules/index.ts:30:3                                
+StreamActivitiesOptions        type       src/jules/index.ts:31:3                                
+Artifact                       type       src/jules/index.ts:33:3                                
+ChangeSetArtifact              type       src/jules/index.ts:34:3                                
+BashArtifact                   type       src/jules/index.ts:35:3                                
+MediaArtifact                  type       src/jules/index.ts:36:3                                
+StrippedMediaArtifact          type       src/jules/index.ts:37:3                                
+ChangeSet                      type       src/jules/index.ts:38:3                                
+GitPatch                       type       src/jules/index.ts:39:3                                
+ParsedChangeSet                type       src/jules/index.ts:40:3                                
+ParsedFile                     type       src/jules/index.ts:41:3                                
+GeneratedFile                  type       src/jules/index.ts:42:3                                
+GeneratedFiles                 type       src/jules/index.ts:43:3                                
+Source                         type       src/jules/index.ts:45:3                                
+SourceContext                  type       src/jules/index.ts:46:3                                
+SourceInput                    type       src/jules/index.ts:47:3                                
+SourceManager                  type       src/jules/index.ts:48:3                                
+ListSourcesOptions             type       src/jules/index.ts:49:3                                
+GitHubRepo                     type       src/jules/index.ts:50:3                                
+Plan                           type       src/jules/index.ts:52:3                                
+PlanStep                       type       src/jules/index.ts:53:3                                
+PullRequest                    type       src/jules/index.ts:54:3                                
+JulesClient                    type       src/jules/index.ts:56:3                                
+JulesOptions                   type       src/jules/index.ts:57:3                                
+AutomationMode                 type       src/jules/index.ts:58:3                                
+JulesQuery                     type       src/jules/index.ts:60:3                                
+JulesDomain                    type       src/jules/index.ts:61:3                                
+QueryResult                    type       src/jules/index.ts:62:3                                
+SyncDepth                      type       src/jules/index.ts:64:3                                
+SyncOptions                    type       src/jules/index.ts:65:3                                
+SyncProgress                   type       src/jules/index.ts:66:3                                
+SyncStats                      type       src/jules/index.ts:67:3                                
+ListSessionsOptions            type       src/jules/index.ts:71:15                               
+ListSessionsResponse           type       src/jules/index.ts:71:36                               
+SdkIpc                         type       src/jules/index.ts:75:15                               
+CreateSessionRequest           type       src/jules/index.ts:80:3                                
+CreateActivityRequest          type       src/jules/index.ts:81:3                                
+ListActivitiesResponse         type       src/jules/index.ts:82:3                                
+ListSourcesResponse            type       src/jules/index.ts:83:3                                
+FleetTask                      type       src/jules/index.ts:84:3                                
+FleetTaskGroup                 type       src/jules/index.ts:85:3                                
+SessionTemplate                type       src/jules/index.ts:86:3                                
+ListActivitiesResponse         interface  src/jules/types.ts:5:18                                
+ListSourcesResponse            interface  src/jules/types.ts:10:18                               
+CreateSessionRequest           interface  src/jules/types.ts:17:18                               
+CreateActivityRequest          interface  src/jules/types.ts:26:18                               
+FleetTask                      interface  src/jules/types.ts:34:18                               
+FleetTaskGroup                 interface  src/jules/types.ts:41:18                               
+SessionTemplate                interface  src/jules/types.ts:50:18                               
+Block                          type       src/renderer/components/markdown/types.ts:3:15         
+PartialBlock                   type       src/renderer/components/markdown/types.ts:3:22         
+BlockNoteEditor                type       src/renderer/components/markdown/types.ts:3:36         
+DropdownItem                   interface  src/renderer/components/shared/DynamicDropdown.tsx:6:18
+AlarmClockBackup               type       src/renderer/library/alarm/alarms/index.ts:9:3         
+AlarmClockState                type       src/renderer/library/alarm/alarms/index.ts:10:3        
+AlarmFiredEvent                type       src/renderer/library/alarm/alarms/index.ts:12:3        
+AlarmSound                     type       src/renderer/library/alarm/alarms/index.ts:13:3        
+WeekDay                        type       src/renderer/library/alarm/alarms/index.ts:14:3        
+UseAlarmClockOptions           type       src/renderer/library/alarm/alarms/index.ts:16:15       
+UseAlarmClockResult            type       src/renderer/library/alarm/alarms/index.ts:16:37       
+AlarmSound                     type       src/renderer/library/alarm/alarms/types.ts:3:13        
+AlarmClockBackup               type       src/renderer/library/alarm/index.ts:22:2               
+AlarmClockState                type       src/renderer/library/alarm/index.ts:23:2               
+AlarmFiredEvent                type       src/renderer/library/alarm/index.ts:25:2               
+AlarmSound                     type       src/renderer/library/alarm/index.ts:26:2               
+UseAlarmClockOptions           type       src/renderer/library/alarm/index.ts:27:2               
+UseAlarmClockResult            type       src/renderer/library/alarm/index.ts:28:2               
+AlarmWeekDay                   type       src/renderer/library/alarm/index.ts:29:13              
+BrowserSoundControllerOptions  type       src/renderer/library/alarm/index.ts:32:2               
+SoundPlaybackOptions           type       src/renderer/library/alarm/index.ts:34:2               
+ReminderBackup                 type       src/renderer/library/alarm/index.ts:37:2               
+ReminderClockState             type       src/renderer/library/alarm/index.ts:38:2               
+ReminderFiredEvent             type       src/renderer/library/alarm/index.ts:40:2               
+ReminderSchedule               type       src/renderer/library/alarm/index.ts:41:2               
+ReminderSchedulerOptions       type       src/renderer/library/alarm/index.ts:42:2               
+UseReminderClockOptions        type       src/renderer/library/alarm/index.ts:43:2               
+UseReminderClockResult         type       src/renderer/library/alarm/index.ts:44:2               
+ReminderWeekDay                type       src/renderer/library/alarm/index.ts:45:13              
+ReminderBackup                 type       src/renderer/library/alarm/reminders/index.ts:9:3      
+ReminderClockState             type       src/renderer/library/alarm/reminders/index.ts:10:3     
+ReminderFiredEvent             type       src/renderer/library/alarm/reminders/index.ts:12:3     
+ReminderSchedule               type       src/renderer/library/alarm/reminders/index.ts:13:3     
+WeekDay                        type       src/renderer/library/alarm/reminders/index.ts:14:3     
+ReminderSchedulerOptions       type       src/renderer/library/alarm/reminders/index.ts:16:15    
+UseReminderClockOptions        type       src/renderer/library/alarm/reminders/index.ts:17:15    
+UseReminderClockResult         type       src/renderer/library/alarm/reminders/index.ts:17:40    
+BrowserSoundControllerOptions  type       src/renderer/library/alarm/sounds/index.ts:2:15        
+SoundPlaybackOptions           type       src/renderer/library/alarm/sounds/index.ts:2:55        
+BrowserSoundControllerOptions  type       src/renderer/library/alarm/sounds/types.ts:2:3         
+SoundPlaybackOptions           type       src/renderer/library/alarm/sounds/types.ts:4:3         
+NotificationAction             type       src/renderer/library/notification/index.ts:3:3         
+NotificationPayload            type       src/renderer/library/notification/index.ts:4:3         
+NotificationType               type       src/renderer/library/notification/index.ts:5:3         
+UseNotificationOptions         type       src/renderer/library/notification/index.ts:6:3         
+UseNotificationResult          type       src/renderer/library/notification/index.ts:7:3         
+SoundId                        type       src/renderer/library/notification/types.ts:3:15        
+NotificationAction             interface  src/renderer/library/notification/types.ts:5:18        
+NotificationType               type       src/renderer/library/notification/types.ts:21:13       
+SessionFormData                type       src/renderer/store/app.ts:6:15                         
+Activity                       type       src/renderer/utils/index.ts:3:15                       
+ActivityGroup                  type       src/renderer/utils/index.ts:3:25                       
+ActivityType                   type       src/renderer/utils/index.ts:3:40                       
+Snippet                        type       src/renderer/utils/index.ts:3:54                       
+JulesDisplayCommand            interface  src/shared/commands.ts:19:18                           
+JulesMessageCommand            interface  src/shared/commands.ts:28:18                           
+JulesStreamCommand             interface  src/shared/commands.ts:38:18                           
+TerminalCommand                interface  src/shared/commands.ts:47:18                           
+PaletteCommand                 interface  src/shared/commands.ts:55:18                           
+JulesCommand                   type       src/shared/commands.ts:64:13                           
+CommandType                    type       src/shared/commands.ts:66:13                           
+ShellType                      type       src/shared/electron.d.ts:11:13                         
+TerminalAPI                    interface  src/shared/electron.d.ts:21:18                         
+QueuesAPI                      interface  src/shared/electron.d.ts:30:18                         
+WindowAPI                      interface  src/shared/electron.d.ts:36:18                         
+PowerAPI                       interface  src/shared/electron.d.ts:42:18                         
+PopupNotification              interface  src/shared/electron.d.ts:47:18                         
+PopupAPI                       interface  src/shared/electron.d.ts:56:18                         
+FilesystemAPI                  interface  src/shared/electron.d.ts:64:18                         
+EnvAPI                         interface  src/shared/electron.d.ts:85:18                         
+HistoryAPI                     interface  src/shared/electron.d.ts:89:18                         
+NotesAPI                       interface  src/shared/electron.d.ts:95:18                         
+AliasesAPI                     interface  src/shared/electron.d.ts:103:18                        
+SnippetsAPI                    interface  src/shared/electron.d.ts:109:18                        
+UINotificationPayload          interface  src/shared/electron.d.ts:115:18                        
+UINotificationAPI              interface  src/shared/electron.d.ts:127:18                        
+ScheduleInput                  type       src/shared/electron.d.ts:145:13                        
+SchedulerAPI                   interface  src/shared/electron.d.ts:159:18                        
+FsBookmark                     interface  src/shared/filesystem.ts:28:18                         
+Source                         type       src/types/activity-feed.ts:4:34                        
+ActionDestination              type       src/types/activity-feed.ts:30:13                       
+QuickActionTemplate            interface  src/types/activity-feed.ts:32:18                       
+SessionStatus                  type       src/types/jules.ts:8:13                                
+ActivityType                   type       src/types/jules.ts:30:13                               
+SessionTemplate                interface  src/types/jules.ts:73:18                               
+SnippetCategory                type       src/types/snippets.ts:10:13                            
+JulesSnippetMeta               interface  src/types/snippets.ts:17:18                            

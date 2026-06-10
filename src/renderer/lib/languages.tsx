@@ -59,3 +59,10 @@ export const LANGUAGES: LanguagePreset[] = [
 export function langFor(id: string | null) {
   return LANGUAGES.find(l => l.id === id)
 }
+
+// Maps a snippet languageId to the Monaco language identifier.
+// Jules "session" snippets are prompt/instruction text — Markdown is the right mode.
+export function toMonacoLang(id: string | null): string {
+  if (id === 'session') return 'markdown'
+  return langFor(id)?.id ?? 'javascript'
+}

@@ -56,7 +56,7 @@ export default function NotesPage() {
   if (!ready) return null
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full px-4 py-4">
       <MarkdownEditor
         key={contentVersion}
         {...(content !== undefined ? { initialContent: content } : {})}

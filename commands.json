@@ -1,0 +1,34 @@
+[
+  {
+    "id": "cmd_display_1",
+    "trigger": "/",
+    "alias": "last",
+    "enabled": true,
+    "createdAt": 1749513600000,
+    "sessionId": "18241105784768399959"
+  },
+  {
+    "id": "cmd_display_2",
+    "trigger": "/",
+    "alias": "prev",
+    "enabled": true,
+    "createdAt": 1749513600000,
+    "sessionId": "11845668431150264772"
+  },
+  {
+    "id": "cmd_at_1",
+    "trigger": "@",
+    "alias": "last",
+    "enabled": true,
+    "createdAt": 1749513600000,
+    "sessionId": "18241105784768399959"
+  },
+  {
+    "id": "cmd_at_2",
+    "trigger": "@",
+    "alias": "prev",
+    "enabled": true,
+    "createdAt": 1749513600000,
+    "sessionId": "11845668431150264772"
+  }
+]

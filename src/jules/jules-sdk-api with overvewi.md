@@ -95,7 +95,7 @@
   - 📄 **MissingApiKeyError**
       - ⚙️ `constructor()`
   - 📄 **NetworkAdapter**
-      - ⚙️ `constructor(apiClient: ApiClient, sessionId: string, pollingIntervalMs: number | undefined, platform: Platform)`
+      - ⚙️ `con@structor(apiClient: ApiClient, sessionId: string, pollingIntervalMs: number | undefined, platform: Platform)`
       - ⚙️ `fetchActivity(activityId: string): Promise<Activity>`
       - ⚙️ `listActivities(options?: ListOptions): Promise<{ activities: Activity[]; nextPageToken?: string }>`
       - ⚙️ `rawStream(): AsyncIterable<Activity>`

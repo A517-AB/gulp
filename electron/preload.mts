@@ -152,18 +152,6 @@ const history: ElectronAPI["history"] = {
   remove: (id) => ipcRenderer.invoke("history.remove", id),
 }
 
-// ── aliases ────────────────────────────────────────────────────────────────────
-
-const aliases: ElectronAPI["aliases"] = {
-  get:  () => ipcRenderer.invoke("aliases.get"),
-  save: (data) => ipcRenderer.invoke("aliases.save", data),
-  onChanged: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: Parameters<typeof cb>[0]) => { cb(data); }
-    ipcRenderer.on("aliases.changed", handler)
-    return () => { ipcRenderer.off("aliases.changed", handler) }
-  },
-}
-
 // ── notes ──────────────────────────────────────────────────────────────────────
 
 const notes: ElectronAPI["notes"] = {
@@ -235,7 +223,6 @@ const api: Omit<ElectronAPI, 'sdk'> = {
   filesystem,
   env,
   history,
-  aliases,
   notes,
   snippets,
   uiNotification,

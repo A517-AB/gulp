@@ -1,6 +1,5 @@
 import type {FileFilter, FsEntry, FsStat, ReaddirOptions} from './filesystem'
 import type {FuseChangeEvent, FuseManifest} from './fuse'
-import type {Command} from './commands'
 import type {HistoryEntry} from './history'
 import type {NoteMeta} from './notes'
 import type {SdkIpc} from '../jules/sdk-ipc'
@@ -100,12 +99,6 @@ export interface NotesAPI {
   onChanged: (cb: () => void) => () => void
 }
 
-export interface AliasesAPI {
-  get:       () => Promise<{ aliases: Command[]; fileFound: boolean }>
-  save:      (aliases: Command[]) => Promise<boolean>
-  onChanged: (cb: (aliases: Command[] | null) => void) => () => void
-}
-
 export interface SnippetsAPI {
   get:       () => Promise<FuseManifest>;
   save:      (data: FuseManifest) => Promise<boolean>;
@@ -185,7 +178,6 @@ export interface ElectronAPI {
   filesystem:      FilesystemAPI;
   env:             EnvAPI;
   history:         HistoryAPI;
-  aliases:         AliasesAPI;
   notes:           NotesAPI;
   snippets:        SnippetsAPI;
   uiNotification:  UINotificationAPI;

@@ -9,7 +9,7 @@ import { DynamicDropdown } from '@renderer/components/shared/DynamicDropdown'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@renderer/ui/dialog'
-import { LANGUAGES, langFor } from '@renderer/lib/languages'
+import { LANGUAGES, langFor, toMonacoLang } from '@renderer/lib/languages'
 import { fuseFilePath } from '@shared/fuse'
 
 const LANGUAGE_ITEMS = LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))
@@ -300,7 +300,7 @@ export function SnippetsPage() {
             <CodeEditor
               value={draftScript}
               onChange={val => { setDraftScript(val ?? '') }}
-              language={langFor(draftLang)?.id ?? 'javascript'}
+              language={toMonacoLang(draftLang)}
               options={{ minimap: { enabled: false }, lineNumbers: 'on' }}
             />
           </div>

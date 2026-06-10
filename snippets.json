@@ -2,14 +2,44 @@
   "version": 1,
   "items": [
     {
+      "id": "76b3806b-87a3-4253-b7ea-e5e2b7d8788c",
+      "title": "raw-handler",
+      "languageId": "python",
+      "type": "snippet",
+      "file": "snippets/python/raw-handler.py",
+      "tags": [],
+      "createdAt": "2026-06-10T07:52:15.066Z",
+      "updatedAt": "2026-06-10T07:52:19.364Z"
+    },
+    {
+      "id": "faf0554e-b990-4c71-a10c-cb6395c41dae",
+      "title": "pure-trap",
+      "languageId": "markdown",
+      "type": "snippet",
+      "file": "snippets/python/pure-trap.py",
+      "tags": [],
+      "createdAt": "2026-06-10T06:19:01.283Z",
+      "updatedAt": "2026-06-10T06:19:08.397Z"
+    },
+    {
+      "id": "0a2b645f-080e-48c6-a47f-905536b6fbc3",
+      "title": "wild-loop",
+      "languageId": "html",
+      "type": "snippet",
+      "file": "snippets/python/wild-loop.py",
+      "tags": [],
+      "createdAt": "2026-06-10T05:31:51.958Z",
+      "updatedAt": "2026-06-10T05:32:25.058Z"
+    },
+    {
       "id": "ae626a34-0ac3-44ca-a8c6-131bc73c7042",
       "title": "wild-util",
-      "languageId": "pwsh",
+      "languageId": "javascript",
       "type": "snippet",
       "file": "snippets/python/wild-util.py",
       "tags": [],
       "createdAt": "2026-06-09T20:28:08.977Z",
-      "updatedAt": "2026-06-09T20:28:30.943Z"
+      "updatedAt": "2026-06-09T23:28:53.371Z"
     },
     {
       "id": "68e32504-2806-403b-aa2f-d097a796c8b6",
@@ -19,7 +49,7 @@
       "file": "snippets/python/raw-patch.py",
       "tags": [],
       "createdAt": "2026-06-09T20:25:37.425Z",
-      "updatedAt": "2026-06-09T20:26:14.437Z"
+      "updatedAt": "2026-06-10T05:31:34.343Z"
     },
     {
       "id": "891517f6-1c35-449d-8f8e-f6662897acd6",
