@@ -6,14 +6,15 @@ export const FuseSnippetType = z.enum(['snippet', 'build'])
 export type FuseSnippetType = z.infer<typeof FuseSnippetType>
 
 export const FuseManifestItem = z.object({
-  id:         z.string().uuid(),
+    id: z.uuid(),
   title:      z.string().nullable(),
   languageId: z.string(),
   type:       FuseSnippetType,
-  file:       z.string(), // relative to FUSE_ROOT, e.g. "snippets/python/my-tool.py"
+    file: z.string(),
+    preview: z.string().optional(),
   tags:       z.array(z.string()).default([]),
-  createdAt:  z.string().datetime(),
-  updatedAt:  z.string().datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime(),
 })
 export type FuseManifestItem = z.infer<typeof FuseManifestItem>
 
@@ -36,6 +37,7 @@ export function fuseResolve(...parts: string[]): string {
 const LANG_EXT: Record<string, string> = {
   python: 'py', typescript: 'ts', javascript: 'js',
   bash: 'sh', pwsh: 'ps1', json: 'json', markdown: 'md', html: 'html',
+    session: 'md',
 }
 
 export function fuseFilePath(type: FuseSnippetType, languageId: string, slug: string): string {

@@ -1,5 +1,5 @@
-import type { AtResult, DisplayResult } from './types'
-import type { AtExecutor, DisplayExecutor } from './triggers'
+import type {AtResult, DisplayResult, TerminalResult} from './types'
+import type {AtExecutor, DisplayExecutor, TerminalExecutor} from './triggers'
 
 export const executeAt: AtExecutor = async (send, command, prompt) => {
   const sentAt = Date.now()
@@ -26,6 +26,32 @@ export const executeAt: AtExecutor = async (send, command, prompt) => {
       error:     err instanceof Error ? err.message : String(err),
     } satisfies AtResult
   }
+}
+
+export const executeTerminal: TerminalExecutor = (deps, command) => {
+    const ranAt = Date.now()
+    try {
+        deps.start(command.cwd ?? '')
+        deps.input(`python "${command.script}"\r`)
+        return {
+            trigger: '>',
+            commandId: command.id,
+            alias: command.alias,
+            script: command.script,
+            ranAt,
+            status: 'ok',
+        } satisfies TerminalResult
+    } catch (err) {
+        return {
+            trigger: '>',
+            commandId: command.id,
+            alias: command.alias,
+            script: command.script,
+            ranAt,
+            status: 'error',
+            error: err instanceof Error ? err.message : String(err),
+        } satisfies TerminalResult
+    }
 }
 
 export const executeDisplay: DisplayExecutor = async (session, command) => {

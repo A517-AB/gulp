@@ -2,6 +2,7 @@
 import { useMotionValue, motion, useMotionTemplate } from "framer-motion";
 import type { MouseEvent } from "react";
 import { cn } from "@/utils";
+import {useTheme} from "@/providers/theme";
 
 interface CardSpotlightProps {
   children: React.ReactNode;
@@ -13,9 +14,13 @@ interface CardSpotlightProps {
 export function CardSpotlight({
   children,
   radius = 350,
-  color = "#262626",
+                                  color,
   className,
 }: CardSpotlightProps) {
+    const {theme} = useTheme();
+    // Default spotlight: subtle dark smear in dark mode, near-invisible in light mode
+    const resolvedColor = color ?? (theme === 'dark' ? '#2a2a2a' : 'rgba(0,0,0,0.04)');
+
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -28,7 +33,7 @@ export function CardSpotlight({
   return (
     <div
       className={cn(
-        "group relative rounded-none border border-white/[0.08] bg-black",
+          "group relative rounded-none border border-border/10 bg-card",
         className,
       )}
       onMouseMove={handleMouseMove}
@@ -39,7 +44,7 @@ export function CardSpotlight({
           background: useMotionTemplate`
             radial-gradient(
               ${radius}px circle at ${mouseX}px ${mouseY}px,
-              ${color},
+              ${resolvedColor},
               transparent 80%
             )
           `,

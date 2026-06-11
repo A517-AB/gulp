@@ -11,6 +11,7 @@ import {
 } from '@renderer/ui/dialog'
 import { LANGUAGES, langFor, toMonacoLang } from '@renderer/lib/languages'
 import { fuseFilePath } from '@shared/fuse'
+import {GitSyncButton} from '@renderer/components/git/GitSyncButton'
 
 const LANGUAGE_ITEMS = LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))
 
@@ -18,13 +19,13 @@ const TITLE_ADJ  = ['swift', 'async', 'clean', 'lazy', 'eager', 'raw', 'pure', '
 const TITLE_NOUN = ['handler', 'parser', 'runner', 'hook', 'util', 'patch', 'probe', 'loop', 'pipe', 'trap', 'drop', 'snap']
 
 function randomTitle() {
-  const a = TITLE_ADJ[Math.floor(Math.random() * TITLE_ADJ.length)]
-  const b = TITLE_NOUN[Math.floor(Math.random() * TITLE_NOUN.length)]
+    const a = TITLE_ADJ[Math.floor(Math.random() * TITLE_ADJ.length)] ?? 'wild'
+    const b = TITLE_NOUN[Math.floor(Math.random() * TITLE_NOUN.length)] ?? 'hook'
   return `${a}-${b}`
 }
 
 function withAlpha(color: string, a: number) {
-  return color.replace(')', ` / ${a})`)
+    return color.replace(')', ` / ${a.toString()})`)
 }
 
 interface SnippetRowProps {
@@ -75,7 +76,7 @@ const SnippetRow = memo(function SnippetRow({
           )}
         </div>
         <p className="text-[10px] font-mono text-fg-dim truncate">
-          {snippet.file}
+            {snippet.preview ?? snippet.file}
         </p>
       </div>
 
@@ -170,7 +171,10 @@ export function SnippetsPage() {
   const handleEditorSave = useCallback(() => {
     if (!editingItem || !draftScript.trim()) return
     const now = new Date().toISOString()
-    void saveItem({ ...editingItem, languageId: draftLang, updatedAt: now }, draftScript)
+      const file = draftLang !== editingItem.languageId
+          ? fuseFilePath(editingItem.type, draftLang, editingItem.title ?? 'untitled')
+          : editingItem.file
+      void saveItem({...editingItem, languageId: draftLang, file, updatedAt: now}, draftScript)
     setEditorOpen(false)
     setEditingItem(null)
   }, [editingItem, draftScript, draftLang, saveItem])
@@ -189,7 +193,7 @@ export function SnippetsPage() {
   }, [deleteItem])
 
   const handleTitleSave = useCallback((snippet: SnippetItem, newTitle: string) => {
-    updateMeta({ ...snippet, title: newTitle || null, updatedAt: new Date().toISOString() })
+      void updateMeta(snippet, {title: newTitle || null})
   }, [updateMeta])
 
   const itemsRef = useRef<SnippetItem[]>([])
@@ -197,7 +201,7 @@ export function SnippetsPage() {
 
   const handleLangChange = useCallback((id: string, newLang: string) => {
     const item = itemsRef.current.find(s => s.id === id)
-    if (item) updateMeta({ ...item, languageId: newLang, updatedAt: new Date().toISOString() })
+      if (item) void updateMeta(item, {languageId: newLang})
   }, [updateMeta])
 
   // ── render ─────────────────────────────────────────────────────────────────
@@ -219,13 +223,13 @@ export function SnippetsPage() {
 
         <div className="flex gap-2 items-center">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-fg-dim" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-fg-dim"/>
             <input
               type="text"
               placeholder="SEARCH..."
               value={search}
               onChange={e => { setSearch(e.target.value) }}
-              className="h-8 pl-7 pr-3 rounded bg-surface border border-subtle text-[10px] font-mono text-fg-primary uppercase tracking-wider placeholder:text-fg-dim focus:outline-none focus:border-moderate transition-colors w-44"
+              className="h-8 pl-8 pr-3 rounded bg-surface border border-subtle text-[10px] font-mono text-fg-primary uppercase tracking-wider placeholder:text-fg-dim focus:outline-none focus:border-moderate transition-colors w-44"
             />
           </div>
           <button
@@ -239,6 +243,7 @@ export function SnippetsPage() {
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
             {items.length} TOTAL
           </span>
+            <GitSyncButton/>
         </div>
       </div>
 

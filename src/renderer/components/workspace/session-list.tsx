@@ -6,8 +6,9 @@ import {Badge} from "@/ui/badge.tsx";
 import {Button} from "@/ui/button.tsx";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/ui/tooltip.tsx";
 import {CardSpotlight} from "@/ui/card-spotlight.tsx";
-import {formatDate} from "./activity-item.tsx";
+import {formatDate} from "@/utils/activity.ts";
 import {useSessionList} from "@/hooks/use-session-list.ts";
+import {useStore} from "@/store/app.ts";
 import {STATE_BADGE, STATE_DOT} from "./session-status.ts";
 import type {SessionListProps} from "@/types/activity-feed.ts";
 
@@ -21,6 +22,7 @@ const LIMIT = 100;
 
 export function SessionList({ onSelectSession, selectedSessionId }: SessionListProps) {
   const { sessions, allSessions, error, searchQuery, setSearchQuery, loadSessions } = useSessionList();
+    const sources = useStore(s => s.sources);
 
     const dailyCount = allSessions.filter((s) => {
         try {
@@ -95,23 +97,21 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
                         <span className="text-[9px] text-fg-dim font-mono tracking-wide leading-none">
                           {formatDate(s.createTime)}
                         </span>
-                                      {s.source?.githubRepo && (
-                                          <>
-                                              <span className="text-[9px] text-fg-ghost font-mono">•</span>
-                                              <Badge
-                                                  className={`shrink-0 text-[8px] px-1 h-3.5 border rounded-sm uppercase tracking-wider leading-none ${STATE_BADGE[s.state]}`}>
-                                                  {s.source.githubRepo.owner}/{s.source.githubRepo.repo}
-                                              </Badge>
-                                          </>
-                                      )}
                                       {(() => {
-                                          const branch = s.sourceContext?.workingBranch ?? s.sourceContext?.githubRepoContext?.startingBranch
-                                          return branch ? (
-                                              <Badge
-                                                  className={`shrink-0 text-[8px] px-1 h-3.5 border rounded-sm tracking-wide leading-none font-mono ${STATE_BADGE[s.state]}`}>
-                                                  {branch}
-                                              </Badge>
-                                          ) : null
+                                          // sourceContext is typed required by the SDK but is absent on old/cached sessions —
+                                          // the SDK itself uses sourceContext?.source in its own storage layer (index.mjs:3088)
+                                          const repo = s.source?.githubRepo
+                                              ?? sources.find(src => src.name === s.sourceContext?.source || src.id === s.sourceContext?.source)?.githubRepo;
+                                          if (!repo) return null;
+                                          return (
+                                              <>
+                                                  <span className="text-[9px] text-fg-ghost font-mono">•</span>
+                                                  <Badge
+                                                      className={`shrink-0 text-[8px] px-1 h-3.5 border rounded-sm uppercase tracking-wider leading-none ${STATE_BADGE[s.state]}`}>
+                                                      {repo.repo}
+                                                  </Badge>
+                                              </>
+                                          );
                                       })()}
                                   </div>
                               </div>

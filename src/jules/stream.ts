@@ -1,3 +1,4 @@
+// NOTE: not sure if this is used anywhere — may be dead code, revisit before deleting
 import type {Activity} from '@jules'
 
 type ActivityType = Activity['type']

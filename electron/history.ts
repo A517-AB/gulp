@@ -1,7 +1,7 @@
 import { ipcMain, app } from 'electron'
 import fs from 'fs-extra'
 import * as path from 'path'
-import type { HistoryEntry } from '../src/shared/history'
+import type {HistoryEntry} from '@shared/history.ts'
 
 const HISTORY_PATH = path.join(app.getAppPath(), 'history.json')
 const MAX_ENTRIES = 200

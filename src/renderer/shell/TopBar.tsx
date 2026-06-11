@@ -11,12 +11,13 @@ export function TopBar({ left, center, right }: TopBarProps) {
     }, []);
 
     return (
-        <header className={`app-drag-region h-toolbar grid grid-cols-[1fr_auto_1fr] items-center gap-4 px-3 shrink-0 bg-transparent hover:opacity-100 transition-opacity duration-500 hover:duration-200 hover:delay-0 ${mounted ? 'opacity-0 delay-[4000ms]' : 'opacity-100'}`}>
-            <div className="flex items-center gap-2 min-w-0 justify-start">
+        <header
+            className={`app-drag-region h-toolbar grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 shrink-0 bg-transparent hover:opacity-100 transition-opacity duration-500 hover:duration-200 hover:delay-0 ${mounted ? 'opacity-0 delay-[4000ms]' : 'opacity-100'}`}>
+            <div className="flex items-center gap-2 min-w-0 justify-start overflow-hidden">
                 {left}
             </div>
 
-            <div className="flex items-center gap-2 justify-center">
+            <div className="flex items-center gap-1 justify-center overflow-x-auto scrollbar-none min-w-0">
                 {center}
             </div>
 

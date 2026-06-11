@@ -165,6 +165,7 @@ function AlarmSection() {
     alarms,
     intervalMs: 5000,
     onFired: (event) => {
+        console.log('[TimePage] alarm fired:', event.alarm.id, event.alarm.label, 'at', event.firedAt)
       notify({
         title:  `Alarm: ${event.alarm.label}`,
         body:   `Fired at ${format(event.firedAt, 'HH:mm:ss')}`,
@@ -234,6 +235,7 @@ function ReminderSection() {
     reminders,
     intervalMs: 5000,
     onFired: (event) => {
+        console.log('[TimePage] reminder fired:', event.reminder.id, event.reminder.title)
       notify({
         title:  event.reminder.title,
         ...(event.reminder.note !== undefined && { body: event.reminder.note }),
@@ -297,6 +299,7 @@ function SchedulerSection() {
     loaded.current = true
     void scheduler.list().then(setItems)
     return scheduler.onFired((item) => {
+        console.log('[TimePage] scheduler fired:', item.id, item.label)
       setFired(p => [`fired: ${item.label} @ ${format(new Date(), 'HH:mm:ss')}`, ...p].slice(0, 5))
       setItems(p => p.filter(i => i.id !== item.id))
     })

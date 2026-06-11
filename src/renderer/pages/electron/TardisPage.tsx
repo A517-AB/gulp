@@ -47,7 +47,9 @@ export default function TardisPage() {
         const saved = await s.add(WORK_ITEM)
         setItems(p => [...p, saved])
       }
-    }).catch(() => {})
+    }).catch((err: unknown) => {
+        console.error('[TardisPage] init failed:', err)
+    })
   }, [])
 
   async function add(item: ScheduledItem) {
@@ -72,20 +74,42 @@ export default function TardisPage() {
 
   const temp = items.find(i => i.id === TEMP_ITEM.id)
   const work = items.find(i => i.id === WORK_ITEM.id)
+    const custom = items.filter(i => i.id !== TEMP_ITEM.id && i.id !== WORK_ITEM.id)
 
   return (
-    <div className="p-4 space-y-6 max-w-xl">
-      <div>
-        <h1 className="text-base font-semibold text-white">Tardis</h1>
-        <p className="text-xs text-fg-ghost mt-1">Scheduled notifications</p>
-      </div>
-
+      <div className="h-full overflow-auto p-4 space-y-6 max-w-xl">
       <div>
         <h2 className="text-xs font-semibold text-fg-secondary mb-2">Jules Watchers</h2>
         <WatcherList />
       </div>
 
       <ScheduleForm onAdd={item => { void add(item) }} />
+
+          {custom.length > 0 && (
+              <div className="space-y-1.5">
+                  {custom.map(item => (
+                      <div key={item.id}
+                           className="flex items-center justify-between p-3 rounded-md border border-hair bg-raised">
+                          <div>
+                              <p className="text-xs text-fg-secondary font-mono">{item.label}</p>
+                              <p className="text-3xs text-fg-ghost mt-0.5">{item.schedule.kind} · {item.sound ?? 'no sound'}</p>
+                          </div>
+                          <button
+                              onClick={() => {
+                                  void toggle(item.id, !item.enabled)
+                              }}
+                              className={`text-xs font-mono px-3 py-1 rounded-md border transition-colors cursor-pointer ${
+                                  item.enabled
+                                      ? 'bg-selected text-fg-primary border-subtle'
+                                      : 'bg-raised text-fg-ghost border-hair'
+                              }`}
+                          >
+                              {item.enabled ? 'on' : 'off'}
+                          </button>
+                      </div>
+                  ))}
+              </div>
+          )}
 
       {temp && (
         <div className="flex items-center justify-between p-3 rounded-md border border-hair bg-raised">
@@ -116,8 +140,8 @@ export default function TardisPage() {
             onClick={() => { void toggle(work.id, !work.enabled) }}
             className={`text-xs font-mono px-3 py-1 rounded-md border transition-colors cursor-pointer ${
               work.enabled
-                ? 'bg-zinc-700 text-zinc-200 border-zinc-600'
-                : 'bg-zinc-900 text-zinc-600 border-zinc-800'
+                  ? 'bg-selected text-fg-primary border-subtle'
+                  : 'bg-raised text-fg-ghost border-hair'
             }`}
           >
             {work.enabled ? 'on' : 'off'}

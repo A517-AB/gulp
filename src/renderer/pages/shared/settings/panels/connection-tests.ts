@@ -1,5 +1,4 @@
 import {isElectron, sdkIpc} from '@shared/bridge'
-import {activityText} from '@/utils/activity'
 import type {TestDef} from '../types'
 
 function getConnectionTests(): TestDef[] {
@@ -12,7 +11,7 @@ function getConnectionTests(): TestDef[] {
       fn: async () => {
         const key = await window.electron?.env.getApiKey()
         if (!key) return { summary: 'null — no key found in env or ~/.jules' }
-        const masked = `${key.slice(0, 6)}…${key.slice(-4)} (${key.length} chars)`
+          const masked = `${key.slice(0, 6)}…${key.slice(-4)} (${String(key.length)} chars)`
         return { summary: masked }
       },
     },
@@ -42,14 +41,16 @@ function getConnectionTests(): TestDef[] {
       key: 'client_first_activities',
         label: 'sdkIpc.activities.list(first session)',
       fn: async () => {
-          if (!sdkIpc) throw new Error('no sdkIpc')
-          const sessions = await sdkIpc.client.sessions()
+          const ipc = sdkIpc
+          if (!ipc) throw new Error('no sdkIpc')
+          const sessions = await ipc.client.sessions()
         const [s] = sessions
         if (!s) return { summary: 'no sessions' }
-          const {activities: acts} = await sdkIpc.activities.list(s.id)
+          const {activities: acts} = await ipc.activities.list(s.id)
+          const summaries = await Promise.all(acts.map(a => ipc.util.toSummary(a)))
         return {
           summary: `${String(acts.length)} activities — "${s.title || s.id}"`,
-            items: acts.map(a => `[${a.type}] ${activityText(a).slice(0, 100)}`),
+            items: summaries.map(s => `[${s.type}] ${s.summary.slice(0, 100)}`),
         }
       },
     },

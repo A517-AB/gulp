@@ -44,7 +44,7 @@ export function registerGitHandlers(): void {
   )
 
   ipcMain.handle('git.log', (_e, cwd: string, limit = 20, branch?: string) =>
-    git(cwd, ['log', `--max-count=${limit}`, '--pretty=format:%H|%s|%an|%ar|%D', ...(branch ? [branch] : [])])
+      git(cwd, ['log', `--max-count=${String(limit)}`, '--pretty=format:%H|%s|%an|%ar|%D', ...(branch ? [branch] : [])])
   )
 
   ipcMain.handle('git.diff', (_e, cwd: string, args: string[] = []) =>
@@ -92,15 +92,15 @@ export function registerGitHandlers(): void {
   // ── sync ──────────────────────────────────────────────────────────────────────
 
   ipcMain.handle('git.push', (_e, cwd: string, remote = 'origin', branch?: string, force = false) =>
-    git(cwd, ['push', ...(force ? ['--force-with-lease'] : []), remote, ...(branch ? [branch] : [])])
+      git(cwd, ['push', ...(force ? ['--force-with-lease'] : []), remote, ...(branch ? [branch] : [])] as string[])
   )
 
   ipcMain.handle('git.pull', (_e, cwd: string, remote = 'origin', branch?: string, rebase = false) =>
-    git(cwd, ['pull', ...(rebase ? ['--rebase'] : []), remote, ...(branch ? [branch] : [])])
+      git(cwd, ['pull', ...(rebase ? ['--rebase'] : []), remote, ...(branch ? [branch] : [])] as string[])
   )
 
   ipcMain.handle('git.fetch', (_e, cwd: string, remote = 'origin', prune = true) =>
-    git(cwd, ['fetch', ...(prune ? ['--prune'] : []), remote])
+      git(cwd, ['fetch', ...(prune ? ['--prune'] : []), remote] as string[])
   )
 
   // ── branches ─────────────────────────────────────────────────────────────────
@@ -130,7 +130,7 @@ export function registerGitHandlers(): void {
   // ── reset / restore ───────────────────────────────────────────────────────────
 
   ipcMain.handle('git.reset', (_e, cwd: string, mode: 'soft' | 'mixed' | 'hard' = 'mixed', ref = 'HEAD') =>
-    git(cwd, ['reset', `--${mode}`, ref])
+      git(cwd, ['reset', `--${mode}`, ref] as string[])
   )
 
   ipcMain.handle('git.restore', (_e, cwd: string, files: string[]) =>

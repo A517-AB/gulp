@@ -100,9 +100,12 @@ export interface NotesAPI {
 }
 
 export interface SnippetsAPI {
-  get:       () => Promise<FuseManifest>;
-  save:      (data: FuseManifest) => Promise<boolean>;
-  onChanged: (cb: (change: FuseChangeEvent) => void) => () => void;
+    get: () => Promise<FuseManifest>;
+    save: (data: FuseManifest) => Promise<boolean>;
+    onChanged: (cb: (change: FuseChangeEvent) => void) => () => void;
+    readCode: (relPath: string) => Promise<string>;
+    writeCode: (relPath: string, content: string) => Promise<void>;
+    deleteCode: (relPath: string) => Promise<void>;
 }
 
 export interface UINotificationPayload {
@@ -167,6 +170,23 @@ export interface SchedulerAPI {
   onFired: (cb: (item: ScheduledItem) => void) => () => void
 }
 
+export interface GitExecResult {
+    stdout: string;
+    stderr: string;
+    exitCode: number;
+    ok: boolean;
+}
+
+export interface GitAPI {
+    run: (cwd: string, args: string[]) => Promise<GitExecResult>;
+    status: (cwd: string) => Promise<GitExecResult>;
+    add: (cwd: string, files?: string[]) => Promise<GitExecResult>;
+    commit: (cwd: string, message: string, allowEmpty?: boolean) => Promise<GitExecResult>;
+    push: (cwd: string, remote?: string, branch?: string, force?: boolean) => Promise<GitExecResult>;
+    pull: (cwd: string, remote?: string, branch?: string, rebase?: boolean) => Promise<GitExecResult>;
+    init: (cwd: string) => Promise<GitExecResult>;
+}
+
 // ── root ───────────────────────────────────────────────────────────────────────
 
 export interface ElectronAPI {
@@ -182,6 +202,7 @@ export interface ElectronAPI {
   snippets:        SnippetsAPI;
   uiNotification:  UINotificationAPI;
   scheduler:       SchedulerAPI;
+    git: GitAPI;
   // TODO: temporary — will be moved to transport layer someday in a sunny shiny day
   sdk:             SdkIpc;
 }

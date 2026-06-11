@@ -3,21 +3,23 @@ import { Outlet, NavLink } from 'react-router'
 import { TopBar } from '@renderer/shell/TopBar'
 import { ThemeProvider } from '@renderer/providers/theme'
 import { navRoutes } from '@renderer/router'
+import {useAppSync} from '@/hooks/use-app-sync'
 
 export default function RootLayout(): ReactNode {
+    useAppSync()
 
     const navLinks = navRoutes
         .filter(route => route.handle?.inNav)
         .map((route) => {
             const path = route.index ? '/' : `/${route.path ?? ''}`
             return (
-                <NavLink 
-                    key={path} 
+                <NavLink
+                    key={path}
                     to={path}
-                    className={({ isActive }) => 
-                        `px-3 py-1 text-sm rounded-md transition-colors ${
-                            isActive 
-                                ? 'bg-active text-fg-primary' 
+                    className={({isActive}) =>
+                        `px-3 py-1 text-xs font-mono rounded transition-colors whitespace-nowrap ${
+                            isActive
+                                ? 'bg-active text-fg-primary'
                                 : 'text-fg-secondary hover:text-fg-primary hover:bg-hover'
                         }`
                     }

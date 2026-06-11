@@ -9,7 +9,7 @@ import { dispatchNotification } from './notification.js'
 
 type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
-type AlarmSchedule = {
+interface AlarmSchedule {
   kind: 'alarm'
   time: string       // "HH:mm"
   days: WeekDay[]    // empty = every day

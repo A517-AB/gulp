@@ -3,11 +3,10 @@ import type { WebContents } from 'electron'
 import fs from 'fs-extra'
 import * as path from 'path'
 import chokidar from 'chokidar'
-import { FuseManifest } from '../src/shared/fuse'
+import {FuseManifest, FUSE_ROOT} from '../src/shared/fuse'
 import type { FuseManifest as FuseManifestType } from '../src/shared/fuse'
 
 const MANIFEST_PATH = path.join(app.getAppPath(), 'snippets.json')
-export const FUSE_ROOT = 'D:/fuse'
 
 const EMPTY_MANIFEST: FuseManifestType = { version: 1, items: [] }
 
@@ -21,13 +20,13 @@ export function registerSnippetsHandlers(getWebContents: () => WebContents | nul
   ipcMain.handle('snippets.get', async (): Promise<FuseManifestType> => {
     console.log('[snippets] get → reading', MANIFEST_PATH)
     try {
-      const raw = await fs.readJson(MANIFEST_PATH)
+        const raw: unknown = await fs.readJson(MANIFEST_PATH)
       const result = FuseManifest.safeParse(raw)
       if (!result.success) {
         console.warn('[snippets] get → manifest invalid, returning empty:', result.error.issues)
         return EMPTY_MANIFEST
       }
-      console.log(`[snippets] get → ok, ${result.data.items.length} items`)
+        console.log(`[snippets] get → ok, ${String(result.data.items.length)} items`)
       return result.data
     } catch (err) {
       console.warn('[snippets] get → no manifest yet, returning empty:', (err as Error).message)
@@ -36,7 +35,7 @@ export function registerSnippetsHandlers(getWebContents: () => WebContents | nul
   })
 
   ipcMain.handle('snippets.save', async (_e, data: FuseManifestType) => {
-    console.log(`[snippets] save → ${data.items?.length ?? 0} items → ${MANIFEST_PATH}`)
+      console.log(`[snippets] save → ${String(data.items.length)} items → ${MANIFEST_PATH}`)
     try {
       const result = FuseManifest.safeParse(data)
       if (!result.success) {
@@ -52,17 +51,37 @@ export function registerSnippetsHandlers(getWebContents: () => WebContents | nul
     }
   })
 
+    // ── code file ops (relative to FUSE_ROOT) ────────────────────────────────
+
+    ipcMain.handle('snippets.readCode', async (_e, relPath: string): Promise<string> => {
+        const abs = path.join(FUSE_ROOT, relPath)
+        return fs.readFile(abs, 'utf-8')
+    })
+
+    ipcMain.handle('snippets.writeCode', async (_e, relPath: string, content: string): Promise<void> => {
+        const abs = path.join(FUSE_ROOT, relPath)
+        await fs.ensureDir(path.dirname(abs))
+        await fs.writeFile(abs, content, 'utf-8')
+    })
+
+    ipcMain.handle('snippets.deleteCode', async (_e, relPath: string): Promise<void> => {
+        const abs = path.join(FUSE_ROOT, relPath)
+        await fs.remove(abs)
+    })
+
   // ── watcher ───────────────────────────────────────────────────────────────
 
-  console.log('[snippets] watching', FUSE_ROOT)
-  const watcher = chokidar.watch(FUSE_ROOT, {
+    const snippetsDir = path.join(FUSE_ROOT, 'snippets')
+    console.log('[snippets] watching', snippetsDir)
+    const watcher = chokidar.watch(snippetsDir, {
     ignoreInitial: true,
     depth: 3,
+        ignored: [/(^|[\/\\])\../, '**/node_modules/**', '**/dist/**'],
     awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
   })
 
   watcher.on('ready', () => {
-    console.log('[snippets] watcher ready on', FUSE_ROOT)
+      console.log('[snippets] watcher ready on', snippetsDir)
   })
 
   watcher.on('all', (event, filePath) => {

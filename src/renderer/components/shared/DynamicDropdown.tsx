@@ -45,7 +45,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
           )}
         </button>
       </PopoverTrigger>
-      
+
       <AnimatePresence>
         {open && (
           <PopoverContent
@@ -63,7 +63,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
               className="z-50 bg-overlay/90 backdrop-blur-xl border border-subtle rounded-xl shadow-xl overflow-hidden"
               onMouseLeave={() => { setHoveredId(null); }}
             >
-              <div className="flex flex-col p-1.5 relative z-10">
+                <div className="flex flex-col p-1.5 relative z-10 overflow-y-auto max-h-64">
                 {items.map((item, i) => {
                   const ItemIcon = item.icon
                   const isSelected = item.id === value
@@ -93,7 +93,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
                       )}
 
                       {ItemIcon && (
-                        <ItemIcon 
+                        <ItemIcon
                           className="size-4 shrink-0 transition-transform duration-200"
                           style={{
                             color: item.color || 'currentColor',

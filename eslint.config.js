@@ -36,6 +36,7 @@ export default defineConfig([
       },
     },
     rules: {
+        '@typescript-eslint/restrict-template-expressions': ['error', {allowNumber: true}],
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
       '@typescript-eslint/ban-ts-comment': ['error', {
         'ts-ignore': true,
@@ -52,7 +53,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/electron/**/*.{ts,mts}', 'vite.config.ts'],
+      files: ['electron/**/*.{ts,mts}', 'vite.config.ts'],
     languageOptions: {
       globals: globals.node,
     },

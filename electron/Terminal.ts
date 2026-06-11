@@ -45,7 +45,7 @@ export function registerTerminalHandlers(getWebContents: () => WebContents | nul
                 rows: 30,
                 cwd: workingDir,
                 env: process.env,
-                useConpty: true,
+                useConpty: false,
             });
 
             const dispData = proc.onData((data: string) => {
@@ -91,14 +91,16 @@ function resolveShell(shellType?: ShellType): Shell {
     }
 
     switch (shellType) {
-        case "powershell": return { exe: "powershell.exe",                          args: [] };
+        case "powershell":
+            return {exe: "powershell.exe", args: ["-NoLogo"]};
         case "git-bash":   return { exe: "C:\\Program Files\\Git\\bin\\bash.exe",   args: ["-l", "-i"] };
         case "wsl":        return { exe: "wsl.exe",                                 args: [] };
         case "python":     return { exe: "python.exe",                              args: [] };
         case "ipython":    return { exe: "ipython.exe",                             args: [] };
         case "node":       return { exe: "node.exe",                                args: [] };
         case "deno":       return { exe: "deno.exe",                                args: ["repl"] };
-        default:           return { exe: "pwsh.exe",                                args: [] }; // PS7
+        default:
+            return {exe: "pwsh.exe", args: ["-NoLogo"]}; // PS7
     }
 }
 

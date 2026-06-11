@@ -1,5 +1,5 @@
 import type { SdkIpc } from '@jules'
-import type { AtCommand, AtResult, DisplayCommand, DisplayResult } from './types'
+import type {AtCommand, AtResult, DisplayCommand, DisplayResult, TerminalCommand, TerminalResult} from './types'
 
 // ── @: fire-forget ────────────────────────────────────────────────────────────
 // Injects only session.send — reusable across any session via command.sessionId.
@@ -29,7 +29,25 @@ export interface DisplaySession {
 export type DisplayExecutor = (session: DisplaySession, command: DisplayCommand) => Promise<DisplayResult>
 
 export const DISPLAY_META = {
-  trigger:     '/' as const,
-  label:       'display',
-  description: 'Pull latest markdown from a Jules session',
+    trigger: '/' as const,
+    label: 'display',
+    description: 'Pull latest markdown from a Jules session',
+}
+
+// ── >: run script in terminal ─────────────────────────────────────────────────
+
+export type StartFn = (cwd: string) => void
+export type InputFn = (data: string) => void
+
+export interface TerminalDeps {
+    start: StartFn
+    input: InputFn
+}
+
+export type TerminalExecutor = (deps: TerminalDeps, command: TerminalCommand) => TerminalResult
+
+export const TERMINAL_META = {
+    trigger: '>' as const,
+    label: 'terminal',
+    description: 'Run a script in the terminal',
 }

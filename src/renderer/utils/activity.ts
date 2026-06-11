@@ -1,5 +1,30 @@
 import {formatDistanceToNow, isValid, parseISO} from "date-fns";
-import type {Activity, ActivityGroup, ActivityType} from '@/utils/types'
+import type {Activity, ActivityGroup, ActivityType} from '@/types/activity-feed'
+import type {ParsedFile} from '@/types/jules'
+
+export function parseUnidiff(patch?: string | null): ParsedFile[] {
+    if (!patch) return []
+    const files: ParsedFile[] = []
+    const sections = patch.split(/^diff --git /m).filter(Boolean)
+    for (const section of sections) {
+        const lines = section.split('\n')
+        let filePath = ''
+        let changeType: ParsedFile['changeType'] = 'modified'
+        let additions = 0
+        let deletions = 0
+        for (const line of lines) {
+            if (line.startsWith('+++ b/')) filePath = line.slice(6)
+            else if (line.startsWith('+++ /dev/null')) changeType = 'deleted'
+            else if (line.startsWith('--- /dev/null')) changeType = 'created'
+            else if (line.startsWith('new file')) changeType = 'created'
+            else if (line.startsWith('deleted file')) changeType = 'deleted'
+            else if (line.startsWith('+') && !line.startsWith('+++')) additions++
+            else if (line.startsWith('-') && !line.startsWith('---')) deletions++
+        }
+        if (filePath) files.push({path: filePath, changeType, additions, deletions})
+    }
+    return files
+}
 
 export function formatDate(dateString: string): string {
   if (!dateString) return "Unknown date";
@@ -12,24 +37,6 @@ export function formatDate(dateString: string): string {
   }
 }
 
-export function activityText(a: Activity): string {
-    switch (a.type) {
-        case 'agentMessaged':
-        case 'userMessaged':
-            return a.message
-        case 'planGenerated':
-            return a.plan.steps.map((s, i) => `${i + 1}. ${s.title}`).join('\n')
-        case 'planApproved':
-            return 'Plan approved'
-        case 'progressUpdated':
-            return a.title + (a.description ? `\n${a.description}` : '')
-        case 'sessionCompleted':
-            return 'Session completed'
-        case 'sessionFailed':
-            return a.reason || 'Session failed'
-    }
-}
-
 export function getActivityTypeColor(type: ActivityType): string {
   const map: Record<ActivityType, string> = {
       agentMessaged: "bg-blue-500",
@@ -40,21 +47,17 @@ export function getActivityTypeColor(type: ActivityType): string {
       sessionCompleted: "bg-green-500",
       sessionFailed: "bg-red-500",
   };
-    return map[type] ?? "bg-gray-500";
+    return map[type];
 }
 
-export function filterActivities(activities: Activity[]): Activity[] {
-    return activities;
-}
-
-export function groupActivities(filtered: Activity[]): ActivityGroup[] {
+export function groupActivities(activities: Activity[]): ActivityGroup[] {
   const grouped: ActivityGroup[] = [];
   let currentGroup: Activity[] | null = null;
 
-  filtered.forEach((activity, index) => {
-      const shouldGroup = activity.type === "progressUpdated";
-    const prev = index > 0 ? filtered[index - 1] : null;
-      const prevShouldGroup = prev?.type === "progressUpdated";
+    activities.forEach((activity, index) => {
+        const shouldGroup = activity.type === "progressUpdated";
+        const prev = index > 0 ? activities[index - 1] : null;
+        const prevShouldGroup = prev?.type === "progressUpdated";
 
     if (shouldGroup) {
       if (prevShouldGroup && currentGroup) {
@@ -70,15 +73,4 @@ export function groupActivities(filtered: Activity[]): ActivityGroup[] {
   });
 
   return grouped;
-}
-
-export function getOutputBranch(activities: Activity[], fallback = "main"): string {
-  for (const activity of [...activities].reverse()) {
-      if (activity.type === "agentMessaged" || activity.type === "sessionCompleted") {
-          const text = activityText(activity);
-          const match = /(?:created|pushed|on|switched to) branch ['"`]?([\w-./]+)['"`]?/i.exec(text);
-      if (match?.[1]) return match[1];
-    }
-  }
-  return fallback;
 }

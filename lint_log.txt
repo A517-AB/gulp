@@ -3,75 +3,20 @@
 > eslint .
 
 
-D:\LAST\electron\aliases.ts
-  17:13  error  Unsafe assignment of an `any` value                                     @typescript-eslint/no-unsafe-assignment
-  42:24  error  Promise returned in function argument where a void return was expected  @typescript-eslint/no-misused-promises
-  45:13  error  Unsafe assignment of an `any` value                                     @typescript-eslint/no-unsafe-assignment
-
 D:\LAST\electron\filesystem\handlers.ts
   129:83  error  Async arrow function has no 'await' expression                                                      @typescript-eslint/require-await
   155:38  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
 
-D:\LAST\electron\git.ts
-   47:37  error  Invalid type "any" of template literal expression                           @typescript-eslint/restrict-template-expressions
-   95:14  error  Unsafe argument of type `any[]` assigned to a parameter of type `string[]`  @typescript-eslint/no-unsafe-argument
-   99:14  error  Unsafe argument of type `any[]` assigned to a parameter of type `string[]`  @typescript-eslint/no-unsafe-argument
-  103:14  error  Unsafe argument of type `any[]` assigned to a parameter of type `string[]`  @typescript-eslint/no-unsafe-argument
-  133:14  error  Unsafe argument of type `any[]` assigned to a parameter of type `string[]`  @typescript-eslint/no-unsafe-argument
-
-D:\LAST\electron\github.ts
-   25:50  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-   42:28  error  Invalid type "any" of template literal expression              @typescript-eslint/restrict-template-expressions
-   42:45  error  Invalid type "any" of template literal expression              @typescript-eslint/restrict-template-expressions
-   59:50  error  Invalid type "URLSearchParams" of template literal expression  @typescript-eslint/restrict-template-expressions
-   69:41  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-   85:45  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-   88:41  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-   92:41  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-   96:41  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-  110:42  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-  127:46  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-  130:42  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-  140:53  error  Invalid type "string | number" of template literal expression  @typescript-eslint/restrict-template-expressions
-  144:53  error  Invalid type "string | number" of template literal expression  @typescript-eslint/restrict-template-expressions
-  148:53  error  Invalid type "string | number" of template literal expression  @typescript-eslint/restrict-template-expressions
-  148:81  error  Invalid type "any" of template literal expression              @typescript-eslint/restrict-template-expressions
-  152:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-  156:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-  160:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-  164:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-  168:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-  172:48  error  Invalid type "number" of template literal expression           @typescript-eslint/restrict-template-expressions
-
 D:\LAST\electron\history.ts
   13:11  error  Unsafe assignment of an `any` value  @typescript-eslint/no-unsafe-assignment
 
-D:\LAST\electron\ipc\bridge.ts
-   7:19  error  Type parameter T is used only once in the function signature                                                        @typescript-eslint/no-unnecessary-type-parameters
-  13:56  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
-  38:83  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
-
-D:\LAST\electron\ipc\handlers.ts
-   53:5   error  Unsafe return of a value of type `any`                                                                  @typescript-eslint/no-unsafe-return
-   99:26  error  ["JULES_API_KEY"] is better written in dot notation                                                     @typescript-eslint/dot-notation
-  101:19  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                              @typescript-eslint/await-thenable
-  116:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
-  124:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
-  136:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
-  144:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
-  148:21  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead  @typescript-eslint/no-confusing-void-expression
-  152:43  error  `select` is deprecated. Use `session.activities.select()` instead                                       @typescript-eslint/no-deprecated
-  160:43  error  Invalid type "number" of template literal expression                                                    @typescript-eslint/restrict-template-expressions
-  191:58  error  'e' is defined but never used                                                                           @typescript-eslint/no-unused-vars
-  264:47  error  '_' is defined but never used                                                                           @typescript-eslint/no-unused-vars
-
 D:\LAST\electron\main.mts
-   79:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
-   83:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
-   94:18  error  Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
-  128:1   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
-  157:46  error  Unnecessary optional chain on a non-nullish value                                                                                                                   @typescript-eslint/no-unnecessary-condition
-  181:44  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
+   78:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   82:5   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+   93:18  error  Promise returned in function argument where a void return was expected                                                                                              @typescript-eslint/no-misused-promises
+  127:1   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  155:46  error  Unnecessary optional chain on a non-nullish value                                                                                                                   @typescript-eslint/no-unnecessary-condition
+  179:44  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                           @typescript-eslint/prefer-nullish-coalescing
 
 D:\LAST\electron\popup.ts
   70:3  error  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read  @typescript-eslint/prefer-nullish-coalescing
@@ -83,7 +28,6 @@ D:\LAST\electron\queues.ts
   42:46  error  '_jsonPath' is defined but never used  @typescript-eslint/no-unused-vars
 
 D:\LAST\electron\scheduler.ts
-   12:6   error  Use an `interface` instead of a `type`                                                              @typescript-eslint/consistent-type-definitions
    53:12  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
    76:15  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
    76:20  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
@@ -103,11 +47,7 @@ D:\LAST\electron\scheduler.ts
   189:33  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
 
 D:\LAST\electron\snippets.ts
-  24:13  error  Unsafe assignment of an `any` value                                                                 @typescript-eslint/no-unsafe-assignment
-  30:43  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-  39:38  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-  39:38  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
-  39:48  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  79:20  error  Unnecessary escape character: \/  no-useless-escape
 
 D:\LAST\src\renderer\base\utils.ts
    33:31  error  Type parameter T is used only once in the function signature                                                                                                                                                                                                                                                                                @typescript-eslint/no-unnecessary-type-parameters
@@ -133,58 +73,8 @@ If a function does not access `this`, it can be annotated with `this: void`  @ty
   243:18  error  Unexpected empty arrow function                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-empty-function
   248:73  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                   @typescript-eslint/prefer-nullish-coalescing
 
-D:\LAST\src\renderer\components\overview\BlockEditor.tsx
-  39:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-D:\LAST\src\renderer\components\overview\BlockEditor.tsx:39:5
-  37 |     const blocks = editor.tryParseMarkdownToBlocks(content)
-  38 |     editor.replaceBlocks(editor.document, blocks)
-> 39 |     setReady(true)
-     |     ^^^^^^^^ Avoid calling setState() directly within an effect
-  40 |   }, [editor, content])
-  41 |
-  42 |   if (!ready) return null  react-hooks/set-state-in-effect
-
-D:\LAST\src\renderer\components\overview\Overview.tsx
-   39:61  error  Unsafe call of a type that could not be resolved                                             @typescript-eslint/no-unsafe-call
-   39:61  error  Unsafe call of a type that could not be resolved                                             @typescript-eslint/no-unsafe-call
-   39:71  error  Unsafe member access .toLowerCase on a type that cannot be resolved                          @typescript-eslint/no-unsafe-member-access
-   39:85  error  Unsafe member access .startsWith on a type that cannot be resolved                           @typescript-eslint/no-unsafe-member-access
-   54:63  error  Invalid operand for a '+' operation. Operands must each be a number or string. Got `any`     @typescript-eslint/restrict-plus-operands
-   75:11  error  Unsafe assignment of an error typed value                                                    @typescript-eslint/no-unsafe-assignment
-   75:21  error  Unsafe call of a type that could not be resolved                                             @typescript-eslint/no-unsafe-call
-   75:30  error  Unsafe member access .find on a type that cannot be resolved                                 @typescript-eslint/no-unsafe-member-access
-   75:55  error  Unsafe argument of type `any` assigned to a parameter of type `string`                       @typescript-eslint/no-unsafe-argument
-   90:60  error  Invalid operand for a '+' operation. Operands must each be a number or string. Got `any`     @typescript-eslint/restrict-plus-operands
-  100:18  error  Unsafe argument of type error typed assigned to a parameter of type `string`                 @typescript-eslint/no-unsafe-argument
-  100:43  error  Unsafe argument of type error typed assigned to a parameter of type `ShellType | undefined`  @typescript-eslint/no-unsafe-argument
-  101:13  error  Unsafe assignment of an error typed value                                                    @typescript-eslint/no-unsafe-assignment
-  104:39  error  Unsafe argument of type error typed assigned to a parameter of type `string`                 @typescript-eslint/no-unsafe-argument
-  104:39  error  Unsafe call of a type that could not be resolved                                             @typescript-eslint/no-unsafe-call
-  104:46  error  Unsafe member access .endsWith on a type that cannot be resolved                             @typescript-eslint/no-unsafe-member-access
-  104:72  error  Invalid operand for a '+' operation. Operands must each be a number or string. Got `any`     @typescript-eslint/restrict-plus-operands
-  105:58  error  Unsafe call of a type that could not be resolved                                             @typescript-eslint/no-unsafe-call
-  105:65  error  Unsafe member access .slice on a type that cannot be resolved                                @typescript-eslint/no-unsafe-member-access
-  108:18  error  Invalid type "any" of template literal expression                                            @typescript-eslint/restrict-template-expressions
-  112:9   error  Unnecessary conditional, comparison is always true, since `"/" === "/"` is true              @typescript-eslint/no-unnecessary-condition
-  114:24  error  Invalid type "any" of template literal expression                                            @typescript-eslint/restrict-template-expressions
-  121:18  error  Invalid type "any" of template literal expression                                            @typescript-eslint/restrict-template-expressions
-  125:26  error  Invalid type "any" of template literal expression                                            @typescript-eslint/restrict-template-expressions
-  128:30  error  Unsafe argument of type error typed assigned to a parameter of type `string`                 @typescript-eslint/no-unsafe-argument
-  131:20  error  Invalid type "any" of template literal expression                                            @typescript-eslint/restrict-template-expressions
-  131:47  error  Invalid type "number" of template literal expression                                         @typescript-eslint/restrict-template-expressions
-  133:16  error  Prefer the safe `: unknown` for a `catch` callback variable                                  @typescript-eslint/use-unknown-in-catch-callback-variable
-  135:20  error  Invalid type "any" of template literal expression                                            @typescript-eslint/restrict-template-expressions
-  143:22  error  Unnecessary conditional, value is `never`                                                    @typescript-eslint/no-unnecessary-condition
-  144:18  error  Invalid type "never" of template literal expression                                          @typescript-eslint/restrict-template-expressions
-  154:26  error  Invalid type "never" of template literal expression                                          @typescript-eslint/restrict-template-expressions
-  157:18  error  Invalid type "never" of template literal expression                                          @typescript-eslint/restrict-template-expressions
+D:\LAST\src\renderer\components\overview\GhostInput.tsx
+  18:30  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
 
 D:\LAST\src\renderer\components\shared\Clock.tsx
   14:36  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
@@ -202,56 +92,14 @@ D:\LAST\src\renderer\components\shared\ScheduleForm.tsx
 D:\LAST\src\renderer\components\shared\SnippetPicker.tsx
   127:63  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
 
-D:\LAST\src\renderer\components\workspace\activity-feed.tsx
-   61:18  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
-   65:23  error  Unnecessary optional chain on a non-nullish value                                                                   @typescript-eslint/no-unnecessary-condition
-   79:70  error  Invalid type "string | undefined" of template literal expression                                                    @typescript-eslint/restrict-template-expressions
-  116:41  error  Unnecessary optional chain on a non-nullish value                                                                   @typescript-eslint/no-unnecessary-condition
-  117:33  error  Unnecessary optional chain on a non-nullish value                                                                   @typescript-eslint/no-unnecessary-condition
-  153:23  error  Expected an assignment or function call and instead saw an expression                                               @typescript-eslint/no-unused-expressions
-  171:54  error  void operator shouldn't be used on void; it should convey that a return value is being ignored                      @typescript-eslint/no-meaningless-void-operator
-  171:59  error  Placing a void expression inside another expression is forbidden. Move it to its own statement instead              @typescript-eslint/no-confusing-void-expression
-
-D:\LAST\src\renderer\components\workspace\activity-item.tsx
-   17:9   error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-refresh/only-export-components
-   19:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-refresh/only-export-components
-   34:74  error  This assertion is unnecessary since it does not change the type of the expression                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unnecessary-type-assertion
-   35:85  error  This assertion is unnecessary since it does not change the type of the expression                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unnecessary-type-assertion
-   36:24  error  Error: Avoid constructing JSX within try/catch
-
-React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
-
-D:\LAST\src\renderer\components\workspace\activity-item.tsx:36:24
-  34 |         if (parsed !== null && typeof parsed === "object" && Object.keys(parsed as object).length > 0) {
-  35 |             if (Array.isArray(parsed) || (typeof parsed === "object" && "steps" in (parsed as object))) {
-> 36 |                 return <PlanContent content={parsed}/>;
-     |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
-  37 |             }
-  38 |             return <pre
-  39 |                 className="text-[11px] overflow-x-auto font-mono bg-muted/50 p-2 rounded">{JSON.stringify(parsed, null, 2)}</pre>;  react-hooks/error-boundaries
-   38:20  error  Error: Avoid constructing JSX within try/catch
-
-React does not immediately render components when JSX is rendered, so any errors from this component will not be caught by the try/catch. To catch errors in rendering a given component, wrap that component in an error boundary. (https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary).
-
-D:\LAST\src\renderer\components\workspace\activity-item.tsx:38:20
-  36 |                 return <PlanContent content={parsed}/>;
-  37 |             }
-> 38 |             return <pre
-     |                    ^^^^
-> 39 |                 className="text-[11px] overflow-x-auto font-mono bg-muted/50 p-2 rounded">{JSON.stringify(parsed, null, 2)}</pre>;
-     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Avoid constructing JSX within try/catch
-  40 |         }
-  41 |     } catch {
-  42 |         // not JSON                                                       react-hooks/error-boundaries
-  126:23  error  This assertion is unnecessary since it does not change the type of the expression                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-unnecessary-type-assertion
-
-D:\LAST\src\renderer\components\workspace\new-session-dialog.tsx
-  15:32  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
-  41:24  error  Promise-returning function provided to attribute where a void return was expected                   @typescript-eslint/no-misused-promises
+D:\LAST\src\renderer\components\ship\Dropdown.tsx
+  33:22  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  37:76  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  39:32  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
 
 D:\LAST\src\renderer\components\workspace\session-list.tsx
-  108:73   error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
-  108:107  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  104:98   error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  104:136  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
 
 D:\LAST\src\renderer\hooks\use-file-tree.ts
   57:26  error  Error: Calling setState synchronously within an effect can trigger cascading renders
@@ -301,109 +149,34 @@ depending on the event type  @typescript-eslint/no-deprecated
 D:\LAST\src\renderer\hooks\use-presets.ts
   21:12  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
 
-D:\LAST\src\renderer\hooks\use-queues.ts
-  28:26  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-D:\LAST\src\renderer\hooks\use-queues.ts:28:26
-  26 |   }, []);
-  27 |
-> 28 |   useEffect(() => { void load(); }, [load]);
-     |                          ^^^^ Avoid calling setState() directly within an effect
-  29 |
-  30 |   const sendTask = useCallback(async (group: FleetTaskGroup, task: FleetTask) => {
-  31 |       if (!sdkIpc) {  react-hooks/set-state-in-effect
+D:\LAST\src\renderer\hooks\use-session-list.ts
+  20:62   error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  20:100  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
 
 D:\LAST\src\renderer\hooks\use-snippets.ts
-  20:26  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-D:\LAST\src\renderer\hooks\use-snippets.ts:20:26
-  18 |   }, [])
-  19 |
-> 20 |   useEffect(() => { void load() }, [load])
-     |                          ^^^^ Avoid calling setState() directly within an effect
-  21 |
-  22 |   useEffect(() => {
-  23 |     return snippetsApi?.onChanged(() => {  react-hooks/set-state-in-effect
-
-D:\LAST\src\renderer\lib\archive.test.ts
-   15:26  error  Calling a string's .toString() method does not change the type or value of the string  @typescript-eslint/no-unnecessary-type-conversion
-   21:20  error  Do not delete dynamically computed property keys                                       @typescript-eslint/no-dynamic-delete
-   89:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
-   89:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
-   98:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
-   98:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
-   99:21  error  Unsafe member access .length on an `any` value                                         @typescript-eslint/no-unsafe-member-access
-  108:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
-  108:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
-  123:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
-  123:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
-  136:13  error  Unsafe assignment of an `any` value                                                    @typescript-eslint/no-unsafe-assignment
-  136:33  error  Forbidden non-null assertion                                                           @typescript-eslint/no-non-null-assertion
-
-D:\LAST\src\renderer\lib\archive.ts
-  13:29  error  Unsafe argument of type `any` assigned to a parameter of type `Iterable<string> | null | undefined`  @typescript-eslint/no-unsafe-argument
-
-D:\LAST\src\renderer\lib\jules\provider.tsx
-  17:46  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
-
-D:\LAST\src\renderer\lib\monaco.ts
-  44:3   error  Unsafe assignment of an error typed value                                         @typescript-eslint/no-unsafe-assignment
-  44:28  error  `typescript` is deprecated. Use the new top level "typescript" namespace instead  @typescript-eslint/no-deprecated
-  44:52  error  Unsafe member access .ESNext on a type that cannot be resolved                    @typescript-eslint/no-unsafe-member-access
-  45:3   error  Unsafe assignment of an error typed value                                         @typescript-eslint/no-unsafe-assignment
-  45:28  error  `typescript` is deprecated. Use the new top level "typescript" namespace instead  @typescript-eslint/no-deprecated
-  45:50  error  Unsafe member access .ESNext on a type that cannot be resolved                    @typescript-eslint/no-unsafe-member-access
-  46:3   error  Unsafe assignment of an error typed value                                         @typescript-eslint/no-unsafe-assignment
-  46:38  error  `typescript` is deprecated. Use the new top level "typescript" namespace instead  @typescript-eslint/no-deprecated
-  46:70  error  Unsafe member access .Bundler on a type that cannot be resolved                   @typescript-eslint/no-unsafe-member-access
-  47:3   error  Unsafe assignment of an error typed value                                         @typescript-eslint/no-unsafe-assignment
-  47:25  error  `typescript` is deprecated. Use the new top level "typescript" namespace instead  @typescript-eslint/no-deprecated
-  47:44  error  Unsafe member access .ReactJSX on a type that cannot be resolved                  @typescript-eslint/no-unsafe-member-access
-  57:7   error  Unsafe assignment of an error typed value                                         @typescript-eslint/no-unsafe-assignment
-  57:37  error  `typescript` is deprecated. Use the new top level "typescript" namespace instead  @typescript-eslint/no-deprecated
-  58:7   error  Unsafe assignment of an error typed value                                         @typescript-eslint/no-unsafe-assignment
-  58:37  error  `typescript` is deprecated. Use the new top level "typescript" namespace instead  @typescript-eslint/no-deprecated
-  60:1   error  Unsafe call of a type that could not be resolved                                  @typescript-eslint/no-unsafe-call
-  60:12  error  Unsafe member access .setCompilerOptions on a type that cannot be resolved        @typescript-eslint/no-unsafe-member-access
-  61:1   error  Unsafe call of a type that could not be resolved                                  @typescript-eslint/no-unsafe-call
-  61:12  error  Unsafe member access .setCompilerOptions on a type that cannot be resolved        @typescript-eslint/no-unsafe-member-access
-  73:1   error  Unsafe call of a type that could not be resolved                                  @typescript-eslint/no-unsafe-call
-  73:12  error  Unsafe member access .setDiagnosticsOptions on a type that cannot be resolved     @typescript-eslint/no-unsafe-member-access
-  74:1   error  Unsafe call of a type that could not be resolved                                  @typescript-eslint/no-unsafe-call
-  74:12  error  Unsafe member access .setDiagnosticsOptions on a type that cannot be resolved     @typescript-eslint/no-unsafe-member-access
-  77:1   error  Unsafe call of a type that could not be resolved                                  @typescript-eslint/no-unsafe-call
-  77:12  error  Unsafe member access .setEagerModelSync on a type that cannot be resolved         @typescript-eslint/no-unsafe-member-access
-  78:1   error  Unsafe call of a type that could not be resolved                                  @typescript-eslint/no-unsafe-call
-  78:12  error  Unsafe member access .setEagerModelSync on a type that cannot be resolved         @typescript-eslint/no-unsafe-member-access
+  56:22  error  Prefer using nullish coalescing operator (`??`) instead of a ternary expression, as it is simpler to read  @typescript-eslint/prefer-nullish-coalescing
 
 D:\LAST\src\renderer\library\jules-watcher\store.ts
   17:51  error  '_' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
-D:\LAST\src\renderer\pages\electron\ActivityPage.tsx
-  115:20  error  Unexpected empty arrow function                                                    @typescript-eslint/no-empty-function
-  167:51  error  Promise-returning function provided to attribute where a void return was expected  @typescript-eslint/no-misused-promises
+D:\LAST\src\renderer\pages\electron\ExplorerPage.tsx
+   62:24  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+   97:21  error  Promise-returning function provided to attribute where a void return was expected                                   @typescript-eslint/no-misused-promises
+  148:29  error  Promise-returning function provided to attribute where a void return was expected                                   @typescript-eslint/no-misused-promises
+  159:36  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  171:36  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
 
 D:\LAST\src\renderer\pages\electron\QueuesPage.tsx
   240:13  error  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
   272:17  error  This assertion is unnecessary since it does not change the type of the expression  @typescript-eslint/no-unnecessary-type-assertion
   272:17  error  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
 
-D:\LAST\src\renderer\pages\electron\SnippetsPage.tsx
-  23:13  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
-  23:18  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
-  27:35  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
+D:\LAST\src\renderer\pages\electron\ShipPage.tsx
+   94:48  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  137:72  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  160:83  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  167:83  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  202:35  error  Unnecessary conditional, comparison is always true, since `"scanning" === "scanning"` is true                       @typescript-eslint/no-unnecessary-condition
 
 D:\LAST\src\renderer\pages\electron\TardisPage.tsx
   50:20  error  Unexpected empty arrow function  @typescript-eslint/no-empty-function
@@ -437,9 +210,6 @@ D:\LAST\src\renderer\pages\shared\settings\panels\TestRow.tsx
   62:54  error  Forbidden non-null assertion                                      @typescript-eslint/no-non-null-assertion
   74:24  error  Forbidden non-null assertion                                      @typescript-eslint/no-non-null-assertion
 
-D:\LAST\src\renderer\pages\shared\settings\panels\connection-tests.ts
-  15:64  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
-
 D:\LAST\src\renderer\shell\TopBar.tsx
   10:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
 
@@ -458,31 +228,9 @@ D:\LAST\src\renderer\shell\TopBar.tsx:10:9
   12 |
   13 |     return (  react-hooks/set-state-in-effect
 
-D:\LAST\src\renderer\store\app.ts
-   47:33  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
-   48:30  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
-   59:65  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator           @typescript-eslint/prefer-nullish-coalescing
-   74:32  error  Prefer using an optional chain expression instead, as it's more concise and easier to read                          @typescript-eslint/prefer-optional-chain
-  123:42  error  Unexpected empty arrow function                                                                                     @typescript-eslint/no-empty-function
-  128:60  error  Unexpected empty arrow function                                                                                     @typescript-eslint/no-empty-function
-
-D:\LAST\src\renderer\utils\activity.ts
-  21:50  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-  43:12  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
-
 D:\LAST\src\shared\bridge.test.ts
   3:28  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
 
-D:\LAST\src\shared\commands\parse.ts
-  5:13  error  Use an `interface` instead of a `type`  @typescript-eslint/consistent-type-definitions
-  6:13  error  Use an `interface` instead of a `type`  @typescript-eslint/consistent-type-definitions
-  8:13  error  Use an `interface` instead of a `type`  @typescript-eslint/consistent-type-definitions
-
-D:\LAST\src\shared\fuse.ts
-   9:26  error  `uuid` is deprecated. Use `z.uuid()` instead              @typescript-eslint/no-deprecated
-  15:26  error  `datetime` is deprecated. Use `z.iso.datetime()` instead  @typescript-eslint/no-deprecated
-  16:26  error  `datetime` is deprecated. Use `z.iso.datetime()` instead  @typescript-eslint/no-deprecated
-
-✖ 253 problems (253 errors, 0 warnings)
-  21 errors and 0 warnings potentially fixable with the `--fix` option.
+✖ 104 problems (104 errors, 0 warnings)
+  15 errors and 0 warnings potentially fixable with the `--fix` option.
 

@@ -1,12 +1,56 @@
 import {useEffect, useRef, useState} from 'react'
 import {useParams} from 'react-router'
 import {sdkIpc} from '@shared/bridge'
-import type {Activity, PlanStep} from '@google/jules-sdk/types'
+import type {Activity, ChangeSetArtifact, PlanStep} from '@google/jules-sdk/types'
+import {parseUnidiff} from '@/utils/activity'
 import {Input} from '@/ui/input'
 import {Button} from '@/ui/button'
-import {CheckCircle2, FileText, Loader2, Send, XCircle} from 'lucide-react'
+import {CheckCircle2, ChevronDown, ChevronRight, FileText, Send, XCircle} from 'lucide-react'
 
-function ActivityItem({ a, onApprove, approving }: { a: Activity; onApprove: () => void; approving: boolean }) {
+function ChangeSetDropdown({artifact}: { artifact: ChangeSetArtifact }) {
+    const [open, setOpen] = useState(false)
+    const patch = artifact.gitPatch.unidiffPatch
+    if (!patch) return null
+    const files = parseUnidiff(patch)
+    if (files.length === 0) return null
+    const totalAdd = files.reduce((s, f) => s + f.additions, 0)
+    const totalDel = files.reduce((s, f) => s + f.deletions, 0)
+    return (
+        <div className="mt-2">
+            <button
+                onClick={() => {
+                    setOpen(o => !o)
+                }}
+                className="flex items-center gap-1.5 text-3xs font-mono text-fg-dim hover:text-fg-secondary transition-colors"
+            >
+                {open ? <ChevronDown className="size-3"/> : <ChevronRight className="size-3"/>}
+                <span>{files.length} file{files.length !== 1 ? 's' : ''} changed</span>
+                <span className="text-green-400">+{totalAdd}</span>
+                <span className="text-red-400">-{totalDel}</span>
+            </button>
+            {open && (
+                <div className="mt-1.5 space-y-0.5 pl-4">
+                    {files.map((f, i) => (
+                        <div key={i} className="flex items-center justify-between gap-2 text-3xs font-mono">
+                            <span className="text-fg-dim truncate">{f.path}</span>
+                            <span className="shrink-0 flex gap-1.5">
+                                <span className="text-green-400">+{f.additions}</span>
+                                <span className="text-red-400">-{f.deletions}</span>
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
+
+function ActivityItem({a, onApprove, approving, changeset}: {
+    a: Activity;
+    onApprove: () => void;
+    approving: boolean;
+    changeset: ChangeSetArtifact | undefined
+}) {
   switch (a.type) {
     case 'agentMessaged':
       return (
@@ -31,7 +75,7 @@ function ActivityItem({ a, onApprove, approving }: { a: Activity; onApprove: () 
               <span className="text-3xs font-mono uppercase tracking-widest text-fg-dim">Plan</span>
             </div>
             <Button size="sm" variant="outline" onClick={onApprove} disabled={approving} className="h-6 text-3xs font-mono">
-              {approving ? <Loader2 className="size-3 animate-spin" /> : 'Approve'}
+                Approve
             </Button>
           </div>
           <ol className="space-y-1 pl-1">
@@ -54,7 +98,9 @@ function ActivityItem({ a, onApprove, approving }: { a: Activity; onApprove: () 
     case 'progressUpdated':
       return (
         <div className="flex items-start gap-2 py-0.5">
-          <Loader2 className="size-3.5 text-fg-dim mt-0.5 shrink-0" />
+          <span className="size-3.5 mt-0.5 shrink-0 flex items-center justify-center">
+            <span className="h-1 w-1 rounded-full bg-fg-dim"/>
+          </span>
           <div>
             <p className="text-xxs text-fg-secondary">{a.title}</p>
             {a.description && <p className="text-3xs text-fg-ghost mt-0.5">{a.description}</p>}
@@ -63,10 +109,14 @@ function ActivityItem({ a, onApprove, approving }: { a: Activity; onApprove: () 
       )
     case 'sessionCompleted':
       return (
-        <div className="flex items-center gap-2 py-0.5">
-          <CheckCircle2 className="size-3.5 text-green-500 shrink-0" />
-          <span className="text-3xs font-mono text-green-500">Session completed</span>
-          {/* gitpatch hook-in: "View changes" button goes here */}
+          <div className="py-0.5">
+              <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                      <CheckCircle2 className="size-3.5 text-green-500 shrink-0"/>
+                      <span className="text-3xs font-mono text-green-500">Session completed</span>
+                  </div>
+                  {changeset && <ChangeSetDropdown artifact={changeset}/>}
+              </div>
         </div>
       )
     case 'sessionFailed':
@@ -112,7 +162,7 @@ export default function ActivityPage() {
 
     sdkIpc.activities.list(id).then(({ activities: list }) => {
       if (!cancelled) setActivities(list)
-    }).catch(() => {})
+    }).catch(console.error)
 
     const unsub = sdkIpc.activities.updates(id, (item) => {
       if (!cancelled) setActivities(prev => [...prev, item])
@@ -156,6 +206,10 @@ export default function ActivityPage() {
 
   if (!id) return null
 
+    const changeset = activities
+        .flatMap(a => Array.isArray(a.artifacts) ? a.artifacts : [])
+        .find((x): x is ChangeSetArtifact => x.type === 'changeSet')
+
   return (
     <div className="flex flex-col h-full">
         <div ref={viewportRef} className="flex-1 overflow-y-auto">
@@ -164,7 +218,9 @@ export default function ActivityPage() {
             <p className="text-fg-ghost text-xs font-mono text-center pt-16 select-none">No activities yet</p>
           )}
           {activities.map((a, i) => (
-            <ActivityItem key={i} a={a} onApprove={approve} approving={approving} />
+              <ActivityItem key={i} a={a} onApprove={() => {
+                  void approve()
+              }} approving={approving} changeset={a.type === 'sessionCompleted' ? changeset : undefined}/>
           ))}
         </div>
         </div>
@@ -184,7 +240,7 @@ export default function ActivityPage() {
             }}
           />
           <Button size="icon-sm" onClick={() => { void send() }} disabled={!input.trim() || sending}>
-            {sending ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
+              <Send className="size-3.5"/>
           </Button>
         </div>
       </div>

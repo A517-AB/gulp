@@ -1,7 +1,6 @@
 import { useTheme } from '@renderer/providers/theme'
 import Editor, { type EditorProps } from '@monaco-editor/react'
 import { cn } from '@/utils'
-import { Loader2 } from 'lucide-react'
 
 export interface CodeEditorProps extends Omit<EditorProps, 'theme'> {
   className?: string
@@ -24,11 +23,7 @@ export function CodeEditor({
       <Editor
         height={height}
         theme={isDark ? 'vs-dark' : 'light'}
-        loading={
-          <div className="flex h-full w-full items-center justify-center text-fg-muted">
-            <Loader2 className="size-5 animate-spin" />
-          </div>
-        }
+
         options={{
           minimap: { enabled: false },
           fontSize: 13,

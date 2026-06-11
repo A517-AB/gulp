@@ -30,5 +30,14 @@
     "enabled": true,
     "createdAt": 1749513600000,
     "sessionId": "11845668431150264772"
+  },
+  {
+    "id": "cmd_run_1",
+    "trigger": ">",
+    "alias": "weather",
+    "enabled": true,
+    "createdAt": 1749513600000,
+    "script": "D:/fuse/scripts/weather.py",
+    "cwd": "D:/fuse/scripts"
   }
 ]

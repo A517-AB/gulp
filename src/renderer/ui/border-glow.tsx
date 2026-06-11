@@ -22,7 +22,7 @@ export function BorderGlow({
       <div
         className={cn(
           "absolute -inset-[1px] rounded-lg opacity-0 transition-opacity duration-500",
-          "group-hover:opacity-100",
+            "group-hover:opacity-40 dark:group-hover:opacity-100",
           animated && "animate-pulse",
         )}
         style={{

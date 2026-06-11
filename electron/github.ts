@@ -22,7 +22,7 @@ async function gh<T>(endpoint: string, options: { method?: string; body?: unknow
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({})) as { message?: string }
-    throw new Error(err.message ?? `GitHub API ${res.status}: ${endpoint}`)
+      throw new Error(err.message ?? `GitHub API ${String(res.status)}: ${endpoint}`)
   }
 
   if (res.status === 204) return undefined as T
@@ -39,7 +39,7 @@ export function registerGitHubHandlers(): void {
   // ── repos ─────────────────────────────────────────────────────────────────────
 
   ipcMain.handle('github.listRepos', (_e, sort = 'updated', per_page = 100) =>
-    gh(`/user/repos?sort=${sort}&per_page=${per_page}&affiliation=owner,collaborator`)
+      gh(`/user/repos?sort=${String(sort)}&per_page=${String(per_page)}&affiliation=owner,collaborator`)
   )
 
   ipcMain.handle('github.getRepo', (_e, owner: string, repo: string) =>
@@ -56,7 +56,7 @@ export function registerGitHubHandlers(): void {
 
   ipcMain.handle('github.listCommits', (_e, owner: string, repo: string, branch?: string, per_page = 20) => {
     const q = new URLSearchParams({ per_page: String(per_page), ...(branch ? { sha: branch } : {}) })
-    return gh(`/repos/${owner}/${repo}/commits?${q}`)
+      return gh(`/repos/${owner}/${repo}/commits?${q.toString()}`)
   })
 
   // ── pull requests ─────────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ export function registerGitHubHandlers(): void {
   )
 
   ipcMain.handle('github.getPR', (_e, owner: string, repo: string, number: number) =>
-    gh(`/repos/${owner}/${repo}/pulls/${number}`)
+      gh(`/repos/${owner}/${repo}/pulls/${String(number)}`)
   )
 
   ipcMain.handle('github.createPR', (_e, owner: string, repo: string, data: {
@@ -82,18 +82,18 @@ export function registerGitHubHandlers(): void {
     body?: string
     state?: 'open' | 'closed'
     base?: string
-  }) => gh(`/repos/${owner}/${repo}/pulls/${number}`, { method: 'PATCH', body: data }))
+  }) => gh(`/repos/${owner}/${repo}/pulls/${String(number)}`, {method: 'PATCH', body: data}))
 
   ipcMain.handle('github.mergePR', (_e, owner: string, repo: string, number: number, method: 'merge' | 'squash' | 'rebase' = 'squash') =>
-    gh(`/repos/${owner}/${repo}/pulls/${number}/merge`, { method: 'PUT', body: { merge_method: method } })
+      gh(`/repos/${owner}/${repo}/pulls/${String(number)}/merge`, {method: 'PUT', body: {merge_method: method}})
   )
 
   ipcMain.handle('github.reviewPR', (_e, owner: string, repo: string, number: number, event: 'APPROVE' | 'REQUEST_CHANGES' | 'COMMENT', body?: string) =>
-    gh(`/repos/${owner}/${repo}/pulls/${number}/reviews`, { method: 'POST', body: { event, body } })
+      gh(`/repos/${owner}/${repo}/pulls/${String(number)}/reviews`, {method: 'POST', body: {event, body}})
   )
 
   ipcMain.handle('github.getPRFiles', (_e, owner: string, repo: string, number: number) =>
-    gh(`/repos/${owner}/${repo}/pulls/${number}/files`)
+      gh(`/repos/${owner}/${repo}/pulls/${String(number)}/files`)
   )
 
   ipcMain.handle('github.getPRChecks', (_e, owner: string, repo: string, ref: string) =>
@@ -107,7 +107,7 @@ export function registerGitHubHandlers(): void {
   )
 
   ipcMain.handle('github.getIssue', (_e, owner: string, repo: string, number: number) =>
-    gh(`/repos/${owner}/${repo}/issues/${number}`)
+      gh(`/repos/${owner}/${repo}/issues/${String(number)}`)
   )
 
   ipcMain.handle('github.createIssue', (_e, owner: string, repo: string, data: {
@@ -124,10 +124,10 @@ export function registerGitHubHandlers(): void {
     state?: 'open' | 'closed'
     labels?: string[]
     assignees?: string[]
-  }) => gh(`/repos/${owner}/${repo}/issues/${number}`, { method: 'PATCH', body: data }))
+  }) => gh(`/repos/${owner}/${repo}/issues/${String(number)}`, {method: 'PATCH', body: data}))
 
   ipcMain.handle('github.addIssueComment', (_e, owner: string, repo: string, number: number, body: string) =>
-    gh(`/repos/${owner}/${repo}/issues/${number}/comments`, { method: 'POST', body: { body } })
+      gh(`/repos/${owner}/${repo}/issues/${String(number)}/comments`, {method: 'POST', body: {body}})
   )
 
   // ── actions / workflows ───────────────────────────────────────────────────────
@@ -137,39 +137,42 @@ export function registerGitHubHandlers(): void {
   )
 
   ipcMain.handle('github.getWorkflow', (_e, owner: string, repo: string, workflowId: string | number) =>
-    gh(`/repos/${owner}/${repo}/actions/workflows/${workflowId}`)
+      gh(`/repos/${owner}/${repo}/actions/workflows/${String(workflowId)}`)
   )
 
   ipcMain.handle('github.triggerWorkflow', (_e, owner: string, repo: string, workflowId: string | number, ref: string, inputs: Record<string, string> = {}) =>
-    gh(`/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`, { method: 'POST', body: { ref, inputs } })
+      gh(`/repos/${owner}/${repo}/actions/workflows/${String(workflowId)}/dispatches`, {
+          method: 'POST',
+          body: {ref, inputs}
+      })
   )
 
   ipcMain.handle('github.listWorkflowRuns', (_e, owner: string, repo: string, workflowId: string | number, per_page = 20) =>
-    gh(`/repos/${owner}/${repo}/actions/workflows/${workflowId}/runs?per_page=${per_page}`)
+      gh(`/repos/${owner}/${repo}/actions/workflows/${String(workflowId)}/runs?per_page=${String(per_page)}`)
   )
 
   ipcMain.handle('github.getWorkflowRun', (_e, owner: string, repo: string, runId: number) =>
-    gh(`/repos/${owner}/${repo}/actions/runs/${runId}`)
+      gh(`/repos/${owner}/${repo}/actions/runs/${String(runId)}`)
   )
 
   ipcMain.handle('github.getWorkflowRunLogs', (_e, owner: string, repo: string, runId: number) =>
-    gh(`/repos/${owner}/${repo}/actions/runs/${runId}/logs`)
+      gh(`/repos/${owner}/${repo}/actions/runs/${String(runId)}/logs`)
   )
 
   ipcMain.handle('github.cancelWorkflowRun', (_e, owner: string, repo: string, runId: number) =>
-    gh(`/repos/${owner}/${repo}/actions/runs/${runId}/cancel`, { method: 'POST' })
+      gh(`/repos/${owner}/${repo}/actions/runs/${String(runId)}/cancel`, {method: 'POST'})
   )
 
   ipcMain.handle('github.rerunWorkflowRun', (_e, owner: string, repo: string, runId: number) =>
-    gh(`/repos/${owner}/${repo}/actions/runs/${runId}/rerun`, { method: 'POST' })
+      gh(`/repos/${owner}/${repo}/actions/runs/${String(runId)}/rerun`, {method: 'POST'})
   )
 
   ipcMain.handle('github.rerunFailedJobs', (_e, owner: string, repo: string, runId: number) =>
-    gh(`/repos/${owner}/${repo}/actions/runs/${runId}/rerun-failed-jobs`, { method: 'POST' })
+      gh(`/repos/${owner}/${repo}/actions/runs/${String(runId)}/rerun-failed-jobs`, {method: 'POST'})
   )
 
   ipcMain.handle('github.listRunJobs', (_e, owner: string, repo: string, runId: number) =>
-    gh(`/repos/${owner}/${repo}/actions/runs/${runId}/jobs`)
+      gh(`/repos/${owner}/${repo}/actions/runs/${String(runId)}/jobs`)
   )
 
   // ── secrets (Actions) ─────────────────────────────────────────────────────────

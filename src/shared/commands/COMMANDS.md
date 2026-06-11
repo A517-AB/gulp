@@ -49,6 +49,26 @@ Each command is a JSON object with a trigger, alias, and a Jules session ID. Add
 
 Toggle `enabled: false` to disable a command without deleting it.
 
+### `>` — Run a script
+
+Type `>` in the input. A menu appears with your configured terminal commands. Select one and it immediately starts a PTY, runs `python "script"` inside it, and switches the right panel to a live xterm terminal showing output.
+
+No prompt needed. Fires on selection.
+
+```json
+{
+  "id": "cmd_run_1",
+  "trigger": ">",
+  "alias": "weather",
+  "enabled": true,
+  "createdAt": 1749513600000,
+  "script": "D:/fuse/scripts/weather.py",
+  "cwd": "D:/fuse/scripts"
+}
+```
+
+`script` is the absolute path to the `.py` file. `cwd` is optional — defaults to home directory if omitted.
+
 ---
 
 ## Adding a new trigger symbol
@@ -261,3 +281,13 @@ Before shipping a new trigger:
 - [ ] `SuggestionMenuController` added in `CommandInput.tsx`
 - [ ] Handler in `OverviewPage.tsx` using the executor
 - [ ] `npx tsc -p tsconfig.app.json --noEmit` passes with no new errors
+
+---
+
+## Implemented triggers
+
+| Trigger | File | Behavior |
+|---------|------|----------|
+| `@` | `AtCommand` | Fire-forget message to Jules session |
+| `/` | `DisplayCommand` | Pull latest markdown from Jules session |
+| `>` | `TerminalCommand` | Run a Python script, output live in xterm panel |

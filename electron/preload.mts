@@ -171,13 +171,16 @@ const notes: ElectronAPI["notes"] = {
 // ── snippets ───────────────────────────────────────────────────────────────────
 
 const snippets: ElectronAPI["snippets"] = {
-  get:       () => ipcRenderer.invoke("snippets.get"),
-  save:      (data) => ipcRenderer.invoke("snippets.save", data),
-  onChanged: (cb) => {
+    get: () => ipcRenderer.invoke("snippets.get"),
+    save: (data) => ipcRenderer.invoke("snippets.save", data),
+    onChanged: (cb) => {
     const handler = (_event: IpcRendererEvent, data: { event: string; path: string }) => { cb(data); }
     ipcRenderer.on("snippets.changed", handler)
     return () => { ipcRenderer.off("snippets.changed", handler) }
   },
+    readCode: (relPath) => ipcRenderer.invoke("snippets.readCode", relPath),
+    writeCode: (relPath, content) => ipcRenderer.invoke("snippets.writeCode", relPath, content),
+    deleteCode: (relPath) => ipcRenderer.invoke("snippets.deleteCode", relPath),
 };
 
 // ── uiNotification ─────────────────────────────────────────────────────────────
@@ -212,6 +215,18 @@ const scheduler: ElectronAPI["scheduler"] = {
   },
 }
 
+// ── git ────────────────────────────────────────────────────────────────────────
+
+const git: ElectronAPI["git"] = {
+    run: (cwd, args) => ipcRenderer.invoke("git.run", cwd, args),
+    status: (cwd) => ipcRenderer.invoke("git.status", cwd),
+    add: (cwd, files) => ipcRenderer.invoke("git.add", cwd, files),
+    commit: (cwd, msg, allowEmpty) => ipcRenderer.invoke("git.commit", cwd, msg, allowEmpty),
+    push: (cwd, remote, branch, force) => ipcRenderer.invoke("git.push", cwd, remote, branch, force),
+    pull: (cwd, remote, branch, rebase) => ipcRenderer.invoke("git.pull", cwd, remote, branch, rebase),
+    init: (cwd) => ipcRenderer.invoke("git.init", cwd),
+}
+
 // ── expose ─────────────────────────────────────────────────────────────────────
 
 const api: Omit<ElectronAPI, 'sdk'> = {
@@ -227,6 +242,7 @@ const api: Omit<ElectronAPI, 'sdk'> = {
   snippets,
   uiNotification,
   scheduler,
+    git,
 };
 
 contextBridge.exposeInMainWorld("electron", { ...api, sdk });

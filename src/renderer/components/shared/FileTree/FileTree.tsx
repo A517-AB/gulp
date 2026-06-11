@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Tree, type NodeRendererProps } from 'react-arborist'
-import { Folder, FolderOpen, File, RefreshCw, AlertCircle } from 'lucide-react'
+import {Folder, FolderOpen, File, AlertCircle} from 'lucide-react'
 import { cn } from '@/utils'
 import { useFileTree } from '@/hooks/use-file-tree'
 import type { FileTreeNode, FileTreeProps } from './types'
@@ -65,7 +65,7 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
 // ── component ─────────────────────────────────────────────────────────────────
 
 export function FileTree({ root, onSelectFile, onSelectFolder, className }: FileTreeProps) {
-  const { nodes, loading, error, loadChildren, refresh } = useFileTree(root)
+    const {nodes, loading, error, loadChildren} = useFileTree(root)
   const containerRef = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState<number | null>(null)
 
@@ -85,23 +85,9 @@ export function FileTree({ root, onSelectFile, onSelectFolder, className }: File
     [loadChildren, onSelectFile, onSelectFolder],
   )
 
-  const folderName = root?.split(/[\\/]/).filter(Boolean).at(-1) ?? 'Files'
-
   return (
     <TreeContext.Provider value={ctx}>
       <div className={cn('flex flex-col h-full', className)}>
-
-        <div className="flex items-center justify-between px-3 py-1.5 border-b border-border shrink-0">
-          <span className="text-xs font-medium text-foreground truncate">{folderName}</span>
-          <button
-            type="button"
-            onClick={() => void refresh()}
-            disabled={loading || !root}
-            className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-40"
-          >
-            <RefreshCw size={12} className={cn(loading && 'animate-spin')} />
-          </button>
-        </div>
 
         <div ref={containerRef} className="flex-1 overflow-hidden">
           {error ? (

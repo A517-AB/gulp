@@ -1,10 +1,24 @@
-import type { AtCommand, DisplayCommand, Command } from './types'
+import type {AtCommand, DisplayCommand, TerminalCommand, Command} from './types'
 
 // ── per-trigger parse results ─────────────────────────────────────────────────
 
-export interface AtParsed      { trigger: '@'; command: AtCommand;      prompt: string }
-export interface DisplayParsed { trigger: '/'; command: DisplayCommand               }
-export type ParsedInput   = AtParsed | DisplayParsed
+export interface AtParsed {
+    trigger: '@';
+    command: AtCommand;
+    prompt: string
+}
+
+export interface DisplayParsed {
+    trigger: '/';
+    command: DisplayCommand
+}
+
+export interface TerminalParsed {
+    trigger: '>';
+    command: TerminalCommand
+}
+
+export type ParsedInput = AtParsed | DisplayParsed | TerminalParsed
 export interface ParseErr  { error: string }
 export type ParseResult   = { ok: true; value: ParsedInput } | { ok: false; error: string }
 
@@ -41,14 +55,23 @@ function parseDisplay(input: string, registry: Command[]): ParseResult {
   return { ok: true, value: { trigger: '/', command } }
 }
 
+function parseTerminal(input: string, registry: Command[]): ParseResult {
+    const alias = input.slice(1).trim()
+    if (!alias) return {ok: false, error: 'Alias required'}
+    const command = registry.find((c): c is TerminalCommand => c.trigger === '>' && c.alias === alias && c.enabled)
+    if (!command) return {ok: false, error: `Unknown command: >${alias}`}
+    return {ok: true, value: {trigger: '>', command}}
+}
+
 // ── main entry ────────────────────────────────────────────────────────────────
 
 export function parseInput(input: string, registry: Command[]): ParseResult {
-  const trimmed = input.trim()
-  const trigger = trimmed[0]
+    const trimmed = input.trim()
+    const trigger = trimmed[0]
 
-  if (trigger === '@') return parseAt(trimmed, registry)
-  if (trigger === '/') return parseDisplay(trimmed, registry)
+    if (trigger === '@') return parseAt(trimmed, registry)
+    if (trigger === '/') return parseDisplay(trimmed, registry)
+    if (trigger === '>') return parseTerminal(trimmed, registry)
 
-  return { ok: false, error: 'Unknown trigger' }
+    return {ok: false, error: 'Unknown trigger'}
 }

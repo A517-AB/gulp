@@ -7,8 +7,7 @@ import {Button} from "@/ui/button.tsx";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/ui/dropdown-menu.tsx";
 import {useActivityGroups} from "@/hooks/use-activity-groups.ts";
 import {getSessionDuration, getStatusInfo} from "./session-status.ts";
-import {activityText, formatDate} from "@/utils/activity.ts";
-import {archiveSession} from "@/lib/archive.ts";
+import {formatDate} from "@/utils/activity.ts";
 import {ActivityItem} from "./activity-item.tsx";
 import {useStore} from "@/store/app.ts";
 import {useWatcherStore} from "@/library/jules-watcher";
@@ -18,15 +17,18 @@ const QUICK_REVIEW_PROMPT =
   "Please perform a comprehensive code review of the repository. Look for bugs, security issues, and opportunities for refactoring. Provide a detailed summary of your findings.";
 
 const EMPTY_ARRAY: Activity[] = [];
+const EMPTY_SUMMARIES: Record<string, string> = {};
 
 export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, onToggleCodeDiffs, onActivitiesChange }: ActivityFeedProps) {
     const activities = useStore(s => s.activities[session.id] ?? EMPTY_ARRAY);
   const error = useStore(s => s.activitiesError[session.id]);
   const loadActivities = useStore(s => s.loadActivities);
+    const streamActivities = useStore(s => s.streamActivities);
   const sendMessage = useStore(s => s.sendMessage);
   const approvePlan = useStore(s => s.approvePlan);
 
   const { grouped, latest } = useActivityGroups(activities);
+    const summaries = useStore(s => s.activitySummaries[session.id] ?? EMPTY_SUMMARIES);
     const isWatched = useWatcherStore(s => s.isWatched(session.id))
     const watch = useWatcherStore(s => s.watch)
     const unwatch = useWatcherStore(s => s.unwatch)
@@ -46,6 +48,11 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
       void loadActivities(session.id);
   }, [session.id, loadActivities]);
 
+    useEffect(() => {
+        if (session.state !== 'inProgress' && session.state !== 'planning') return;
+        return streamActivities(session.id);
+    }, [session.id, session.state, streamActivities]);
+
   useEffect(() => {
     const newIds = activities.filter(a => !prevIdsRef.current.has(a.id)).map(a => a.id);
     prevIdsRef.current = new Set(activities.map(a => a.id));
@@ -58,11 +65,13 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
     setNewActivityIds(new Set(newIds));
       bottomRef.current?.scrollIntoView({behavior: 'smooth'});
     const t = setTimeout(() => { setNewActivityIds(new Set()); }, 500);
-    return () => clearTimeout(t);
+      return () => {
+          clearTimeout(t);
+      };
   }, [activities]);
 
   useEffect(() => {
-    onActivitiesChange?.(activities);
+      onActivitiesChange(activities);
   }, [activities, onActivitiesChange]);
 
   const toggleBash = (id: string) => {
@@ -76,7 +85,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
     setApplyState({ status: "applying" });
     const result = await sdkIpc.session.applyPatch(session.id, { cwd });
     if (result.success) {
-      setApplyState({ status: "done", message: `Applied to branch: ${result.branch}` });
+        setApplyState({status: "done", message: `Applied to branch: ${result.branch ?? 'unknown'}`});
     } else {
         setApplyState({status: "error", message: result.error ?? "Unknown error"});
     }
@@ -106,11 +115,14 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
       void sendMessage(session.id, QUICK_REVIEW_PROMPT).finally(() => { setSending(false); });
   };
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const branch = session.sourceContext?.workingBranch
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         ?? session.sourceContext?.githubRepoContext?.startingBranch
         ?? "main";
 
     const statusInfo = getStatusInfo(session.state);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const hasDiffs = session.outputs?.some(o => o.type === 'changeSet') ?? false;
     const canApplyLocally = sdkIpc !== null && session.state === "completed" && hasDiffs;
 
@@ -135,7 +147,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
               <div className="mt-2 pt-2 border-t border-hair">
                 <div className="text-[9px] font-bold uppercase tracking-widest text-purple-400 mb-1">Latest</div>
                   <div
-                      className="text-[11px] text-fg-secondary line-clamp-2 font-mono">{activityText(latest).slice(0, 150)}</div>
+                      className="text-[11px] text-fg-secondary line-clamp-2 font-mono">{(summaries[latest.id] ?? '').slice(0, 150)}</div>
               </div>
             )}
           </div>
@@ -143,7 +155,11 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
               <Button
                   variant="ghost" size="icon"
                   onClick={() => {
-                      isWatched ? unwatch(session.id) : watch({id: session.id, title: session.title})
+                      if (isWatched) {
+                          unwatch(session.id);
+                      } else {
+                          watch({id: session.id, title: session.title});
+                      }
                   }}
                   className={`h-7 w-7 hover:bg-hover ${isWatched ? 'text-purple-400' : 'text-fg-muted'}`}
                   title={isWatched ? 'Stop watching' : 'Watch for replies'}
@@ -161,7 +177,9 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 bg-surface border-hair text-fg-secondary">
                   {session.state === "inProgress" && (
-                  <DropdownMenuItem onClick={() => { void handleQuickReview(); }} disabled={sending} className="focus:bg-hover text-xs cursor-pointer">
+                      <DropdownMenuItem onClick={() => {
+                          handleQuickReview();
+                      }} disabled={sending} className="focus:bg-hover text-xs cursor-pointer">
                     <Play className="mr-2 h-3.5 w-3.5" /><span>Start Code Review</span>
                   </DropdownMenuItem>
                 )}
@@ -178,7 +196,10 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
                     <Plus className="mr-2 h-3.5 w-3.5" /><span>New Session</span>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => { archiveSession(session.id); onArchive?.(); }} className="focus:bg-hover text-xs cursor-pointer text-red-400 focus:text-red-400">
+                  <DropdownMenuItem onClick={() => {
+                      void sdkIpc?.session.archive(session.id);
+                      onArchive?.();
+                  }} className="focus:bg-hover text-xs cursor-pointer text-red-400 focus:text-red-400">
                   <Archive className="mr-2 h-3.5 w-3.5" /><span>Archive Session</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -213,14 +234,21 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
         <ScrollArea className="h-full">
             <div className="p-3 flex flex-col space-y-2.5">
             {grouped.map((item, i) => (
-              <ActivityItem key={Array.isArray(item) ? `group-${String(i)}` : item.id} item={item} expandedBash={expandedBash} onToggleBash={toggleBash} onApprovePlan={() => { void handleApprovePlan(); }} approvingPlan={approving} isNew={!Array.isArray(item) && newActivityIds.has(item.id)} />
+                <ActivityItem key={Array.isArray(item) ? `group-${String(i)}` : item.id} item={item}
+                              expandedBash={expandedBash} onToggleBash={toggleBash} onApprovePlan={() => {
+                    void handleApprovePlan();
+                }} approvingPlan={approving} isNew={!Array.isArray(item) && newActivityIds.has(item.id)}
+                              summaries={summaries}/>
             ))}
                 <div ref={bottomRef}/>
           </div>
         </ScrollArea>
       </div>
 
-      <form onSubmit={(e) => { e.preventDefault(); void submit(); }} className="border-t border-hair bg-surface p-3">
+        <form onSubmit={(e) => {
+            e.preventDefault();
+            submit();
+        }} className="border-t border-hair bg-surface p-3">
         <div className="flex gap-2">
           <Textarea value={message} onChange={(e) => { setMessage(e.target.value); }} placeholder="Send a message to Jules..." className="min-h-[56px] resize-none text-[11px] bg-raised border-hair text-fg-primary placeholder:text-fg-ghost focus:border-purple-500/50" onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }} />
           <Button type="submit" size="icon" disabled={!message.trim() || sending} className="h-9 w-9">
