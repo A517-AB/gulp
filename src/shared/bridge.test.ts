@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type * as BridgeModuleNS from "./bridge";
 
-type BridgeModule = typeof import("./bridge");
+type BridgeModule = typeof BridgeModuleNS;
 
 function clearWindow() {
   Reflect.deleteProperty(globalThis, "window");

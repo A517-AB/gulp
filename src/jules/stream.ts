@@ -1,5 +1,5 @@
 // NOTE: not sure if this is used anywhere — may be dead code, revisit before deleting
-import type {Activity} from '@jules'
+import type {Activity} from '@google/jules-sdk/types'
 
 type ActivityType = Activity['type']
 

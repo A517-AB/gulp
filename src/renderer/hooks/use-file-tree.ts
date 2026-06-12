@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { filesystem } from '@shared/bridge'
 import type { FsEntry } from '@shared/filesystem'
 
@@ -32,8 +32,9 @@ function insertChildren(nodes: FileTreeNode[], id: string, children: FileTreeNod
 
 export function useFileTree(root: string | null) {
   const [nodes, setNodes] = useState<FileTreeNode[]>([])
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [rev, setRev] = useState(0)
+  const cancelRef = useRef<(() => void) | null>(null)
 
   const loadDir = useCallback(async (dir: string): Promise<FileTreeNode[]> => {
     if (!filesystem) return []
@@ -41,20 +42,21 @@ export function useFileTree(root: string | null) {
     return entries.map(entryToNode)
   }, [])
 
-  const refresh = useCallback(async () => {
-    if (!root) return
-    setLoading(true)
-    setError(null)
-    try {
-      setNodes(await loadDir(root))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load directory')
-    } finally {
-      setLoading(false)
-    }
-  }, [root, loadDir])
+  const refresh = useCallback(() => { setRev(r => r + 1) }, [])
 
-  useEffect(() => { void refresh() }, [refresh])
+  useEffect(() => {
+    cancelRef.current?.()
+    if (!root) return
+    let cancelled = false
+    cancelRef.current = () => { cancelled = true }
+    loadDir(root).then(
+      result => { if (!cancelled) setNodes(result) },
+      (err: unknown) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load directory')
+      },
+    )
+    return () => { cancelled = true }
+  }, [root, loadDir, rev])
 
   const loadChildren = useCallback(async (node: FileTreeNode) => {
     if (node.loaded || !node.isDir) return
@@ -62,10 +64,9 @@ export function useFileTree(root: string | null) {
       const children = await loadDir(node.id)
       setNodes(prev => insertChildren(prev, node.id, children))
     } catch {
-      // folder unreadable — mark loaded with empty children so we don't retry
       setNodes(prev => insertChildren(prev, node.id, []))
     }
   }, [loadDir])
 
-  return { nodes, loading, error, loadChildren, refresh }
+  return { nodes: root ? nodes : [], error, loadChildren, refresh }
 }

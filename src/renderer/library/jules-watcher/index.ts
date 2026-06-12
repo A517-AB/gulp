@@ -1,4 +1,5 @@
 export { JulesWatcher } from './JulesWatcher'
 export { WatcherList } from './WatcherList'
+export { WatcherStreams } from './WatcherStreams'
 export { useWatcherStore } from './store'
 export type { WatchedSession } from './types'

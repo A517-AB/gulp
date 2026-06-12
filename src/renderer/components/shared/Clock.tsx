@@ -11,8 +11,8 @@ export function Clock({ size = 240, className }: ClockProps) {
   const [time, setTime] = useState(new Date())
 
   useEffect(() => {
-      const id = setInterval(() => setTime(new Date()), 1000)
-      return () => clearInterval(id)
+      const id = setInterval(() => { setTime(new Date()) }, 1000)
+      return () => { clearInterval(id) }
   }, [])
 
   return (
@@ -23,10 +23,12 @@ export function Clock({ size = 240, className }: ClockProps) {
           background: transparent;
         }
         .react-clock__mark__body {
-          background-color: rgba(255,255,255,0.12);
+          background-color: currentColor;
+          opacity: 0.2;
         }
         .react-clock__hour-mark__body {
-          background-color: rgba(255,255,255,0.35);
+          background-color: currentColor;
+          opacity: 0.5;
         }
         .react-clock__minute-mark__body {
           display: none;

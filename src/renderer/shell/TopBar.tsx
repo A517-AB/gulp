@@ -7,7 +7,8 @@ export function TopBar({ left, center, right }: TopBarProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
+        const id = setTimeout(() => { setMounted(true) }, 0)
+        return () => { clearTimeout(id) }
     }, []);
 
     return (

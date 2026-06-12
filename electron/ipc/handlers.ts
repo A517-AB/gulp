@@ -301,6 +301,10 @@ export function registerSdkHandlers() {
         serialize(toSummary(activity))
     )
 
+    ipcMain.handle('sdk:util.toSummaries', (_, activities: Activity[]) =>
+        serialize(activities.map(a => toSummary(a)))
+    )
+
     // ── query ─────────────────────────────────────────────────────────────────────
 
     ipcMain.handle('sdk:query.validate', (_, query: unknown) =>

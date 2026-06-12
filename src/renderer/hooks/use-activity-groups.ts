@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import {groupActivities} from "@/utils/activity";
-import type { Activity } from "@/types/activity-feed";
+import type { Activity } from "@google/jules-sdk/types";
 import type { UseActivityGroupsReturn } from "@/types/ui-hooks";
 
 export function useActivityGroups(activities: Activity[]): UseActivityGroupsReturn {

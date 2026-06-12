@@ -10,6 +10,7 @@ import {formatDate} from "@/utils/activity.ts";
 import {useSessionList} from "@/hooks/use-session-list.ts";
 import {useStore} from "@/store/app.ts";
 import {STATE_BADGE, STATE_DOT} from "./session-status.ts";
+import {SessionContextMenu} from "./SessionContextMenu.tsx";
 import type {SessionListProps} from "@/types/activity-feed.ts";
 
 function truncateText(text: string, maxLength: number) {
@@ -54,8 +55,8 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
           ) : (
               <TooltipProvider>
                   {sessions.map((s) => (
+                      <SessionContextMenu key={s.id} session={s}>
                       <CardSpotlight
-                          key={s.id}
                           radius={200}
                           color="var(--spotlight-color)"
                           className={`relative rounded-md overflow-hidden transition-all border ${
@@ -100,8 +101,9 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
                                       {(() => {
                                           // sourceContext is typed required by the SDK but is absent on old/cached sessions —
                                           // the SDK itself uses sourceContext?.source in its own storage layer (index.mjs:3088)
+                                          const sc = s.sourceContext as { source?: string } | undefined
                                           const repo = s.source?.githubRepo
-                                              ?? sources.find(src => src.name === s.sourceContext?.source || src.id === s.sourceContext?.source)?.githubRepo;
+                                              ?? sources.find(src => src.name === sc?.source || src.id === sc?.source)?.githubRepo;
                                           if (!repo) return null;
                                           return (
                                               <>
@@ -117,6 +119,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
                               </div>
                           </button>
                       </CardSpotlight>
+                      </SessionContextMenu>
                   ))}
               </TooltipProvider>
           )}

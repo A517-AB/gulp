@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Tree, type NodeRendererProps } from 'react-arborist'
-import {Folder, FolderOpen, File, AlertCircle} from 'lucide-react'
+import { Folder, FolderOpen, File, AlertCircle } from 'lucide-react'
 import { cn } from '@/utils'
 import { useFileTree } from '@/hooks/use-file-tree'
 import type { FileTreeNode, FileTreeProps } from './types'
@@ -48,16 +48,16 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
       style={style}
       className={cn(
         'flex items-center gap-1.5 px-2 rounded-sm cursor-pointer select-none',
-        'hover:bg-accent hover:text-accent-foreground transition-colors',
-        node.isSelected && 'bg-accent text-accent-foreground',
+        'hover:bg-hover hover:text-fg-primary transition-colors',
+        node.isSelected && 'bg-selected text-fg-primary',
       )}
       onClick={handleClick}
     >
       <Icon
         size={13}
-        className={cn('shrink-0', node.data.isDir ? 'text-blue-400' : 'text-muted-foreground')}
+        className={cn('shrink-0', node.data.isDir ? 'text-fg-secondary' : 'text-fg-muted')}
       />
-      <span className="truncate text-xs">{node.data.name}</span>
+      <span className="truncate text-xs text-fg-secondary">{node.data.name}</span>
     </div>
   )
 }
@@ -65,7 +65,7 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
 // ── component ─────────────────────────────────────────────────────────────────
 
 export function FileTree({ root, onSelectFile, onSelectFolder, className }: FileTreeProps) {
-    const {nodes, loading, error, loadChildren} = useFileTree(root)
+  const { nodes, error, loadChildren } = useFileTree(root)
   const containerRef = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState<number | null>(null)
 
@@ -77,7 +77,7 @@ export function FileTree({ root, onSelectFile, onSelectFolder, className }: File
       if (entry) setHeight(entry.contentRect.height)
     })
     ro.observe(el)
-    return () => { ro.disconnect(); }
+    return () => { ro.disconnect() }
   }, [])
 
   const ctx = useMemo<TreeCtx>(
@@ -88,25 +88,20 @@ export function FileTree({ root, onSelectFile, onSelectFolder, className }: File
   return (
     <TreeContext.Provider value={ctx}>
       <div className={cn('flex flex-col h-full', className)}>
-
         <div ref={containerRef} className="flex-1 overflow-hidden">
           {error ? (
             <div className="flex items-center gap-2 px-3 pt-4 text-destructive">
               <AlertCircle size={13} className="shrink-0" />
               <span className="text-xs truncate">{error}</span>
             </div>
-          ) : !root ? (
-            <p className="text-xs text-muted-foreground text-center pt-6">No folder selected</p>
-          ) : nodes.length === 0 && !loading ? (
-            <p className="text-xs text-muted-foreground text-center pt-6">Empty</p>
-          ) : height !== null ? (
+          ) : height !== null && nodes.length > 0 ? (
             <Tree
               data={nodes}
               idAccessor="id"
               childrenAccessor="children"
               openByDefault={false}
-              rowHeight={28}
-              indent={16}
+              rowHeight={24}
+              indent={14}
               height={height}
               width="100%"
               disableDrag
@@ -116,7 +111,6 @@ export function FileTree({ root, onSelectFile, onSelectFolder, className }: File
             </Tree>
           ) : null}
         </div>
-
       </div>
     </TreeContext.Provider>
   )

@@ -25,19 +25,21 @@ export default function NotesPage() {
   useEffect(() => {
     const ipc = notes
     if (isElectron && ipc) {
-      ipc.get(NOTE_ID).then((raw) => {
-        setContent(raw ? (raw) : undefined)
+      void ipc.get(NOTE_ID).then((raw) => {
+        setContent(raw ?? undefined)
         setReady(true)
       })
       return ipc.onChanged(() => {
-        ipc.get(NOTE_ID).then((raw) => {
-          setContent(raw ? (raw) : undefined)
+        void ipc.get(NOTE_ID).then((raw) => {
+          setContent(raw ?? undefined)
           setContentVersion((v) => v + 1)
         })
       })
     }
-    setContent(lsLoad())
-    setReady(true)
+    setTimeout(() => {
+      setContent(lsLoad())
+      setReady(true)
+    }, 0)
     return undefined
   }, [])
 
@@ -46,7 +48,7 @@ export default function NotesPage() {
     saveTimer.current = setTimeout(() => {
       const ipc = notes
       if (isElectron && ipc) {
-        ipc.save(NOTE_ID, 'Notes', blocks)
+        void ipc.save(NOTE_ID, 'Notes', blocks)
       } else {
         localStorage.setItem(LS_KEY, JSON.stringify(blocks))
       }

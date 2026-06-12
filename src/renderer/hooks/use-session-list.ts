@@ -16,8 +16,9 @@ export function useSessionList(): UseSessionListReturn {
         const q = searchQuery.toLowerCase()
           // sourceContext is typed required by the SDK but is absent on old/cached sessions —
           // the SDK itself uses sourceContext?.source in its own storage layer (index.mjs:3088)
+          const sc = s.sourceContext as { source?: string } | undefined
           const githubRepo = s.source?.githubRepo
-              ?? sources.find(src => src.name === s.sourceContext?.source || src.id === s.sourceContext?.source)?.githubRepo
+              ?? sources.find(src => src.name === sc?.source || src.id === sc?.source)?.githubRepo
           const sourceStr = githubRepo ? `${githubRepo.owner}/${githubRepo.repo}` : ''
           return s.title.toLowerCase().includes(q) || sourceStr.toLowerCase().includes(q)
       }),

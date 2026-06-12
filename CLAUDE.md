@@ -97,6 +97,10 @@ Copy `.env.example` to `.env`:
 
 ## Working conventions
 
+**No loading states** — no spinners, no skeleton loaders, no loading screens. If data isn't ready, render nothing or render what you have.
+
+**Zero lint and zero typecheck errors** — run `npm run lint` and `npm run typecheck` after all changes are done, not after each file. Fix everything before reporting done.
+
 **Exports** — always export types through an `index.ts` barrel in the folder they belong to. No `export *`, no ad-hoc re-exports scattered across files. If a type needs to be consumed elsewhere, it goes through the index.
 
 **Folder structure** — this is an active, evolving codebase. Some folders are intentionally flat or mid-refactor. When you're already inside a folder, tidy up what you touch. Don't add new mess on top of existing mess, and don't restructure folders you weren't asked to touch.

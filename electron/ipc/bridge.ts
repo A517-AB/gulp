@@ -106,6 +106,7 @@ export const sdk: SdkIpc = {
 
     util: {
         toSummary: (activity) => ipcRenderer.invoke('sdk:util.toSummary', activity),
+        toSummaries: (activities) => ipcRenderer.invoke('sdk:util.toSummaries', activities),
     },
 
     query: {

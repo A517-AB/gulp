@@ -126,7 +126,7 @@ export function registerFilesystemHandlers(): void {
     return shell.openPath(filePath)
   })
 
-  ipcMain.handle('fs.revealInFolder', async (_e, filePath: string): Promise<void> => {
+  ipcMain.handle('fs.revealInFolder', (_e, filePath: string): void => {
     shell.showItemInFolder(filePath)
   })
 
@@ -152,6 +152,6 @@ export function registerFilesystemHandlers(): void {
     const result = await dialog.showSaveDialog(
       defaultName !== undefined ? { defaultPath: defaultName } : {},
     )
-    return result.canceled ? null : (result.filePath ?? null)
+    return result.canceled ? null : result.filePath
   })
 }

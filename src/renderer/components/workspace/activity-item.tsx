@@ -1,6 +1,7 @@
+import type React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import {ChevronDown, ChevronRight, Terminal} from "lucide-react";
+import {CheckCircle2, ChevronDown, ChevronRight, Terminal, XCircle} from "lucide-react";
 import {Card, CardContent} from "@/ui/card.tsx";
 import {Badge} from "@/ui/badge.tsx";
 import {Avatar, AvatarFallback} from "@/ui/avatar.tsx";
@@ -11,8 +12,8 @@ import {CardSpotlight} from "@/ui/card-spotlight.tsx";
 import {PlanContent} from "./plan-content.tsx";
 import {formatDate, getActivityTypeColor} from "@/utils/activity.ts";
 import {ChangeSetSummary} from "./changeset-summary.tsx";
-import type {BashArtifact, ChangeSetArtifact, MediaArtifact} from "@google/jules-sdk";
-import type {Activity, ActivityGroup, ActivityRole, ActivityType} from "@/types/activity-feed.ts";
+import type {Activity, BashArtifact, ChangeSetArtifact, MediaArtifact} from "@google/jules-sdk/types";
+import type {ActivityGroup, ActivityRole, ActivityType} from "@/types/activity-feed.ts";
 
 
 function Markdown({children}: { children: string }) {
@@ -24,14 +25,42 @@ function Markdown({children}: { children: string }) {
     );
 }
 
-function renderContent(activity: Activity, summary: string) {
-    if (activity.type === 'planGenerated') {
-        return <PlanContent content={activity.plan}/>;
+function renderContent(activity: Activity): React.ReactNode {
+    switch (activity.type) {
+        case 'planGenerated':
+            return <PlanContent content={activity.plan}/>;
+        case 'agentMessaged':
+        case 'userMessaged':
+            return <Markdown>{activity.message}</Markdown>;
+        case 'planApproved':
+            return (
+                <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0"/>
+                    <span className="text-[10px] font-mono text-fg-ghost">Plan approved</span>
+                </div>
+            );
+        case 'progressUpdated':
+            return (
+                <div>
+                    <p className="text-[11px] text-fg-secondary">{activity.title}</p>
+                    {activity.description && <p className="text-[10px] text-fg-ghost mt-0.5">{activity.description}</p>}
+                </div>
+            );
+        case 'sessionCompleted':
+            return (
+                <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0"/>
+                    <span className="text-[10px] font-mono text-green-500">Session completed</span>
+                </div>
+            );
+        case 'sessionFailed':
+            return (
+                <div className="flex items-center gap-1.5">
+                    <XCircle className="h-3 w-3 text-red-500 shrink-0"/>
+                    <span className="text-[10px] font-mono text-red-400">{activity.reason}</span>
+                </div>
+            );
     }
-    if (activity.type === 'agentMessaged' || activity.type === 'userMessaged') {
-        return <Markdown>{activity.message}</Markdown>;
-    }
-    return <Markdown>{summary}</Markdown>;
 }
 
 function Av({role}: { role: ActivityRole }) {
@@ -157,10 +186,10 @@ function SingleActivity({
                             onApprovePlan,
                             approvingPlan,
                             isNew,
-                            summaries
                         }: Omit<ActivityItemProps, "item"> & { activity: Activity }) {
     const isUser = activity.originator === "user";
     const isPlanPending = activity.type === "planGenerated";
+    const content = renderContent(activity);
 
     return (
         <div
@@ -175,7 +204,7 @@ function SingleActivity({
                             <span className="text-[9px] font-mono text-fg-dim">{formatDate(activity.createTime)}</span>
                         </div>
                         <div className="text-[11px] leading-relaxed text-fg-secondary break-words">
-                            {renderContent(activity, summaries[activity.id] ?? '')}
+                            {content}
                         </div>
                     </CardContent>
                 </Card>
@@ -186,7 +215,7 @@ function SingleActivity({
                         <span className="text-[9px] font-mono text-fg-dim">{formatDate(activity.createTime)}</span>
                     </div>
                     <div className="text-[11px] leading-relaxed text-fg-secondary break-words">
-                        {renderContent(activity, summaries[activity.id] ?? '')}
+                        {content}
                     </div>
                     <ActivityArtifacts activity={activity} expandedBash={expandedBash} onToggleBash={onToggleBash}/>
                     {isPlanPending && (

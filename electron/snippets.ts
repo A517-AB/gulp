@@ -76,7 +76,7 @@ export function registerSnippetsHandlers(getWebContents: () => WebContents | nul
     const watcher = chokidar.watch(snippetsDir, {
     ignoreInitial: true,
     depth: 3,
-        ignored: [/(^|[\/\\])\../, '**/node_modules/**', '**/dist/**'],
+        ignored: [/(^|[/\\])\../, '**/node_modules/**', '**/dist/**'],
     awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
   })
 

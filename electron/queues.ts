@@ -35,11 +35,11 @@ function resolve(filename: string): string {
 
 export function registerQueuesHandlers(): void {
 
-  ipcMain.handle("queues.getTasks", (_event, _jsonPath?: string) => {
+  ipcMain.handle("queues.getTasks", () => {
     return readJsonArray(resolve("tasks.json"));
   });
 
-  ipcMain.handle("queues.getQueue", (_event, _jsonPath?: string) => {
+  ipcMain.handle("queues.getQueue", () => {
     return readJsonArray(resolve("ipc-queue.json"));
   });
 

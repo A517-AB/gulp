@@ -33,7 +33,6 @@ export interface ActivityFeedProps {
   onNewSession?: () => void;
   showCodeDiffs: boolean;
   onToggleCodeDiffs: (show: boolean) => void;
-  onActivitiesChange: (activities: Activity[]) => void;
 }
 
 export interface SessionListProps {
@@ -42,7 +41,7 @@ export interface SessionListProps {
 }
 
 export interface CodeDiffSidebarProps {
-  activities: Activity[];
+  sessionId: string;
   repoUrl?: string;
 }
 

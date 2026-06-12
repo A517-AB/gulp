@@ -23,9 +23,9 @@ export function useHistory() {
 
   useEffect(() => {
     if (isElectron && historyApi) {
-      historyApi.get().then(setEntries)
+      void historyApi.get().then(setEntries)
     } else {
-      setEntries(lsLoad())
+      setTimeout(() => { setEntries(lsLoad()) }, 0)
     }
   }, [])
 

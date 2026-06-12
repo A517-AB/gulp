@@ -11,7 +11,8 @@ import {formatDate} from "@/utils/activity.ts";
 import {ActivityItem} from "./activity-item.tsx";
 import {useStore} from "@/store/app.ts";
 import {useWatcherStore} from "@/library/jules-watcher";
-import type {Activity, ActivityFeedProps} from "@/types/activity-feed.ts";
+import type {Activity} from "@google/jules-sdk/types";
+import type {ActivityFeedProps} from "@/types/activity-feed.ts";
 
 const QUICK_REVIEW_PROMPT =
   "Please perform a comprehensive code review of the repository. Look for bugs, security issues, and opportunities for refactoring. Provide a detailed summary of your findings.";
@@ -19,7 +20,7 @@ const QUICK_REVIEW_PROMPT =
 const EMPTY_ARRAY: Activity[] = [];
 const EMPTY_SUMMARIES: Record<string, string> = {};
 
-export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, onToggleCodeDiffs, onActivitiesChange }: ActivityFeedProps) {
+export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, onToggleCodeDiffs }: ActivityFeedProps) {
     const activities = useStore(s => s.activities[session.id] ?? EMPTY_ARRAY);
   const error = useStore(s => s.activitiesError[session.id]);
   const loadActivities = useStore(s => s.loadActivities);
@@ -49,7 +50,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
   }, [session.id, loadActivities]);
 
     useEffect(() => {
-        if (session.state !== 'inProgress' && session.state !== 'planning') return;
+        if (session.state === 'completed' || session.state === 'failed') return;
         return streamActivities(session.id);
     }, [session.id, session.state, streamActivities]);
 
@@ -69,10 +70,6 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
           clearTimeout(t);
       };
   }, [activities]);
-
-  useEffect(() => {
-      onActivitiesChange(activities);
-  }, [activities, onActivitiesChange]);
 
   const toggleBash = (id: string) => {
     setExpandedBash(prev => { const n = new Set(prev); if (n.has(id)) { n.delete(id); } else { n.add(id); } return n; });
@@ -164,7 +161,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
                   className={`h-7 w-7 hover:bg-hover ${isWatched ? 'text-purple-400' : 'text-fg-muted'}`}
                   title={isWatched ? 'Stop watching' : 'Watch for replies'}
               >
-                  {isWatched ? <BellOff className="h-3.5 w-3.5"/> : <Bell className="h-3.5 w-3.5"/>}
+                  {isWatched ? <Bell className="h-3.5 w-3.5"/> : <BellOff className="h-3.5 w-3.5"/>}
               </Button>
             {hasDiffs && (
               <Button variant="ghost" size="icon" onClick={() => { onToggleCodeDiffs(!showCodeDiffs); }} className={`h-7 w-7 hover:bg-hover ${showCodeDiffs ? "bg-purple-500/20 text-purple-400" : "text-fg-muted"}`}>
@@ -233,6 +230,12 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
             <div className="p-3 flex flex-col space-y-2.5">
+            {session.prompt && (
+                <div className="flex flex-row-reverse gap-2.5">
+                    <div className="h-6 w-6 shrink-0 mt-0.5 rounded-full bg-purple-500 flex items-center justify-center text-[9px] font-bold text-white uppercase">U</div>
+                    <div className="max-w-[85%] md:max-w-[70%] rounded-lg border border-purple-500/10 bg-purple-500/5 px-3 py-2 text-[11px] leading-relaxed text-fg-secondary break-words whitespace-pre-wrap">{session.prompt}</div>
+                </div>
+            )}
             {grouped.map((item, i) => (
                 <ActivityItem key={Array.isArray(item) ? `group-${String(i)}` : item.id} item={item}
                               expandedBash={expandedBash} onToggleBash={toggleBash} onApprovePlan={() => {

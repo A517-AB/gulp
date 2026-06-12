@@ -124,7 +124,7 @@ function SnippetItem({ snippet, isSelected, onToggle }: { snippet: Snippet, isSe
         {isSelected && <Check className="size-3 text-fg-primary" />}
       </div>
       <div className="flex flex-col overflow-hidden">
-        <span className="truncate font-medium">{snippet.title || 'Untitled'}</span>
+        <span className="truncate font-medium">{snippet.title ?? 'Untitled'}</span>
         {snippet.julesMeta?.description && (
           <span className="truncate text-xs text-fg-secondary opacity-70">
             {snippet.julesMeta.description}

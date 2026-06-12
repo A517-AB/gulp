@@ -28,26 +28,11 @@ D:\LAST\electron\queues.ts
   42:46  error  '_jsonPath' is defined but never used  @typescript-eslint/no-unused-vars
 
 D:\LAST\electron\scheduler.ts
-   53:12  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
-   76:15  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   76:20  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   84:15  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   84:20  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   88:15  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   88:20  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   88:29  error  Invalid type "WeekDay" of template literal expression                                               @typescript-eslint/restrict-template-expressions
-   92:15  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   92:20  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   92:25  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   95:17  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   97:7   error  Unnecessary conditional, comparison is always true, since `"windowed" === "windowed"` is true       @typescript-eslint/no-unnecessary-condition
-   99:17  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   99:35  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-   99:49  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
-  189:33  error  Invalid type "number" of template literal expression                                                @typescript-eslint/restrict-template-expressions
+  53:12  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  97:7   error  Unnecessary conditional, comparison is always true, since `"windowed" === "windowed"` is true       @typescript-eslint/no-unnecessary-condition
 
 D:\LAST\electron\snippets.ts
-  79:20  error  Unnecessary escape character: \/  no-useless-escape
+  79:24  error  Unnecessary escape character: \/  no-useless-escape
 
 D:\LAST\src\renderer\base\utils.ts
    33:31  error  Type parameter T is used only once in the function signature                                                                                                                                                                                                                                                                                @typescript-eslint/no-unnecessary-type-parameters
@@ -63,7 +48,6 @@ If a function does not access `this`, it can be annotated with `this: void`  @ty
   110:19  error  Unnecessary conditional, value is always truthy                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unnecessary-condition
   127:55  error  Unsafe spread of an `any` value in an array                                                                                                                                                                                                                                                                                                 @typescript-eslint/no-unsafe-assignment
   141:23  error  Type parameter T is used only once in the function signature                                                                                                                                                                                                                                                                                @typescript-eslint/no-unnecessary-type-parameters
-  162:23  error  Invalid type "number" of template literal expression                                                                                                                                                                                                                                                                                        @typescript-eslint/restrict-template-expressions
   172:73  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                   @typescript-eslint/prefer-nullish-coalescing
   186:46  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
   186:56  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                    @typescript-eslint/no-explicit-any
@@ -72,9 +56,6 @@ If a function does not access `this`, it can be annotated with `this: void`  @ty
   226:12  error  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read                                                                                                                                                                                                                              @typescript-eslint/prefer-nullish-coalescing
   243:18  error  Unexpected empty arrow function                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-empty-function
   248:73  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                                                                                                                                   @typescript-eslint/prefer-nullish-coalescing
-
-D:\LAST\src\renderer\components\overview\GhostInput.tsx
-  18:30  error  Invalid type "number" of template literal expression  @typescript-eslint/restrict-template-expressions
 
 D:\LAST\src\renderer\components\shared\Clock.tsx
   14:36  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
@@ -150,11 +131,11 @@ D:\LAST\src\renderer\hooks\use-presets.ts
   21:12  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
 
 D:\LAST\src\renderer\hooks\use-session-list.ts
-  20:62   error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
-  20:100  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  20:66   error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  20:104  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
 
 D:\LAST\src\renderer\hooks\use-snippets.ts
-  56:22  error  Prefer using nullish coalescing operator (`??`) instead of a ternary expression, as it is simpler to read  @typescript-eslint/prefer-nullish-coalescing
+  65:26  error  Prefer using nullish coalescing operator (`??`) instead of a ternary expression, as it is simpler to read  @typescript-eslint/prefer-nullish-coalescing
 
 D:\LAST\src\renderer\library\jules-watcher\store.ts
   17:51  error  '_' is assigned a value but never used  @typescript-eslint/no-unused-vars
@@ -177,9 +158,6 @@ D:\LAST\src\renderer\pages\electron\ShipPage.tsx
   160:83  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
   167:83  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
   202:35  error  Unnecessary conditional, comparison is always true, since `"scanning" === "scanning"` is true                       @typescript-eslint/no-unnecessary-condition
-
-D:\LAST\src\renderer\pages\electron\TardisPage.tsx
-  50:20  error  Unexpected empty arrow function  @typescript-eslint/no-empty-function
 
 D:\LAST\src\renderer\pages\shared\NotesPage.tsx
   28:7   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-floating-promises
@@ -205,10 +183,8 @@ D:\LAST\src\renderer\pages\shared\NotesPage.tsx:39:5
   49:9   error  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-floating-promises
 
 D:\LAST\src\renderer\pages\shared\settings\panels\TestRow.tsx
-  19:31  error  Invalid type "string | undefined" of template literal expression  @typescript-eslint/restrict-template-expressions
-  62:54  error  Invalid type "number" of template literal expression              @typescript-eslint/restrict-template-expressions
-  62:54  error  Forbidden non-null assertion                                      @typescript-eslint/no-non-null-assertion
-  74:24  error  Forbidden non-null assertion                                      @typescript-eslint/no-non-null-assertion
+  62:54  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  74:24  error  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
 
 D:\LAST\src\renderer\shell\TopBar.tsx
   10:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
@@ -231,6 +207,6 @@ D:\LAST\src\renderer\shell\TopBar.tsx:10:9
 D:\LAST\src\shared\bridge.test.ts
   3:28  error  `import()` type annotations are forbidden  @typescript-eslint/consistent-type-imports
 
-✖ 104 problems (104 errors, 0 warnings)
+✖ 84 problems (84 errors, 0 warnings)
   15 errors and 0 warnings potentially fixable with the `--fix` option.
 

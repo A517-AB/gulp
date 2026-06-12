@@ -37,6 +37,12 @@ export default defineConfig([
     },
     rules: {
         '@typescript-eslint/restrict-template-expressions': ['error', {allowNumber: true}],
+        '@typescript-eslint/no-unused-vars': ['error', {
+            argsIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+            caughtErrorsIgnorePattern: '^_',
+            destructuredArrayIgnorePattern: '^_',
+        }],
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
       '@typescript-eslint/ban-ts-comment': ['error', {
         'ts-ignore': true,

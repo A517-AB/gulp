@@ -50,7 +50,7 @@ function load(): ScheduledItem[] {
   try {
     const raw = fs.readFileSync(storePath(), 'utf8')
     const store = JSON.parse(raw) as Store
-    return store.items ?? []
+    return store.items
   } catch {
     return []
   }
@@ -94,11 +94,8 @@ function toTrigger(s: ScheduleInput): string | Date | null {
   if (s.kind === 'interval') {
     return `*/${s.everyMinutes} * * * *`
   }
-  if (s.kind === 'windowed') {
-    const days = s.days.length > 0 ? s.days.join(',') : '1,2,3,4,5'
-    return `*/${s.everyMinutes} ${s.fromHour}-${s.toHour - 1} * * ${days}`
-  }
-  return null
+  const days = s.days.length > 0 ? s.days.join(',') : '1,2,3,4,5'
+  return `*/${s.everyMinutes} ${s.fromHour}-${s.toHour - 1} * * ${days}`
 }
 
 // ── Scheduler ─────────────────────────────────────────────────────────────────

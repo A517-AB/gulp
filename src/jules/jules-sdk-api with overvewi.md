@@ -1,4 +1,127 @@
-# API Reference Tree for `jules-sdk typed.ts`
+# Jules SDK — Quick Reference
+
+## Entry point
+`jules`            — pre-built JulesClient singleton (main process)
+`connect(options)` — make a new client with a different API key / baseUrl
+
+---
+
+## JulesClient  (top-level, what `jules` is)
+`.session(id)`            — get a SessionClient for an existing session
+`.session(config)`        — create + get a SessionClient in one call
+`.sessions(options)`      — paginated cursor over session list; `.all()` to drain
+`.run(config)`            — create session, run to completion, return AutomatedSession
+`.all(items, mapper)`     — batch-run many sessions with concurrency control
+`.sync(options)`          — pull remote sessions into local cache; fires onProgress
+`.select(query)`          — structured query across sessions or activities
+`.sources`                — SourceManager (see below)
+`.storage`                — direct access to the local SessionStorage
+
+---
+
+## SessionClient  (`jules.session(id)`)
+`.send(prompt)`           — send a message to an in-progress session
+`.ask(prompt)`            — send + await agent reply in one call
+`.approve()`              — approve a pending plan
+`.info()`                 — fetch current SessionResource from API
+`.result()`               — wait for completion, return SessionOutcome
+`.waitFor(state)`         — block until session reaches a given state
+`.stream(options)`        — AsyncIterable of activities as they arrive
+`.updates()`              — AsyncIterable of new activities (polling)
+`.history()`              — AsyncIterable of all past activities from cache
+`.select(options)`        — filtered slice of stored activities
+`.snapshot(options?)`     — full snapshot: state + activities + diffs
+`.archive()` / `.unarchive()`
+`.activities`             — ActivityClient (see below)
+`.hydrate()`              — pull & cache all activities for this session
+
+---
+
+## ActivityClient  (`.activities` on SessionClient)
+`.list(options)`          — paged fetch from API `{ activities, nextPageToken }`
+`.get(activityId)`        — fetch one activity
+`.select(options)`        — filtered slice from local cache
+`.history()`              — all cached activities as AsyncIterable
+`.updates()`              — new activities as AsyncIterable (polling)
+`.stream()`               — live stream as AsyncIterable
+`.hydrate()`              — fetch + store all activities, returns count
+
+---
+
+## Artifacts  (on SessionOutcome / ChangeSetArtifact)
+`ChangeSetArtifact`       — `.gitPatch` (unidiff + commit msg) + `.parsed()` → files
+`BashArtifact`            — `.command`, `.stdout`, `.stderr`, `.exitCode`
+`MediaArtifact`           — `.data` (base64), `.format`, `.toUrl()`, `.save(path)`
+
+---
+
+## SourceManager  (`jules.sources`)
+`.get({ github: 'owner/repo' })` — resolve a Source by GitHub slug
+
+---
+
+## Pure utility functions  (sync, no network)
+`toSummary(activity)`                  — → `{ id, type, createTime, summary }` one-liner
+`computeSummary(activity)`             — just the summary string
+`computeArtifactCount(activity)`       — artifact count number
+`computeDurationMs(session)`           — ms from createTime→updateTime
+`parseUnidiff(patch)`                  — unidiff string → `ParsedFile[]`
+`parseUnidiffWithContent(patch)`       — same + file content → `GeneratedFile[]`
+`injectActivityComputedFields(a)`      — adds `artifactCount` + `summary` to activity
+`injectSessionComputedFields(s)`       — adds `durationMs` to session
+`validateQuery(query)`                 — validate a JulesQuery object → ValidationResult
+`formatValidationResult(result)`       — → human-readable string
+`getSchema(domain)`                    — field schema for 'sessions' | 'activities'
+`getAllSchemas()`                       — both schemas + filter/projection docs
+`generateTypeDefinition(domain)`       — TypeScript type string for the domain
+`generateMarkdownDocs()`               — full markdown schema reference
+
+---
+
+## Cache/storage helpers  (Node, main process only)
+`getRootDir()`                         — path to local SDK cache dir
+`getCacheInfo()`                       — last sync time + session count
+`getSessionCacheInfo(id)`              — per-session cache status
+`getActivityCount(id)`                 — cached activity count for a session
+`getLatestActivities(id, n)`           — last N cached activities
+`getSessionCount()`                    — total cached sessions
+`isSessionFrozen(lastActivityTime)`    — true if session looks abandoned
+
+---
+
+## Storage classes  (internal — you won't construct these)
+`NodeSessionStorage`   — file-backed session index (main process)
+`NodeFileStorage`      — file-backed activity log (main process)
+`MemorySessionStorage` — in-memory session index (tests)
+`MemoryStorage`        — in-memory activity log (tests)
+
+---
+
+## Errors
+`JulesApiError`               — HTTP error from the API (status, url)
+`JulesAuthenticationError`    — 401
+`JulesRateLimitError`         — 429
+`JulesNetworkError`           — fetch failed (no response)
+`AutomatedSessionFailedError` — `.run()` / `.all()` session hit failed state
+`MissingApiKeyError`          — no API key configured
+`InvalidStateError`           — operation not valid in current session state
+`SyncInProgressError`         — sync called while already syncing
+`TimeoutError`                — waitFor / result timed out
+
+---
+
+## Key types
+`SessionState`   — `queued | planning | awaitingPlanApproval | awaitingUserFeedback | inProgress | paused | failed | completed`
+`Activity`       — union of 7: `agentMessaged | userMessaged | planGenerated | planApproved | progressUpdated | sessionCompleted | sessionFailed`
+`Artifact`       — `ChangeSetArtifact | MediaArtifact | BashArtifact`
+`SessionConfig`  — `{ prompt, source?, title?, requireApproval?, autoPr? }`
+`SourceInput`    — `{ github: 'owner/repo', baseBranch: string }`
+`SyncOptions`    — `{ sessionId?, limit?, depth?, incremental?, concurrency?, onProgress?, signal? }`
+`StreamActivitiesOptions` — `{ exclude?: { originator }, initialRetries? }`
+
+---
+
+# Full API Reference Tree
 
 ### 🔑 Legend
 * 🏫 **Classes**

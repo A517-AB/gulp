@@ -62,7 +62,7 @@ export function useSnippets() {
     if (!api) return
 
         const nextTitle = updates.title !== undefined ? updates.title : item.title
-        const nextLang = updates.languageId !== undefined ? updates.languageId : item.languageId
+        const nextLang = updates.languageId ?? item.languageId
         const newFile = fuseFilePath(item.type, nextLang, nextTitle ?? 'untitled')
 
         const updatedItem: FuseManifestItem = {

@@ -59,7 +59,7 @@ export function TestRow({ label, result, onRun }: TestRowProps) {
                 onClick={() => { setExpanded(v => !v); }}
                 className="text-[10px] font-mono text-fg-ghost hover:text-fg-secondary transition-colors"
               >
-                {expanded ? '▲ hide' : `▼ see all (${result.items!.length})`}
+                {expanded ? '▲ hide' : `▼ see all (${result.items?.length ?? 0})`}
               </button>
               <AnimatePresence>
                 {expanded && (
@@ -71,7 +71,7 @@ export function TestRow({ label, result, onRun }: TestRowProps) {
                     className="overflow-hidden"
                   >
                     <div className="rounded border border-subtle bg-surface max-h-56 overflow-y-auto">
-                      {result.items!.map((item, i) => (
+                      {(result.items ?? []).map((item, i) => (
                         <div key={i} className="px-3 py-1.5 text-[10px] font-mono text-fg-secondary border-b border-hair last:border-0">
                           {item}
                         </div>

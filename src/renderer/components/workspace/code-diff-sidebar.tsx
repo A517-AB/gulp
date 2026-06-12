@@ -3,12 +3,16 @@ import {FileCode} from "lucide-react";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {DiffViewer} from "@/ui/diff-viewer.tsx";
 import type {ChangeSetArtifact} from "@google/jules-sdk";
+import {useStore} from "@/store/app.ts";
 import type {CodeDiffSidebarProps} from "@/types/activity-feed.ts";
 
-export function CodeDiffSidebar({ activities, repoUrl }: CodeDiffSidebarProps) {
+const EMPTY_ACTIVITIES: never[] = [];
+
+export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
+    const activities = useStore(s => s.activities[sessionId] ?? EMPTY_ACTIVITIES);
     const finalDiff = useMemo(() => activities
         .flatMap(a => {
-            const cs = a.artifacts.find((art): art is ChangeSetArtifact => art.type === 'changeSet');
+            const cs = (a as {artifacts?: unknown[]}).artifacts?.find((art): art is ChangeSetArtifact => (art as {type?: string}).type === 'changeSet');
             return cs ? [{id: a.id, patch: cs.gitPatch.unidiffPatch}] : [];
         })
         .slice(-1), [activities]);

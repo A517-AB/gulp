@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { scheduler } from '@shared/bridge'
 import type { ScheduledItem } from '@shared/electron'
 import { ScheduleForm } from '@/components/shared/ScheduleForm'
-import { WatcherList } from '@/library/jules-watcher'
 
 // ── hardcoded temp item — remove when real presets exist ──────────────────────
 const TEMP_ITEM: ScheduledItem = {
@@ -78,11 +77,6 @@ export default function TardisPage() {
 
   return (
       <div className="h-full overflow-auto p-4 space-y-6 max-w-xl">
-      <div>
-        <h2 className="text-xs font-semibold text-fg-secondary mb-2">Jules Watchers</h2>
-        <WatcherList />
-      </div>
-
       <ScheduleForm onAdd={item => { void add(item) }} />
 
           {custom.length > 0 && (

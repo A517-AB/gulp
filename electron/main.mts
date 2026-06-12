@@ -62,6 +62,9 @@ function createWindow() {
     width: 1200,
     height: 800,
     titleBarStyle: "hidden",
+    autoHideMenuBar: true,
+    frame: false,
+    transparent: true,
     icon: isDev 
       ? path.join(__dirname, "../public/icon.png")
       : path.join(__dirname, "../dist/icon.png"),
@@ -75,11 +78,11 @@ function createWindow() {
 
   if (isDev) {
     console.log("[main] loading dev URL:", DEV_URL);
-    mainWindow.loadURL(DEV_URL);
+    void mainWindow.loadURL(DEV_URL);
   } else {
     const prodFile = path.join(__dirname, "../dist/index.html");
     console.log("[main] loading prod file:", prodFile);
-    mainWindow.loadFile(prodFile);
+    void mainWindow.loadFile(prodFile);
   }
 
   mainWindow.webContents.on("did-finish-load", () => {
@@ -90,7 +93,7 @@ function createWindow() {
     console.error("[main] renderer failed to load:", url, code, desc);
     if (isDev) {
       console.log("[main] retrying in 1s — is 'npm run dev' running?");
-      setTimeout(() => mainWindow?.loadURL(DEV_URL), 1000);
+      setTimeout(() => { void mainWindow?.loadURL(DEV_URL) }, 1000);
     }
   });
 
@@ -124,7 +127,7 @@ ipcMain.on("window.close", () => {
 });
 
 // ── lifecycle ─────────────────────────────────────────────────────────────────
-app.whenReady().then(() => {
+void app.whenReady().then(() => {
   console.log("[main] app ready");
   registerTerminalHandlers(() => mainWindow?.webContents ?? null);
   registerQueuesHandlers();
@@ -152,7 +155,7 @@ app.whenReady().then(() => {
   });
 
   globalShortcut.register("Ctrl+Shift+Space", () => {
-    if (mainWindow?.isVisible() && mainWindow?.isFocused()) mainWindow.hide();
+    if (mainWindow?.isVisible() && mainWindow.isFocused()) mainWindow.hide();
     else { mainWindow?.show(); mainWindow?.focus(); }
   });
 
@@ -176,7 +179,7 @@ app.on("window-all-closed", () => {
 
 // ── env ───────────────────────────────────────────────────────────────────────
 ipcMain.handle("env.getApiKey", () => {
-  const apiKey = process.env.JULES_API_KEY || null;
+  const apiKey = process.env.JULES_API_KEY ?? null;
   console.log('[main] env.getApiKey called, returning:', apiKey ? 'API Key SET' : 'API Key NOT SET');
   return apiKey;
 });

@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import {isElectron, queues as electronQueues, sdkIpc} from "@shared/bridge";
 import {InlineEdit} from "@renderer/ui/inline-edit";
-import type {FleetTask, FleetTaskGroup, Source} from "@/types/jules";
+import type {Source} from "@google/jules-sdk/types";
+import type {FleetTask, FleetTaskGroup} from "@jules";
 
 const TASKS_STORAGE_KEY = "workspace:fleet-tasks";
 
@@ -231,13 +232,14 @@ export default function QueuesView() {
   const handleSendGroup = async (group: FleetTaskGroup, e: React.MouseEvent) => {
     e.stopPropagation();
       if (!sdkIpc) return;
+    const ipc = sdkIpc;
     const key = `group-${group.group}`;
       const github = group.repo.replace(/^(?:sources\/)?github\//, '')
     setSendingStates((p) => ({ ...p, [key]: true }));
     try {
       await Promise.all(
         group.tasks.map((task) =>
-            sdkIpc!.client.run({
+            ipc.client.run({
             prompt: task.task,
             title: `${task.topic} (${task.folder})`,
                 ...(github ? {source: {github, baseBranch: group.baseBranch ?? 'main'}} : {}),
@@ -253,6 +255,7 @@ export default function QueuesView() {
 
   const handleSendSelected = async () => {
       if (!sdkIpc || selectedTasks.size === 0) return;
+    const ipc = sdkIpc;
     const byRepo: Record<string, { repo: string; baseBranch: string; tasks: FleetTask[] }> = {};
     tasks.forEach((group, gIdx) => {
       group.tasks.forEach((task, tIdx) => {
@@ -269,7 +272,7 @@ export default function QueuesView() {
           selected.map((t, i) => `${(i + 1).toString()}. **${t.topic}** (${t.folder})\n   ${t.task}`).join("\n")
         }`;
           const github = repo.replace(/^(?:sources\/)?github\//, '')
-          await sdkIpc!.client.run({
+          await ipc.client.run({
           prompt,
           title: `Combined Tasks (${selected.length.toString()})`,
               ...(github ? {source: {github, baseBranch}} : {}),

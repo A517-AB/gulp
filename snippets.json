@@ -2,6 +2,17 @@
   "version": 1,
   "items": [
     {
+      "id": "dcbc98be-de11-45e2-a0d4-76c068414e89",
+      "title": "sharp-probe",
+      "languageId": "javascript",
+      "type": "snippet",
+      "file": "snippets/javascript/sharp-probe.js",
+      "preview": "ipcMain.handle('sdk:activities.list', async (_, id: string, options?: ListOptions) => { const t",
+      "tags": [],
+      "createdAt": "2026-06-11T23:46:33.328Z",
+      "updatedAt": "2026-06-11T23:46:41.412Z"
+    },
+    {
       "id": "146d0f10-0cfd-410c-9bff-357e0a477190",
       "title": "silent-runner",
       "languageId": "bash",

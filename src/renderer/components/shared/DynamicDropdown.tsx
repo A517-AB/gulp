@@ -33,8 +33,8 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
             "flex items-center justify-center size-9 rounded-lg transition-all hover:bg-hover active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring relative",
             className
           )}
-          style={{ color: selected?.color || 'var(--fg-secondary)' }}
-          title={selected?.label || placeholder}
+          style={{ color: selected?.color ?? 'var(--fg-secondary)' }}
+          title={selected?.label ?? placeholder}
         >
           {TriggerIcon ? (
             <TriggerIcon className="size-5" />
@@ -96,7 +96,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
                         <ItemIcon
                           className="size-4 shrink-0 transition-transform duration-200"
                           style={{
-                            color: item.color || 'currentColor',
+                            color: item.color ?? 'currentColor',
                             transform: hoveredId === item.id ? "scale(1.15)" : "scale(1)"
                           }}
                         />
@@ -107,7 +107,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
                         <motion.div
                           layoutId="dropdown-active-dot"
                           className="absolute right-3 size-1.5 rounded-full"
-                          style={{ backgroundColor: item.color || 'var(--color-primary, currentColor)' }}
+                          style={{ backgroundColor: item.color ?? 'var(--color-primary, currentColor)' }}
                         />
                       )}
                     </motion.button>

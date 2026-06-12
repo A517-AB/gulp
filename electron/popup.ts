@@ -67,7 +67,7 @@ function create(): BrowserWindow {
 }
 
 function ensure(): BrowserWindow {
-  if (!popupWindow) popupWindow = create();
+  popupWindow ??= create();
   return popupWindow;
 }
 

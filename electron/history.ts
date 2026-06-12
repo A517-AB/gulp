@@ -10,7 +10,7 @@ async function read(): Promise<HistoryEntry[]> {
   try {
     const exists = await fs.pathExists(HISTORY_PATH)
     if (!exists) return []
-    const raw = await fs.readJson(HISTORY_PATH)
+    const raw: unknown = await fs.readJson(HISTORY_PATH)
     return Array.isArray(raw) ? (raw as HistoryEntry[]) : []
   } catch {
     return []

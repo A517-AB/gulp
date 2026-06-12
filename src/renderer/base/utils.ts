@@ -30,10 +30,10 @@ export function isObject(obj: unknown): obj is Record<string, unknown> {
 /**
  * Check whether the given array contains objects.
  */
-export function isObjectArray<T>(value: T[]): boolean {
-  const parser = Object.prototype.toString;
-  if (parser.call(value) === '[object Array]') {
-    if (parser.call(value[0]) === '[object Object]') {
+export function isObjectArray(value: unknown[]): boolean {
+  const parser = (x: unknown) => Object.prototype.toString.call(x);
+  if (parser(value) === '[object Array]') {
+    if (parser(value[0]) === '[object Object]') {
       return true;
     }
   }
@@ -48,40 +48,40 @@ export function isObjectArray<T>(value: T[]): boolean {
  * Get nested object value by path string.
  * @example getValue('user.settings.theme', config) // returns config.user.settings.theme
  */
-export function getValue<T = unknown>(nameSpace: string, obj: Record<string, unknown>): T | undefined {
+export function getValue(nameSpace: string, obj: Record<string, unknown>): unknown {
   let value: unknown = obj;
   const splits = nameSpace.replace(/\[/g, '.').replace(/\]/g, '').split('.');
-  
-  for (let i = 0; i < splits.length && !isUndefined(value); i++) {
-    value = (value as Record<string, unknown>)[splits[i]!];
+
+  for (const key of splits) {
+    if (isUndefined(value)) break;
+    value = (value as Record<string, unknown>)[key];
   }
-  
-  return value as T | undefined;
+
+  return value;
 }
 
 /**
  * Set nested object value by path string.
  * @example setValue('user.settings.theme', 'dark', config)
  */
-export function setValue<T = unknown>(
-  nameSpace: string, 
-  value: T, 
+export function setValue(
+  nameSpace: string,
+  value: unknown,
   obj: Record<string, unknown> = {}
 ): Record<string, unknown> {
   const keys = nameSpace.replace(/\[/g, '.').replace(/\]/g, '').split('.');
   const start = obj;
   let fromObj = start;
-  
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i]!;
-    
+
+  for (const [i, key] of keys.entries()) {
+
     // Prevent prototype pollution
     if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
       continue;
     }
-    
+
     if (i + 1 === keys.length) {
-      fromObj[key] = value === undefined ? {} : value;
+      fromObj[key] = value ?? {};
     } else if (isNullOrUndefined(fromObj[key])) {
       fromObj[key] = {};
     }
@@ -96,7 +96,7 @@ export function setValue<T = unknown>(
  * Delete an item from an object.
  */
 export function deleteObject(obj: Record<string, unknown>, key: string): void {
-  delete obj[key];
+  Reflect.deleteProperty(obj, key);
 }
 
 /**
@@ -107,7 +107,7 @@ export function extend<T extends Record<string, unknown>>(
   target: T,
   ...sources: (Record<string, unknown> | undefined | null)[]
 ): T {
-  const result = (target && typeof target === 'object' ? target : {}) as T;
+  const result = target;
   
   for (const source of sources) {
     if (!source) continue;
@@ -124,7 +124,7 @@ export function extend<T extends Record<string, unknown>>(
             copyValue
           );
         } else if (Array.isArray(copyValue)) {
-          (result as Record<string, unknown>)[key] = [...copyValue];
+          (result as Record<string, unknown>)[key] = [...(copyValue as unknown[])];
         }
       } else {
         (result as Record<string, unknown>)[key] = copyValue;
@@ -138,15 +138,15 @@ export function extend<T extends Record<string, unknown>>(
 /**
  * Shallow merge source into destination (mutates destination).
  */
-export function merge<T extends Record<string, unknown>>(
-  source: T, 
+export function merge(
+  source: Record<string, unknown>,
   destination: Record<string, unknown>
 ): void {
   if (isNullOrUndefined(destination)) return;
   
   const keys = Object.keys(destination);
   for (const key of keys) {
-    (source as Record<string, unknown>)[key] = destination[key];
+    source[key] = destination[key];
   }
 }
 
@@ -169,9 +169,9 @@ export function uniqueID(): string {
   if (typeof window === 'undefined') return getUniqueID();
   
   const num = new Uint16Array(5);
-  const intCrypto = (window as Window & { msCrypto?: Crypto }).msCrypto || window.crypto;
+  const intCrypto = (window as Window & { msCrypto?: Crypto }).msCrypto ?? window.crypto;
   intCrypto.getRandomValues(num);
-  
+
   return Array.from(num).join('-');
 }
 
@@ -183,8 +183,8 @@ export function uniqueID(): string {
  * Debounce a function - only executes after delay ms of inactivity.
  * @example const debouncedSave = debounce(save, 300)
  */
-export function debounce<T extends (...args: any[]) => any>(
-  fn: T, 
+export function debounce<T extends (...args: unknown[]) => unknown>(
+  fn: T,
   delay: number
 ): (...args: Parameters<T>) => void {
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -205,8 +205,8 @@ export function debounce<T extends (...args: any[]) => any>(
  * Throttle a function - executes at most once per delay ms.
  * @example const throttledResize = throttle(onResize, 100)
  */
-export function throttle<T extends (...args: any[]) => any>(
-  fn: T, 
+export function throttle<T extends (...args: unknown[]) => unknown>(
+  fn: T,
   delay: number
 ): (...args: Parameters<T>) => void {
   let lastCall = 0;
@@ -223,8 +223,8 @@ export function throttle<T extends (...args: any[]) => any>(
       }
       lastCall = now;
       fn.apply(this, args);
-    } else if (!timeoutId) {
-      timeoutId = setTimeout(() => {
+    } else {
+      timeoutId ??= setTimeout(() => {
         lastCall = Date.now();
         timeoutId = null;
         fn.apply(this, args);
@@ -240,12 +240,12 @@ export function throttle<T extends (...args: any[]) => any>(
 export function setImmediate(handler: () => void): () => void {
   if (typeof window === 'undefined') {
     setTimeout(handler, 0);
-    return () => {};
+    return () => undefined;
   }
   
   let unbind: () => void;
   const num = new Uint16Array(5);
-  const intCrypto = (window as Window & { msCrypto?: Crypto }).msCrypto || window.crypto;
+  const intCrypto = (window as Window & { msCrypto?: Crypto }).msCrypto ?? window.crypto;
   intCrypto.getRandomValues(num);
   const secret = 'ca2' + Array.from(num).join('');
   

@@ -25,8 +25,7 @@ export function ScheduleForm({ onAdd }: Props) {
     if (kind === 'once')     return { kind: 'once',     at: new Date(Date.now() + minutes * 60_000).toISOString() }
     if (kind === 'interval') return { kind: 'interval', everyMinutes: minutes }
     if (kind === 'daily')    return { kind: 'daily',    time }
-    if (kind === 'windowed') return { kind: 'windowed', everyMinutes: minutes, fromHour, toHour, days: [1, 2, 3, 4, 5] }
-    return null
+    return { kind: 'windowed', everyMinutes: minutes, fromHour, toHour, days: [1, 2, 3, 4, 5] }
   }
 
   function submit() {

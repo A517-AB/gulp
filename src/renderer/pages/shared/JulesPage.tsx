@@ -6,19 +6,24 @@ import {NewSessionDialog} from "@/components/workspace/new-session-dialog.tsx";
 import {GridBackground} from "@/ui/grid-background";
 import {BackgroundBeams} from "@/ui/background-beams";
 import {useResizable} from "@renderer/hooks/use-resizable";
-import type {Activity, Session, SessionInitialValues} from "@/types/activity-feed";
+import {useStore} from "@/store/app.ts";
+import type {SessionResource as Session} from "@google/jules-sdk/types";
+import type {SessionInitialValues} from "@/types/activity-feed";
 
 export default function JulesPage() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showCodeDiffs, setShowCodeDiffs] = useState(false);
   const [codeDiffCollapsed, setCodeDiffCollapsed] = useState(false);
-  const [currentActivities, setCurrentActivities] = useState<Activity[]>([]);
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [newSessionValues, setNewSessionValues] = useState<SessionInitialValues | undefined>();
   const [refreshKey, setRefreshKey] = useState(0);
 
   const { width: diffWidth, isResizing, startResizing } = useResizable({ defaultWidth: 600 });
+  const sessionList = useStore(s => s.sessionList);
+  const liveSelectedSession = selectedSession
+    ? (sessionList.find(s => s.id === selectedSession.id) ?? selectedSession)
+    : null;
 
   const handleSessionCreated = () => {
     setRefreshKey((k) => k + 1);
@@ -50,14 +55,13 @@ export default function JulesPage() {
       </aside>
 
       <main className="flex-1 overflow-hidden flex flex-col min-w-0">
-        {selectedSession ? (
+        {liveSelectedSession ? (
           <ActivityFeed
-            session={selectedSession}
+            session={liveSelectedSession}
             onArchive={handleArchive}
             onNewSession={() => { openNewSession(); }}
             showCodeDiffs={showCodeDiffs}
             onToggleCodeDiffs={setShowCodeDiffs}
-            onActivitiesChange={setCurrentActivities}
           />
         ) : (
           <GridBackground className="h-full">
@@ -74,7 +78,7 @@ export default function JulesPage() {
         )}
       </main>
 
-      {selectedSession && showCodeDiffs && (
+      {liveSelectedSession && showCodeDiffs && (
         <>
           {!codeDiffCollapsed && (
             <div className="w-1 cursor-col-resize bg-transparent hover:bg-blue-500/50 transition-colors" onMouseDown={startResizing} />
@@ -91,7 +95,7 @@ export default function JulesPage() {
             </div>
             {!codeDiffCollapsed && (
                 <CodeDiffSidebar
-                    activities={currentActivities} {...(selectedSession.source ? {repoUrl: `https://github.com/${selectedSession.source.githubRepo.owner}/${selectedSession.source.githubRepo.repo}`} : {})} />
+                    sessionId={liveSelectedSession.id} {...(liveSelectedSession.source ? {repoUrl: `https://github.com/${liveSelectedSession.source.githubRepo.owner}/${liveSelectedSession.source.githubRepo.repo}`} : {})} />
             )}
           </aside>
         </>

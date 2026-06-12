@@ -1,11 +1,12 @@
 import {create} from 'zustand'
-import type {Activity, SessionResource, Source} from '@jules'
+import type {Activity, SessionResource, Source} from '@google/jules-sdk/types'
 import type {SessionFormData} from '@/types/activity-feed'
 import {sdkIpc} from '@shared/bridge'
 
 export type { SessionFormData }
 
 const activeStreams = new Map<string, () => void>()
+let syncInProgress = false
 
 const DEFAULT_FORM: SessionFormData = {
     sourceId: '',
@@ -89,21 +90,29 @@ export const useStore = create<AppStore>((set, get) => ({
     },
 
     sync: async () => {
-        if (!sdkIpc) return
+        if (!sdkIpc || syncInProgress) return
+        syncInProgress = true
         try {
             await sdkIpc.client.sync()
             await get().loadSessions()
         } catch (err) {
             console.error('[AppStore] sync error:', err)
+        } finally {
+            syncInProgress = false
         }
     },
 
     loadActivities: async (sessionId) => {
         if (!sdkIpc) return
+        if ((get().activities[sessionId]?.length ?? 0) > 0) return
         const ipc = sdkIpc
         set(state => ({activitiesError: {...state.activitiesError, [sessionId]: null}}))
         try {
-            const {activities} = await ipc.activities.list(sessionId)
+            let activities = await ipc.activities.select(sessionId)
+            if (activities.length === 0) {
+                const result = await ipc.activities.list(sessionId)
+                activities = result.activities
+            }
             set(state => {
                 const streamed = state.activities[sessionId] ?? []
                 const merged = [...activities]
@@ -112,7 +121,7 @@ export const useStore = create<AppStore>((set, get) => ({
                 }
                 return {activities: {...state.activities, [sessionId]: merged}}
             })
-            void Promise.all(activities.map(a => ipc.util.toSummary(a))).then(sums => {
+            void ipc.util.toSummaries(activities).then(sums => {
                 const map = Object.fromEntries(sums.map(s => [s.id, s.summary]))
                 set(state => ({
                     activitySummaries: {
@@ -167,6 +176,7 @@ export const useStore = create<AppStore>((set, get) => ({
         if (!sdkIpc || !content.trim()) return
         try {
             await sdkIpc.session.send(sessionId, content)
+            void get().loadSessions()
         } catch (err) {
             console.error('[AppStore] sendMessage error:', err)
             throw err
