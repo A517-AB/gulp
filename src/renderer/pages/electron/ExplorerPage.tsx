@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { editor } from 'monaco-editor'
-import { FolderOpen, FileCode, Save, X, FolderSearch } from 'lucide-react'
+import { FolderOpen, FileCode, Save, X } from 'lucide-react'
 import { FileTree } from '@renderer/components/shared/FileTree'
 import { CodeEditor } from '@renderer/ui/code-editor'
 import { filesystem } from '@shared/bridge'
@@ -75,24 +75,21 @@ export function ExplorerPage() {
     <div className="flex flex-row h-full overflow-hidden w-full text-fg-primary bg-base">
 
       {/* Left Column: Explorer Pane */}
-      <div className="w-64 flex flex-col h-full overflow-hidden shrink-0 border-r border-hair bg-base">
-        <div className="p-4 border-b border-hair bg-base shrink-0 flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <FolderOpen className="h-4 w-4 text-fg-secondary" />
-            <h2 className="text-[10px] font-bold font-mono tracking-wider text-fg-primary uppercase">
-              Explorer
-            </h2>
-          </div>
+      <div className="w-56 flex flex-col h-full overflow-hidden shrink-0 border-r border-hair">
+        <div className="flex items-center gap-2 px-3 h-9 shrink-0 border-b border-hair">
           <button
             onClick={() => { void handleSelectFolder() }}
-            className="w-full bg-surface border border-subtle text-fg-muted text-[10px] py-1.5 px-3 rounded-md flex items-center justify-center gap-2 hover:bg-hover hover:text-fg-primary transition-all font-mono tracking-wider"
+            className="flex items-center gap-2 min-w-0 flex-1 hover:text-fg-primary transition-colors group"
+            title={rootDir ?? 'Open folder'}
           >
-            <FolderSearch className="h-3.5 w-3.5" />
-            {rootDir ? 'CHANGE FOLDER' : 'OPEN WORKSPACE'}
+            <FolderOpen className="h-3.5 w-3.5 text-fg-ghost shrink-0 group-hover:text-fg-muted transition-colors" />
+            <span className="text-[10px] font-mono text-fg-ghost truncate group-hover:text-fg-muted transition-colors">
+              {rootDir ? rootDir.split(/[\\/]/).pop() : 'open folder'}
+            </span>
           </button>
         </div>
 
-        <div className="flex-1 overflow-auto p-2 bg-base">
+        <div className="flex-1 overflow-auto py-1">
           {rootDir && (
             <FileTree
               root={rootDir}

@@ -114,7 +114,6 @@ interface ActivityItemProps {
     onApprovePlan: () => void;
     approvingPlan: boolean;
     isNew: boolean;
-    summaries: Record<string, string>;
 }
 
 function AgentCard({children}: { children: React.ReactNode }) {
@@ -239,7 +238,6 @@ export function ActivityItem({
                                  onApprovePlan,
                                  approvingPlan,
                                  isNew,
-                                 summaries
                              }: ActivityItemProps) {
     if (Array.isArray(item)) {
         const first = item.at(0);
@@ -259,15 +257,16 @@ export function ActivityItem({
                             className="text-[9px] font-mono text-fg-dim">{item.length} update{item.length > 1 ? "s" : ""}</span>
                     </div>
                     <div className="space-y-2">
-                        {item.map((a, i) => (
-                            <div key={a.id} className={i > 0 ? "pt-2 border-t border-hair" : ""}>
-                                <div
-                                    className="text-[8px] font-mono text-fg-dim mb-1 uppercase">{formatDate(a.createTime)}</div>
-                                <div className="text-[11px] leading-relaxed text-fg-secondary break-words">
-                                    <Markdown>{summaries[a.id] ?? ''}</Markdown>
+                        {item.map((a, i) => {
+                            const update = a as Extract<Activity, {type: 'progressUpdated'}>;
+                            return (
+                                <div key={a.id} className={i > 0 ? "pt-2 border-t border-hair" : ""}>
+                                    <div className="text-[8px] font-mono text-fg-dim mb-1 uppercase">{formatDate(a.createTime)}</div>
+                                    <p className="text-[11px] text-fg-secondary">{update.title}</p>
+                                    {update.description && <p className="text-[10px] text-fg-ghost mt-0.5">{update.description}</p>}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                     {lastBashActivity && <ActivityArtifacts activity={lastBashActivity} expandedBash={expandedBash}
                                                             onToggleBash={onToggleBash} only="bash"/>}
@@ -280,6 +279,5 @@ export function ActivityItem({
     }
 
     return <SingleActivity activity={item} expandedBash={expandedBash} onToggleBash={onToggleBash}
-                           onApprovePlan={onApprovePlan} approvingPlan={approvingPlan} isNew={isNew}
-                           summaries={summaries}/>;
+                           onApprovePlan={onApprovePlan} approvingPlan={approvingPlan} isNew={isNew}/>;
 }

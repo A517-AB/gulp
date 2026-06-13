@@ -241,7 +241,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
                               expandedBash={expandedBash} onToggleBash={toggleBash} onApprovePlan={() => {
                     void handleApprovePlan();
                 }} approvingPlan={approving} isNew={!Array.isArray(item) && newActivityIds.has(item.id)}
-                              summaries={summaries}/>
+                />
             ))}
                 <div ref={bottomRef}/>
           </div>

@@ -62,6 +62,9 @@ const window_: ElectronAPI["window"] = {
   close:    () => {
     ipcRenderer.send("window.close");
   },
+  quit: () => {
+    ipcRenderer.send("window.quit");
+  },
 };
 
 // ── power ──────────────────────────────────────────────────────────────────────

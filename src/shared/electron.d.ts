@@ -36,6 +36,7 @@ export interface WindowAPI {
   minimize: () => void;
   maximize: () => void;
   close:    () => void;
+  quit:     () => void;
 }
 
 export interface PowerAPI {

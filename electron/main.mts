@@ -64,7 +64,8 @@ function createWindow() {
     titleBarStyle: "hidden",
     autoHideMenuBar: true,
     frame: false,
-    transparent: true,
+    transparent: true, // required for borderless rounded corners — do not remove
+    backgroundColor: "#000000", // prevents white flash on startup
     icon: isDev 
       ? path.join(__dirname, "../public/icon.png")
       : path.join(__dirname, "../dist/icon.png"),
@@ -124,6 +125,10 @@ ipcMain.on("window.maximize", () => {
 
 ipcMain.on("window.close", () => {
   mainWindow?.close();
+});
+
+ipcMain.on("window.quit", () => {
+  app.quit();
 });
 
 // ── lifecycle ─────────────────────────────────────────────────────────────────

@@ -61,6 +61,18 @@ export function TopBar({ left, center, right }: TopBarProps) {
                                 <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
                             </svg>
                         </button>
+
+                        <button
+                            type="button"
+                            onClick={() => { windowControls?.quit(); }}
+                            className="group flex items-center justify-center w-8 h-8 rounded-md hover:bg-orange-500/10 hover:shadow-[0_0_10px_rgba(249,115,22,0.25)] transition-all"
+                            aria-label="Quit"
+                        >
+                            <svg width="10" height="10" viewBox="0 0 10 10" className="text-fg-ghost group-hover:text-orange-400 transition-colors">
+                                <path d="M5 1 A4 4 0 1 0 5 9 A4 4 0 1 0 5 1" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeDasharray="20 5" strokeDashoffset="7"/>
+                                <line x1="5" y1="1" x2="5" y2="5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                            </svg>
+                        </button>
                     </div>
                 )}
             </div>

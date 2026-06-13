@@ -5,5 +5,6 @@ export interface FileTreeProps {
   root: string | null
   onSelectFile?:   (entry: FsEntry) => void
   onSelectFolder?: (entry: FsEntry) => void
+  onDelete?:       (entry: FsEntry) => Promise<void>
   className?: string
 }

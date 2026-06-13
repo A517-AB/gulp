@@ -1,5 +1,5 @@
 import type {Dispatch, ReactNode, SetStateAction, SyntheticEvent} from "react";
-import type {Activity, Session, Source} from "./jules";
+import type {SessionResource as Session, Activity, Source} from "@google/jules-sdk/types";
 
 export type { Activity, Session, Source };
 

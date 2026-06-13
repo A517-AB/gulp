@@ -1,87 +1,226 @@
 import {useState} from "react";
 import {AnimatePresence, motion} from "framer-motion";
-import {ChevronDown, Download, FolderSearch, GitBranch, GitMerge, Plus, Trash2, Upload} from "lucide-react";
+import {
+    Archive,
+    CheckCircle2,
+    ChevronDown,
+    Download,
+    GitBranch,
+    GitMerge,
+    Loader2,
+} from "lucide-react";
+import {ScrollArea} from "@/ui/scroll-area";
 import {Dropdown} from "@/components/ship/Dropdown";
+import {cn} from "@/utils";
 
-const FAKE_REPOS = [
-    {id: "1", label: "LAST",             path: "D:/LAST",                        branch: "jules-watcher", patches: [
-        {id: "p1", session: "Fix login button bug",     files: 3,  additions: 42,  deletions: 12, branch: "jules-patch-1718000001", isNew: true,  diff: `@@ -12,7 +12,7 @@ export function LoginButton() {
--  const handleClick = () => login();
-+  const handleClick = async () => { await login(); refresh(); };
--  return <button onClick={handleClick}>Login</button>;
-+  return <button onClick={handleClick} disabled={loading}>Login</button>;`},
-        {id: "p2", session: "Refactor auth middleware", files: 7,  additions: 130, deletions: 88, branch: "jules-patch-1718000002", isNew: true,  diff: `@@ -1,6 +1,8 @@
-+import { rateLimit } from './rate-limit';
-+
- export function authMiddleware(req, res, next) {
--  if (!req.headers.authorization) return res.status(401).end();
--  next();
-+  if (!req.headers.authorization) return res.status(401).json({ error: 'Unauthorized' });
-+  rateLimit(req);
-+  next();
- }`},
-    ]},
-    {id: "2", label: "jules-sdk-main",   path: "D:/jules rest/jules-sdk-main",   branch: "main",          patches: [
-        {id: "p3", session: "Add rate limiting",        files: 2,  additions: 55,  deletions: 3,  branch: "jules-patch-1718000003", isNew: false, diff: `@@ -44,3 +44,8 @@ export class Client {
-+  async rateLimit(config: RateLimitConfig) {
-+    await this.request('/rate-limit', { method: 'POST', body: config });
-+  }
- }`},
-    ]},
-    {id: "3", label: "some-other-repo",  path: "D:/projects/some-other-repo",    branch: "dev",           patches: []},
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+type FileStatus = "modified" | "added" | "deleted";
+type ActionState = "idle" | "busy" | "done";
+
+interface MockFile {
+    id: string;
+    path: string;
+    additions: number;
+    deletions: number;
+    status: FileStatus;
+}
+
+interface MockPatch {
+    id: string;
+    session: string;
+    branch: string;
+    isNew: boolean;
+    age: string;
+    files: MockFile[];
+}
+
+interface MockRepo {
+    id: string;
+    label: string;
+    path: string;
+    branch: string;
+    patches: MockPatch[];
+}
+
+// ── Mock Data ──────────────────────────────────────────────────────────────────
+
+const REPOS: MockRepo[] = [
+    {
+        id: "1",
+        label: "LAST",
+        path: "D:/LAST",
+        branch: "master",
+        patches: [
+            {
+                id: "p1",
+                session: "Fix login button bug",
+                branch: "jules-patch-1718000001",
+                isNew: true,
+                age: "2h",
+                files: [
+                    {id: "f1", path: "src/auth/LoginButton.tsx",  additions: 18, deletions: 5,  status: "modified"},
+                    {id: "f2", path: "src/auth/useLogin.ts",      additions: 20, deletions: 6,  status: "modified"},
+                    {id: "f3", path: "src/auth/types.ts",         additions: 4,  deletions: 1,  status: "modified"},
+                ],
+            },
+            {
+                id: "p2",
+                session: "Refactor auth middleware",
+                branch: "jules-patch-1718000002",
+                isNew: true,
+                age: "4h",
+                files: [
+                    {id: "f4",  path: "electron/auth.ts",           additions: 45, deletions: 22, status: "modified"},
+                    {id: "f5",  path: "electron/rate-limit.ts",     additions: 55, deletions: 0,  status: "added"},
+                    {id: "f6",  path: "electron/session.ts",        additions: 30, deletions: 66, status: "modified"},
+                    {id: "f7",  path: "electron/types.ts",          additions: 8,  deletions: 3,  status: "modified"},
+                    {id: "f8",  path: "src/shared/auth.d.ts",       additions: 4,  deletions: 0,  status: "added"},
+                    {id: "f9",  path: "src/shared/bridge.ts",       additions: 12, deletions: 8,  status: "modified"},
+                    {id: "f10", path: "electron/legacy-auth.ts",    additions: 0,  deletions: 87, status: "deleted"},
+                ],
+            },
+            {
+                id: "p3",
+                session: "Dark mode toggle animation",
+                branch: "jules-patch-1718000005",
+                isNew: false,
+                age: "1d",
+                files: [
+                    {id: "f11", path: "src/renderer/ui/theme-toggle.tsx",       additions: 42, deletions: 18, status: "modified"},
+                    {id: "f12", path: "src/renderer/styles/animations.css",     additions: 15, deletions: 0,  status: "added"},
+                ],
+            },
+        ],
+    },
+    {
+        id: "2",
+        label: "jules-sdk-main",
+        path: "D:/jules rest/jules-sdk-main",
+        branch: "main",
+        patches: [
+            {
+                id: "p4",
+                session: "Add rate limiting",
+                branch: "jules-patch-1718000003",
+                isNew: false,
+                age: "2d",
+                files: [
+                    {id: "f13", path: "src/client.ts",      additions: 28, deletions: 3, status: "modified"},
+                    {id: "f14", path: "src/rate-limit.ts",  additions: 27, deletions: 0, status: "added"},
+                ],
+            },
+        ],
+    },
+    {id: "3", label: "some-other-repo",  path: "D:/projects/some-other-repo", branch: "dev",  patches: []},
+    {id: "4", label: "personal-notes",   path: "D:/notes",                    branch: "main", patches: []},
 ];
 
-const ACTIONS = [
-    {id: "apply",  icon: GitBranch, label: "Apply",   cls: "hover:text-purple-400 hover:border-purple-500/30"},
-    {id: "merge",  icon: GitMerge,  label: "Merge",   cls: "hover:text-blue-400   hover:border-blue-500/30"},
-    {id: "push",   icon: Upload,    label: "Push",    cls: "hover:text-cyan-400   hover:border-cyan-500/30"},
-    {id: "files",  icon: Download,  label: "Files",   cls: "hover:text-green-400  hover:border-green-500/30"},
-    {id: "delete", icon: Trash2,    label: "Delete",  cls: "hover:text-red-400    hover:border-red-500/30"},
-];
+const EMPTY_REPO: MockRepo = {id: "", label: "", path: "", branch: "", patches: []};
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
+const STATUS_DOT: Record<FileStatus, string> = {
+    added:    "bg-green-500",
+    deleted:  "bg-red-500",
+    modified: "bg-yellow-500",
+};
+
+function ActionBtn({
+    state, icon, busyIcon, label, busyLabel, doneLabel, hoverCls,
+    onClick,
+}: {
+    state: ActionState;
+    icon: React.ReactNode;
+    busyIcon?: React.ReactNode;
+    label: string;
+    busyLabel?: string;
+    doneLabel?: string;
+    hoverCls: string;
+    onClick: (e: React.MouseEvent) => void;
+}) {
+    const isDone = state === "done";
+    const isBusy = state === "busy";
+    return (
+        <motion.button
+            whileTap={{scale: 0.93}}
+            onClick={onClick}
+            disabled={isBusy || isDone}
+            className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-mono transition-all",
+                isDone
+                    ? "text-green-400 border-green-500/30 bg-green-500/5"
+                    : cn("text-fg-ghost border-hair", hoverCls),
+            )}
+        >
+            {isBusy  ? (busyIcon ?? <Loader2 className="h-2.5 w-2.5 animate-spin"/>) : isDone ? <CheckCircle2 className="h-2.5 w-2.5"/> : icon}
+            <span>{isBusy ? (busyLabel ?? label) : isDone ? (doneLabel ?? "Done") : label}</span>
+        </motion.button>
+    );
+}
+
+// ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function ShipPage() {
-    const [repoId,       setRepoId]       = useState("1");
-    const [selectedPatch, setSelectedPatch] = useState("");
-    const [status,       setStatus]       = useState<"idle"|"scanning"|"done">("idle");
+    const [repoId,      setRepoId]      = useState("1");
+    const [openPatch,   setOpenPatch]   = useState("");
+    const [fileActions, setFileActions] = useState<Record<string, {merge: ActionState; get: ActionState}>>({});
+    const [snapshots,   setSnapshots]   = useState<Record<string, ActionState>>({});
 
-    const repo    = FAKE_REPOS.find(r => r.id === repoId) ?? FAKE_REPOS[0] ?? {id:"", label:"", path:"", branch:"", patches:[]};
+    const repo = REPOS.find(r => r.id === repoId) ?? EMPTY_REPO;
+
+    function triggerFile(fileId: string, action: "merge" | "get") {
+        setFileActions(p => ({...p, [fileId]: {...(p[fileId] ?? {merge: "idle", get: "idle"}), [action]: "busy"}}));
+        setTimeout(() => {
+            setFileActions(p => ({...p, [fileId]: {...(p[fileId] ?? {merge: "idle", get: "idle"}), [action]: "done"}}));
+            setTimeout(() => {
+                setFileActions(p => ({...p, [fileId]: {...(p[fileId] ?? {merge: "idle", get: "idle"}), [action]: "idle"}}));
+            }, 1800);
+        }, 900);
+    }
+
+    function triggerSnapshot(patchId: string) {
+        setSnapshots(p => ({...p, [patchId]: "busy"}));
+        setTimeout(() => {
+            setSnapshots(p => ({...p, [patchId]: "done"}));
+            setTimeout(() => { setSnapshots(p => ({...p, [patchId]: "idle"})); }, 2500);
+        }, 1100);
+    }
+
+    const totalAdd = repo.patches.reduce((s, p) => s + p.files.reduce((s2, f) => s2 + f.additions, 0), 0);
+    const totalDel = repo.patches.reduce((s, p) => s + p.files.reduce((s2, f) => s2 + f.deletions, 0), 0);
+
     const newCount = repo.patches.filter(p => p.isNew).length;
-
-    const handleScan = () => {
-        setStatus("scanning");
-        setTimeout(() => { setStatus("done"); setTimeout(() => { setStatus("idle"); }, 1800); }, 1400);
-    };
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
 
-            {/* ── toolbar ── */}
+            {/* ── Toolbar ───────────────────────────────────────────────────── */}
             <motion.div
-                initial={{opacity: 0, y: -8}}
+                initial={{opacity: 0, y: -6}}
                 animate={{opacity: 1, y: 0}}
-                transition={{duration: 0.2}}
-                className="flex items-center gap-2 px-6 pt-5 pb-4 shrink-0"
+                transition={{duration: 0.18}}
+                className="flex items-center gap-3 px-6 pt-5 pb-4 shrink-0"
             >
                 <Dropdown
-                    items={FAKE_REPOS.map(r => ({id: r.id, label: r.label, meta: r.branch}))}
+                    items={REPOS.map(r => ({id: r.id, label: r.label, meta: r.branch}))}
                     value={repoId}
-                    onChange={id => { setRepoId(id); setSelectedPatch(""); return; }}
+                    onChange={id => { setRepoId(id); setOpenPatch(""); }}
                 />
 
-                {/* new indicator */}
                 <AnimatePresence>
                     {newCount > 0 && (
                         <motion.div
-                            key="dot"
-                            initial={{opacity: 0, scale: 0.5}}
+                            key="newdot"
+                            initial={{opacity: 0, scale: 0.6}}
                             animate={{opacity: 1, scale: 1}}
-                            exit={{opacity: 0, scale: 0.5}}
-                            transition={{type: "spring", stiffness: 300, damping: 20}}
+                            exit={{opacity: 0, scale: 0.6}}
+                            transition={{type: "spring", stiffness: 300, damping: 22}}
                             className="flex items-center gap-1.5"
                         >
                             <span className="relative flex h-1.5 w-1.5">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-60"/>
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-purple-500"/>
+                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-purple-500"/>
                             </span>
                             <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest">{newCount} new</span>
                         </motion.div>
@@ -90,167 +229,207 @@ export default function ShipPage() {
 
                 <div className="flex-1"/>
 
-                {/* scan spinner */}
-                <AnimatePresence>
-                    {status !== "idle" && (
-                        <motion.svg
-                            key="spin"
-                            width="14" height="14" viewBox="0 0 14 14"
-                            initial={{opacity: 0, scale: 0.5}}
-                            animate={{opacity: 1, scale: status === "done" ? [1, 1.18, 1] : 1}}
-                            exit={{opacity: 0, scale: 0.5}}
-                            transition={{
-                                opacity: {duration: 0.2},
-                                scale: status === "done"
-                                    ? {duration: 0.45, times: [0, 0.4, 1], ease: "easeInOut"}
-                                    : {duration: 0.2},
-                            }}
-                            className={status === "scanning" ? "animate-spin" : ""}
-                        >
-                            <motion.circle
-                                cx="7" cy="7" r="5.5"
-                                fill="none"
-                                strokeWidth="1"
-                                strokeLinecap="round"
-                                animate={{
-                                    pathLength: status === "done" ? 1 : 0.32,
-                                    stroke: status === "done" ? "#4ade80" : "#a855f7",
-                                    filter: status === "done"
-                                        ? "drop-shadow(0 0 3px rgba(74,222,128,0.55))"
-                                        : "drop-shadow(0 0 2px rgba(168,85,247,0.35))",
-                                }}
-                                transition={{
-                                    pathLength: {duration: 0.55, ease: [0.34, 1.2, 0.64, 1]},
-                                    stroke:     {duration: 0.45, ease: "easeInOut"},
-                                    filter:     {duration: 0.45},
-                                }}
-                            />
-                        </motion.svg>
-                    )}
-                </AnimatePresence>
-
-                <button
-                    onClick={handleScan}
-                    className="flex items-center gap-1.5 text-[10px] font-mono text-fg-dim hover:text-fg-secondary uppercase tracking-widest transition-colors"
-                >
-                    <FolderSearch className="h-3 w-3"/>Scan
-                </button>
-                <button className="flex items-center gap-1.5 text-[10px] font-mono text-fg-dim hover:text-fg-secondary uppercase tracking-widest transition-colors">
-                    <Plus className="h-3 w-3"/>Add
-                </button>
+                {repo.patches.length > 0 && (
+                    <div className="flex items-center gap-3 text-[10px] font-mono">
+                        <span className="text-fg-dim">{repo.patches.length} patches</span>
+                        <span className="text-green-400">+{totalAdd}</span>
+                        <span className="text-red-400">-{totalDel}</span>
+                    </div>
+                )}
             </motion.div>
 
-            {/* ── patch list ── */}
-            <div className="flex-1 overflow-auto px-6 pb-8">
-                {repo.patches.length === 0 && (
-                    <p className="text-[10px] font-mono text-fg-ghost uppercase tracking-widest pt-8 text-center">No patches</p>
-                )}
+            {/* ── Patch list ────────────────────────────────────────────────── */}
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={repoId}
+                    initial={{opacity: 0}}
+                    animate={{opacity: 1}}
+                    exit={{opacity: 0}}
+                    transition={{duration: 0.15}}
+                    className="flex-1 overflow-hidden"
+                >
 
-                <div className="space-y-px">
-                    {repo.patches.map((patch, i) => {
-                        const isOpen = selectedPatch === patch.id;
-                        return (
-                            <motion.div
-                                key={patch.id}
-                                initial={{opacity: 0, y: 8}}
-                                animate={{opacity: 1, y: 0}}
-                                transition={{duration: 0.16, delay: i * 0.04}}
-                            >
-                                {/* row */}
-                                <div
-                                    onClick={() => { setSelectedPatch(isOpen ? "" : patch.id); }}
-                                    className={`flex items-center gap-3 py-2.5 px-3 rounded-md cursor-pointer group transition-colors ${
-                                        isOpen ? "bg-hover" : "hover:bg-hover/60"
-                                    }`}
+                    <ScrollArea className="h-full">
+                        <div className="px-6 py-4">
+                            {repo.patches.length === 0 ? (
+                                <motion.p
+                                    initial={{opacity: 0}}
+                                    animate={{opacity: 1}}
+                                    transition={{delay: 0.1}}
+                                    className="text-[10px] font-mono text-fg-ghost uppercase tracking-widest text-center py-16"
                                 >
-                                    {patch.isNew && (
-                                        <span className="w-1 h-1 rounded-full bg-purple-500 shrink-0"/>
-                                    )}
-                                    {!patch.isNew && <span className="w-1 h-1 shrink-0"/>}
+                                    No patches
+                                </motion.p>
+                            ) : (
+                                <div className="space-y-px">
+                                    {repo.patches.map((patch, pi) => {
+                                        const isOpen        = openPatch === patch.id;
+                                        const snapshotState = snapshots[patch.id] ?? "idle";
+                                        const patchAdd      = patch.files.reduce((s, f) => s + f.additions, 0);
+                                        const patchDel      = patch.files.reduce((s, f) => s + f.deletions, 0);
 
-                                    <GitBranch className="h-3 w-3 text-fg-ghost shrink-0"/>
-
-                                    <div className="flex-1 min-w-0">
-                                        <span className="text-[11px] font-semibold text-fg-primary truncate block">{patch.session}</span>
-                                        <span className="text-[9px] font-mono text-fg-ghost">{patch.branch}</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 text-[9px] font-mono shrink-0">
-                                        <span className="text-fg-ghost">{patch.files}f</span>
-                                        <span className="text-green-400">+{patch.additions}</span>
-                                        <span className="text-red-400">-{patch.deletions}</span>
-                                    </div>
-
-                                    <motion.div
-                                        animate={{rotate: isOpen ? 180 : 0}}
-                                        transition={{duration: 0.15}}
-                                        className="text-fg-ghost"
-                                    >
-                                        <ChevronDown className="h-3 w-3"/>
-                                    </motion.div>
-                                </div>
-
-                                {/* expanded */}
-                                <AnimatePresence initial={false}>
-                                    {isOpen && (
-                                        <motion.div
-                                            key="body"
-                                            initial={{height: 0, opacity: 0}}
-                                            animate={{height: "auto", opacity: 1}}
-                                            exit={{height: 0, opacity: 0}}
-                                            transition={{duration: 0.22, ease: [0.4, 0, 0.2, 1]}}
-                                            className="overflow-hidden"
-                                        >
-                                            <div className="px-3 pb-4 pt-1 space-y-3">
-
-                                                {/* action buttons */}
-                                                <motion.div
-                                                    initial={{opacity: 0, y: -4}}
-                                                    animate={{opacity: 1, y: 0}}
-                                                    transition={{duration: 0.15, delay: 0.06}}
-                                                    className="flex items-center gap-1.5 flex-wrap"
+                                        return (
+                                            <motion.div
+                                                key={patch.id}
+                                                initial={{opacity: 0, y: 8}}
+                                                animate={{opacity: 1, y: 0}}
+                                                transition={{duration: 0.18, delay: pi * 0.06}}
+                                            >
+                                                {/* Patch row */}
+                                                <div
+                                                    onClick={() => { setOpenPatch(isOpen ? "" : patch.id); }}
+                                                    className={cn(
+                                                        "flex items-center gap-3 py-3 px-3 rounded-md cursor-pointer transition-colors select-none",
+                                                        isOpen ? "bg-hover" : "hover:bg-hover/50",
+                                                    )}
                                                 >
-                                                    {ACTIONS.map(a => (
-                                                        <button
-                                                            key={a.id}
-                                                            onClick={e => { e.stopPropagation(); }}
-                                                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded border border-hair text-[10px] font-mono text-fg-ghost transition-all ${a.cls}`}
+                                                    {/* Pulse dot */}
+                                                    <div className="w-2 shrink-0 flex items-center justify-center">
+                                                        {patch.isNew ? (
+                                                            <span className="relative flex h-1.5 w-1.5">
+                                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-60"/>
+                                                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-purple-500"/>
+                                                            </span>
+                                                        ) : (
+                                                            <span className="h-1.5 w-1.5 rounded-full bg-fg-ghost/20"/>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex-1 min-w-0">
+                                                        <span className="text-[12px] font-semibold text-fg-primary block truncate">
+                                                            {patch.session}
+                                                        </span>
+                                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                                            <GitBranch className="h-2.5 w-2.5 text-fg-ghost shrink-0"/>
+                                                            <span className="text-[9px] font-mono text-fg-ghost truncate">
+                                                                {patch.branch}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2.5 shrink-0 text-[10px] font-mono">
+                                                        <span className="text-fg-ghost">{patch.files.length}f</span>
+                                                        <span className="text-green-400">+{patchAdd}</span>
+                                                        <span className="text-red-400">-{patchDel}</span>
+                                                        <span className="text-fg-dim">{patch.age}</span>
+                                                    </div>
+
+                                                    <motion.div
+                                                        animate={{rotate: isOpen ? 180 : 0}}
+                                                        transition={{duration: 0.16}}
+                                                        className="text-fg-ghost shrink-0"
+                                                    >
+                                                        <ChevronDown className="h-3.5 w-3.5"/>
+                                                    </motion.div>
+                                                </div>
+
+                                                {/* Expanded: files */}
+                                                <AnimatePresence initial={false}>
+                                                    {isOpen && (
+                                                        <motion.div
+                                                            key="body"
+                                                            initial={{height: 0, opacity: 0}}
+                                                            animate={{height: "auto", opacity: 1}}
+                                                            exit={{height: 0, opacity: 0}}
+                                                            transition={{duration: 0.22, ease: [0.4, 0, 0.2, 1]}}
+                                                            className="overflow-hidden"
                                                         >
-                                                            <a.icon className="h-2.5 w-2.5"/>
-                                                            {a.label}
-                                                        </button>
-                                                    ))}
-                                                </motion.div>
+                                                            <div className="mx-3 mb-4 rounded-md border border-hair bg-raised overflow-hidden">
+                                                                {patch.files.map((file, fi) => {
+                                                                    const fa      = fileActions[file.id] ?? {merge: "idle" as ActionState, get: "idle" as ActionState};
+                                                                    const slashIdx = file.path.lastIndexOf("/");
+                                                                    const dir      = slashIdx >= 0 ? file.path.slice(0, slashIdx + 1) : "";
+                                                                    const name     = slashIdx >= 0 ? file.path.slice(slashIdx + 1) : file.path;
 
-                                                {/* diff */}
-                                                <motion.pre
-                                                    initial={{opacity: 0}}
-                                                    animate={{opacity: 1}}
-                                                    transition={{duration: 0.2, delay: 0.1}}
-                                                    className="text-[10px] font-mono leading-relaxed rounded-md bg-raised p-3 overflow-x-auto"
-                                                >
-                                                    {patch.diff.split("\n").map((line, li) => (
-                                                        <div
-                                                            key={li}
-                                                            className={
-                                                                line.startsWith("+") ? "text-green-400" :
-                                                                line.startsWith("-") ? "text-red-400" :
-                                                                line.startsWith("@") ? "text-blue-400 opacity-60" :
-                                                                "text-fg-dim"
-                                                            }
-                                                        >{line || " "}</div>
-                                                    ))}
-                                                </motion.pre>
+                                                                    return (
+                                                                        <motion.div
+                                                                            key={file.id}
+                                                                            initial={{opacity: 0, x: -5}}
+                                                                            animate={{opacity: 1, x: 0}}
+                                                                            transition={{duration: 0.14, delay: fi * 0.045}}
+                                                                            className={cn(
+                                                                                "flex items-center gap-3 px-4 py-2.5 group/file transition-colors hover:bg-hover/60",
+                                                                                fi > 0 && "border-t border-hair",
+                                                                            )}
+                                                                        >
+                                                                            <span className={cn("h-1.5 w-1.5 rounded-full shrink-0 mt-px", STATUS_DOT[file.status])}/>
 
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-            </div>
+                                                                            <span className="flex-1 min-w-0 text-[11px] font-mono truncate">
+                                                                                <span className="text-fg-ghost">{dir}</span>
+                                                                                <span className="text-fg-primary font-semibold">{name}</span>
+                                                                            </span>
+
+                                                                            <div className="flex items-center gap-2 shrink-0 text-[10px] font-mono">
+                                                                                {file.status !== "deleted" && (
+                                                                                    <span className="text-green-400">+{file.additions}</span>
+                                                                                )}
+                                                                                {file.status !== "added" && (
+                                                                                    <span className="text-red-400">-{file.deletions}</span>
+                                                                                )}
+                                                                            </div>
+
+                                                                            {/* Per-file actions (visible on hover) */}
+                                                                            <div className="flex items-center gap-1 opacity-0 group-hover/file:opacity-100 transition-opacity shrink-0">
+                                                                                {file.status !== "deleted" && (
+                                                                                    <ActionBtn
+                                                                                        state={fa.merge}
+                                                                                        icon={<GitMerge className="h-2.5 w-2.5"/>}
+                                                                                        label="Merge"
+                                                                                        busyLabel="Merging"
+                                                                                        doneLabel="Merged"
+                                                                                        hoverCls="hover:text-purple-400 hover:border-purple-500/30"
+                                                                                        onClick={(e) => { e.stopPropagation(); triggerFile(file.id, "merge"); }}
+                                                                                    />
+                                                                                )}
+                                                                                <ActionBtn
+                                                                                    state={fa.get}
+                                                                                    icon={<Download className="h-2.5 w-2.5"/>}
+                                                                                    label="Get"
+                                                                                    busyLabel="Saving"
+                                                                                    doneLabel="Saved"
+                                                                                    hoverCls="hover:text-cyan-400 hover:border-cyan-500/30"
+                                                                                    onClick={(e) => { e.stopPropagation(); triggerFile(file.id, "get"); }}
+                                                                                />
+                                                                            </div>
+                                                                        </motion.div>
+                                                                    );
+                                                                })}
+
+                                                                {/* Patch footer */}
+                                                                <motion.div
+                                                                    initial={{opacity: 0}}
+                                                                    animate={{opacity: 1}}
+                                                                    transition={{delay: patch.files.length * 0.045 + 0.05}}
+                                                                    className="border-t border-hair px-4 py-2.5 flex items-center justify-between"
+                                                                >
+                                                                    <span className="text-[9px] font-mono text-fg-ghost uppercase tracking-widest">
+                                                                        {patch.files.length} file{patch.files.length !== 1 ? "s" : ""} changed
+                                                                    </span>
+
+                                                                    <ActionBtn
+                                                                        state={snapshotState}
+                                                                        icon={<Archive className="h-2.5 w-2.5"/>}
+                                                                        label="Snapshot"
+                                                                        busyLabel="Saving..."
+                                                                        doneLabel="Saved to folder"
+                                                                        hoverCls="hover:text-fg-primary hover:border-subtle"
+                                                                        onClick={(e) => { e.stopPropagation(); triggerSnapshot(patch.id); }}
+                                                                    />
+                                                                </motion.div>
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+                </motion.div>
+            </AnimatePresence>
         </div>
     );
 }
+
