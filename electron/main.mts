@@ -37,13 +37,13 @@ function buildTrayIcon(): ReturnType<typeof nativeImage.createFromBuffer> {
   const buf = Buffer.alloc(size * size * 4, 0)
   const R = 8.0
   const sqrt3 = Math.sqrt(3)
-  
+
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const dx = Math.abs(x - size / 2 + 0.5)
       const dy = Math.abs(y - size / 2 + 0.5)
       const idx = (y * size + x) * 4
-      
+
       // Flat-topped hexagon equation
       if (dy <= R * (sqrt3 / 2) && (dy + sqrt3 * dx <= sqrt3 * R)) {
         buf[idx] = 139; buf[idx + 1] = 92; buf[idx + 2] = 246; buf[idx + 3] = 255
@@ -64,9 +64,9 @@ function createWindow() {
     titleBarStyle: "hidden",
     autoHideMenuBar: true,
     frame: false,
-    transparent: true, // required for borderless rounded corners — do not remove
+      transparent: false,
     backgroundColor: "#000000", // prevents white flash on startup
-    icon: isDev 
+    icon: isDev
       ? path.join(__dirname, "../public/icon.png")
       : path.join(__dirname, "../dist/icon.png"),
     webPreferences: {

@@ -67,8 +67,8 @@ export type {
   SyncStats,
 } from '@google/jules-sdk/types'
 
-// ListSessionsOptions + ListSessionsResponse live in sessions.js, exported via main entry
-export type { ListSessionsOptions, ListSessionsResponse } from '@google/jules-sdk'
+// These live in the main entry, not /types
+export type {ListSessionsOptions, ListSessionsResponse, DomainSchema, ValidationResult} from '@google/jules-sdk'
 
 // ── IPC bridge type ───────────────────────────────────────────────────────────
 

@@ -35,8 +35,9 @@ export default defineConfig({
       },
     },
   },
+    // can you not change it to rollup
   build: {
-    rollupOptions: {
+      rolldownOptions: {
       input: {
         index:        resolve(__dirname, 'index.html'),
         notification: resolve(__dirname, 'notification.html'),

@@ -121,6 +121,7 @@
 
 ---
 
+<!-- region Full API Reference Tree -->
 # Full API Reference Tree
 
 ### 🔑 Legend
@@ -769,3 +770,4 @@
   - 📄 `const PROJECTION_SCHEMA: { description: string; syntax: { name: string; description: string; example: string }[]; defaults: { sessions: string[]; activities: string[] } }`
   - 📄 `const SESSION_COMPUTED_FIELDS: undefined any`
   - 📄 `const SESSION_SCHEMA: DomainSchema`
+<!-- endregion -->

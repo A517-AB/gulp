@@ -1,4 +1,3 @@
-import type React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {CheckCircle2, ChevronDown, ChevronRight, Terminal, XCircle} from "lucide-react";
@@ -19,7 +18,7 @@ import type {ActivityGroup, ActivityRole, ActivityType} from "@/types/activity-f
 function Markdown({children}: { children: string }) {
     return (
         <div
-            className="prose prose-sm dark:prose-invert max-w-none break-words prose-p:text-xs prose-headings:text-xs prose-code:text-[11px] prose-pre:text-[11px] prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
+            className="prose dark:prose-invert max-w-none break-words prose-p:text-sm prose-headings:text-base prose-code:text-sm prose-pre:text-sm prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
         </div>
     );
@@ -36,14 +35,14 @@ function renderContent(activity: Activity): React.ReactNode {
             return (
                 <div className="flex items-center gap-1.5">
                     <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0"/>
-                    <span className="text-[10px] font-mono text-fg-ghost">Plan approved</span>
+                    <span className="text-xs font-mono text-fg-muted">Plan approved</span>
                 </div>
             );
         case 'progressUpdated':
             return (
                 <div>
-                    <p className="text-[11px] text-fg-secondary">{activity.title}</p>
-                    {activity.description && <p className="text-[10px] text-fg-ghost mt-0.5">{activity.description}</p>}
+                    <p className="text-sm text-fg-primary">{activity.title}</p>
+                    {activity.description && <p className="text-xs text-fg-muted mt-0.5">{activity.description}</p>}
                 </div>
             );
         case 'sessionCompleted':
@@ -200,9 +199,9 @@ function SingleActivity({
                     <CardContent className="p-3">
                         <div className="flex items-center gap-2 mb-2">
                             <TypeBadge type={activity.type}/>
-                            <span className="text-[9px] font-mono text-fg-dim">{formatDate(activity.createTime)}</span>
+                            <span className="text-xs font-mono text-fg-muted">{formatDate(activity.createTime)}</span>
                         </div>
-                        <div className="text-[11px] leading-relaxed text-fg-secondary break-words">
+                        <div className="text-sm leading-relaxed text-fg-primary break-words">
                             {content}
                         </div>
                     </CardContent>
@@ -211,9 +210,9 @@ function SingleActivity({
                 <AgentCard>
                     <div className="flex items-center gap-2 mb-2">
                         <TypeBadge type={activity.type}/>
-                        <span className="text-[9px] font-mono text-fg-dim">{formatDate(activity.createTime)}</span>
+                        <span className="text-xs font-mono text-fg-muted">{formatDate(activity.createTime)}</span>
                     </div>
-                    <div className="text-[11px] leading-relaxed text-fg-secondary break-words">
+                    <div className="text-sm leading-relaxed text-fg-primary break-words">
                         {content}
                     </div>
                     <ActivityArtifacts activity={activity} expandedBash={expandedBash} onToggleBash={onToggleBash}/>
@@ -254,16 +253,18 @@ export function ActivityItem({
                             progress
                         </Badge>
                         <span
-                            className="text-[9px] font-mono text-fg-dim">{item.length} update{item.length > 1 ? "s" : ""}</span>
+                            className="text-xs font-mono text-fg-muted">{item.length} update{item.length > 1 ? "s" : ""}</span>
                     </div>
                     <div className="space-y-2">
                         {item.map((a, i) => {
                             const update = a as Extract<Activity, {type: 'progressUpdated'}>;
                             return (
                                 <div key={a.id} className={i > 0 ? "pt-2 border-t border-hair" : ""}>
-                                    <div className="text-[8px] font-mono text-fg-dim mb-1 uppercase">{formatDate(a.createTime)}</div>
-                                    <p className="text-[11px] text-fg-secondary">{update.title}</p>
-                                    {update.description && <p className="text-[10px] text-fg-ghost mt-0.5">{update.description}</p>}
+                                    <div
+                                        className="text-xs font-mono text-fg-muted mb-1 uppercase">{formatDate(a.createTime)}</div>
+                                    <p className="text-sm text-fg-primary">{update.title}</p>
+                                    {update.description &&
+                                        <p className="text-xs text-fg-muted mt-0.5">{update.description}</p>}
                                 </div>
                             );
                         })}

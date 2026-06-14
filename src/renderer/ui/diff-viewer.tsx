@@ -3,7 +3,7 @@ import { Check, Copy, ChevronDown, ChevronRight, ExternalLink } from "lucide-rea
 import { cn } from "@/utils";
 
 interface DiffViewerProps {
-  diff: string;
+    diff: string | undefined | null;
   className?: string;
   repoUrl?: string;
   branch?: string;
@@ -21,7 +21,8 @@ interface DiffLine {
   modifiedLineNumber?: number;
 }
 
-function parseDiff(diff: string): ParsedDiffFile[] {
+function parseDiff(diff: string | undefined | null): ParsedDiffFile[] {
+    if (!diff) return [];
   const files: ParsedDiffFile[] = [];
   const lines = diff.split("\n");
   let currentFile: ParsedDiffFile | null = null;

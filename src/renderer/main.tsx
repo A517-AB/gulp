@@ -1,7 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import App from '@renderer/App'
 import '@renderer/lib/monaco'
-window.addEventListener('contextmenu', e => { e.preventDefault() }, true)
 
 const root = document.getElementById('root')
 if (!root) throw new Error('[main] Root element #root not found in DOM')

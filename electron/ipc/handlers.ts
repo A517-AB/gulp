@@ -1,12 +1,12 @@
 import {ipcMain} from 'electron'
 import type {
-    Activity,
     JulesDomain,
     JulesOptions,
     JulesQuery,
     ListSessionsOptions,
     SessionConfig,
     SessionState,
+    Activity,
 } from '@google/jules-sdk'
 import {
     formatValidationResult,

@@ -9,7 +9,7 @@ import {CardSpotlight} from "@/ui/card-spotlight.tsx";
 import {formatDate} from "@/utils/activity.ts";
 import {useSessionList} from "@/hooks/use-session-list.ts";
 import {useStore} from "@/store/app.ts";
-import {STATE_BADGE, STATE_DOT} from "./session-status.ts";
+import {STATE_BADGE, STATE_DOT, getStatusInfo} from "./session-status.ts";
 import {SessionContextMenu} from "./SessionContextMenu.tsx";
 import type {SessionListProps} from "@/types/activity-feed.ts";
 
@@ -76,7 +76,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
                                   </TooltipTrigger>
                                   <TooltipContent side="right"
                                                   className="bg-overlay border-hair text-fg-secondary text-[10px] z-[60]">
-                                      <span className="capitalize">{s.state.replace(/([A-Z])/g, ' $1')}</span>
+                                      <span>{getStatusInfo(s.state).label}</span>
                                   </TooltipContent>
                               </Tooltip>
                               <div className="flex-1 min-w-0">

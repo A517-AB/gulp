@@ -1,6 +1,5 @@
 import { BellOff } from 'lucide-react'
 import { useWatcherStore } from './store'
-import { JulesWatcher } from './JulesWatcher'
 
 export function WatcherList() {
   const watched  = useWatcherStore(s => s.watched)
@@ -15,7 +14,6 @@ export function WatcherList() {
     <div className="space-y-1.5">
       {sessions.map(s => (
         <div key={s.id}>
-          <JulesWatcher id={s.id} title={s.title} />
           <div className="flex items-center justify-between p-3 rounded-md border border-hair bg-raised">
             <div className="min-w-0 mr-3">
               <p className="text-xs text-fg-secondary font-mono truncate">{s.title}</p>

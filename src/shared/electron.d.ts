@@ -2,7 +2,7 @@ import type {FileFilter, FsEntry, FsStat, ReaddirOptions} from './filesystem'
 import type {FuseChangeEvent, FuseManifest} from './fuse'
 import type {HistoryEntry} from './history'
 import type {NoteMeta} from './notes'
-import type {SdkIpc} from '../jules/sdk-ipc'
+import type {SdkIpc} from '@jules'
 
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
