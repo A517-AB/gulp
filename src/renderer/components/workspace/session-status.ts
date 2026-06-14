@@ -1,4 +1,4 @@
-import type {SessionStatus, SessionStatusInfo} from '@/types/activity-feed.ts'
+import type {SessionStatus, SessionStatusInfo} from '@jules'
 
 export const STATE_COLOR: Record<SessionStatus, string> = {
     unspecified: "bg-zinc-500/15 text-zinc-400",

@@ -80,7 +80,8 @@ export default defineConfig({
                 external: nodeExternal,
                 output: {
                   entryFileNames: '[name].mjs',
-                  codeSplitting:  true,
+                  codeSplitting:        true,
+                  inlineDynamicImports: false,
                 },
               },
             },

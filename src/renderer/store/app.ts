@@ -1,9 +1,15 @@
 import {create} from 'zustand'
-import type {Activity, SessionResource, Source} from '@google/jules-sdk/types'
-import type {SessionFormData} from '@/types/activity-feed'
+import type {Activity, SessionResource, Source} from '@jules'
 import {sdkIpc} from '@shared/bridge'
 
-export type { SessionFormData }
+export interface SessionFormData {
+    sourceId: string
+    title: string
+    prompt: string
+    startingBranch: string
+    autoCreatePr: boolean
+    interactive: boolean
+}
 
 const activeStreams = new Map<string, () => void>()
 const loadedSessions = new Set<string>()

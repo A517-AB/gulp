@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from "react";
-import {Archive, Bell, BellOff, Code, GitBranch, Loader2, MoreVertical, Play, Plus, Send} from "lucide-react";
+import {Archive, Code, GitBranch, Loader2, MoreVertical, Play, Plus, Send} from "lucide-react";
 import {filesystem, sdkIpc} from "@shared/bridge";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {Textarea} from "@/ui/textarea.tsx";
@@ -10,9 +10,15 @@ import {getSessionDuration, getStatusInfo} from "./session-status.ts";
 import {formatDate} from "@/utils/activity.ts";
 import {ActivityItem} from "./activity-item.tsx";
 import {useStore} from "@/store/app.ts";
-import {useWatcherStore} from "@/library/jules-watcher";
-import type {Activity} from "@google/jules-sdk/types";
-import type {ActivityFeedProps} from "@/types/activity-feed.ts";
+import type {Activity, SessionResource} from "@google/jules-sdk/types";
+
+interface ActivityFeedProps {
+    session: SessionResource;
+    onArchive?: () => void;
+    onNewSession?: () => void;
+    showCodeDiffs: boolean;
+    onToggleCodeDiffs: (show: boolean) => void;
+}
 
 const QUICK_REVIEW_PROMPT =
   "Please perform a comprehensive code review of the repository. Look for bugs, security issues, and opportunities for refactoring. Provide a detailed summary of your findings.";
@@ -30,9 +36,6 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
 
   const { grouped, latest } = useActivityGroups(activities);
     const summaries = useStore(s => s.activitySummaries[session.id] ?? EMPTY_SUMMARIES);
-    const isWatched = useWatcherStore(s => s.isWatched(session.id))
-    const watch = useWatcherStore(s => s.watch)
-    const unwatch = useWatcherStore(s => s.unwatch)
   const [message, setMessage] = useState("");
   const [expandedBash, setExpandedBash] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
@@ -149,20 +152,6 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
             )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
-              <Button
-                  variant="ghost" size="icon"
-                  onClick={() => {
-                      if (isWatched) {
-                          unwatch(session.id);
-                      } else {
-                          watch({id: session.id, title: session.title});
-                      }
-                  }}
-                  className={`h-7 w-7 hover:bg-hover ${isWatched ? 'text-purple-400' : 'text-fg-muted'}`}
-                  title={isWatched ? 'Stop watching' : 'Watch for replies'}
-              >
-                  {isWatched ? <Bell className="h-3.5 w-3.5"/> : <BellOff className="h-3.5 w-3.5"/>}
-              </Button>
             {hasDiffs && (
               <Button variant="ghost" size="icon" onClick={() => { onToggleCodeDiffs(!showCodeDiffs); }} className={`h-7 w-7 hover:bg-hover ${showCodeDiffs ? "bg-purple-500/20 text-purple-400" : "text-fg-muted"}`}>
                 <Code className="h-3.5 w-3.5" />

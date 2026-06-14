@@ -8,7 +8,15 @@ import {Label} from "@/ui/label.tsx";
 import {DynamicDropdown} from "@/components/shared/DynamicDropdown";
 import {Toggle} from "@/ui/toggle.tsx";
 import {useNewSessionForm} from "@/hooks/use-new-session-form.ts";
-import type {NewSessionDialogProps} from "@/types/activity-feed.ts";
+import type {SessionInitialValues} from '@jules';
+
+interface NewSessionDialogProps {
+    onSessionCreated?: () => void;
+    initialValues?: SessionInitialValues;
+    trigger?: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
 
 export function NewSessionDialog({ onSessionCreated, initialValues, trigger, open: controlledOpen, onOpenChange }: NewSessionDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);

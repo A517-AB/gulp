@@ -4,8 +4,6 @@ import { TopBar } from '@renderer/shell/TopBar'
 import { ThemeProvider } from '@renderer/providers/theme'
 import { navRoutes } from '@renderer/router'
 import {useAppSync} from '@/hooks/use-app-sync'
-import {WatcherStreams} from '@/library/jules-watcher'
-
 export default function RootLayout(): ReactNode {
     useAppSync()
 
@@ -32,7 +30,6 @@ export default function RootLayout(): ReactNode {
 
     return (
         <ThemeProvider>
-            <WatcherStreams />
             <div className="flex flex-col h-screen w-screen overflow-hidden bg-base">
                 <TopBar center={navLinks} />
                 <main className="flex-1 overflow-hidden min-h-0 h-full">

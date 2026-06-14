@@ -1,7 +1,13 @@
 import { useMemo } from "react";
 import {groupActivities} from "@/utils/activity";
 import type { Activity } from "@google/jules-sdk/types";
-import type { UseActivityGroupsReturn } from "@/types/ui-hooks";
+import type { ActivityGroup } from "@jules";
+
+interface UseActivityGroupsReturn {
+    filtered: Activity[];
+    grouped: ActivityGroup[];
+    latest: Activity | null;
+}
 
 export function useActivityGroups(activities: Activity[]): UseActivityGroupsReturn {
     const grouped = useMemo(() => groupActivities(activities), [activities]);

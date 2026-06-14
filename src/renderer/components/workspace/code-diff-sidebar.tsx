@@ -2,9 +2,14 @@ import {useMemo} from "react";
 import {FileCode} from "lucide-react";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {DiffViewer} from "@/ui/diff-viewer.tsx";
-import type {ChangeSetArtifact} from "@google/jules-sdk";
+import type {ChangeSetArtifact} from "@jules";
 import {useStore} from "@/store/app.ts";
-import type {CodeDiffSidebarProps} from "@/types/activity-feed.ts";
+import {filesystem, sdkIpc} from "@shared/bridge";
+
+interface CodeDiffSidebarProps {
+    sessionId: string;
+    repoUrl?: string;
+}
 
 const EMPTY_ACTIVITIES: never[] = [];
 
@@ -16,6 +21,40 @@ export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
             return cs ? [{id: a.id, patch: cs.gitPatch.unidiffPatch}] : [];
         })
         .slice(-1), [activities]);
+
+    const handleDownloadFile = async (filename: string) => {
+        try {
+            if (!sdkIpc) throw new Error("Jules SDK IPC is not available");
+            const snapshot = await sdkIpc.session.snapshot(sessionId);
+            const matchedFile = snapshot.generatedFiles.find(f => f.path === filename);
+
+            if (!matchedFile) {
+                throw new Error(`Full content for ${filename} was not found in the session snapshot`);
+            }
+
+            const defaultName = filename.split("/").pop() ?? "file";
+
+            if (filesystem) {
+                const savePath = await filesystem.showSaveDialog(defaultName);
+                if (!savePath) return; // cancelled
+                await filesystem.writeFile(savePath, matchedFile.content);
+            } else {
+                // Web fallback
+                const blob = new Blob([matchedFile.content], { type: "text/plain" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = defaultName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        } catch (err) {
+            console.error("[CodeDiffSidebar] failed to download file:", err);
+            throw err;
+        }
+    };
 
   if (finalDiff.length === 0) {
     return (
@@ -34,7 +73,15 @@ export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
   return (
     <ScrollArea className="h-full">
       <div className="p-4">
-          {finalDiff.map((x) => <DiffViewer key={x.id} diff={x.patch} {...(repoUrl ? {repoUrl} : {})} branch="main"/>)}
+          {finalDiff.map((x) => (
+              <DiffViewer 
+                  key={x.id} 
+                  diff={x.patch} 
+                  onDownloadFile={handleDownloadFile} 
+                  {...(repoUrl ? {repoUrl} : {})} 
+                  branch="main"
+              />
+          ))}
       </div>
     </ScrollArea>
   );

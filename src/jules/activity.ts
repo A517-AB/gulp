@@ -1,7 +1,10 @@
-// NOTE: not sure if this is used anywhere — may be dead code, revisit before deleting
-import type {Activity} from '@google/jules-sdk/types'
+import type { Activity } from '@google/jules-sdk/types'
 
-type ActivityType = Activity['type']
+export type ActivityType = Activity['type']
+export type ActivityRole = Activity['originator']
+
+// Consecutive progressUpdated activities collapse into an array for grouped rendering
+export type ActivityGroup = Activity | Activity[]
 
 export type StreamHandlers = {
     [K in ActivityType]?: (activity: Extract<Activity, { type: K }>) => void

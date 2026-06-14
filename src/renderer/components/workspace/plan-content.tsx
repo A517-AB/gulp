@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/ui/button.tsx";
-import type { PlanContentProps } from "@/types/activity-feed.ts";
+interface PlanContentProps {
+    content: unknown;
+}
 
 interface PlanStepObject {
   title?: string;

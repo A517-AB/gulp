@@ -1,7 +1,25 @@
 import {type SyntheticEvent, useCallback, useEffect, useMemo} from "react";
 import {useStore} from "@/store/app";
 import {sdkIpc} from "@shared/bridge";
-import type {UseNewSessionFormProps, UseNewSessionFormReturn} from "@/types/activity-feed";
+import type {SessionFormData} from "@/store/app";
+import type {SessionInitialValues} from '@jules';
+import type {Source} from "@google/jules-sdk/types";
+
+interface UseNewSessionFormProps {
+    open: boolean;
+    initialValues?: SessionInitialValues;
+    onSessionCreated?: () => void;
+    onClose: () => void;
+}
+
+interface UseNewSessionFormReturn {
+    sources: Source[];
+    branches: string[];
+    formData: SessionFormData;
+    setFormData: (patch: Partial<SessionFormData> | ((prev: SessionFormData) => Partial<SessionFormData>)) => void;
+    error: string | null;
+    handleSubmit: (e: SyntheticEvent<HTMLFormElement>) => Promise<void>;
+}
 
 export function useNewSessionForm({
   open,

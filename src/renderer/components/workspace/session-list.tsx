@@ -11,7 +11,12 @@ import {useSessionList} from "@/hooks/use-session-list.ts";
 import {useStore} from "@/store/app.ts";
 import {STATE_BADGE, STATE_DOT, getStatusInfo} from "./session-status.ts";
 import {SessionContextMenu} from "./SessionContextMenu.tsx";
-import type {SessionListProps} from "@/types/activity-feed.ts";
+import type {SessionResource} from "@google/jules-sdk/types";
+
+interface SessionListProps {
+    onSelectSession: (session: SessionResource) => void;
+    selectedSessionId?: string;
+}
 
 function truncateText(text: string, maxLength: number) {
     if (!text) return "";

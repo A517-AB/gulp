@@ -2,7 +2,6 @@ import type {FileFilter, FsEntry, FsStat, ReaddirOptions} from './filesystem'
 import type {FuseChangeEvent, FuseManifest} from './fuse'
 import type {HistoryEntry} from './history'
 import type {NoteMeta} from './notes'
-import type {SdkIpc} from '@jules'
 
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
@@ -203,9 +202,7 @@ export interface ElectronAPI {
   snippets:        SnippetsAPI;
   uiNotification:  UINotificationAPI;
   scheduler:       SchedulerAPI;
-    git: GitAPI;
-  // TODO: temporary — will be moved to transport layer someday in a sunny shiny day
-  sdk:             SdkIpc;
+  git:             GitAPI;
 }
 
 // ── global augments ────────────────────────────────────────────────────────────

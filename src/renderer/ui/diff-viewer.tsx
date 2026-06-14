@@ -1,5 +1,5 @@
 import { useState, useMemo, useId } from "react";
-import { Check, Copy, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import { Check, Copy, ChevronDown, ChevronRight, ExternalLink, Download } from "lucide-react";
 import { cn } from "@/utils";
 
 interface DiffViewerProps {
@@ -7,6 +7,7 @@ interface DiffViewerProps {
   className?: string;
   repoUrl?: string;
   branch?: string;
+  onDownloadFile?: ((filename: string) => Promise<void> | void) | undefined;
 }
 
 interface ParsedDiffFile {
@@ -68,13 +69,16 @@ function FileDiff({
   file,
   repoUrl,
   branch = "main",
+  onDownloadFile,
 }: {
   file: ParsedDiffFile;
   repoUrl?: string;
   branch?: string;
+  onDownloadFile?: ((filename: string) => Promise<void> | void) | undefined;
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
+  const [downloadState, setDownloadState] = useState<"idle" | "saving" | "done" | "error">("idle");
   const contentId = useId();
 
   const handleCopy = async () => {
@@ -86,6 +90,19 @@ function FileDiff({
       setCopyState("error");
     }
     setTimeout(() => { setCopyState("idle") }, 2000);
+  };
+
+  const handleDownload = async () => {
+    if (!onDownloadFile) return;
+    try {
+      setDownloadState("saving");
+      await onDownloadFile(file.filename);
+      setDownloadState("done");
+    } catch (err) {
+      console.error("[DiffViewer] failed to download file:", err);
+      setDownloadState("error");
+    }
+    setTimeout(() => { setDownloadState("idle") }, 2000);
   };
 
   const addedCount = file.lines.filter(l => l.type === "add").length;
@@ -135,6 +152,16 @@ function FileDiff({
             {copyState === "copied" ? <Check className="h-3 w-3" /> : copyState === "error" ? <span className="text-destructive font-bold">!</span> : <Copy className="h-3 w-3" />}
             <span>{copyState === "copied" ? "Copied" : copyState === "error" ? "Error" : "Copy"}</span>
           </button>
+          {onDownloadFile && (
+            <button
+              onClick={() => { void handleDownload() }}
+              disabled={downloadState === "saving"}
+              className="flex items-center gap-1 px-2 py-1 text-3xs font-mono uppercase tracking-wider rounded bg-hover hover:bg-active border border-hair text-fg-dim hover:text-fg-secondary transition-colors active:scale-95 disabled:opacity-50"
+            >
+              {downloadState === "done" ? <Check className="h-3 w-3 text-green-500" /> : downloadState === "error" ? <span className="text-destructive font-bold">!</span> : <Download className="h-3 w-3" />}
+              <span>{downloadState === "saving" ? "Saving..." : downloadState === "done" ? "Saved" : downloadState === "error" ? "Error" : "Save"}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -184,7 +211,7 @@ function FileDiff({
   );
 }
 
-export function DiffViewer({ diff, className, repoUrl, branch }: DiffViewerProps) {
+export function DiffViewer({ diff, className, repoUrl, branch, onDownloadFile }: DiffViewerProps) {
   const files = useMemo(() => parseDiff(diff), [diff]);
 
   if (files.length === 0) {
@@ -201,7 +228,13 @@ export function DiffViewer({ diff, className, repoUrl, branch }: DiffViewerProps
         {files.length} {files.length === 1 ? "file" : "files"} changed
       </div>
       {files.map((file, idx) => (
-        <FileDiff key={idx} file={file} {...(repoUrl && { repoUrl })} {...(branch && { branch })} />
+        <FileDiff 
+          key={idx} 
+          file={file} 
+          {...(onDownloadFile && { onDownloadFile })} 
+          {...(repoUrl && { repoUrl })} 
+          {...(branch && { branch })} 
+        />
       ))}
     </div>
   );

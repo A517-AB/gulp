@@ -5,9 +5,9 @@ import {fileURLToPath} from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const WIDTH    = 340
+const WIDTH  = 340
 const HEIGHT = 360
-const OFFSET   = 12
+const OFFSET = 12
 
 let win: BrowserWindow | null = null
 
@@ -48,59 +48,37 @@ function getOrCreateWindow(): BrowserWindow {
     void win.loadFile(path.join(__dirname, '../dist/notification.html'))
   }
 
+  win.once('ready-to-show', () => { win?.showInactive() })
   win.on('closed', () => { win = null })
 
   return win
 }
 
-export function dispatchNotification(payload: unknown): void {
+function send(payload: unknown): void {
   const w = getOrCreateWindow()
-  if (w.isVisible()) {
-    w.webContents.send('notification:show', payload)
+  if (w.webContents.isLoading()) {
+    w.once('ready-to-show', () => { w.webContents.send('notification:show', payload) })
   } else {
-    w.once('ready-to-show', () => {
-      w.webContents.send('notification:show', payload)
-      w.showInactive()
-    })
-    if (w.webContents.isLoading()) return
     w.webContents.send('notification:show', payload)
-    w.showInactive()
   }
 }
 
+export function prewarmNotificationWindow(): void {
+  getOrCreateWindow()
+}
+
+export function dispatchNotification(payload: unknown): void {
+  send(payload)
+}
+
 export function registerUINotificationHandlers(getWebContents: () => WebContents | null): void {
-  ipcMain.on('uikit:notification', (_e, info) => {
-    if (!info) {
-      win?.close()
-      return
-    }
-
-    const w = getOrCreateWindow()
-
-    if (w.isVisible()) {
-      w.webContents.send('notification:show', info)
-    } else {
-      w.once('ready-to-show', () => {
-        w.webContents.send('notification:show', info)
-        w.showInactive()
-      })
-      if (w.webContents.isLoading()) return
-      w.webContents.send('notification:show', info)
-      w.showInactive()
-    }
-  })
-
-  ipcMain.on('notification:close', (_e) => {
-    BrowserWindow.fromWebContents(_e.sender)?.close()
-  })
+  ipcMain.on('uikit:notification', (_e, info) => { if (info) send(info) })
 
   ipcMain.on('notification:click', (_e, extraData) => {
     getWebContents()?.send('uinotification.click', extraData)
-    BrowserWindow.fromWebContents(_e.sender)?.close()
   })
 
   ipcMain.on('notification:cancel', (_e, extraData) => {
     getWebContents()?.send('uinotification.cancel', extraData)
-    BrowserWindow.fromWebContents(_e.sender)?.close()
   })
 }

@@ -13,7 +13,6 @@ import SnapshotPage from '@renderer/pages/electron/SnapshotPage'
 import QueuesPage from '@renderer/pages/electron/QueuesPage'
 import {SnippetsPage} from '@renderer/pages/electron/SnippetsPage'
 import {ExplorerPage} from '@renderer/pages/electron/ExplorerPage'
-import TimePage from '@renderer/pages/electron/TimePage'
 import TardisPage from '@renderer/pages/electron/TardisPage'
 import ShipPage from '@renderer/pages/electron/ShipPage'
 import OverviewPage from '@renderer/pages/web/OverviewPage'
@@ -54,7 +53,6 @@ const electronRoutes: AppRoute[] = [
     { path: 'queues',       Component: QueuesPage,   handle: { title: 'Queues',   inNav: true } },
     { path: 'snippets',     Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },
     {path: 'explorer', Component: ExplorerPage, handle: {title: 'Explorer', inNav: true}},
-    { path: 'library',       Component: TimePage,     handle: { title: 'Time',     inNav: true } },
     {path: 'tardis', Component: TardisPage, handle: {title: 'Tardis', inNav: true}},
     {path: 'ship', Component: ShipPage, handle: {title: 'Ship', inNav: true}},
     { path: 'activity/:id', Component: ActivityPage },

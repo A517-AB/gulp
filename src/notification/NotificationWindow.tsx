@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Toaster, toast } from 'sonner'
-import { BrowserSoundController } from '@/library/alarm/sounds'
+import { BrowserSoundController } from '@/library/notification/sounds'
 import { notifBridge, type NotifPayload } from './bridge'
 
 function useLocalTheme(): 'light' | 'dark' {

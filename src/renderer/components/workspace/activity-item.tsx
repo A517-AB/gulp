@@ -1,6 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import {CheckCircle2, ChevronDown, ChevronRight, Terminal, XCircle} from "lucide-react";
+import {CheckCircle2, ChevronDown, ChevronRight, Terminal, XCircle, Download, Check} from "lucide-react";
 import {Card, CardContent} from "@/ui/card.tsx";
 import {Badge} from "@/ui/badge.tsx";
 import {Avatar, AvatarFallback} from "@/ui/avatar.tsx";
@@ -11,8 +11,9 @@ import {CardSpotlight} from "@/ui/card-spotlight.tsx";
 import {PlanContent} from "./plan-content.tsx";
 import {formatDate, getActivityTypeColor} from "@/utils/activity.ts";
 import {ChangeSetSummary} from "./changeset-summary.tsx";
-import type {Activity, BashArtifact, ChangeSetArtifact, MediaArtifact} from "@google/jules-sdk/types";
-import type {ActivityGroup, ActivityRole, ActivityType} from "@/types/activity-feed.ts";
+import type {Activity, BashArtifact, ChangeSetArtifact, MediaArtifact, ActivityGroup, ActivityRole, ActivityType} from '@jules';
+import {filesystem, sdkIpc} from "@shared/bridge";
+import {useState} from "react";
 
 
 function Markdown({children}: { children: string }) {
@@ -130,11 +131,52 @@ function ActivityArtifacts({activity, expandedBash, onToggleBash, only}: {
     activity: Activity;
     expandedBash: Set<string>;
     onToggleBash: (id: string) => void;
-    only?: 'bash' | 'changeset';
+    only?: 'bash' | 'changeset' | 'media';
 }) {
-    const bash = only !== 'changeset' ? activity.artifacts.find((a): a is BashArtifact => a.type === 'bashOutput') : undefined;
-    const media = only == null ? activity.artifacts.find((a): a is MediaArtifact => a.type === 'media') : undefined;
-    const changeset = only !== 'bash' ? activity.artifacts.find((a): a is ChangeSetArtifact => a.type === 'changeSet') : undefined;
+    const [downloadState, setDownloadState] = useState<"idle" | "saving" | "done" | "error">("idle");
+    const bash = only !== 'changeset' && only !== 'media' ? activity.artifacts.find((a): a is BashArtifact => a.type === 'bashOutput') : undefined;
+    const media = only !== 'bash' && only !== 'changeset' ? activity.artifacts.find((a): a is MediaArtifact => a.type === 'media') : undefined;
+    const changeset = only !== 'bash' && only !== 'media' ? activity.artifacts.find((a): a is ChangeSetArtifact => a.type === 'changeSet') : undefined;
+
+    const handleDownloadMedia = async (med: MediaArtifact) => {
+        try {
+            setDownloadState("saving");
+            const ext = med.format.split("/").pop() ?? "bin";
+            const defaultName = `jules_media_${activity.id}.${ext}`;
+            
+            if (filesystem && sdkIpc) {
+                const savePath = await filesystem.showSaveDialog(defaultName);
+                if (!savePath) {
+                    setDownloadState("idle");
+                    return;
+                }
+                await sdkIpc.artifact.save(med.data, savePath);
+            } else {
+                // Web fallback
+                const binaryString = window.atob(med.data);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                const blob = new Blob([bytes], { type: med.format });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = defaultName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            setDownloadState("done");
+        } catch (err) {
+            console.error("[ActivityArtifacts] failed to download media:", err);
+            setDownloadState("error");
+        }
+        setTimeout(() => { setDownloadState("idle"); }, 2000);
+    };
+
     return (
         <>
             {changeset && <ChangeSetSummary artifact={changeset}/>}
@@ -154,12 +196,39 @@ function ActivityArtifacts({activity, expandedBash, onToggleBash, only}: {
                 </div>
             )}
             {media && (
-                <div className="mt-3 pt-3 border-t border-hair">
-                    <img
-                        src={`data:${media.format};base64,${media.data}`}
-                        alt="Jules media artifact"
-                        className="max-w-full rounded border border-hair shadow-md"
-                    />
+                <div className="mt-3 pt-3 border-t border-hair space-y-2">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[9px] font-mono uppercase tracking-wider text-fg-dim">Generated Media ({media.format})</span>
+                        <button
+                            onClick={() => { void handleDownloadMedia(media); }}
+                            disabled={downloadState === "saving"}
+                            className="flex items-center gap-1 px-1.5 py-0.5 text-3xs font-mono uppercase tracking-wider rounded bg-hover hover:bg-active border border-hair text-fg-dim hover:text-fg-secondary transition-colors disabled:opacity-50"
+                        >
+                            {downloadState === "done" ? <Check className="h-3 w-3 text-green-500" /> : downloadState === "error" ? <span className="text-destructive font-bold">!</span> : <Download className="h-3 w-3" />}
+                            <span>{downloadState === "saving" ? "Saving..." : downloadState === "done" ? "Saved" : downloadState === "error" ? "Error" : "Save"}</span>
+                        </button>
+                    </div>
+                    <div className="flex justify-center bg-surface-raised rounded p-2 border border-hair">
+                        {media.format.startsWith('video/') ? (
+                            <video
+                                src={`data:${media.format};base64,${media.data}`}
+                                controls
+                                className="max-w-full rounded border border-hair shadow-md"
+                            />
+                        ) : media.format.startsWith('audio/') ? (
+                            <audio
+                                src={`data:${media.format};base64,${media.data}`}
+                                controls
+                                className="w-full"
+                            />
+                        ) : (
+                            <img
+                                src={`data:${media.format};base64,${media.data}`}
+                                alt="Jules media artifact"
+                                className="max-w-full rounded border border-hair shadow-md"
+                            />
+                        )}
+                    </div>
                 </div>
             )}
         </>
@@ -243,6 +312,7 @@ export function ActivityItem({
         if (!first) return null;
         const lastBashActivity = [...item].reverse().find(a => a.artifacts.some(x => x.type === 'bashOutput'));
         const lastChangesetActivity = [...item].reverse().find(a => a.artifacts.some(x => x.type === 'changeSet'));
+        const lastMediaActivity = [...item].reverse().find(a => a.artifacts.some(x => x.type === 'media'));
         return (
             <div className="flex gap-2.5">
                 <Av role={first.originator}/>
@@ -274,6 +344,9 @@ export function ActivityItem({
                     {lastChangesetActivity && lastChangesetActivity !== lastBashActivity &&
                         <ActivityArtifacts activity={lastChangesetActivity} expandedBash={expandedBash}
                                            onToggleBash={onToggleBash} only="changeset"/>}
+                    {lastMediaActivity && lastMediaActivity !== lastBashActivity && lastMediaActivity !== lastChangesetActivity &&
+                        <ActivityArtifacts activity={lastMediaActivity} expandedBash={expandedBash}
+                                           onToggleBash={onToggleBash} only="media"/>}
                 </AgentCard>
             </div>
         );

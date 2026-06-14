@@ -8,7 +8,7 @@ import {BackgroundBeams} from "@/ui/background-beams";
 import {useResizable} from "@renderer/hooks/use-resizable";
 import {useStore} from "@/store/app.ts";
 import type {SessionResource as Session} from "@google/jules-sdk/types";
-import type {SessionInitialValues} from "@/types/activity-feed";
+import type {SessionInitialValues} from '@jules';
 
 export default function JulesPage() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
@@ -19,7 +19,7 @@ export default function JulesPage() {
   const [newSessionValues, setNewSessionValues] = useState<SessionInitialValues | undefined>();
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const { width: diffWidth, isResizing, startResizing } = useResizable({ defaultWidth: 600 });
+  const { width: diffWidth, isResizing, handleProps: resizeHandleProps } = useResizable({ defaultWidth: 600 });
   const sessionList = useStore(s => s.sessionList);
   const liveSelectedSession = selectedSession
     ? (sessionList.find(s => s.id === selectedSession.id) ?? selectedSession)
@@ -81,7 +81,7 @@ export default function JulesPage() {
       {liveSelectedSession && showCodeDiffs && (
         <>
           {!codeDiffCollapsed && (
-            <div className="w-1 cursor-col-resize bg-transparent hover:bg-blue-500/50 transition-colors" onMouseDown={startResizing} />
+            <div className="w-1 cursor-col-resize bg-transparent hover:bg-blue-500/50 transition-colors" {...resizeHandleProps} />
           )}
           <aside
             className={`hidden md:flex flex-col border-l border-hair bg-surface shrink-0 ${isResizing ? "" : "transition-all duration-200"} ${codeDiffCollapsed ? "w-12" : ""}`}

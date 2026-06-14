@@ -74,14 +74,15 @@ export type {ListSessionsOptions, ListSessionsResponse, DomainSchema, Validation
 
 export type { SdkIpc } from './sdk-ipc'
 
-// ── Stream helpers ────────────────────────────────────────────────────────────
+// ── Activity ──────────────────────────────────────────────────────────────────
 
-export type {StreamHandlers} from './stream'
-export {dispatchActivity} from './stream'
+export type { ActivityType, ActivityRole, ActivityGroup, StreamHandlers } from './activity'
+export { dispatchActivity } from './activity'
 
-// ── App-level types ───────────────────────────────────────────────────────────
+// ── Session ───────────────────────────────────────────────────────────────────
 
-export type {
-  FleetTask,
-  FleetTaskGroup,
-} from './types'
+export type { SessionStatus, SessionStatusInfo, SessionInitialValues } from './session'
+
+// ── Fleet ─────────────────────────────────────────────────────────────────────
+
+export type { FleetTask, FleetTaskGroup } from './types'

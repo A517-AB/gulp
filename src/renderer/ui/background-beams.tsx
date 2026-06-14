@@ -17,7 +17,7 @@ export function BackgroundBeams({ className }: { className?: string }) {
       )}
     >
       <svg
-        className="absolute h-full w-full"
+        className="absolute h-full w-full overflow-hidden"
         width="100%"
         height="100%"
         viewBox="0 0 696 316"

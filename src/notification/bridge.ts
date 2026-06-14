@@ -1,4 +1,4 @@
-import type { SoundId } from '@/library/alarm/sounds'
+import type { SoundId } from '@/library/notification/sounds'
 
 export interface NotifPayload {
   title:      string

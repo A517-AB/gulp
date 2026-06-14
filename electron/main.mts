@@ -15,7 +15,7 @@ import { registerGitHandlers } from "./git";
 import { registerGitHubHandlers } from "./github";
 import { registerHistoryHandlers } from "./history";
 import { registerNotesHandlers } from "./notes";
-import { registerUINotificationHandlers } from "./notification";
+import { registerUINotificationHandlers, prewarmNotificationWindow } from "./notification";
 import { registerSchedulerHandlers } from "./scheduler";
 import { registerSdkHandlers } from "./ipc/handlers";
 
@@ -143,6 +143,7 @@ void app.whenReady().then(() => {
   registerHistoryHandlers();
   registerNotesHandlers(() => mainWindow?.webContents ?? null);
   registerUINotificationHandlers(() => mainWindow?.webContents ?? null);
+  prewarmNotificationWindow();
   registerSchedulerHandlers(() => mainWindow?.webContents ?? null);
   registerSdkHandlers();
   createWindow();

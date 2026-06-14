@@ -1,6 +1,6 @@
 import {formatDistanceToNow, isValid, parseISO} from "date-fns";
 import type {Activity, ParsedFile} from '@google/jules-sdk/types'
-import type {ActivityGroup, ActivityType} from '@/types/activity-feed'
+import type {ActivityGroup, ActivityType} from '@jules'
 
 export function parseUnidiff(patch?: string | null): ParsedFile[] {
     if (!patch) return []

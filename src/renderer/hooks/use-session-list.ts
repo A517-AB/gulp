@@ -1,6 +1,15 @@
 import {useMemo, useState} from "react";
 import {useStore} from "@/store/app";
-import type {UseSessionListReturn} from "@/types/activity-feed";
+import type {SessionResource} from "@google/jules-sdk/types";
+
+interface UseSessionListReturn {
+    sessions: SessionResource[];
+    allSessions: SessionResource[];
+    error: string | null;
+    searchQuery: string;
+    setSearchQuery: (q: string) => void;
+    loadSessions: () => Promise<void>;
+}
 
 export function useSessionList(): UseSessionListReturn {
   const sessions = useStore(s => s.sessionList)
