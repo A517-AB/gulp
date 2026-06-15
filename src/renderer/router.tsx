@@ -17,6 +17,7 @@ import TardisPage from '@renderer/pages/electron/TardisPage'
 import ShipPage from '@renderer/pages/electron/ShipPage'
 import KitPage from '@renderer/pages/electron/KitPage'
 import TimePage from '@renderer/pages/electron/TimePage'
+import GanttPage from '@renderer/pages/electron/GanttPage'
 import OverviewPage from '@renderer/pages/web/OverviewPage'
 
 // ── dev ───────────────────────────────────────────────────────────────────────
@@ -57,7 +58,8 @@ const electronRoutes: AppRoute[] = [
     {path: 'explorer', Component: ExplorerPage, handle: {title: 'Explorer', inNav: true}},
     {path: 'tardis', Component: TardisPage, handle: {title: 'Tardis', inNav: true}},
     {path: 'time',   Component: TimePage,   handle: {title: 'Time',   inNav: true}},
-    {path: 'ship', Component: ShipPage, handle: {title: 'Ship', inNav: true}},
+    {path: 'ship',  Component: ShipPage,  handle: {title: 'Ship',  inNav: true}},
+    {path: 'gantt', Component: GanttPage, handle: {title: 'Gantt', inNav: true}},
     ...(import.meta.env.DEV ? [{ path: 'kit', Component: KitPage, handle: { title: 'Kit', inNav: true } }] : []),
     { path: 'activity/:id', Component: ActivityPage },
     { path: 'snapshot/:id', Component: SnapshotPage },

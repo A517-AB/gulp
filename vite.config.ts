@@ -16,9 +16,12 @@ export default defineConfig({
   clearScreen: false,
   resolve: {
     tsconfigPaths: true,
-    alias: {
-      '@syncfusion/ej2-react-gantt': 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt',
-    },
+    alias: [
+      {
+        find: /^@syncfusion\/(.+)$/,
+        replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/$1',
+      },
+    ],
   },
   server: {
     host: '127.0.0.1',
