@@ -20,6 +20,7 @@ export const notes          = el?.notes          ?? null;
 export const snippets       = el?.snippets       ?? null;
 export const uiNotification = el?.uiNotification ?? null;
 export const scheduler      = el?.scheduler      ?? null;
+export const notifLog       = el?.notifLog       ?? null;
 export const git            = el?.git            ?? null;
 export const julesEvents    = el?.julesEvents    ?? null;
 export const sdkIpc: SdkIpc | null = (el as unknown as { sdk?: SdkIpc } | undefined)?.sdk ?? (isWeb ? webSdk : null);

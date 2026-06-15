@@ -57,8 +57,8 @@ function TypeBadge({ type }: { type: ActivityType }) {
 
 function AgentCard({ children }: { children: ReactNode }) {
     return (
-        <BorderGlow className="max-w-[90%] md:max-w-[80%]" containerClassName="bg-surface/50">
-            <CardSpotlight className="border-0 bg-transparent rounded-lg">
+        <BorderGlow className="max-w-[90%] md:max-w-[80%]" containerClassName="bg-surface/50" glowOnHover={false}>
+            <CardSpotlight className="border-0 bg-transparent rounded-lg" spotlightOnHover={false}>
                 <CardContent className="p-3">{children}</CardContent>
             </CardSpotlight>
         </BorderGlow>
@@ -172,9 +172,8 @@ export const SingleActivity = memo(
             >
                 <Av role={activity.originator} />
                 {isUser ? (
-                    <motion.div
-                        whileHover={{ y: -1, scale: 1.002, boxShadow: "0 10px 30px -15px rgba(139, 92, 246, 0.12)" }}
-                        className="max-w-[85%] md:max-w-[70%] transition-shadow duration-300"
+                    <div
+                        className="max-w-[85%] md:max-w-[70%]"
                     >
                         <Card className="py-2.5 border-purple-500/15 dark:border-purple-500/20 bg-purple-500/5 dark:bg-purple-950/20 shadow-sm backdrop-blur-sm">
                             <CardContent className="p-3">
@@ -186,7 +185,7 @@ export const SingleActivity = memo(
                                 <ActivityArtifacts activity={activity} />
                             </CardContent>
                         </Card>
-                    </motion.div>
+                    </div>
                 ) : (
                     <AgentCard>
                         <div className="flex items-center gap-2 mb-2">

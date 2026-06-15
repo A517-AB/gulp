@@ -2,15 +2,13 @@ import { useEffect, useEffectEvent } from 'react'
 import { uiNotification } from '@shared/bridge'
 import type { NotificationPayload, UseNotificationOptions, UseNotificationResult } from './types'
 
-export function useNotification({ onClick, onCancel }: UseNotificationOptions = {}): UseNotificationResult {
-  const handleClick  = useEffectEvent((extraData: unknown) => { onClick?.(extraData) })
-  const handleCancel = useEffectEvent((extraData: unknown) => { onCancel?.(extraData) })
+export function useNotification({ onAction }: UseNotificationOptions = {}): UseNotificationResult {
+  const handleAction = useEffectEvent((actionId: string, extraData: unknown) => { onAction?.(actionId, extraData) })
 
   useEffect(() => {
     if (!uiNotification) return
-    const offClick  = uiNotification.onClicked(handleClick)
-    const offCancel = uiNotification.onCancelled(handleCancel)
-    return () => { offClick(); offCancel() }
+    const off = uiNotification.onAction(handleAction)
+    return () => { off() }
   }, [])
 
   return {

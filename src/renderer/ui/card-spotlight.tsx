@@ -9,13 +9,15 @@ interface CardSpotlightProps {
   radius?: number;
   color?: string;
   className?: string;
+  spotlightOnHover?: boolean;
 }
 
 export function CardSpotlight({
   children,
   radius = 350,
-                                  color,
+  color,
   className,
+  spotlightOnHover = true,
 }: CardSpotlightProps) {
     const {theme} = useTheme();
     // Default spotlight: subtle dark smear in dark mode, near-invisible in light mode
@@ -36,20 +38,22 @@ export function CardSpotlight({
           "group relative rounded-none border border-border/10 bg-card",
         className,
       )}
-      onMouseMove={handleMouseMove}
+      onMouseMove={spotlightOnHover ? handleMouseMove : undefined}
     >
-      <motion.div
-        className="pointer-events-none absolute -inset-px rounded-none opacity-0 transition duration-300 group-hover:opacity-100"
-        style={{
-          background: useMotionTemplate`
-            radial-gradient(
-              ${radius}px circle at ${mouseX}px ${mouseY}px,
-              ${resolvedColor},
-              transparent 80%
-            )
-          `,
-        }}
-      />
+      {spotlightOnHover && (
+        <motion.div
+          className="pointer-events-none absolute -inset-px rounded-none opacity-0 transition duration-300 group-hover:opacity-100"
+          style={{
+            background: useMotionTemplate`
+              radial-gradient(
+                ${radius}px circle at ${mouseX}px ${mouseY}px,
+                ${resolvedColor},
+                transparent 80%
+              )
+            `,
+          }}
+        />
+      )}
       {children}
     </div>
   );

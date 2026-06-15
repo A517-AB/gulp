@@ -7,6 +7,7 @@ interface BorderGlowProps {
   containerClassName?: string;
   glowColor?: string;
   animated?: boolean;
+  glowOnHover?: boolean;
 }
 
 export function BorderGlow({
@@ -15,6 +16,7 @@ export function BorderGlow({
   containerClassName,
   glowColor = "rgba(168, 85, 247, 0.3)",
   animated = false,
+  glowOnHover = true,
 }: BorderGlowProps) {
   return (
     <div className={cn("group relative", className)}>
@@ -22,7 +24,7 @@ export function BorderGlow({
       <div
         className={cn(
           "absolute -inset-[1px] rounded-lg opacity-0 transition-opacity duration-500",
-            "group-hover:opacity-40 dark:group-hover:opacity-100",
+          glowOnHover && "group-hover:opacity-40 dark:group-hover:opacity-100",
           animated && "animate-pulse",
         )}
         style={{

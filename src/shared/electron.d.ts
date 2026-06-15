@@ -108,23 +108,45 @@ export interface SnippetsAPI {
     deleteCode: (relPath: string) => Promise<void>;
 }
 
+export interface UINotifAction {
+  id:     string;
+  label:  string;
+  style?: 'primary' | 'ghost';
+}
+
 export interface UINotificationPayload {
   title:      string;
   body?:      string;
   type?:      'default' | 'success' | 'error' | 'info' | 'warning';
-  action?:    { label: string };
-  cancel?:    { label: string };
+  actions?:   UINotifAction[];
   duration?:  number;
   id?:        string | number;
   sound?:     string;
   extraData?: unknown;
+  source?:    string;
 }
 
 export interface UINotificationAPI {
-  show:        (payload: UINotificationPayload) => void;
-  destroy:     () => void;
-  onClicked:   (cb: (extraData: unknown) => void) => () => void;
-  onCancelled: (cb: (extraData: unknown) => void) => () => void;
+  show:     (payload: UINotificationPayload) => void;
+  destroy:  () => void;
+  onAction: (cb: (actionId: string, extraData: unknown) => void) => () => void;
+}
+
+export interface NotifLogEntry {
+  id:       string;
+  title:    string;
+  body?:    string;
+  source?:  string;
+  firedAt:  string;
+  seen:     boolean;
+  actions?: { id: string; label: string }[];
+}
+
+export interface NotifLogAPI {
+  get:         () => Promise<NotifLogEntry[]>;
+  clear:       () => Promise<void>;
+  markSeen:    (id: string) => Promise<NotifLogEntry[]>;
+  markAllSeen: () => Promise<NotifLogEntry[]>;
 }
 
 // ── scheduler ─────────────────────────────────────────────────────────────────
@@ -220,6 +242,7 @@ export interface ElectronAPI {
   snippets:        SnippetsAPI;
   uiNotification:  UINotificationAPI;
   scheduler:       SchedulerAPI;
+  notifLog:        NotifLogAPI;
   git:             GitAPI;
   julesEvents:     JulesEventsAPI;
   store:           StoreAPI;

@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { format } from 'date-fns'
+import { AnimatePresence, motion } from 'motion/react'
 import { BrowserSoundController } from '@notification/sounds'
 import { useNotification } from '@/library/notification'
-import { scheduler } from '@shared/bridge'
-import type { ScheduledItem } from '@shared/electron'
+import { scheduler, notifLog } from '@shared/bridge'
+import type { ScheduledItem, NotifLogEntry } from '@shared/electron'
 
 function randomId() {
   return Math.random().toString(36).slice(2, 10)
@@ -97,22 +98,21 @@ function ActionSection() {
   const append = (msg: string) => { setLog(p => [msg, ...p].slice(0, 5)) }
 
   const { notify, success, info } = useNotification({
-    onClick:  (d) => { append(`click → ${JSON.stringify(d)}`) },
-    onCancel: (d) => { append(`cancel → ${JSON.stringify(d)}`) },
+    onAction: (actionId, d) => { append(`${actionId} → ${JSON.stringify(d)}`) },
   })
 
   return (
     <Section label="Actions">
       <Row label="Variants">
         <Btn onClick={() => {
-          notify({ title: 'New message', body: 'From Alex', action: { label: 'View' }, extraData: 'view' })
-        }}>Action only</Btn>
+          notify({ title: 'New message', body: 'From Alex', actions: [{ id: 'view', label: 'View' }], extraData: 'msg-1' })
+        }}>Single action</Btn>
         <Btn onClick={() => {
-          success({ title: 'Export ready', body: 'report.pdf', action: { label: 'Open' }, cancel: { label: 'Dismiss' }, extraData: 'open' })
-        }}>Action + cancel</Btn>
+          success({ title: 'Export ready', body: 'report.pdf', actions: [{ id: 'open', label: 'Open' }, { id: 'dismiss', label: 'Dismiss', style: 'ghost' }], extraData: 'export-1' })
+        }}>Two actions</Btn>
         <Btn onClick={() => {
-          info({ title: 'Stand-up in 5 min', action: { label: 'Got it' }, cancel: { label: 'Snooze 10m' }, sound: 'pulse', extraData: 'standup' })
-        }}>With snooze + sound</Btn>
+          info({ title: 'Stand-up in 5 min', actions: [{ id: 'ack', label: 'Got it' }, { id: 'snooze', label: 'Snooze 10m', style: 'ghost' }], sound: 'pulse', extraData: 'standup' })
+        }}>With sound</Btn>
       </Row>
       {log.length > 0 && (
         <ul className="space-y-0.5 pt-1">
@@ -203,6 +203,113 @@ function SchedulerSection() {
   )
 }
 
+// ── Missed Notifications ──────────────────────────────────────────────────────
+
+function MissedNotificationsSection() {
+  const [entries, setEntries] = useState<NotifLogEntry[]>([])
+  const loaded = useRef(false)
+
+  useEffect(() => {
+    if (!notifLog || loaded.current) return
+    loaded.current = true
+    void notifLog.get().then(setEntries)
+  }, [])
+
+  if (!notifLog) {
+    return (
+      <Section label="Missed Notifications">
+        <p className="text-xs text-fg-ghost">Electron only.</p>
+      </Section>
+    )
+  }
+
+  const unseenCount = entries.filter(e => !e.seen).length
+
+  async function markAllSeen() {
+    const updated = await notifLog?.markAllSeen()
+    if (updated) setEntries(updated)
+  }
+
+  async function clear() {
+    await notifLog?.clear()
+    setEntries([])
+  }
+
+  return (
+    <Section label="Missed Notifications">
+      {entries.length > 0 && (
+        <div className="flex items-center gap-2">
+          {unseenCount > 0 && (
+            <Btn onClick={() => { void markAllSeen() }}>
+              Mark all seen{unseenCount > 0 ? ` (${unseenCount})` : ''}
+            </Btn>
+          )}
+          <Btn muted onClick={() => { void clear() }}>Clear all</Btn>
+        </div>
+      )}
+
+      {entries.length === 0 && (
+        <p className="text-xs text-fg-ghost">No recent notifications.</p>
+      )}
+
+      <div className="space-y-2">
+        <AnimatePresence initial={false}>
+          {entries.map((entry) => (
+            <motion.div
+              key={entry.id}
+              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0,  scale: 1    }}
+              exit={{    opacity: 0, x: 16, scale: 0.97 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className={`rounded-lg border px-3 py-2.5 space-y-1 transition-colors ${
+                entry.seen
+                  ? 'border-hair bg-transparent'
+                  : 'border-subtle bg-raised'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <p className={`text-xs font-medium leading-snug ${entry.seen ? 'text-fg-ghost' : 'text-fg-primary'}`}>
+                  {entry.title}
+                </p>
+                <span className="text-2xs text-fg-ghost shrink-0 tabular-nums">
+                  {format(new Date(entry.firedAt), 'HH:mm')}
+                </span>
+              </div>
+
+              {entry.body !== undefined && (
+                <p className="text-2xs text-fg-muted leading-snug">{entry.body}</p>
+              )}
+
+              <div className="flex items-center gap-3">
+                {entry.source !== undefined && (
+                  <span className="text-2xs text-fg-ghost font-mono">{entry.source}</span>
+                )}
+                {(entry.actions?.length ?? 0) > 0 && (
+                  <div className="flex gap-1.5">
+                    {entry.actions?.map(a => (
+                      <span key={a.id} className="text-2xs text-fg-ghost font-mono px-1.5 py-0.5 rounded border border-hair">{a.label}</span>
+                    ))}
+                  </div>
+                )}
+                {!entry.seen && (
+                  <button
+                    onClick={() => {
+                      void notifLog?.markSeen(entry.id).then(updated => { setEntries(updated) })
+                    }}
+                    className="ml-auto text-2xs text-fg-ghost hover:text-fg-secondary transition-colors"
+                  >
+                    mark seen
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </Section>
+  )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function TimePage() {
@@ -215,6 +322,8 @@ export default function TimePage() {
       <ActionSection />
       <SectionDivider />
       <SchedulerSection />
+      <SectionDivider />
+      <MissedNotificationsSection />
     </div>
   )
 }

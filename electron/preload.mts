@@ -191,15 +191,12 @@ const snippets: ElectronAPI["snippets"] = {
 const uiNotification: ElectronAPI["uiNotification"] = {
   show:    (payload) => { ipcRenderer.send("notif.dispatch", payload); },
   destroy: ()        => { ipcRenderer.send("notif.dispatch", null); },
-  onClicked: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: unknown) => { cb(data); };
-    ipcRenderer.on("notif.clicked", handler);
-    return () => { ipcRenderer.off("notif.clicked", handler); };
-  },
-  onCancelled: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: unknown) => { cb(data); };
-    ipcRenderer.on("notif.dismissed", handler);
-    return () => { ipcRenderer.off("notif.dismissed", handler); };
+  onAction: (cb) => {
+    const handler = (_event: IpcRendererEvent, data: { actionId: string; extraData: unknown }) => {
+      cb(data.actionId, data.extraData)
+    }
+    ipcRenderer.on("notif.clicked", handler)
+    return () => { ipcRenderer.off("notif.clicked", handler) }
   },
 };
 
@@ -246,6 +243,15 @@ const julesEvents: ElectronAPI["julesEvents"] = {
   },
 }
 
+// ── notifLog ───────────────────────────────────────────────────────────────────
+
+const notifLog: ElectronAPI["notifLog"] = {
+  get:         () => ipcRenderer.invoke("notif.log.get"),
+  clear:       () => ipcRenderer.invoke("notif.log.clear"),
+  markSeen:    (id) => ipcRenderer.invoke("notif.log.markSeen", id),
+  markAllSeen: () => ipcRenderer.invoke("notif.log.markAllSeen"),
+}
+
 // ── store ──────────────────────────────────────────────────────────────────────
 
 const store: ElectronAPI["store"] = {
@@ -269,6 +275,7 @@ const api: Omit<ElectronAPI, 'sdk'> = {
   snippets,
   uiNotification,
   scheduler,
+  notifLog,
   git,
   julesEvents,
   store,

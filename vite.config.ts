@@ -70,7 +70,8 @@ export default defineConfig({
               rolldownOptions: {
                 external: nodeExternal,
                 input: {
-                  main:          'electron/main.mts',
+                  main:           'electron/main.mts',
+                  'notif-main':   'electron/main-notif.mts',
                   'jules-worker': 'electron/jules-worker.ts',
                 },
                 output: {

@@ -1,7 +1,8 @@
-import type {WebContents} from 'electron'
-import {BrowserWindow, ipcMain, screen} from 'electron'
+import type { WebContents } from 'electron'
+import { BrowserWindow, ipcMain, screen } from 'electron'
 import * as path from 'node:path'
-import {fileURLToPath} from 'node:url'
+import { fileURLToPath } from 'node:url'
+import { appendToLog } from './log.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -68,17 +69,24 @@ export function prewarmNotificationWindow(): void {
 }
 
 export function dispatchNotification(payload: unknown): void {
+  const p = payload as { title?: string; body?: string; source?: string; id?: string | number; actions?: { id: string; label: string }[] }
+  if (p.title) appendToLog(p as Parameters<typeof appendToLog>[0])
   send(payload)
 }
 
 export function registerUINotificationHandlers(getWebContents: () => WebContents | null): void {
-  ipcMain.on('notif.dispatch', (_e, info) => { if (info) send(info) })
-
-  ipcMain.on('notif.clicked', (_e, extraData) => {
-    getWebContents()?.send('notif.clicked', extraData)
+  ipcMain.on('notif.dispatch', (_e, info: unknown) => {
+    if (!info) return
+    const p = info as { title?: string; body?: string; source?: string; id?: string | number; actions?: { id: string; label: string }[] }
+    if (p.title) appendToLog(p as Parameters<typeof appendToLog>[0])
+    send(info)
   })
 
-  ipcMain.on('notif.dismissed', (_e, extraData) => {
+  ipcMain.on('notif.internal.clicked', (_e, data: { actionId: string; extraData?: unknown }) => {
+    getWebContents()?.send('notif.clicked', data)
+  })
+
+  ipcMain.on('notif.internal.dismissed', (_e, extraData: unknown) => {
     getWebContents()?.send('notif.dismissed', extraData)
   })
 }

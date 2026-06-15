@@ -15,7 +15,7 @@ import { registerGitHandlers } from "./git";
 import { registerGitHubHandlers } from "./github";
 import { registerHistoryHandlers } from "./history";
 import { registerNotesHandlers } from "./notes";
-import { registerUINotificationHandlers, prewarmNotificationWindow, registerSchedulerHandlers } from "./notifications";
+import { registerUINotificationHandlers, prewarmNotificationWindow, registerSchedulerHandlers, registerNotifLogHandlers } from "./notifications";
 import { registerSdkHandlers } from "./ipc/handlers";
 import { startJulesWorker, registerJulesEventsHandlers } from "./jules-events";
 import { registerStoreHandlers } from "./store";
@@ -146,6 +146,7 @@ void app.whenReady().then(() => {
   registerUINotificationHandlers(() => mainWindow?.webContents ?? null);
   prewarmNotificationWindow();
   registerSchedulerHandlers(() => mainWindow?.webContents ?? null);
+  registerNotifLogHandlers();
   registerSdkHandlers();
   registerJulesEventsHandlers();
   registerStoreHandlers();

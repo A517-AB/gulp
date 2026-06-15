@@ -1,6 +1,6 @@
 export { useNotification } from './use-notification'
 export type {
-  NotificationAction,
+  NotifAction,
   NotificationPayload,
   NotificationType,
   UseNotificationOptions,

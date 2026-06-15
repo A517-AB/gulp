@@ -1,26 +1,26 @@
 export type SoundId = 'none' | 'beep' | 'chime' | 'bell' | 'pulse'
 
-export interface NotificationAction {
-  label: string
+export interface NotifAction {
+  id:     string
+  label:  string
+  style?: 'primary' | 'ghost'
 }
 
 export interface NotificationPayload {
   title:      string
   body?:      string
-  icon?:      string
-  action?:    NotificationAction
-  cancel?:    NotificationAction
+  actions?:   NotifAction[]
   sound?:     SoundId
   duration?:  number
   id?:        string | number
   extraData?: unknown
+  source?:    string
 }
 
 export type NotificationType = 'default' | 'success' | 'error' | 'info' | 'warning'
 
 export interface UseNotificationOptions {
-  onClick?:    (extraData: unknown) => void
-  onCancel?:   (extraData: unknown) => void
+  onAction?: (actionId: string, extraData: unknown) => void
 }
 
 export interface UseNotificationResult {

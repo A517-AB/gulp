@@ -5,21 +5,27 @@ import type { SoundId } from './sounds'
 
 // ── types ──────────────────────────────────────────────────────────────────────
 
+export interface NotifAction {
+  id:     string
+  label:  string
+  style?: 'primary' | 'ghost'
+}
+
 export interface NotifPayload {
   title:      string
   body?:      string
   type?:      'default' | 'success' | 'error' | 'info' | 'warning'
-  action?:    { label: string }
-  cancel?:    { label: string }
+  actions?:   NotifAction[]
   duration?:  number
   id?:        string | number
   sound?:     SoundId
   extraData?: unknown
+  source?:    string
 }
 
 interface NotifBridge {
   onShow:    (cb: (data: NotifPayload) => void) => void
-  clicked:   (extraData?: unknown) => void
+  clicked:   (actionId: string, extraData?: unknown) => void
   dismissed: (extraData?: unknown) => void
 }
 
@@ -45,11 +51,12 @@ function useLocalTheme(): 'light' | 'dark' {
 // ── custom toast ───────────────────────────────────────────────────────────────
 
 function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
-  const isClickable = !data.action && !data.cancel && data.extraData !== undefined
+  const hasActions  = (data.actions?.length ?? 0) > 0
+  const isClickable = !hasActions && data.extraData !== undefined
 
   return (
     <div
-      onClick={isClickable ? () => { notif.clicked(data.extraData); toast.dismiss(id) } : undefined}
+      onClick={isClickable ? () => { notif.clicked('default', data.extraData); toast.dismiss(id) } : undefined}
       className={`relative flex items-start gap-3 w-full rounded-xl border border-hair bg-overlay/90 backdrop-blur-xl shadow-2xl overflow-hidden px-4 py-3${isClickable ? ' cursor-pointer' : ''}`}
     >
       <div className="flex-1 min-w-0 space-y-1.5">
@@ -59,30 +66,31 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
           <p className="text-2xs text-fg-secondary leading-snug">{data.body}</p>
         )}
 
-        {(data.action ?? data.cancel) && (
-          <div className="flex gap-2 pt-0.5">
-            {data.action && (
+        {hasActions && (
+          <div className="flex flex-wrap gap-2 pt-0.5">
+            {data.actions?.map((action) => (
               <button
-                onClick={(e) => { e.stopPropagation(); notif.clicked(data.extraData); toast.dismiss(id) }}
-                className="text-2xs font-medium px-2.5 py-1 rounded-md bg-selected text-fg-primary hover:bg-hover transition-colors"
+                key={action.id}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  notif.clicked(action.id, data.extraData)
+                  toast.dismiss(id)
+                }}
+                className={
+                  action.style === 'ghost'
+                    ? 'text-2xs font-medium px-2.5 py-1 rounded-md text-fg-ghost hover:text-fg-secondary hover:bg-hover transition-colors'
+                    : 'text-2xs font-medium px-2.5 py-1 rounded-md bg-selected text-fg-primary hover:bg-hover transition-colors'
+                }
               >
-                {data.action.label}
+                {action.label}
               </button>
-            )}
-            {data.cancel && (
-              <button
-                onClick={(e) => { e.stopPropagation(); notif.dismissed(data.extraData); toast.dismiss(id) }}
-                className="text-2xs font-medium px-2.5 py-1 rounded-md text-fg-ghost hover:text-fg-secondary hover:bg-hover transition-colors"
-              >
-                {data.cancel.label}
-              </button>
-            )}
+            ))}
           </div>
         )}
       </div>
 
       <button
-        onClick={(e) => { e.stopPropagation(); toast.dismiss(id) }}
+        onClick={(e) => { e.stopPropagation(); notif.dismissed(data.extraData); toast.dismiss(id) }}
         className="shrink-0 mt-0.5 text-fg-ghost hover:text-fg-secondary transition-colors"
         aria-label="Dismiss"
       >

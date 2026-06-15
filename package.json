@@ -11,6 +11,7 @@
     "build:web": "cross-env VITE_TARGET=web tsc -b && vite build",
     "start": "electron .",
     "run:e": "electron .",
+    "run:notif": "electron dist-electron/notif-main.mjs",
     "debug": "electron . --inspect=9229",
     "start:web": "npm run build:web && vite preview",
     "typecheck": "tsc -b --pretty false",
