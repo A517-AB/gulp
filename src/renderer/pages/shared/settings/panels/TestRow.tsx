@@ -47,7 +47,7 @@ export function TestRow({ label, result, onRun }: TestRowProps) {
             {result.summary}
             <button
               onClick={copyResult}
-              className="absolute top-1.5 right-1.5 opacity-0 group-hover/res:opacity-100 transition-opacity text-[9px] font-mono text-fg-ghost hover:text-fg-primary bg-base border border-hair px-1.5 py-0.5 rounded"
+              className="absolute top-1.5 right-1.5 opacity-0 group-hover/res:opacity-100 transition-opacity text-3xs font-mono text-fg-ghost hover:text-fg-primary bg-base border border-hair px-1.5 py-0.5 rounded"
             >
               copy
             </button>

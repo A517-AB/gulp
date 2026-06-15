@@ -80,7 +80,7 @@ function ContextMenuLabel({
     <ContextMenuPrimitive.Label
       data-slot="context-menu-label"
       className={cn(
-        "px-2 py-1 text-[9px] font-mono uppercase tracking-widest text-fg-ghost",
+        "px-2 py-1 text-3xs font-mono uppercase tracking-widest text-fg-ghost",
         inset && "pl-8",
         className,
       )}

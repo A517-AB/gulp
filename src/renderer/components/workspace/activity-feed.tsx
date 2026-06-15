@@ -133,11 +133,11 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5">
               <h2 className="text-sm font-bold uppercase tracking-wide truncate text-fg-primary">{session.title}</h2>
-              <div className={`flex items-center gap-1 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-wider rounded ${statusInfo.bgColor} ${statusInfo.color}`}>
+              <div className={`flex items-center gap-1 px-2 py-0.5 text-3xs font-mono font-bold uppercase tracking-wider rounded ${statusInfo.bgColor} ${statusInfo.color}`}>
                 <span>{statusInfo.icon}</span><span>{statusInfo.label}</span>
               </div>
             </div>
-            <div className="flex items-center gap-3 text-[9px] font-mono text-fg-dim uppercase tracking-wide">
+            <div className="flex items-center gap-3 text-3xs font-mono text-fg-dim uppercase tracking-wide">
                 <span>Started {formatDate(session.createTime)}</span>
                 <span>•</span><span>{branch}</span>
                 {session.state === "inProgress" && <>
@@ -145,7 +145,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
             </div>
               {session.state === "inProgress" && latest && (
               <div className="mt-2 pt-2 border-t border-hair">
-                <div className="text-[9px] font-bold uppercase tracking-widest text-purple-400 mb-1">Latest</div>
+                <div className="text-3xs font-bold uppercase tracking-widest text-purple-400 mb-1">Latest</div>
                   <div
                       className="text-[11px] text-fg-secondary line-clamp-2 font-mono">{(summaries[latest.id] ?? '').slice(0, 150)}</div>
               </div>
@@ -221,7 +221,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
             <div className="p-3 flex flex-col space-y-2.5">
             {session.prompt && (
                 <div className="flex flex-row-reverse gap-2.5">
-                    <div className="h-6 w-6 shrink-0 mt-0.5 rounded-full bg-purple-500 flex items-center justify-center text-[9px] font-bold text-white uppercase">U</div>
+                    <div className="h-6 w-6 shrink-0 mt-0.5 rounded-full bg-purple-500 flex items-center justify-center text-3xs font-bold text-white uppercase">U</div>
                     <div className="max-w-[85%] md:max-w-[70%] rounded-lg border border-purple-500/10 bg-purple-500/5 px-3 py-2 text-[11px] leading-relaxed text-fg-secondary break-words whitespace-pre-wrap">{session.prompt}</div>
                 </div>
             )}

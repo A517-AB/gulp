@@ -70,7 +70,7 @@ const SnippetRow = memo(function SnippetRow({
             placeholder="Untitled"
           />
           {snippet.type === 'build' && (
-            <span className="shrink-0 text-[9px] font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400 border border-orange-500/20 uppercase">
+            <span className="shrink-0 text-3xs font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400 border border-orange-500/20 uppercase">
               Build
             </span>
           )}

@@ -109,7 +109,7 @@ export function ExplorerPage() {
                 <span className="text-[10px] font-mono text-fg-primary truncate" title={openFilePath}>
                   {openFilePath.split(/[\\/]/).pop()}
                 </span>
-                <span className="text-[9px] font-mono text-fg-ghost truncate" title={openFilePath}>
+                <span className="text-3xs font-mono text-fg-ghost truncate" title={openFilePath}>
                   ({openFilePath})
                 </span>
               </div>

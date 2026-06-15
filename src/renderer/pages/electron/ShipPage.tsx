@@ -222,7 +222,7 @@ export default function ShipPage() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-60"/>
                                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-purple-500"/>
                             </span>
-                            <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest">{newCount} new</span>
+                            <span className="text-3xs font-mono text-purple-400 uppercase tracking-widest">{newCount} new</span>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -301,7 +301,7 @@ export default function ShipPage() {
                                                         </span>
                                                         <div className="flex items-center gap-1.5 mt-0.5">
                                                             <GitBranch className="h-2.5 w-2.5 text-fg-ghost shrink-0"/>
-                                                            <span className="text-[9px] font-mono text-fg-ghost truncate">
+                                                            <span className="text-3xs font-mono text-fg-ghost truncate">
                                                                 {patch.branch}
                                                             </span>
                                                         </div>
@@ -402,7 +402,7 @@ export default function ShipPage() {
                                                                     transition={{delay: patch.files.length * 0.045 + 0.05}}
                                                                     className="border-t border-hair px-4 py-2.5 flex items-center justify-between"
                                                                 >
-                                                                    <span className="text-[9px] font-mono text-fg-ghost uppercase tracking-widest">
+                                                                    <span className="text-3xs font-mono text-fg-ghost uppercase tracking-widest">
                                                                         {patch.files.length} file{patch.files.length !== 1 ? "s" : ""} changed
                                                                     </span>
 

@@ -1,3 +1,4 @@
+import './notification.css'
 import { createRoot } from 'react-dom/client'
 import { NotificationWindow } from './NotificationWindow'
 

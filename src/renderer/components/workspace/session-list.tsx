@@ -100,7 +100,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
                                       </Tooltip>
                                   </div>
                                   <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                        <span className="text-[9px] text-fg-dim font-mono tracking-wide leading-none">
+                        <span className="text-3xs text-fg-dim font-mono tracking-wide leading-none">
                           {formatDate(s.createTime)}
                         </span>
                                       {(() => {
@@ -112,7 +112,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
                                           if (!repo) return null;
                                           return (
                                               <>
-                                                  <span className="text-[9px] text-fg-ghost font-mono">•</span>
+                                                  <span className="text-3xs text-fg-ghost font-mono">•</span>
                                                   <Badge
                                                       className={`shrink-0 text-[8px] px-1 h-3.5 border rounded-sm uppercase tracking-wider leading-none ${STATE_BADGE[s.state]}`}>
                                                       {repo.repo}
@@ -132,7 +132,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
       </ScrollArea>
       <div className="border-t border-hair px-3 py-2.5 bg-raised shrink-0">
           <div className="flex justify-between items-center mb-1.5">
-              <span className="text-[9px] font-bold text-fg-ghost uppercase tracking-widest">Daily Limit</span>
+              <span className="text-3xs font-bold text-fg-ghost uppercase tracking-widest">Daily Limit</span>
           <span className="text-[10px] font-mono font-bold text-fg-dim">{dailyCount}/{LIMIT}</span>
         </div>
           <div className="w-full h-1 bg-surface overflow-hidden rounded-full">

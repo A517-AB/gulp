@@ -16,7 +16,7 @@ export function ChangeSetSummary({ artifact, className }: ChangeSetSummaryProps)
     const totalDel = files.reduce((s, f) => s + f.deletions, 0);
     return (
         <div className={cn("mt-3 pt-3 border-t border-hair", className)}>
-            <div className="flex items-center gap-2 mb-2 text-[9px] font-mono uppercase tracking-wider text-blue-400">
+            <div className="flex items-center gap-2 mb-2 text-3xs font-mono uppercase tracking-wider text-blue-400">
                 <span>⬡</span>
                 <span>Code Changes</span>
                 <span className="text-fg-ghost ml-auto">{files.length} file{files.length !== 1 ? 's' : ''}</span>
@@ -25,7 +25,7 @@ export function ChangeSetSummary({ artifact, className }: ChangeSetSummaryProps)
             </div>
             <div className="space-y-0.5">
                 {files.map((f, i) => (
-                    <div key={i} className="flex items-center justify-between gap-2 text-[9px] font-mono">
+                    <div key={i} className="flex items-center justify-between gap-2 text-3xs font-mono">
                         <span className="text-fg-dim truncate">{f.path}</span>
                         <span className="shrink-0 flex gap-1.5">
                             <span className="text-green-400">+{f.additions}</span>

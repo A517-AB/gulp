@@ -23,7 +23,7 @@ export function SessionContextMenu({ session, children }: Props) {
 
     return (
         <ContextMenu.Root>
-            <ContextMenu.Trigger asChild>
+            <ContextMenu.Trigger className="contents">
                 {children}
             </ContextMenu.Trigger>
             <ContextMenu.Portal>

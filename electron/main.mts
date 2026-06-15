@@ -59,8 +59,8 @@ function createWindow() {
   console.log("[main] preload path:", preloadPath, "exists:", fs.existsSync(preloadPath));
 
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1440,
+    height: 900,
     titleBarStyle: "hidden",
     autoHideMenuBar: true,
     frame: false,

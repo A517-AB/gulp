@@ -157,7 +157,7 @@ export function PlanContent({ content }: PlanContentProps) {
         {steps.map((step, i) => (
           <div key={i} className="pl-3 border-l-2 border-primary/30">
             {getStepTitle(step) && <div className="font-medium text-xs">{formatStepHeading(step, i, usesNumberedLabels)}</div>}
-            {getStepDescription(step) && <div className="text-muted-foreground text-[11px] mt-0.5 leading-relaxed">{getStepDescription(step)}</div>}
+            {getStepDescription(step) && <div className="text-fg-muted text-[11px] mt-0.5 leading-relaxed">{getStepDescription(step)}</div>}
             {!getStepTitle(step) && !getStepDescription(step) && <div className="text-xs">{stringifyPlanStep(step)}</div>}
           </div>
         ))}
