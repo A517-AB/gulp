@@ -3,7 +3,7 @@ import { ipcMain, app } from 'electron'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import type { WebContents } from 'electron'
-import { dispatchNotification } from './notification.js'
+import { dispatchNotification } from './dispatch.js'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -68,7 +68,6 @@ function parseTime(time: string): { h: number; m: number } {
   return { h: h ?? 0, m: m ?? 0 }
 }
 
-// Returns a cron expression or a Date for one-shot schedules
 function toTrigger(s: ScheduleInput): string | Date | null {
   if (s.kind === 'alarm') {
     const { h, m } = parseTime(s.time)
@@ -77,7 +76,7 @@ function toTrigger(s: ScheduleInput): string | Date | null {
   }
   if (s.kind === 'once') {
     const d = new Date(s.at)
-    return d > new Date() ? d : null   // already passed
+    return d > new Date() ? d : null
   }
   if (s.kind === 'daily') {
     const { h, m } = parseTime(s.time)
@@ -118,9 +117,8 @@ function startJob(item: ScheduledItem, getWebContents: () => WebContents | null)
       id:    item.id,
     })
 
-    getWebContents()?.send('scheduler.fired', item)
+    getWebContents()?.send('notif.scheduler.fired', item)
 
-    // one-shot: remove after firing
     if (item.schedule.kind === 'once') {
       stopJob(item.id)
       removeItem(item.id)
@@ -147,14 +145,13 @@ function removeItem(id: string): void {
 // ── Registration ──────────────────────────────────────────────────────────────
 
 export function registerSchedulerHandlers(getWebContents: () => WebContents | null): void {
-  // restore on startup
   for (const item of load()) {
     if (item.enabled) startJob(item, getWebContents)
   }
 
-  ipcMain.handle('scheduler.list', () => load())
+  ipcMain.handle('notif.scheduler.list', () => load())
 
-  ipcMain.handle('scheduler.add', (_, item: ScheduledItem) => {
+  ipcMain.handle('notif.scheduler.add', (_, item: ScheduledItem) => {
     const items = load().filter(i => i.id !== item.id)
     items.push(item)
     save(items)
@@ -162,12 +159,12 @@ export function registerSchedulerHandlers(getWebContents: () => WebContents | nu
     return item
   })
 
-  ipcMain.handle('scheduler.remove', (_, id: string) => {
+  ipcMain.handle('notif.scheduler.remove', (_, id: string) => {
     stopJob(id)
     removeItem(id)
   })
 
-  ipcMain.handle('scheduler.toggle', (_, id: string, enabled: boolean) => {
+  ipcMain.handle('notif.scheduler.toggle', (_, id: string, enabled: boolean) => {
     const items = load()
     const item = items.find(i => i.id === id)
     if (!item) return
@@ -178,7 +175,7 @@ export function registerSchedulerHandlers(getWebContents: () => WebContents | nu
     return item
   })
 
-  ipcMain.handle('scheduler.snooze', (_, id: string, minutes: number) => {
+  ipcMain.handle('notif.scheduler.snooze', (_, id: string, minutes: number) => {
     const item = load().find(i => i.id === id)
     if (!item) return
     const snoozeItem: ScheduledItem = {

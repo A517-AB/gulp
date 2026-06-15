@@ -1,7 +1,29 @@
 import { useEffect, useState } from 'react'
 import { Toaster, toast } from 'sonner'
-import { BrowserSoundController } from '@/library/notification/sounds'
-import { notifBridge, type NotifPayload } from './bridge'
+import { BrowserSoundController } from './sounds'
+import type { SoundId } from './sounds'
+
+// ── types ──────────────────────────────────────────────────────────────────────
+
+export interface NotifPayload {
+  title:      string
+  body?:      string
+  type?:      'default' | 'success' | 'error' | 'info' | 'warning'
+  action?:    { label: string }
+  cancel?:    { label: string }
+  duration?:  number
+  id?:        string | number
+  sound?:     SoundId
+  extraData?: unknown
+}
+
+interface NotifBridge {
+  onShow:    (cb: (data: NotifPayload) => void) => void
+  clicked:   (extraData?: unknown) => void
+  dismissed: (extraData?: unknown) => void
+}
+
+const notif = (window as unknown as { notif: NotifBridge }).notif
 
 // ── theme ──────────────────────────────────────────────────────────────────────
 
@@ -27,7 +49,7 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
 
   return (
     <div
-      onClick={isClickable ? () => { notifBridge.click(data.extraData); toast.dismiss(id) } : undefined}
+      onClick={isClickable ? () => { notif.clicked(data.extraData); toast.dismiss(id) } : undefined}
       className={`relative flex items-start gap-3 w-full rounded-xl border border-hair bg-overlay/90 backdrop-blur-xl shadow-2xl overflow-hidden px-4 py-3${isClickable ? ' cursor-pointer' : ''}`}
     >
       <div className="flex-1 min-w-0 space-y-1.5">
@@ -41,7 +63,7 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
           <div className="flex gap-2 pt-0.5">
             {data.action && (
               <button
-                onClick={(e) => { e.stopPropagation(); notifBridge.click(data.extraData); toast.dismiss(id) }}
+                onClick={(e) => { e.stopPropagation(); notif.clicked(data.extraData); toast.dismiss(id) }}
                 className="text-2xs font-medium px-2.5 py-1 rounded-md bg-selected text-fg-primary hover:bg-hover transition-colors"
               >
                 {data.action.label}
@@ -49,7 +71,7 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
             )}
             {data.cancel && (
               <button
-                onClick={(e) => { e.stopPropagation(); notifBridge.cancel(data.extraData); toast.dismiss(id) }}
+                onClick={(e) => { e.stopPropagation(); notif.dismissed(data.extraData); toast.dismiss(id) }}
                 className="text-2xs font-medium px-2.5 py-1 rounded-md text-fg-ghost hover:text-fg-secondary hover:bg-hover transition-colors"
               >
                 {data.cancel.label}
@@ -96,7 +118,7 @@ export function NotificationWindow() {
   const theme = useLocalTheme()
 
   useEffect(() => {
-    notifBridge.onShow(fire)
+    notif.onShow(fire)
   }, [])
 
   return (

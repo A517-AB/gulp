@@ -97,11 +97,6 @@ export default function JulesPage() {
                 <button onClick={() => { setCodeDiffCollapsed((c) => !c); }} className="text-fg-dim hover:text-fg-secondary text-xs px-1">
                   {codeDiffCollapsed ? "‹" : "›"}
                 </button>
-                {!codeDiffCollapsed && (
-                  <button onClick={() => { setShowCodeDiffs(false); }} className="text-fg-dim hover:text-fg-secondary text-xs px-1 font-sans">
-                    ✕
-                  </button>
-                )}
               </div>
             </div>
             {!codeDiffCollapsed && (

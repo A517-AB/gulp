@@ -1,30 +1,10 @@
 import {formatDistanceToNow, isValid, parseISO} from "date-fns";
-import type {Activity, ParsedFile} from '@google/jules-sdk/types'
+import type {Activity} from '@google/jules-sdk/types'
 import type {ActivityGroup, ActivityType} from '@jules'
+import { parseUnidiff } from '@jules'
 
-export function parseUnidiff(patch?: string | null): ParsedFile[] {
-    if (!patch) return []
-    const files: ParsedFile[] = []
-    const sections = patch.split(/^diff --git /m).filter(Boolean)
-    for (const section of sections) {
-        const lines = section.split('\n')
-        let filePath = ''
-        let changeType: ParsedFile['changeType'] = 'modified'
-        let additions = 0
-        let deletions = 0
-        for (const line of lines) {
-            if (line.startsWith('+++ b/')) filePath = line.slice(6)
-            else if (line.startsWith('+++ /dev/null')) changeType = 'deleted'
-            else if (line.startsWith('--- /dev/null')) changeType = 'created'
-            else if (line.startsWith('new file')) changeType = 'created'
-            else if (line.startsWith('deleted file')) changeType = 'deleted'
-            else if (line.startsWith('+') && !line.startsWith('+++')) additions++
-            else if (line.startsWith('-') && !line.startsWith('---')) deletions++
-        }
-        if (filePath) files.push({path: filePath, changeType, additions, deletions})
-    }
-    return files
-}
+export { parseUnidiff }
+
 
 export function formatDate(dateString: string): string {
   if (!dateString) return "Unknown date";

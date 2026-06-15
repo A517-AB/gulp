@@ -1,6 +1,6 @@
-import '@syncfusion/ej2-react-gantt/styles/material-dark.css'
+
 import type { ReactNode } from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { GanttComponent } from '@syncfusion/ej2-react-gantt'
 import { Gantt, Edit, Filter, Selection, Sort, Toolbar } from '@syncfusion/ej2-gantt'
 
@@ -14,10 +14,10 @@ export interface GanttTask {
   TaskName: string
   StartDate: string
   EndDate: string
-  Duration?: number
+  Duration?: number | undefined
   Progress: number
-  Predecessor?: string
-  subtasks?: GanttTask[]
+  Predecessor?: string | undefined
+  subtasks?: GanttTask[] | undefined
 }
 
 const DEFAULT_TASKS: GanttTask[] = [
@@ -56,6 +56,7 @@ const EDIT_SETTINGS = {
 const TOOLBAR = ['Add', 'Edit', 'Delete', 'Update', 'Cancel', 'ExpandAll', 'CollapseAll', 'Indent', 'Outdent']
 
 const COLUMNS = [
+  { field: 'TaskID',      headerText: 'ID',        width: 60,  isPrimaryKey: true, visible: false },
   { field: 'TaskName',    headerText: 'Task',     width: 220 },
   { field: 'StartDate',   headerText: 'Start',    width: 120 },
   { field: 'EndDate',     headerText: 'End',      width: 120 },
@@ -82,26 +83,40 @@ async function saveTasks(tasks: GanttTask[]): Promise<void> {
   await filesystem.writeFile(GANTT_PATH, JSON.stringify(tasks, null, 2))
 }
 
+function extractPlain(item: unknown): GanttTask {
+  const d = item as Record<string, unknown>
+  return {
+    TaskID: d['TaskID'] as number,
+    TaskName: d['TaskName'] as string,
+    StartDate: d['StartDate'] as string,
+    EndDate: d['EndDate'] as string,
+    Duration: d['Duration'] as number | undefined,
+    Progress: d['Progress'] as number,
+    Predecessor: d['Predecessor'] as string | undefined,
+    subtasks: Array.isArray(d['subtasks']) ? d['subtasks'].map(extractPlain) : undefined,
+  }
+}
+
 export default function GanttPage(): ReactNode {
-  const [tasks, setTasks] = useState<GanttTask[]>([])
+  const [tasks, setTasks] = useState<GanttTask[]>(DEFAULT_TASKS)
+  const ganttRef = useRef<GanttComponent>(null)
 
   useEffect(() => {
     void loadTasks().then(setTasks)
   }, [])
 
-  const handleActionComplete = useCallback((args: { requestType: string; data?: GanttTask[] }) => {
+  const handleActionComplete = useCallback((args: { requestType: string }) => {
     if (!['save', 'delete', 'add'].includes(args.requestType)) return
-    // pull full data from event or re-read from component ref if needed
-    if (args.data) {
-      const next = Array.isArray(args.data) ? args.data : [args.data]
-      setTasks(next)
-      void saveTasks(next)
-    }
+    if (!ganttRef.current) return
+    const plain = (ganttRef.current.dataSource as unknown[]).map(extractPlain)
+    setTasks(plain)
+    void saveTasks(plain)
   }, [])
 
   return (
     <div className="h-full w-full flex flex-col overflow-hidden">
       <GanttComponent
+        ref={ganttRef}
         dataSource={tasks}
         taskFields={TASK_FIELDS}
         columns={COLUMNS}

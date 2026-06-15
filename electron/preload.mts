@@ -189,32 +189,32 @@ const snippets: ElectronAPI["snippets"] = {
 // ── uiNotification ─────────────────────────────────────────────────────────────
 
 const uiNotification: ElectronAPI["uiNotification"] = {
-  show:    (payload) => { ipcRenderer.send("uikit:notification", payload); },
-  destroy: ()        => { ipcRenderer.send("uikit:notification", null); },
+  show:    (payload) => { ipcRenderer.send("notif.dispatch", payload); },
+  destroy: ()        => { ipcRenderer.send("notif.dispatch", null); },
   onClicked: (cb) => {
     const handler = (_event: IpcRendererEvent, data: unknown) => { cb(data); };
-    ipcRenderer.on("uinotification.click", handler);
-    return () => { ipcRenderer.off("uinotification.click", handler); };
+    ipcRenderer.on("notif.clicked", handler);
+    return () => { ipcRenderer.off("notif.clicked", handler); };
   },
   onCancelled: (cb) => {
     const handler = (_event: IpcRendererEvent, data: unknown) => { cb(data); };
-    ipcRenderer.on("uinotification.cancel", handler);
-    return () => { ipcRenderer.off("uinotification.cancel", handler); };
+    ipcRenderer.on("notif.dismissed", handler);
+    return () => { ipcRenderer.off("notif.dismissed", handler); };
   },
 };
 
 // ── scheduler ─────────────────────────────────────────────────────────────────
 
 const scheduler: ElectronAPI["scheduler"] = {
-  list:   ()                   => ipcRenderer.invoke("scheduler.list"),
-  add:    (item)               => ipcRenderer.invoke("scheduler.add", item),
-  remove: (id)                 => ipcRenderer.invoke("scheduler.remove", id),
-  toggle: (id, enabled)        => ipcRenderer.invoke("scheduler.toggle", id, enabled),
-  snooze: (id, minutes)        => ipcRenderer.invoke("scheduler.snooze", id, minutes),
+  list:   ()                   => ipcRenderer.invoke("notif.scheduler.list"),
+  add:    (item)               => ipcRenderer.invoke("notif.scheduler.add", item),
+  remove: (id)                 => ipcRenderer.invoke("notif.scheduler.remove", id),
+  toggle: (id, enabled)        => ipcRenderer.invoke("notif.scheduler.toggle", id, enabled),
+  snooze: (id, minutes)        => ipcRenderer.invoke("notif.scheduler.snooze", id, minutes),
   onFired: (cb) => {
     const handler = (_event: IpcRendererEvent, item: Parameters<typeof cb>[0]) => { cb(item) }
-    ipcRenderer.on("scheduler.fired", handler)
-    return () => { ipcRenderer.off("scheduler.fired", handler) }
+    ipcRenderer.on("notif.scheduler.fired", handler)
+    return () => { ipcRenderer.off("notif.scheduler.fired", handler) }
   },
 }
 

@@ -11,9 +11,11 @@ const MANIFEST_PATH = path.join(app.getAppPath(), 'snippets.json')
 const EMPTY_MANIFEST: FuseManifestType = { version: 1, items: [] }
 
 export function registerSnippetsHandlers(getWebContents: () => WebContents | null): void {
-  console.log('[snippets] registering handlers')
-  console.log('[snippets] manifest path:', MANIFEST_PATH)
-  console.log('[snippets] fuse root:', FUSE_ROOT)
+  const t0 = performance.now()
+  const t = (label: string) => { console.log(`[snippets] ${label} +${(performance.now() - t0).toFixed(1)}ms`) }
+  t('registering handlers')
+  t(`manifest path: ${MANIFEST_PATH}`)
+  t(`fuse root: ${FUSE_ROOT}`)
 
   // ── manifest (D:\LAST\snippets.json) ──────────────────────────────────────
 
@@ -72,7 +74,7 @@ export function registerSnippetsHandlers(getWebContents: () => WebContents | nul
   // ── watcher ───────────────────────────────────────────────────────────────
 
     const snippetsDir = path.join(FUSE_ROOT, 'snippets')
-    console.log('[snippets] watching', snippetsDir)
+    t(`watching ${snippetsDir}`)
     const watcher = chokidar.watch(snippetsDir, {
     ignoreInitial: true,
     depth: 3,
@@ -81,7 +83,7 @@ export function registerSnippetsHandlers(getWebContents: () => WebContents | nul
   })
 
   watcher.on('ready', () => {
-      console.log('[snippets] watcher ready on', snippetsDir)
+      t(`watcher ready on ${snippetsDir}`)
   })
 
   watcher.on('all', (event, filePath) => {

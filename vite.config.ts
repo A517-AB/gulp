@@ -17,10 +17,11 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: [
-      {
-        find: /^@syncfusion\/(.+)$/,
-        replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/$1',
-      },
+      { find: 'react',       replacement: resolve(__dirname, 'node_modules/react') },
+      { find: 'react-dom',   replacement: resolve(__dirname, 'node_modules/react-dom') },
+      { find: '@syncfusion/ej2-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist/es6/ej2-gantt.es5.js' },
+      { find: '@syncfusion/ej2-react-gantt', replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist/es6/ej2-react-gantt.es5.js' },
+      { find: /^@syncfusion\/(.+)$/, replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/$1' },
     ],
   },
   server: {
@@ -82,7 +83,7 @@ export default defineConfig({
         preload: {
           input: {
             preload: 'electron/preload.mts',
-            'notification-preload': 'electron/notification-preload.ts',
+            'notification-preload': 'electron/notifications/preload.ts',
           },
           vite: {
             build: {

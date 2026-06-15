@@ -72,6 +72,7 @@ export interface SdkIpc {
   }
     util: {
         toSummary: (activity: Activity) => Promise<ActivitySummary>
+        toSummaries: (activities: Activity[]) => Promise<ActivitySummary[]>
     }
     query: {
         validate: (query: unknown) => Promise<ValidationResult>

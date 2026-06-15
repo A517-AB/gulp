@@ -57,9 +57,9 @@ function getOrCreateWindow(): BrowserWindow {
 function send(payload: unknown): void {
   const w = getOrCreateWindow()
   if (w.webContents.isLoading()) {
-    w.once('ready-to-show', () => { w.webContents.send('notification:show', payload) })
+    w.once('ready-to-show', () => { w.webContents.send('notif.show', payload) })
   } else {
-    w.webContents.send('notification:show', payload)
+    w.webContents.send('notif.show', payload)
   }
 }
 
@@ -72,13 +72,13 @@ export function dispatchNotification(payload: unknown): void {
 }
 
 export function registerUINotificationHandlers(getWebContents: () => WebContents | null): void {
-  ipcMain.on('uikit:notification', (_e, info) => { if (info) send(info) })
+  ipcMain.on('notif.dispatch', (_e, info) => { if (info) send(info) })
 
-  ipcMain.on('notification:click', (_e, extraData) => {
-    getWebContents()?.send('uinotification.click', extraData)
+  ipcMain.on('notif.clicked', (_e, extraData) => {
+    getWebContents()?.send('notif.clicked', extraData)
   })
 
-  ipcMain.on('notification:cancel', (_e, extraData) => {
-    getWebContents()?.send('uinotification.cancel', extraData)
+  ipcMain.on('notif.dismissed', (_e, extraData) => {
+    getWebContents()?.send('notif.dismissed', extraData)
   })
 }

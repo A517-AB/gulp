@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { format } from 'date-fns'
-import { BrowserSoundController } from '@/library/notification/sounds'
+import { BrowserSoundController } from '@notification/sounds'
 import { useNotification } from '@/library/notification'
 import { scheduler } from '@shared/bridge'
 import type { ScheduledItem } from '@shared/electron'

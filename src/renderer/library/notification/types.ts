@@ -1,6 +1,4 @@
-import type { SoundId } from '@/library/notification/sounds'
-
-export type { SoundId }
+export type SoundId = 'none' | 'beep' | 'chime' | 'bell' | 'pulse'
 
 export interface NotificationAction {
   label: string

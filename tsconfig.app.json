@@ -32,6 +32,8 @@
       "@/utils/*": ["./src/renderer/utils/*"],
       "@/features": ["./src/renderer/features"],
       "@/features/*": ["./src/renderer/features/*"],
+      "@notification": ["./src/notification"],
+      "@notification/*": ["./src/notification/*"],
       "@jules": ["./src/jules/index.ts"],
       "@jules/*": ["./src/jules/*"],
       "@syncfusion/ej2-react-gantt": ["D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/index.d.ts"],
