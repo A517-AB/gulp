@@ -16,6 +16,9 @@ export default defineConfig({
   clearScreen: false,
   resolve: {
     tsconfigPaths: true,
+    alias: {
+      '@syncfusion/ej2-react-gantt': 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt',
+    },
   },
   server: {
     host: '127.0.0.1',
@@ -62,6 +65,10 @@ export default defineConfig({
             build: {
               rolldownOptions: {
                 external: nodeExternal,
+                input: {
+                  main:          'electron/main.mts',
+                  'jules-worker': 'electron/jules-worker.ts',
+                },
                 output: {
                   entryFileNames: '[name].mjs',
                 },

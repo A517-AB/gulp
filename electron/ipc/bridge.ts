@@ -1,6 +1,6 @@
 import type {IpcRendererEvent} from 'electron'
 import {ipcRenderer} from 'electron'
-import type {SdkIpc} from '@/jules/sdk-ipc'
+import type {SdkIpc} from '@/jules'
 
 type Unsubscribe = () => void
 

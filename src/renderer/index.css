@@ -99,14 +99,14 @@
   --color-selected: var(--interactive-selected);
 
   /* ── typography scale ────────────────────────────────────────────────────── */
-  /* 9px — status dots, timestamps, ultra-tiny badges  */
-  --text-3xs:                  0.5625rem;
+  /* 13px — status dots, timestamps, ultra-tiny badges  */
+  --text-3xs:                  0.8125rem;
   --text-3xs--line-height:     1.3;
-  /* 10px — mono labels, workspace titles, most UI text  */
-  --text-2xs:                  0.625rem;
+  /* 14px — mono labels, workspace titles, most UI text  */
+  --text-2xs:                  0.875rem;
   --text-2xs--line-height:     1.4;
-  /* 11px — slightly larger label, answers, body copy  */
-  --text-xxs:                  0.6875rem;
+  /* 15px — slightly larger label, answers, body copy  */
+  --text-xxs:                  0.9375rem;
   --text-xxs--line-height:     1.5;
 
   /* ── letter-spacing ──────────────────────────────────────────────────────── */

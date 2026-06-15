@@ -1,6 +1,6 @@
 import type { IpcRendererEvent } from "electron";
 import { contextBridge, ipcRenderer } from "electron";
-import type { ShellType, PopupNotification, ElectronAPI } from "../src/shared/electron";
+import type { ShellType, PopupNotification, ElectronAPI, JulesWorkerEvent } from "../src/shared/electron";
 import { sdk } from "./ipc/bridge";
 // ── terminal ───────────────────────────────────────────────────────────────────
 
@@ -230,6 +230,30 @@ const git: ElectronAPI["git"] = {
     init: (cwd) => ipcRenderer.invoke("git.init", cwd),
 }
 
+// ── jules events ───────────────────────────────────────────────────────────────
+
+const julesEvents: ElectronAPI["julesEvents"] = {
+  subscribe: () => {
+    ipcRenderer.send("jules:subscribe")
+  },
+  unsubscribe: () => {
+    ipcRenderer.send("jules:unsubscribe")
+  },
+  on: (cb: (event: JulesWorkerEvent) => void) => {
+    const handler = (_event: IpcRendererEvent, data: JulesWorkerEvent) => { cb(data) }
+    ipcRenderer.on("jules:event", handler)
+    return () => { ipcRenderer.off("jules:event", handler) }
+  },
+}
+
+// ── store ──────────────────────────────────────────────────────────────────────
+
+const store: ElectronAPI["store"] = {
+  get:    (key)        => ipcRenderer.invoke("store:get", key),
+  set:    (key, value) => ipcRenderer.invoke("store:set", key, value),
+  delete: (key)        => ipcRenderer.invoke("store:delete", key),
+}
+
 // ── expose ─────────────────────────────────────────────────────────────────────
 
 const api: Omit<ElectronAPI, 'sdk'> = {
@@ -245,7 +269,9 @@ const api: Omit<ElectronAPI, 'sdk'> = {
   snippets,
   uiNotification,
   scheduler,
-    git,
+  git,
+  julesEvents,
+  store,
 };
 
 contextBridge.exposeInMainWorld("electron", { ...api, sdk });

@@ -1,5 +1,5 @@
 import type { SdkIpc } from '@jules'
-import type {AtCommand, AtResult, DisplayCommand, DisplayResult, TerminalCommand, TerminalResult} from './types'
+import type {AtCommand, AtResult, DisplayCommand, DisplayResult, TerminalCommand, TerminalResult, PreviewCommand, PreviewResult} from './types'
 
 // ── @: fire-forget ────────────────────────────────────────────────────────────
 // Injects only session.send — reusable across any session via command.sessionId.
@@ -50,4 +50,19 @@ export const TERMINAL_META = {
     trigger: '>' as const,
     label: 'terminal',
     description: 'Run a script in the terminal',
+}
+
+// ── :: watch preview ─────────────────────────────────────────────────────────
+
+export interface PreviewSession {
+  hydrate: HydrateFn
+  select:  SelectFn
+}
+
+export type PreviewExecutor = (session: PreviewSession, command: PreviewCommand) => Promise<PreviewResult>
+
+export const PREVIEW_META = {
+  trigger:     ':' as const,
+  label:       'preview',
+  description: 'Watch previews (diffs) of a Jules session',
 }

@@ -1,4 +1,4 @@
-export type Trigger = '@' | '/' | '>'
+export type Trigger = '@' | '/' | '>' | ':'
 
 // ── @: fire-forget message to Jules ──────────────────────────────────────────
 
@@ -70,7 +70,31 @@ export interface TerminalResult {
     error?: string
 }
 
+// ── :: watch preview diffs from Jules ────────────────────────────────────────
+
+export interface PreviewCommand {
+  id:         string
+  trigger:    ':'
+  alias:      string
+  enabled:    boolean
+  createdAt:  number
+  updatedAt?: number
+  sessionId:  string
+}
+
+export interface PreviewResult {
+  trigger:   ':'
+  commandId: string
+  alias:     string
+  sessionId: string
+  patch:     string
+  pulledAt:  number
+  status:    'ok' | 'empty' | 'error'
+  error?:    string
+}
+
 // ── unions ────────────────────────────────────────────────────────────────────
 
-export type Command = AtCommand | DisplayCommand | TerminalCommand
-export type CommandResult = AtResult | DisplayResult | TerminalResult
+export type Command = AtCommand | DisplayCommand | TerminalCommand | PreviewCommand
+export type CommandResult = AtResult | DisplayResult | TerminalResult | PreviewResult
+

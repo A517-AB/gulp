@@ -1,7 +1,7 @@
 import {useState, useCallback, useMemo, type KeyboardEvent} from 'react'
 import {AnimatePresence} from 'framer-motion'
 import { parseInput, isParseOk } from '@shared/commands'
-import type {AtCommand, Command, DisplayCommand, TerminalCommand} from '@shared/commands'
+import type {AtCommand, Command, DisplayCommand, TerminalCommand, PreviewCommand} from '@shared/commands'
 import {useHistory} from '@/hooks/use-history'
 import {GhostInput} from './GhostInput'
 import {CommandMenu} from './CommandMenu'
@@ -10,17 +10,19 @@ import { cn } from '@/utils'
 
 type PanelMode = 'none' | 'commands' | 'history'
 
-const TRIGGER_CHARS: string[] = ['/', '@', '>']
+const TRIGGER_CHARS: string[] = ['/', '@', '>', ':']
 
 interface Props {
     commands: Command[]
     onDisplay: (command: DisplayCommand) => void
     onSend: (command: AtCommand, prompt: string) => void
     onRun: (command: TerminalCommand) => void
+    onPreview: (command: PreviewCommand) => void
     className?: string
 }
 
-export function CommandInput({commands, onDisplay, onSend, onRun, className}: Props) {
+
+export function CommandInput({commands, onDisplay, onSend, onRun, onPreview, className}: Props) {
     const [input, setInput] = useState('')
     const [panelMode, setPanelMode] = useState<PanelMode>('none')
     const [activeIndex, setIndex] = useState(0)
@@ -51,11 +53,15 @@ export function CommandInput({commands, onDisplay, onSend, onRun, className}: Pr
             onRun(cmd)
             setInput('')
             closePanel()
+        } else if (cmd.trigger === ':') {
+            onPreview(cmd)
+            setInput('')
+            closePanel()
         } else {
             setInput(`@${cmd.alias} `)
             closePanel()
         }
-    }, [onDisplay, onRun, closePanel])
+    }, [onDisplay, onRun, onPreview, closePanel])
 
     const handleChange = useCallback((val: string) => {
         setInput(val)
@@ -147,8 +153,10 @@ export function CommandInput({commands, onDisplay, onSend, onRun, className}: Pr
                 onSend(parsed.value.command, parsed.value.prompt)
             } else if (parsed.value.trigger === '/') {
                 onDisplay(parsed.value.command)
-            } else {
+            } else if (parsed.value.trigger === '>') {
                 onRun(parsed.value.command)
+            } else {
+                onPreview(parsed.value.command)
             }
 
             void pushHistory(input.trim())
@@ -156,7 +164,7 @@ export function CommandInput({commands, onDisplay, onSend, onRun, className}: Pr
             closePanel()
         }
     }, [panelMode, visibleCommands, history, activeIndex, input, commands,
-        selectCommand, removeHistory, onSend, onDisplay, onRun, pushHistory, closePanel])
+        selectCommand, removeHistory, onSend, onDisplay, onRun, onPreview, pushHistory, closePanel])
 
     return (
         <div className={cn('relative', className)}>

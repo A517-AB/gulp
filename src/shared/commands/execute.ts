@@ -1,5 +1,5 @@
-import type {AtResult, DisplayResult, TerminalResult} from './types'
-import type {AtExecutor, DisplayExecutor, TerminalExecutor} from './triggers'
+import type {AtResult, DisplayResult, TerminalResult, PreviewResult} from './types'
+import type {AtExecutor, DisplayExecutor, TerminalExecutor, PreviewExecutor} from './triggers'
 
 export const executeAt: AtExecutor = async (send, command, prompt) => {
   const sentAt = Date.now()
@@ -52,6 +52,33 @@ export const executeTerminal: TerminalExecutor = (deps, command) => {
             error: err instanceof Error ? err.message : String(err),
         } satisfies TerminalResult
     }
+}
+
+export const executePreview: PreviewExecutor = async (session, command) => {
+  const pulledAt = Date.now()
+  try {
+    await session.hydrate(command.sessionId)
+    const activities = await session.select(command.sessionId, {
+      type:  'sessionCompleted',
+      order: 'desc',
+      limit: 1,
+    })
+    const completed = activities[0]
+    if (completed?.type !== 'sessionCompleted') {
+      return { trigger: ':', commandId: command.id, alias: command.alias, sessionId: command.sessionId, patch: '', pulledAt, status: 'empty' } satisfies PreviewResult
+    }
+    const artifacts: unknown[] = Array.isArray(completed.artifacts) ? completed.artifacts : []
+    const cs = artifacts.find((a): a is { type: 'changeSet'; gitPatch: { unidiffPatch?: string } } =>
+      typeof a === 'object' && a !== null && 'type' in a && (a as Record<string, unknown>)['type'] === 'changeSet'
+    )
+    const patch = cs?.gitPatch.unidiffPatch ?? ''
+    if (!patch) {
+      return { trigger: ':', commandId: command.id, alias: command.alias, sessionId: command.sessionId, patch: '', pulledAt, status: 'empty' } satisfies PreviewResult
+    }
+    return { trigger: ':', commandId: command.id, alias: command.alias, sessionId: command.sessionId, patch, pulledAt, status: 'ok' } satisfies PreviewResult
+  } catch (err) {
+    return { trigger: ':', commandId: command.id, alias: command.alias, sessionId: command.sessionId, patch: '', pulledAt, status: 'error', error: err instanceof Error ? err.message : String(err) } satisfies PreviewResult
+  }
 }
 
 export const executeDisplay: DisplayExecutor = async (session, command) => {

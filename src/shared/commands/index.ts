@@ -7,10 +7,12 @@ export type {
     DisplayCommand,
     DisplayResult,
     TerminalCommand,
-    TerminalResult
+    TerminalResult,
+    PreviewCommand,
+    PreviewResult,
 } from './types'
-export type {AtExecutor, DisplayExecutor, DisplaySession, TerminalExecutor, TerminalDeps} from './triggers'
-export {AT_META, DISPLAY_META, TERMINAL_META} from './triggers'
+export type {AtExecutor, DisplayExecutor, DisplaySession, TerminalExecutor, TerminalDeps, PreviewExecutor} from './triggers'
+export {AT_META, DISPLAY_META, TERMINAL_META, PREVIEW_META} from './triggers'
 export type {AtParsed, DisplayParsed, TerminalParsed, ParsedInput, ParseErr, ParseResult} from './parse'
 export { parseInput, isParseOk } from './parse'
-export {executeAt, executeDisplay, executeTerminal} from './execute'
+export {executeAt, executeDisplay, executeTerminal, executePreview} from './execute'

@@ -18,6 +18,8 @@ import { registerNotesHandlers } from "./notes";
 import { registerUINotificationHandlers, prewarmNotificationWindow } from "./notification";
 import { registerSchedulerHandlers } from "./scheduler";
 import { registerSdkHandlers } from "./ipc/handlers";
+import { startJulesWorker, registerJulesEventsHandlers } from "./jules-events";
+import { registerStoreHandlers } from "./store";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -146,6 +148,9 @@ void app.whenReady().then(() => {
   prewarmNotificationWindow();
   registerSchedulerHandlers(() => mainWindow?.webContents ?? null);
   registerSdkHandlers();
+  registerJulesEventsHandlers();
+  registerStoreHandlers();
+  startJulesWorker();
   createWindow();
 
   tray = new Tray(buildTrayIcon());

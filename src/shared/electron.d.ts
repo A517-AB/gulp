@@ -170,6 +170,18 @@ export interface SchedulerAPI {
   onFired: (cb: (item: ScheduledItem) => void) => () => void
 }
 
+export type JulesWorkerEvent =
+  | { type: 'ready' }
+  | { type: 'session.new';          sessionId: string; state: string }
+  | { type: 'session.stateChanged'; sessionId: string; state: string; prevState: string }
+  | { type: 'error';                message: string }
+
+export interface JulesEventsAPI {
+  subscribe:   () => void
+  unsubscribe: () => void
+  on:          (cb: (event: JulesWorkerEvent) => void) => () => void
+}
+
 export interface GitExecResult {
     stdout: string;
     stderr: string;
@@ -185,6 +197,12 @@ export interface GitAPI {
     push: (cwd: string, remote?: string, branch?: string, force?: boolean) => Promise<GitExecResult>;
     pull: (cwd: string, remote?: string, branch?: string, rebase?: boolean) => Promise<GitExecResult>;
     init: (cwd: string) => Promise<GitExecResult>;
+}
+
+export interface StoreAPI {
+    get:    (key: string) => Promise<unknown>
+    set:    (key: string, value: unknown) => Promise<void>
+    delete: (key: string) => Promise<void>
 }
 
 // ── root ───────────────────────────────────────────────────────────────────────
@@ -203,6 +221,8 @@ export interface ElectronAPI {
   uiNotification:  UINotificationAPI;
   scheduler:       SchedulerAPI;
   git:             GitAPI;
+  julesEvents:     JulesEventsAPI;
+  store:           StoreAPI;
 }
 
 // ── global augments ────────────────────────────────────────────────────────────

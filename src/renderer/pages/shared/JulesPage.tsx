@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {ActivityFeed} from "@/components/workspace/activity-feed.tsx";
+import {ActivityFeed} from "@/components/workspace/activity";
 import {SessionList} from "@/components/workspace/session-list.tsx";
 import {CodeDiffSidebar} from "@/components/workspace/code-diff-sidebar.tsx";
 import {NewSessionDialog} from "@/components/workspace/new-session-dialog.tsx";
@@ -7,6 +7,7 @@ import {GridBackground} from "@/ui/grid-background";
 import {BackgroundBeams} from "@/ui/background-beams";
 import {useResizable} from "@renderer/hooks/use-resizable";
 import {useStore} from "@/store/app.ts";
+import {FlyingJules} from "@/components/workspace/flying-jules.tsx";
 import type {SessionResource as Session} from "@google/jules-sdk/types";
 import type {SessionInitialValues} from '@jules';
 
@@ -67,11 +68,14 @@ export default function JulesPage() {
           <GridBackground className="h-full">
             <BackgroundBeams />
             <div className="relative z-10 flex h-full items-center justify-center">
-              <div className="text-center space-y-3">
-                <p className="text-[10px] font-mono text-fg-dim uppercase tracking-widest">No session selected</p>
-                <button onClick={() => { openNewSession(); }} className="text-[10px] font-mono uppercase tracking-widest text-purple-400 hover:text-purple-300">
-                  + New Session
-                </button>
+              <div className="text-center space-y-5 flex flex-col items-center justify-center">
+                <FlyingJules size={100} state="idle" />
+                <div className="space-y-3">
+                  <p className="text-[10px] font-mono text-fg-dim uppercase tracking-widest">No session selected</p>
+                  <button onClick={() => { openNewSession(); }} className="text-[10px] font-mono uppercase tracking-widest text-purple-400 hover:text-purple-300">
+                    + New Session
+                  </button>
+                </div>
               </div>
             </div>
           </GridBackground>
@@ -89,13 +93,20 @@ export default function JulesPage() {
           >
             <div className="px-3 py-2 border-b border-hair flex items-center justify-between">
               {!codeDiffCollapsed && <span className="text-[10px] font-bold text-fg-dim uppercase tracking-widest">Code Changes</span>}
-              <button onClick={() => { setCodeDiffCollapsed((c) => !c); }} className="ml-auto text-fg-dim hover:text-fg-secondary text-xs px-1">
-                {codeDiffCollapsed ? "‹" : "›"}
-              </button>
+              <div className="flex items-center gap-1.5 ml-auto">
+                <button onClick={() => { setCodeDiffCollapsed((c) => !c); }} className="text-fg-dim hover:text-fg-secondary text-xs px-1">
+                  {codeDiffCollapsed ? "‹" : "›"}
+                </button>
+                {!codeDiffCollapsed && (
+                  <button onClick={() => { setShowCodeDiffs(false); }} className="text-fg-dim hover:text-fg-secondary text-xs px-1 font-sans">
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
             {!codeDiffCollapsed && (
                 <CodeDiffSidebar
-                    sessionId={liveSelectedSession.id} {...(liveSelectedSession.source ? {repoUrl: `https://github.com/${liveSelectedSession.source.githubRepo.owner}/${liveSelectedSession.source.githubRepo.repo}`} : {})} />
+                    sessionId={liveSelectedSession.id} {...(liveSelectedSession.source?.githubRepo ? {repoUrl: `https://github.com/${liveSelectedSession.source.githubRepo.owner}/${liveSelectedSession.source.githubRepo.repo}`} : {})} />
             )}
           </aside>
         </>
