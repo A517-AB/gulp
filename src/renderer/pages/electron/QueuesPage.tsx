@@ -14,7 +14,7 @@ import {
     Send,
     Trash2,
 } from "lucide-react";
-import {isElectron, queues as electronQueues} from "@shared/bridge";
+import {queues as electronQueues} from "@shared/bridge";
 import {useStore} from "@/store/app";
 import {InlineEdit} from "@renderer/ui/inline-edit";
 import type {Source} from "@google/jules-sdk/types";
@@ -129,7 +129,6 @@ export default function QueuesView() {
   const runSession = useStore(s => s.runSession);
   const [tasks, setTasks] = useState<FleetTaskGroup[]>([]);
   const [queue, setQueue] = useState<unknown[]>([]);
-  const [loading, setLoading] = useState(true);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [sendingStates, setSendingStates] = useState<Record<string, boolean>>({});
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
@@ -138,19 +137,13 @@ export default function QueuesView() {
     async function load() {
       try {
         const [fetchedTasks, fetchedQueue] = await Promise.all([
-          isElectron
-            ? (electronQueues?.getTasks() ?? Promise.resolve([]))
-            : Promise.resolve(readBrowserTasks()),
-          isElectron
-            ? (electronQueues?.getQueue() ?? Promise.resolve([]))
-            : Promise.resolve<unknown[]>([]),
+          electronQueues?.getTasks() ?? Promise.resolve(readBrowserTasks()),
+          electronQueues?.getQueue() ?? Promise.resolve<unknown[]>([]),
         ]);
         setTasks(normalizeTasks(fetchedTasks));
         setQueue(fetchedQueue);
       } catch (err) {
         console.error("Failed to load queues:", err);
-      } finally {
-        setLoading(false);
       }
     }
     void load();
@@ -165,8 +158,8 @@ export default function QueuesView() {
   const save = useCallback(async (updated: FleetTaskGroup[]) => {
     setTasks(updated);
     try {
-      if (!isElectron) { writeBrowserTasks(updated); return; }
-      await electronQueues?.saveTasks(updated);
+      if (!electronQueues) { writeBrowserTasks(updated); return; }
+      await electronQueues.saveTasks(updated);
     } catch (err) {
       console.error("Failed to save tasks:", err);
     }
@@ -285,20 +278,6 @@ export default function QueuesView() {
       setSendingStates((p) => ({ ...p, selected: false }));
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="label-mono text-fg-ghost animate-pulse"
-        >
-          Loading Fleet...
-        </motion.p>
-      </div>
-    );
-  }
 
   const totalTasks = tasks.reduce((acc, g) => acc + g.tasks.length, 0);
 
@@ -431,7 +410,7 @@ export default function QueuesView() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                    transition={{ duration: 0.15 }}
                     className="overflow-hidden"
                   >
                     <div className="pl-8 pr-2 py-1 space-y-0.5">

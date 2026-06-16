@@ -19,6 +19,10 @@ Reference the SDK overview at `src/jules/jules-sdk-api with overvewi.md` for the
 - Handle each format correctly: animated gifs via `<img>`, video via `<video>`, images via `<img>`
 - Surface this in both the inline chat feed and a sidebar panel
 
+## 8. Quick note — global hotkey + floating window
+
+Global hotkey (e.g. Ctrl+Shift+N) that drops a small floating input anywhere in the app. Type, press Enter, it appends to the notes page and dismisses. Never need to navigate to notes at all. Separate idea: floating always-on-top note window (like the notification popup). Discuss floating window approach before implementing.
+
 ## 3. SDK notifications styling
 
 Jules sends notifications. Find out where the styling for those notifications comes from — is it the SDK itself, the notification preload (`electron/notification-preload.ts`), or something Jules injects? Document and clean up.

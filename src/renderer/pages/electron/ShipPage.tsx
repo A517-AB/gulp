@@ -140,7 +140,6 @@ export default function ShipPage() {
         openPatchId,
         openFileKey,
         patchData,
-        patchLoading,
         parsedDiffs,
         fileStates,
         snapshotStates,
@@ -303,7 +302,6 @@ export default function ShipPage() {
                                         const isOpen        = openPatchId === session.id;
                                         const isActive      = ACTIVE_STATES.has(session.state);
                                         const data          = patchData[session.id];
-                                        const isLoading     = patchLoading[session.id] ?? false;
                                         const snapshotState = snapshotStates[session.id] ?? "idle";
                                         const files         = data?.files ?? [];
                                         const patchAdd      = files.reduce((s, f) => s + f.additions, 0);
@@ -390,12 +388,8 @@ export default function ShipPage() {
                                                             transition={{duration: 0.22, ease: [0.4, 0, 0.2, 1]}}
                                                             className="overflow-hidden"
                                                         >
-                                                            <div className="mx-3 mb-4 rounded-md border border-hair bg-raised overflow-hidden">
-                                                                {isLoading ? (
-                                                                    <div className="flex items-center justify-center py-6">
-                                                                        <Loader2 className="h-3.5 w-3.5 animate-spin text-fg-ghost"/>
-                                                                    </div>
-                                                                ) : data === null ? (
+                                                            <div className="overflow-hidden">
+                                                                {data === null ? (
                                                                     <p className="text-[10px] font-mono text-fg-ghost text-center py-6">
                                                                         No changeset
                                                                     </p>

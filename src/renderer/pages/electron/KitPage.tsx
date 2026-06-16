@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { DynamicDropdown } from '@/components/shared/DynamicDropdown'
+import { Folder, GitBranch, Zap } from 'lucide-react'
 import { Button } from '@/ui/button'
 import { Badge } from '@/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/ui/avatar'
@@ -23,6 +25,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function KitPage() {
   const [selectVal, setSelectVal] = useState('')
+  const [dropdownVal, setDropdownVal] = useState<string | null>(null)
 
   return (
     <TooltipProvider>
@@ -99,6 +102,21 @@ export default function KitPage() {
                 <SelectItem value="gamma">Gamma</SelectItem>
               </SelectContent>
             </Select>
+          </Section>
+
+          <Separator />
+
+          <Section title="DynamicDropdown">
+            <DynamicDropdown
+              value={dropdownVal}
+              onChange={setDropdownVal}
+              placeholder="Pick one…"
+              items={[
+                { id: 'folder', label: 'Folder', icon: Folder, color: 'var(--color-primary)' },
+                { id: 'branch', label: 'Git Branch', icon: GitBranch, color: '#a78bfa' },
+                { id: 'zap', label: 'Zap', icon: Zap, color: '#facc15' },
+              ]}
+            />
           </Section>
 
           <Separator />

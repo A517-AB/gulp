@@ -161,7 +161,8 @@ export const useStore = create<AppStore>((set, get) => ({
                 })
             }
         } catch (err) {
-            loadedSessions.delete(sessionId)
+            const is404 = err instanceof Error && err.message.includes('404')
+            if (!is404) loadedSessions.delete(sessionId)
             console.error(`[store] loadActivities failed ${sessionId}:`, err)
             set(state => ({
                 activitiesError: {

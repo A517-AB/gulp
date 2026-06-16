@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { useStore } from './app';
 import { parse as parseDiff } from 'diff2html';
 import type { DiffFile } from 'diff2html/lib-esm/types';
@@ -45,7 +46,7 @@ function extractFilePatch(unidiff: string, filePath: string): string {
     return sections.find(s => s.includes(`b/${filePath}`) || s.includes(`/${filePath}`)) ?? "";
 }
 
-export const useShipStore = create<ShipState>((set, get) => ({
+export const useShipStore = create<ShipState>()(persist((set, get) => ({
     sourceId: "",
     openPatchId: "",
     openFileKey: "",
@@ -161,4 +162,4 @@ export const useShipStore = create<ShipState>((set, get) => ({
             set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "idle" } }));
         }
     }
-}));
+}), { name: 'ship-store', partialize: (s) => ({ patchData: s.patchData, parsedDiffs: s.parsedDiffs, openPatchId: s.openPatchId }) }));
