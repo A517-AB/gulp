@@ -34,6 +34,17 @@ export default defineConfig({
     hmr: {
       overlay: false
     },
+    forwardConsole: {
+      logLevels: ['error', 'warn'],
+    },
+    warmup: {
+      clientFiles: [
+        './src/renderer/main.tsx',
+        './src/renderer/App.tsx',
+        './src/renderer/router.tsx',
+        './src/renderer/layouts/RootLayout.tsx',
+      ],
+    },
     proxy: {
       '/api/jules': {
         target: 'https://jules.googleapis.com/v1alpha',
@@ -42,8 +53,15 @@ export default defineConfig({
       },
     },
   },
-    // can you not change it to rollup
+    optimizeDeps: {
+    include: [
+      '@syncfusion/ej2-gantt',
+      '@syncfusion/ej2-react-gantt',
+    ],
+  },
+  // can you not change it to rollup
   build: {
+    target: 'esnext',
       rolldownOptions: {
       input: {
         index:        resolve(__dirname, 'index.html'),

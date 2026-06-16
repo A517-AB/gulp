@@ -31,7 +31,6 @@ export function useNewSessionForm({
     const setFormData = useStore(s => s.setNewSessionForm);
     const resetForm = useStore(s => s.resetNewSessionForm);
     const loadSources = useStore(s => s.loadSources);
-    const runSession = useStore(s => s.runSession);
     const createSession = useStore(s => s.createSession);
 
   useEffect(() => {
@@ -55,19 +54,20 @@ export function useNewSessionForm({
     try {
         const ownerRepo = formData.sourceId.replace(/^(?:sources\/)?github\//, '')
         const config = {
-        prompt: formData.prompt,
-        ...(formData.title ? { title: formData.title } : {}),
-            ...(formData.autoCreatePr ? {autoPr: true} : {}),
-            ...(ownerRepo ? {source: {github: ownerRepo, baseBranch: formData.startingBranch || 'main'}} : {}),
+            prompt: formData.prompt,
+            ...(formData.title ? { title: formData.title } : {}),
+            ...(formData.autoCreatePr ? { autoPr: true } : {}),
+            ...(formData.interactive ? { requireApproval: true } : {}),
+            ...(ownerRepo ? { source: { github: ownerRepo, baseBranch: formData.startingBranch || 'main' } } : {}),
         }
-        await (formData.interactive ? createSession(config) : runSession(config))
+        await createSession(config)
       resetForm();
       onClose();
       onSessionCreated?.();
     } catch (err) {
       console.error('[useNewSessionForm] createSession failed:', err);
     }
-    }, [formData, onClose, onSessionCreated, resetForm, createSession, runSession]);
+    }, [formData, onClose, onSessionCreated, resetForm, createSession]);
 
   return {
     sources,

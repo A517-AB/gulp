@@ -1,3 +1,4 @@
+// Sync page store — Jules backup git sync (push/pull to remote). NOT for Explorer or Ship.
 import { create } from 'zustand';
 import { git, filesystem, store } from '@shared/bridge';
 import { toast } from 'sonner';

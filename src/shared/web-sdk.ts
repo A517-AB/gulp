@@ -75,10 +75,6 @@ export const webSdk: SdkIpc = {
       const { activities } = await post<{ activities: Activity[] }>(`/sessions/${id}/select`, options ?? {})
       return activities
     },
-    hydrate: async (id) => {
-      const { activities } = await api<{ activities: Activity[] }>(`/sessions/${id}/activities`)
-      return activities.length
-    },
     applyPatch: async () => ({ success: false, error: 'not supported in web mode' }),
     stream:  (id, onItem, onDone) => wsStream(`${WS}/ws/sessions/${id}/stream`,  'activity', onItem, onDone),
     history: (id, onItem, onDone) => wsStream(`${WS}/ws/sessions/${id}/stream`,  'activity', onItem, onDone),
@@ -116,7 +112,7 @@ export const webSdk: SdkIpc = {
       const source = await api<Source | null>(`/sources/${owner}/${repo}`)
       return source ?? undefined
     },
-    resolve: async () => null,
+    resolve: async () => ({ github: null, baseBranch: 'main' }),
   },
 
   artifact: {

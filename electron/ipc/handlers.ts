@@ -91,14 +91,15 @@ export function registerSdkHandlers() {
         serialize(await jules.session(id).info())
     )
 
-    ipcMain.handle('sdk:client.run', async (_, config: SessionConfig) =>
-        serialize(await jules.run(config))
-    )
+    ipcMain.handle('sdk:client.run', async (_, config: SessionConfig) => {
+        const session = await jules.run(config)
+        return { id: session.id }
+    })
 
     ipcMain.handle('sdk:client.with', (_, options: JulesOptions) => {
         if (!process.env.JULES_API_KEY && !options.apiKey)
             console.warn('[sdk:client.with] no API key in env or options — requests will fail')
-        serialize(jules.with(options))
+        jules.with(options)
     })
 
     ipcMain.handle('sdk:client.all', async (_, configs: SessionConfig[], options?: {
@@ -132,17 +133,19 @@ export function registerSdkHandlers() {
         serialize(await jules.session(id).info())
     )
 
-    ipcMain.handle('sdk:session.result', async (_, id: string) =>
-        serialize(await jules.session(id).result())
-    )
+    ipcMain.handle('sdk:session.result', async (_, id: string) => {
+        const o = await jules.session(id).result()
+        return { sessionId: o.sessionId, title: o.title, state: o.state, pullRequest: o.pullRequest, outputs: o.outputs }
+    })
 
     ipcMain.handle('sdk:session.waitFor', async (_, id: string, state: SessionState) =>
         jules.session(id).waitFor(state)
     )
 
-    ipcMain.handle('sdk:session.snapshot', async (_, id: string, options?: { activities?: boolean }) =>
-        serialize(await jules.session(id).snapshot(options))
-    )
+    ipcMain.handle('sdk:session.snapshot', async (_, id: string, options?: { activities?: boolean }) => {
+        const snap = await jules.session(id).snapshot(options)
+        return snap.toJSON()
+    })
 
     ipcMain.handle('sdk:session.archive', async (_, id: string) =>
         jules.session(id).archive()
@@ -154,10 +157,6 @@ export function registerSdkHandlers() {
 
     ipcMain.handle('sdk:session.select', async (_, id: string, options?: SelectOptions) =>
         serialize(await jules.session(id).activities.select(options))
-    )
-
-    ipcMain.handle('sdk:session.hydrate', async (_, id: string) =>
-        serialize(await jules.session(id).activities.hydrate())
     )
 
     ipcMain.handle('sdk:session.applyPatch', async (_, id: string, options: { cwd: string }) => {
@@ -224,7 +223,7 @@ export function registerSdkHandlers() {
     // ── activities ────────────────────────────────────────────────────────────────
 
     ipcMain.handle('sdk:activities.hydrate', async (_, id: string) =>
-        serialize(await jules.session(id).activities.hydrate())
+        await jules.session(id).activities.hydrate()
     )
 
     ipcMain.handle('sdk:activities.select', async (_, id: string, options?: SelectOptions) =>

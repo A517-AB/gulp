@@ -1,7 +1,7 @@
 import type {FileFilter, FsEntry, FsStat, ReaddirOptions} from './filesystem'
 import type {FuseChangeEvent, FuseManifest} from './fuse'
 import type {HistoryEntry} from './history'
-import type {NoteMeta} from './notes'
+import type {NoteMeta} from './local-data'
 
 
 // ── per-tool APIs ──────────────────────────────────────────────────────────────

@@ -13,6 +13,7 @@ import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescri
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/ui/dialog'
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/ui/tooltip'
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '@/ui/context-menu'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/ui/accordion'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -182,6 +183,99 @@ export default function KitPage() {
                 <p className="text-xs text-fg-secondary">Body content here.</p>
               </DialogContent>
             </Dialog>
+          </Section>
+
+          <Separator />
+
+          <Section title="Accordion — dot (static) + meta + action">
+            <div className="w-full">
+              <Accordion type="single">
+                <AccordionItem id="a1">
+                  <AccordionTrigger
+                    dot={{ color: "bg-green-500" }}
+                    meta={<><span className="text-green-400">+142</span><span className="text-fg-ghost">3.2s</span></>}
+                    action={<span className="px-2 py-0.5 rounded border border-hair text-2xs font-mono text-fg-muted hover:text-fg-primary hover:border-subtle transition-colors">apply</span>}
+                  >
+                    <span className="text-sm font-semibold text-fg-primary">Fetching dependencies</span>
+                    <span className="block text-2xs font-mono text-fg-ghost mt-0.5">lockfile · 142 packages</span>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="text-xs text-fg-muted">Resolved 142 packages from lockfile. No network requests needed.</p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem id="a2">
+                  <AccordionTrigger
+                    dot={{ color: "bg-purple-500", ping: true }}
+                    meta={<span className="text-fg-dim">84 files</span>}
+                  >
+                    <span className="text-sm font-semibold text-fg-primary">Running type checks</span>
+                    <span className="block text-2xs font-mono text-fg-ghost mt-0.5">inProgress</span>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="text-xs text-fg-muted">tsc --noEmit passed with 0 errors across 84 files.</p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem id="a3">
+                  <AccordionTrigger dot={{ color: "bg-fg-ghost/20" }} meta={<span className="text-fg-ghost">1.2s</span>}>
+                    <span className="text-sm font-semibold text-fg-primary">Building output</span>
+                    <span className="block text-2xs font-mono text-fg-ghost mt-0.5">completed</span>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <p className="text-xs text-fg-muted">Rolldown bundled 3 entry points in 1.2s.</p>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </Section>
+
+          <Separator />
+
+          <Section title="Accordion — icon slot (pass anything)">
+            <div className="w-full">
+              <Accordion type="single">
+                <AccordionItem id="b1">
+                  <AccordionTrigger icon={<Zap className="h-3 w-3 text-yellow-400" />}>
+                    <span className="text-xs font-mono text-fg-secondary">Fetching dependencies</span>
+                  </AccordionTrigger>
+                  <AccordionContent indent={false}>
+                    <p className="text-xs text-fg-muted">Resolved 142 packages from lockfile.</p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem id="b2">
+                  <AccordionTrigger icon={<Zap className="h-3 w-3 text-yellow-400" />}>
+                    <span className="text-xs font-mono text-fg-secondary">Running type checks</span>
+                  </AccordionTrigger>
+                  <AccordionContent indent={false}>
+                    <p className="text-xs text-fg-muted">tsc --noEmit passed with 0 errors.</p>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </Section>
+
+          <Separator />
+
+          <Section title="Accordion — dot=false (no left slot at all)">
+            <div className="w-full">
+              <Accordion type="single">
+                <AccordionItem id="c1">
+                  <AccordionTrigger dot={false}>
+                    <span className="text-xs font-mono text-fg-secondary">Fetching dependencies</span>
+                  </AccordionTrigger>
+                  <AccordionContent indent={false}>
+                    <p className="text-xs text-fg-muted">Resolved 142 packages from lockfile.</p>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem id="c2">
+                  <AccordionTrigger dot={false}>
+                    <span className="text-xs font-mono text-fg-secondary">Running type checks</span>
+                  </AccordionTrigger>
+                  <AccordionContent indent={false}>
+                    <p className="text-xs text-fg-muted">tsc --noEmit passed with 0 errors.</p>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
           </Section>
 
           <Separator />

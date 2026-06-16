@@ -1,38 +1,12 @@
-
 import type { ReactNode } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { GanttComponent } from '@syncfusion/ej2-react-gantt'
+import { GanttComponent, type RowSelectEventArgs } from '@syncfusion/ej2-react-gantt'
 import { Gantt, Edit, Filter, Selection, Sort, Toolbar } from '@syncfusion/ej2-gantt'
+import type { GanttTask } from '@shared/local-data'
+import { loadGanttTasks, saveGanttTasks } from '@shared/local-data'
+import { NoteEditor } from '@/components/markdown/NoteEditor'
 
 Gantt.Inject(Edit, Filter, Selection, Sort, Toolbar)
-import { filesystem } from '@shared/bridge'
-
-const GANTT_PATH = 'D:\\fuse\\gantt.json'
-
-export interface GanttTask {
-  TaskID: number
-  TaskName: string
-  StartDate: string
-  EndDate: string
-  Duration?: number | undefined
-  Progress: number
-  Predecessor?: string | undefined
-  subtasks?: GanttTask[] | undefined
-}
-
-const DEFAULT_TASKS: GanttTask[] = [
-  {
-    TaskID: 1,
-    TaskName: 'Project kickoff',
-    StartDate: '2026-06-16',
-    EndDate: '2026-06-20',
-    Progress: 0,
-    subtasks: [
-      { TaskID: 2, TaskName: 'Define scope',    StartDate: '2026-06-16', EndDate: '2026-06-17', Duration: 1, Progress: 0 },
-      { TaskID: 3, TaskName: 'Set milestones',  StartDate: '2026-06-18', EndDate: '2026-06-20', Duration: 2, Progress: 0, Predecessor: '2' },
-    ],
-  },
-]
 
 const TASK_FIELDS = {
   id:           'TaskID',
@@ -65,24 +39,6 @@ const COLUMNS = [
   { field: 'Predecessor', headerText: 'Deps',     width: 100 },
 ]
 
-async function loadTasks(): Promise<GanttTask[]> {
-  if (!filesystem) return DEFAULT_TASKS
-  try {
-    const raw = await filesystem.readFile(GANTT_PATH)
-    return JSON.parse(raw) as GanttTask[]
-  } catch {
-    return DEFAULT_TASKS
-  }
-}
-
-async function saveTasks(tasks: GanttTask[]): Promise<void> {
-  if (!filesystem) return
-  try {
-    await filesystem.mkdir('D:\\fuse')
-  } catch { /* already exists */ }
-  await filesystem.writeFile(GANTT_PATH, JSON.stringify(tasks, null, 2))
-}
-
 function extractPlain(item: unknown): GanttTask {
   const d = item as Record<string, unknown>
   return {
@@ -98,11 +54,12 @@ function extractPlain(item: unknown): GanttTask {
 }
 
 export default function GanttPage(): ReactNode {
-  const [tasks, setTasks] = useState<GanttTask[]>(DEFAULT_TASKS)
+  const [tasks, setTasks] = useState<GanttTask[]>([])
+  const [selectedTask, setSelectedTask] = useState<{ id: number; name: string } | null>(null)
   const ganttRef = useRef<GanttComponent>(null)
 
   useEffect(() => {
-    void loadTasks().then(setTasks)
+    void loadGanttTasks().then(setTasks)
   }, [])
 
   const handleActionComplete = useCallback((args: { requestType: string }) => {
@@ -110,24 +67,45 @@ export default function GanttPage(): ReactNode {
     if (!ganttRef.current) return
     const plain = (ganttRef.current.dataSource as unknown[]).map(extractPlain)
     setTasks(plain)
-    void saveTasks(plain)
+    void saveGanttTasks(plain)
   }, [])
 
+  const handleRowSelected = useCallback((args: RowSelectEventArgs) => {
+    const data = args.data as GanttTask | undefined
+    if (data && typeof data.TaskID === 'number') {
+      setSelectedTask({ id: data.TaskID, name: data.TaskName })
+    }
+  }, [])
+
+  const handleRowDeselected = useCallback(() => {
+    setSelectedTask(null)
+  }, [])
+
+  const noteId = selectedTask ? `gantt-task-${selectedTask.id}` : 'default'
+  const noteTitle = selectedTask ? `Task: ${selectedTask.name}` : 'Notes'
+
   return (
-    <div className="h-full w-full flex flex-col overflow-hidden">
-      <GanttComponent
-        ref={ganttRef}
-        dataSource={tasks}
-        taskFields={TASK_FIELDS}
-        columns={COLUMNS}
-        editSettings={EDIT_SETTINGS}
-        toolbar={TOOLBAR}
-        allowSorting
-        allowFiltering
-        height="100%"
-        actionComplete={handleActionComplete}
-      >
-      </GanttComponent>
+    <div className="h-full w-full flex overflow-hidden">
+      <div className="flex-1 h-full overflow-hidden flex flex-col">
+        <GanttComponent
+          ref={ganttRef}
+          dataSource={tasks}
+          taskFields={TASK_FIELDS}
+          columns={COLUMNS}
+          editSettings={EDIT_SETTINGS}
+          toolbar={TOOLBAR}
+          allowSorting
+          allowFiltering
+          height="100%"
+          actionComplete={handleActionComplete}
+          rowSelected={handleRowSelected}
+          rowDeselected={handleRowDeselected}
+        >
+        </GanttComponent>
+      </div>
+      <div className="w-[450px] border-l border-hair h-full bg-surface overflow-y-auto">
+        <NoteEditor key={noteId} id={noteId} title={noteTitle} className="h-full" />
+      </div>
     </div>
   )
 }

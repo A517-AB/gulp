@@ -118,6 +118,7 @@ Copy `.env.example` to `.env`:
 ## User conventions
 
 - **"push"** always means: merge current work to `master` (the repo's default branch). Never just push to a feature branch and stop.
+- **ej2** (`@syncfusion/ej2-react-gantt` / `@syncfusion/ej2-gantt`) is local from the owner. Since it's a locally set tool, it is not in `package.json` dependencies but works locally.
 
 ## Working conventions
 

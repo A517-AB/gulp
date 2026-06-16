@@ -1,6 +1,7 @@
 import { utilityProcess, ipcMain } from 'electron'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { dispatchNotification } from './notifications/dispatch.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -8,7 +9,27 @@ const __dirname = path.dirname(__filename)
 const subscribers = new Set<Electron.WebContents>()
 let worker: Electron.UtilityProcess | null = null
 
+type WorkerEvent =
+  | { type: 'ready' }
+  | { type: 'session.new';          sessionId: string; state: string }
+  | { type: 'session.stateChanged'; sessionId: string; state: string; prevState: string }
+  | { type: 'error';                message: string }
+
+function notifyJulesEvent(event: WorkerEvent): void {
+    if (event.type !== 'session.stateChanged') return
+    const state = event.state.toLowerCase().replace(/_/g, '')
+    const id = event.sessionId.replace(/^sessions\//, '')
+    if (state === 'completed') {
+        dispatchNotification({ title: 'Session completed', body: id, type: 'success', source: 'jules', extraData: { sessionId: event.sessionId } })
+    } else if (state === 'failed') {
+        dispatchNotification({ title: 'Session failed', body: id, type: 'error', source: 'jules', extraData: { sessionId: event.sessionId } })
+    } else if (state === 'waitingforuserinput') {
+        dispatchNotification({ title: 'Waiting for approval', body: 'A session needs your input to continue', type: 'info', source: 'jules', extraData: { sessionId: event.sessionId } })
+    }
+}
+
 function broadcast(event: unknown) {
+    notifyJulesEvent(event as WorkerEvent)
     for (const wc of [...subscribers]) {
         if (wc.isDestroyed()) {
             subscribers.delete(wc)

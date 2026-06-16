@@ -1,0 +1,258 @@
+{
+  "interfaces": [
+    {
+      "name": "ListOptions",
+      "body": "pageSize?: number;\n    pageToken?: string;\n    filter?: string;"
+    },
+    {
+      "name": "SelectOptions",
+      "body": "after?: string;\n    before?: string;\n    type?: string;\n    limit?: number;\n    order?: 'asc' | 'desc';"
+    },
+    {
+      "name": "ActivityClient",
+      "body": "/**\n     * COLD STREAM: Yields all known past activities from local storage.\n     * Ends immediately after yielding the last known activity.\n     * Does NOT open a network connection.\n     */\n    history(): AsyncIterable<Activity>;\n    /**\n     * HOT STREAM: Yields ONLY future activities as they arrive from the network.\n     * Blocks indefinitely.\n     */\n    updates(): AsyncIterable<Activity>;\n    /**\n     * HYBRID STREAM: Yields full history(), then seamlessly switches to updates().\n     * The standard choice for most applications.\n     */\n    stream(): AsyncIterable<Activity>;\n    /**\n     * LOCAL QUERY: Performs rich filtering against local storage only.\n     * Fast, but might be incomplete if not synced.\n     */\n    select(options?: SelectOptions): Promise<Activity[]>;\n    /**\n     * NETWORK LIST: Honest wrapper around standard REST pagination.\n     * Uses opaque tokens.\n     */\n    list(options?: ListOptions): Promise<{\n        activities: Activity[];\n        nextPageToken?: string;"
+    },
+    {
+      "name": "NetworkClient",
+      "body": "rawStream(): AsyncIterable<Activity>;\n    listActivities(options?: ListOptions): Promise<{\n        activities: Activity[];\n        nextPageToken?: string;"
+    },
+    {
+      "name": "SourceInput",
+      "body": "/**\n     * The GitHub repository identifier in the format 'owner/repo'.\n     * The SDK will resolve this to the full source name (e.g., 'sources/github/owner/repo').\n     */\n    github: string;\n    /**\n     * The base branch that Jules will branch off of when starting the session.\n     * Maps to `sourceContext.githubRepoContext.startingBranch` in the REST API.\n     */\n    baseBranch: string;"
+    },
+    {
+      "name": "SessionConfig",
+      "body": "/**\n     * The initial instruction or task description for the agent.\n     * Required. Maps to `prompt` in the REST API `POST /sessions` payload.\n     */\n    prompt: string;\n    /**\n     * The source code context for the session.\n     * Optional. If omitted, creates a \"repoless\" session not attached to any repository.\n     * The SDK constructs the `sourceContext` payload from this input when provided.\n     */\n    source?: SourceInput;\n    /**\n     * A short, descriptive title for the session. Strongly recommended.\n     * This title is displayed in the Jules UI and helps identify the session at a glance.\n     * If omitted, the session will have no title in the UI.\n     * Maps to `title` in the REST API.\n     */\n    title?: string;\n    /**\n     * If true, the agent will pause and wait for explicit approval (via `session.approve()`)\n     * before executing any generated plan.\n     *\n     * @default false for `jules.run()`\n     * @default true for `jules.session()`\n     */\n    requireApproval?: boolean;\n    /**\n     * If true, the agent will automatically create a Pull Request when the task is completed.\n     * Maps to `automationMode: AUTO_CREATE_PR` in the REST API.\n     * If false, maps to `AUTOMATION_MODE_UNSPECIFIED`.\n     *\n     * @default true for `jules.run()`\n     */\n    autoPr?: boolean;"
+    },
+    {
+      "name": "RestGitHubRepo",
+      "body": "owner: string;\n    repo: string;\n    isPrivate: boolean;\n    defaultBranch?: {\n        displayName: string;"
+    },
+    {
+      "name": "RestSource",
+      "body": "name: string;\n    id: string;\n    githubRepo?: RestGitHubRepo;"
+    },
+    {
+      "name": "GitHubRepo",
+      "body": "owner: string;\n    repo: string;\n    isPrivate: boolean;\n    defaultBranch?: string;\n    branches?: string[];"
+    },
+    {
+      "name": "RestPullRequest",
+      "body": "url: string;\n    title: string;\n    description: string;\n    baseRef?: string;\n    headRef?: string;"
+    },
+    {
+      "name": "RestSessionOutput",
+      "body": "pullRequest?: RestPullRequest;\n    changeSet?: ChangeSet;"
+    },
+    {
+      "name": "RestSessionResource",
+      "body": "name: string;\n    id: string;\n    prompt: string;\n    sourceContext: SourceContext;\n    source?: RestSource;\n    title: string;\n    createTime: string;\n    updateTime: string;\n    state: string;\n    requirePlanApproval?: boolean;\n    automationMode?: string;\n    url: string;\n    outputs?: RestSessionOutput[];\n    activities?: any[];\n    generatedFiles?: GeneratedFile[];\n    archived?: boolean;"
+    },
+    {
+      "name": "PullRequest",
+      "body": "url: string;\n    title: string;\n    description: string;\n    baseRef?: string;\n    headRef?: string;"
+    },
+    {
+      "name": "SourceContext",
+      "body": "/**\n     * The name of the source (e.g., \"sources/github/owner/repo\").\n     */\n    source: string;\n    /**\n     * Context specific to GitHub repos.\n     */\n    githubRepoContext?: {\n        startingBranch: string;"
+    },
+    {
+      "name": "SessionResource",
+      "body": "/**\n     * The full resource name (e.g., \"sessions/314159...\").\n     */\n    name: string;\n    /**\n     * The unique ID of the session.\n     */\n    id: string;\n    prompt: string;\n    sourceContext: SourceContext;\n    source?: Source;\n    title: string;\n    requirePlanApproval?: boolean;\n    automationMode?: AutomationMode;\n    /**\n     * The time the session was created (RFC 3339 timestamp).\n     */\n    createTime: string;\n    /**\n     * The time the session was last updated (RFC 3339 timestamp).\n     */\n    updateTime: string;\n    /**\n     * The current state of the session.\n     */\n    state: SessionState;\n    /**\n     * The URL to view the session in the Jules web app.\n     */\n    url: string;\n    /**\n     * The outputs of the session, if any.\n     */\n    outputs: SessionOutput[];\n    /**\n     * The activities associated with the session.\n     * Only populated when `include: { activities: true"
+    },
+    {
+      "name": "PlanStep",
+      "body": "id: string;\n    title: string;\n    description?: string;\n    index: number;"
+    },
+    {
+      "name": "Plan",
+      "body": "id: string;\n    steps: PlanStep[];\n    createTime: string;"
+    },
+    {
+      "name": "GitPatch",
+      "body": "/**\n     * The patch content.\n     */\n    unidiffPatch: string;\n    /**\n     * The base commit id the patch should be applied to.\n     */\n    baseCommitId: string;\n    /**\n     * A suggested commit message for the.\n     */\n    suggestedCommitMessage: string;"
+    },
+    {
+      "name": "ChangeSet",
+      "body": "source: string;\n    gitPatch: GitPatch;"
+    },
+    {
+      "name": "ParsedFile",
+      "body": "/** The file path relative to the repository root */\n    path: string;\n    /** The type of change */\n    changeType: 'created' | 'modified' | 'deleted';\n    /** Number of lines added */\n    additions: number;\n    /** Number of lines removed */\n    deletions: number;"
+    },
+    {
+      "name": "ParsedChangeSet",
+      "body": "/** Individual file changes */\n    files: ParsedFile[];\n    /** Summary counts */\n    summary: {\n        totalFiles: number;\n        created: number;\n        modified: number;\n        deleted: number;"
+    },
+    {
+      "name": "GeneratedFile",
+      "body": "/** The file path relative to the repository root */\n    path: string;\n    /** The type of change */\n    changeType: 'created' | 'modified' | 'deleted';\n    /**\n     * The full content of the file.\n     * For 'created' files: the complete file content.\n     * For 'modified' files: only the added lines (base content is not available).\n     * For 'deleted' files: empty string.\n     */\n    content: string;\n    /** Number of lines added */\n    additions: number;\n    /** Number of lines removed */\n    deletions: number;"
+    },
+    {
+      "name": "GeneratedFiles",
+      "body": "/** Returns all generated files */\n    all(): GeneratedFile[];\n    /** Find a file by its path */\n    get(path: string): GeneratedFile | undefined;\n    /** Filter files by change type */\n    filter(changeType: 'created' | 'modified' | 'deleted'): GeneratedFile[];"
+    },
+    {
+      "name": "ChangeSetArtifact",
+      "body": "readonly type: 'changeSet';\n    readonly source: string;\n    readonly gitPatch: GitPatch;\n    /**\n     * Parses the unified diff and returns structured file change information.\n     *\n     * @returns Parsed diff with file paths, change types, and line counts.\n     *\n     * @example\n     * if (artifact.type === 'changeSet') {\n     *   const parsed = artifact.parsed();\n     *   console.log(`Changed ${parsed.summary.totalFiles"
+    },
+    {
+      "name": "MediaArtifact",
+      "body": "readonly type: 'media';\n    /**\n     * The base64-encoded media data.\n     */\n    readonly data: string;\n    /**\n     * The format of the media (e.g., 'image/png').\n     */\n    readonly format: string;\n    /**\n     * Saves the media data to a file.\n     * This method is only available in Node.js environments.\n     *\n     * @param filepath The path to save the file to.\n     * @throws {Error"
+    },
+    {
+      "name": "BashArtifact",
+      "body": "readonly type: 'bashOutput';\n    readonly command: string;\n    readonly stdout: string;\n    readonly stderr: string;\n    readonly exitCode: number | null;\n    /**\n     * Returns a cleanly formatted string combining the command, output, and exit code.\n     *\n     * @example\n     * if (artifact.type === 'bashOutput') {\n     *   console.log(artifact.toString());\n     *"
+    },
+    {
+      "name": "RestChangeSetArtifact",
+      "body": "changeSet: ChangeSet;"
+    },
+    {
+      "name": "RestMediaArtifact",
+      "body": "media: {\n        data: string;\n        mimeType: string;"
+    },
+    {
+      "name": "RestBashOutputArtifact",
+      "body": "bashOutput: {\n        command: string;\n        output: string;\n        exitCode: number | null;"
+    },
+    {
+      "name": "ActivitySummary",
+      "body": "id: string;\n    type: string;\n    createTime: string;\n    summary: string;"
+    },
+    {
+      "name": "SessionOutcome",
+      "body": "sessionId: string;\n    title: string;\n    state: 'completed' | 'failed';\n    /**\n     * The primary Pull Request created by the session, if applicable.\n     */\n    pullRequest?: PullRequest;\n    /**\n     * All outputs generated by the session.\n     */\n    outputs: SessionOutput[];\n    /**\n     * Returns all files generated by this session with their full content.\n     * This is a convenience method for accessing session outputs as files.\n     *\n     * @example\n     * const result = await session.result();\n     * const files = result.generatedFiles();\n     * const answer = files.get('answer.md');\n     * console.log(answer?.content);\n     */\n    generatedFiles(): GeneratedFiles;\n    /**\n     * Returns the change set artifact if one exists, providing access to\n     * the unified diff and parsed file changes.\n     *\n     * @example\n     * const result = await session.result();\n     * const changeSet = result.changeSet();\n     * if (changeSet) {\n     *   const parsed = changeSet.parsed();\n     *   console.log(`${parsed.summary.totalFiles"
+    },
+    {
+      "name": "AutomatedSession",
+      "body": "/**\n     * The unique ID of the session.\n     */\n    readonly id: string;\n    /**\n     * Provides a real-time stream of activities as the automated run progresses.\n     * This uses an Async Iterator, making it easy to consume events as they happen.\n     *\n     * @example\n     * const run = await jules.run({ ..."
+    },
+    {
+      "name": "SessionClient",
+      "body": "/**\n     * The unique ID of the session.\n     */\n    readonly id: string;\n    /**\n     * Scoped access to activity-specific operations.\n     */\n    readonly activities: ActivityClient;\n    /**\n     * COLD STREAM: Yields all known past activities from local storage.\n     * Ends immediately after yielding the last known activity.\n     * Does NOT open a network connection.\n     */\n    history(): AsyncIterable<Activity>;\n    /**\n     * HOT STREAM: Yields ONLY future activities as they arrive from the network.\n     * Blocks indefinitely.\n     */\n    updates(): AsyncIterable<Activity>;\n    /**\n     * LOCAL QUERY: Performs rich filtering against local storage only.\n     * Fast, but might be incomplete if not synced.\n     *\n     * @deprecated Use `session.activities.select()` instead.\n     */\n    select(options?: SelectOptions): Promise<Activity[]>;\n    /**\n     * Provides a real-time stream of activities for the session.\n     * This uses an Async Iterator to abstract the polling of the ListActivities endpoint.\n     *\n     * @param options Options to control the stream, such as filters.\n     * @example\n     * // Filter out activities originated by the user\n     * for await (const activity of session.stream({ exclude: { originator: 'user'"
+    },
+    {
+      "name": "SessionSnapshot",
+      "body": "readonly id: string;\n    readonly state: SessionState;\n    readonly url: string;\n    readonly createdAt: Date;\n    readonly updatedAt: Date;\n    readonly durationMs: number;\n    readonly prompt: string;\n    readonly title: string;\n    readonly pr?: PullRequest;\n    readonly activities: readonly Activity[];\n    readonly activityCounts: Readonly<Record<string, number>>;\n    readonly timeline: readonly TimelineEntry[];\n    readonly insights: SessionInsights;\n    readonly generatedFiles: GeneratedFiles;\n    readonly changeSet: () => ChangeSetArtifact | undefined;\n    toJSON(options?: ToJSONOptions): Partial<SerializedSnapshot>;\n    toMarkdown(): string;"
+    },
+    {
+      "name": "TimelineEntry",
+      "body": "readonly time: string;\n    readonly type: string;\n    readonly summary: string;"
+    },
+    {
+      "name": "SessionInsights",
+      "body": "readonly completionAttempts: number;\n    readonly planRegenerations: number;\n    readonly userInterventions: number;\n    readonly failedCommands: readonly Activity[];"
+    },
+    {
+      "name": "ToJSONOptions",
+      "body": "/**\n     * Fields to include in the output. If specified, only these fields are returned.\n     * Takes precedence over `exclude` if both are provided.\n     */\n    include?: SnapshotField[];\n    /**\n     * Fields to exclude from the output. Ignored if `include` is specified.\n     */\n    exclude?: SnapshotField[];"
+    },
+    {
+      "name": "SerializedSnapshot",
+      "body": "id: string;\n    state: string;\n    url: string;\n    createdAt: string;\n    updatedAt: string;\n    durationMs: number;\n    prompt: string;\n    title: string;\n    activities: Activity[];\n    activityCounts: Record<string, number>;\n    timeline: TimelineEntry[];\n    generatedFiles: GeneratedFile[];\n    insights: {\n        completionAttempts: number;\n        planRegenerations: number;\n        userInterventions: number;\n        failedCommandCount: number;"
+    },
+    {
+      "name": "ListSourcesOptions",
+      "body": "/**\n     * A filter expression to filter sources.\n     * Currently supports filtering by name (e.g., 'name=\"sources/github/owner/repo\"').\n     */\n    filter?: string;\n    /**\n     * The maximum number of sources to return per page.\n     * @default 100\n     */\n    pageSize?: number;"
+    },
+    {
+      "name": "SourceManager",
+      "body": "/**\n     * Iterates over all connected sources.\n     * Uses an Async Iterator to abstract API pagination.\n     *\n     * @param options Optional configuration for listing sources (filter, pageSize).\n     * @example\n     * for await (const source of jules.sources({ filter: 'name=\"sources/github/owner/repo\"'"
+    },
+    {
+      "name": "JulesClient",
+      "body": "/**\n     * Executes a task in automated mode.\n     * This is a high-level abstraction for \"fire-and-forget\" tasks.\n     *\n     * @param config The configuration for the run.\n     * @returns A `AutomatedSession` object, which is an enhanced Promise that resolves to the final outcome.\n     *\n     * @example\n     * const run = await jules.run({\n     *   prompt: \"Fix the bug described in issue #123\",\n     *   source: { github: 'my-org/my-project', baseBranch: 'main'"
+    },
+    {
+      "name": "SyncProgress",
+      "body": "phase: 'fetching_list' | 'hydrating_records' | 'hydrating_activities' | 'checkpoint';\n    current: number;\n    total?: number;\n    lastIngestedId?: string;\n    activityCount?: number;"
+    },
+    {
+      "name": "SyncStats",
+      "body": "sessionsIngested: number;\n    activitiesIngested: number;\n    isComplete: boolean;\n    durationMs: number;"
+    },
+    {
+      "name": "SyncCheckpoint",
+      "body": "lastProcessedSessionId: string;\n    sessionsProcessed: number;\n    startedAt: string;"
+    },
+    {
+      "name": "SyncOptions",
+      "body": "/**\n     * If set, syncs only this specific session.\n     * Overrides `limit` and full-scan behavior.\n     */\n    sessionId?: string;\n    /**\n     * Maximum number of sessions to ingest in one pass.\n     * @default 100\n     */\n    limit?: number;\n    /**\n     * Data depth per session.\n     * @default 'metadata'\n     */\n    depth?: SyncDepth;\n    /**\n     * If true, stops when hitting a record already in the local cache.\n     * @default true\n     */\n    incremental?: boolean;\n    /**\n     * Simultaneous hydration jobs. Use low values for SBCs/low bandwidth.\n     * @default 3\n     */\n    concurrency?: number;\n    /**\n     * Optional callback for UI/CLI progress bars.\n     */\n    onProgress?: (progress: SyncProgress) => void;\n    /**\n     * If true, saves progress to disk and resumes from checkpoint on restart.\n     * Checkpoint stored at .jules/cache/sync-checkpoint.json\n     */\n    checkpoint?: boolean;\n    /**\n     * AbortSignal to gracefully cancel the sync operation.\n     * When aborted, sync returns partial stats with isComplete: false.\n     * Does NOT throw an error.\n     */\n    signal?: AbortSignal;"
+    }
+  ],
+  "types": [
+    {
+      "name": "ListSessionsOptions",
+      "def": "{ pageSize?: number"
+    },
+    {
+      "name": "ListSessionsResponse",
+      "def": "{ sessions: SessionResource[]"
+    },
+    {
+      "name": "InternalConfig",
+      "def": "{ pollingIntervalMs: number"
+    },
+    {
+      "name": "StorageFactory",
+      "def": "{ activity: (sessionId: string) => ActivityStorage"
+    },
+    {
+      "name": "Source",
+      "def": "{ /** * The full resource name (e.g., \"sources/github/owner/repo\"). */ name: string"
+    },
+    {
+      "name": "AutomationMode",
+      "def": "'AUTOMATION_MODE_UNSPECIFIED' | 'AUTO_CREATE_PR'"
+    },
+    {
+      "name": "SessionState",
+      "def": "'unspecified' | 'queued' | 'planning' /** The agent is waiting for plan approval. Call `session.approve()`. */ | 'awaitingPlanApproval' | 'awaitingUserFeedback' | 'inProgress' | 'paused' | 'failed' | 'completed'"
+    },
+    {
+      "name": "Origin",
+      "def": "'user' | 'agent' | 'system'"
+    },
+    {
+      "name": "SessionOutput",
+      "def": "{ type: 'pullRequest'"
+    },
+    {
+      "name": "Artifact",
+      "def": "ChangeSetArtifact | MediaArtifact | BashArtifact"
+    },
+    {
+      "name": "RestArtifact",
+      "def": "RestChangeSetArtifact | RestMediaArtifact | RestBashOutputArtifact"
+    },
+    {
+      "name": "StrippedMediaArtifact",
+      "def": "Omit<MediaArtifact, 'data'> & { dataStripped: true"
+    },
+    {
+      "name": "LightweightArtifact",
+      "def": "Exclude<Artifact, MediaArtifact> | StrippedMediaArtifact"
+    },
+    {
+      "name": "Activity",
+      "def": "ActivityAgentMessaged | ActivityUserMessaged | ActivityPlanGenerated | ActivityPlanApproved | ActivityProgressUpdated | ActivitySessionCompleted | ActivitySessionFailed"
+    },
+    {
+      "name": "JulesDomain",
+      "def": "'sessions' | 'activities'"
+    },
+    {
+      "name": "StreamActivitiesOptions",
+      "def": "{ exclude?: { originator: Origin"
+    },
+    {
+      "name": "SnapshotField",
+      "def": "keyof SerializedSnapshot"
+    },
+    {
+      "name": "SyncDepth",
+      "def": "'metadata' | 'activities'"
+    }
+  ]
+}

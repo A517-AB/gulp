@@ -74,6 +74,18 @@ Bring back ship page properly — needs more store coverage. Specifically:
 - Snippets store
 - Git status store
 
+## 13. Tree-sitter WASM — syntax parsing
+
+Add `web-tree-sitter` to the renderer. Replaces regex-based highlighting in the snippet/code editor with proper AST parsing. Enables accurate code folding, symbol extraction, and eventually "go to definition"-style features. Runs entirely in the renderer via WASM — no IPC, no main process involvement.
+
+Start with the languages actually used in snippets (JS/TS). Grammar WASM files load on demand per language.
+
+## 14. Fast diff via WASM
+
+Replace current diff library with `diff-match-patch` compiled to WASM (or `xdiff` WASM). 10–20x faster for large files. Relevant when rendering Jules patch output — large changesets currently block the UI while the diff is computed.
+
+Candidate: `diff-match-patch-wasm` on npm, or build `xdiff` via Emscripten.
+
 ## Notes
 
 - SDK types are from an older clone, runtime shape may differ from type definitions — always guard defensively

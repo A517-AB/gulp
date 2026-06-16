@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connections — D:/last</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 2rem;
+      line-height: 1.6;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: #58a6ff;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid #21262d;
+      padding-bottom: 0.75rem;
+    }
+    h2 {
+      font-size: 1.2rem;
+      color: #8b949e;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .section {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .stat {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 6px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-label {
+      display: block;
+      font-size: 0.8rem;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .stat-value {
+      display: block;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #58a6ff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th {
+      text-align: left;
+      padding: 0.6rem 1rem;
+      background: #0d1117;
+      color: #58a6ff;
+      border-bottom: 2px solid #21262d;
+      position: sticky;
+      top: 0;
+    }
+    td {
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid #21262d;
+    }
+    tr:hover td { background: #1c2333; }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 0.3rem 0;
+      padding-left: 1.2rem;
+      position: relative;
+      color: #8b949e;
+    }
+    li::before {
+      content: "○";
+      position: absolute;
+      left: 0;
+      color: #484f58;
+    }
+    .mermaid {
+      background: #0d1117;
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    .timestamp {
+      font-size: 0.75rem;
+      color: #484f58;
+      margin-top: 2rem;
+      text-align: right;
+    }
+    input[type="text"] {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 6px;
+      color: #c9d1d9;
+      padding: 0.5rem 1rem;
+      width: 100%;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    input[type="text"]::placeholder { color: #484f58; }
+    input[type="text"]:focus { outline: none; border-color: #58a6ff; }
+  </style>
+</head>
+<body>
+  <h1>Connections — D:/last</h1>
+  <div class="section stats-grid"><div class="stat"><span class="stat-label">Files</span><span class="stat-value">234</span></div>
+<div class="stat"><span class="stat-label">Connected</span><span class="stat-value">108</span></div>
+<div class="stat"><span class="stat-label">Orphans</span><span class="stat-value">126</span></div>
+<div class="stat"><span class="stat-label">Circular Deps</span><span class="stat-value">8</span></div></div>
+<div class="section">
+        <h2>Dependency Graph (Top Connected)</h2>
+        <pre class="mermaid">graph LR;
+    src_renderer_components_workspace_activity_activity_artifacts_tsx[&quot;activity-artifacts&quot;] --&gt; src_renderer_components_workspace_activity_types_ts[&quot;types&quot;];
+    src_renderer_components_workspace_activity_activity_feed_header_tsx[&quot;activity-feed-header&quot;] --&gt; src_renderer_components_workspace_activity_types_ts[&quot;types&quot;];
+    src_renderer_components_workspace_activity_activity_feed_tsx[&quot;activity-feed&quot;] --&gt; src_renderer_components_workspace_activity_types_ts[&quot;types&quot;];
+    src_renderer_components_workspace_activity_activity_feed_tsx[&quot;activity-feed&quot;] --&gt; src_renderer_components_workspace_activity_activity_item_tsx[&quot;activity-item&quot;];
+    src_renderer_components_workspace_activity_activity_feed_tsx[&quot;activity-feed&quot;] --&gt; src_renderer_components_workspace_activity_activity_feed_header_tsx[&quot;activity-feed-header&quot;];
+    src_renderer_components_workspace_activity_activity_item_tsx[&quot;activity-item&quot;] --&gt; src_renderer_components_workspace_activity_types_ts[&quot;types&quot;];
+    src_renderer_components_workspace_activity_activity_item_tsx[&quot;activity-item&quot;] --&gt; src_renderer_components_workspace_activity_grouped_activity_tsx[&quot;grouped-activity&quot;];
+    src_renderer_components_workspace_activity_grouped_activity_tsx[&quot;grouped-activity&quot;] --&gt; src_renderer_components_workspace_activity_types_ts[&quot;types&quot;];
+    src_renderer_components_workspace_activity_grouped_activity_tsx[&quot;grouped-activity&quot;] --&gt; src_renderer_components_workspace_activity_activity_artifacts_tsx[&quot;activity-artifacts&quot;];
+    src_renderer_transport_context_tsx[&quot;context&quot;] --&gt; src_renderer_transport_index_ts[&quot;index&quot;];
+    src_renderer_transport_context_tsx[&quot;context&quot;] --&gt; src_renderer_transport__context_ts[&quot;_context&quot;];
+    src_renderer_transport_context_tsx[&quot;context&quot;] --&gt; src_renderer_transport_types_ts[&quot;types&quot;];
+    src_renderer_transport_fetch_ts[&quot;fetch&quot;] --&gt; src_renderer_transport_index_ts[&quot;index&quot;];
+    src_renderer_transport_fetch_ts[&quot;fetch&quot;] --&gt; src_renderer_transport_types_ts[&quot;types&quot;];
+    src_renderer_transport_index_ts[&quot;index&quot;] --&gt; src_renderer_transport_ipc_ts[&quot;ipc&quot;];
+    src_renderer_transport_index_ts[&quot;index&quot;] --&gt; src_renderer_transport_fetch_ts[&quot;fetch&quot;];
+    src_renderer_transport_index_ts[&quot;index&quot;] --&gt; src_renderer_transport_types_ts[&quot;types&quot;];
+    src_renderer_transport_index_ts[&quot;index&quot;] --&gt; src_renderer_transport__context_ts[&quot;_context&quot;];
+    src_renderer_transport_index_ts[&quot;index&quot;] --&gt; src_renderer_transport_context_tsx[&quot;context&quot;];
+    src_renderer_transport_index_ts[&quot;index&quot;] --&gt; src_renderer_transport_use_transport_ts[&quot;use-transport&quot;];
+    src_renderer_transport_ipc_ts[&quot;ipc&quot;] --&gt; src_renderer_transport_index_ts[&quot;index&quot;];
+    src_renderer_transport_ipc_ts[&quot;ipc&quot;] --&gt; src_renderer_transport_types_ts[&quot;types&quot;];
+    src_renderer_transport__context_ts[&quot;_context&quot;] --&gt; src_renderer_transport_types_ts[&quot;types&quot;];
+    src_shared_commands_execute_ts[&quot;execute&quot;] --&gt; src_shared_commands_types_ts[&quot;types&quot;];
+    src_shared_commands_execute_ts[&quot;execute&quot;] --&gt; src_shared_commands_triggers_ts[&quot;triggers&quot;];
+    src_shared_commands_index_ts[&quot;index&quot;] --&gt; src_shared_commands_types_ts[&quot;types&quot;];
+    src_shared_commands_index_ts[&quot;index&quot;] --&gt; src_shared_commands_triggers_ts[&quot;triggers&quot;];
+    src_shared_commands_index_ts[&quot;index&quot;] --&gt; src_shared_commands_parse_ts[&quot;parse&quot;];
+    src_shared_commands_index_ts[&quot;index&quot;] --&gt; src_shared_commands_execute_ts[&quot;execute&quot;];
+    src_shared_commands_parse_ts[&quot;parse&quot;] --&gt; src_shared_commands_types_ts[&quot;types&quot;];
+    src_shared_commands_triggers_ts[&quot;triggers&quot;] --&gt; src_shared_commands_types_ts[&quot;types&quot;];
+    primitives_hotkeys_ts[&quot;hotkeys&quot;] --&gt; primitives_keyboard_ts[&quot;keyboard&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_observer_ts[&quot;observer&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_dom_ts[&quot;dom&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_sanitize_ts[&quot;sanitize&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_easing_ts[&quot;easing&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_keyboard_ts[&quot;keyboard&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_hotkeys_ts[&quot;hotkeys&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_drag_ts[&quot;drag&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_predicate_ts[&quot;predicate&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_data_query_ts[&quot;data-query&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_collection_ts[&quot;collection&quot;];
+    primitives_index_ts[&quot;index&quot;] --&gt; primitives_utils_ts[&quot;utils&quot;];
+    primitives__run_ts[&quot;_run&quot;] --&gt; primitives_observer_ts[&quot;observer&quot;];
+    primitives__run_ts[&quot;_run&quot;] --&gt; primitives_easing_ts[&quot;easing&quot;];
+    primitives__run_ts[&quot;_run&quot;] --&gt; primitives_keyboard_ts[&quot;keyboard&quot;];
+    primitives_collection_ts[&quot;collection&quot;] --&gt; primitives_predicate_ts[&quot;predicate&quot;];
+    primitives_collection_ts[&quot;collection&quot;] --&gt; primitives_data_query_ts[&quot;data-query&quot;];
+    primitives_data_query_ts[&quot;data-query&quot;] --&gt; primitives_predicate_ts[&quot;predicate&quot;];
+    primitives_data_query_ts[&quot;data-query&quot;] --&gt; primitives_collection_ts[&quot;collection&quot;];
+    src_renderer_pages_shared_settings_panels_connection_tests_ts[&quot;connection-tests&quot;] --&gt; src_renderer_pages_shared_settings_types_ts[&quot;types&quot;];
+    src_renderer_pages_shared_settings_panels_TestingPanel_tsx[&quot;TestingPanel&quot;] --&gt; src_renderer_pages_shared_settings_panels_connection_tests_ts[&quot;connection-tests&quot;];
+    src_renderer_pages_shared_settings_panels_TestingPanel_tsx[&quot;TestingPanel&quot;] --&gt; src_renderer_pages_shared_settings_panels_TestRow_tsx[&quot;TestRow&quot;];
+    src_renderer_pages_shared_settings_panels_TestingPanel_tsx[&quot;TestingPanel&quot;] --&gt; src_renderer_pages_shared_settings_types_ts[&quot;types&quot;];
+    src_renderer_pages_shared_settings_panels_TestRow_tsx[&quot;TestRow&quot;] --&gt; src_renderer_pages_shared_settings_types_ts[&quot;types&quot;];
+    src_renderer_transport_use_transport_ts[&quot;use-transport&quot;] --&gt; src_renderer_transport__context_ts[&quot;_context&quot;];
+    primitives_sanitize_ts[&quot;sanitize&quot;] --&gt; primitives_dom_ts[&quot;dom&quot;];
+    primitives_drag_ts[&quot;drag&quot;] --&gt; primitives_utils_ts[&quot;utils&quot;];
+    src_jules_index_ts[&quot;index&quot;] --&gt; src_jules_sdk_ipc_ts[&quot;sdk-ipc&quot;];
+    src_shared_bridge_ts[&quot;bridge&quot;] --&gt; src_jules_sdk_ipc_ts[&quot;sdk-ipc&quot;];
+</pre>
+      </div>
+<div class="section">
+        <h2>Most Imported Files</h2>
+        <table><thead><tr><th>File</th><th>Imported By (count)</th></tr></thead><tbody><tr><td>src/renderer/components/workspace/activity/types.ts</td><td>8</td></tr>
+<tr><td>src/renderer/transport/types.ts</td><td>5</td></tr>
+<tr><td>src/shared/commands/types.ts</td><td>4</td></tr>
+<tr><td>primitives/keyboard.ts</td><td>3</td></tr>
+<tr><td>primitives/predicate.ts</td><td>3</td></tr>
+<tr><td>src/renderer/pages/shared/settings/types.ts</td><td>3</td></tr>
+<tr><td>src/renderer/transport/index.ts</td><td>3</td></tr>
+<tr><td>src/renderer/transport/_context.ts</td><td>3</td></tr>
+<tr><td>primitives/collection.ts</td><td>2</td></tr>
+<tr><td>primitives/data-query.ts</td><td>2</td></tr>
+<tr><td>primitives/dom.ts</td><td>2</td></tr>
+<tr><td>primitives/easing.ts</td><td>2</td></tr>
+<tr><td>primitives/observer.ts</td><td>2</td></tr>
+<tr><td>primitives/utils.ts</td><td>2</td></tr>
+<tr><td>src/jules/sdk-ipc.ts</td><td>2</td></tr></tbody></table>
+      </div>
+<div class="section">
+        <h2>Most Complex Files (Most Imports)</h2>
+        <table><thead><tr><th>File</th><th>Imports (count)</th></tr></thead><tbody><tr><td>primitives/index.ts</td><td>17</td></tr>
+<tr><td>src/renderer/transport/index.ts</td><td>6</td></tr>
+<tr><td>src/jules/index.ts</td><td>4</td></tr>
+<tr><td>src/renderer/components/workspace/activity/activity-feed.tsx</td><td>4</td></tr>
+<tr><td>src/renderer/components/workspace/activity/grouped-activity.tsx</td><td>4</td></tr>
+<tr><td>src/renderer/utils/index.ts</td><td>4</td></tr>
+<tr><td>src/shared/commands/index.ts</td><td>4</td></tr>
+<tr><td>src/shared/electron.d.ts</td><td>4</td></tr>
+<tr><td>primitives/_run.ts</td><td>3</td></tr>
+<tr><td>src/renderer/components/overview/CommandInput.tsx</td><td>3</td></tr></tbody></table>
+      </div>
+<div class="section">
+        <h2>Circular Dependencies (8)</h2>
+        <ul><li>primitives/collection.ts → primitives/data-query.ts → primitives/collection.ts</li>
+<li>primitives/data-query.ts → primitives/collection.ts → primitives/data-query.ts</li>
+<li>src/renderer/transport/index.ts → src/renderer/transport/ipc.ts → src/renderer/transport/index.ts</li>
+<li>src/renderer/transport/index.ts → src/renderer/transport/fetch.ts → src/renderer/transport/index.ts</li>
+<li>src/renderer/transport/context.tsx → src/renderer/transport/index.ts → src/renderer/transport/context.tsx</li>
+<li>src/renderer/transport/fetch.ts → src/renderer/transport/index.ts → src/renderer/transport/fetch.ts</li>
+<li>src/renderer/transport/index.ts → src/renderer/transport/context.tsx → src/renderer/transport/index.ts</li>
+<li>src/renderer/transport/ipc.ts → src/renderer/transport/index.ts → src/renderer/transport/ipc.ts</li></ul>
+      </div>
+<div class="section">
+        <h2>Orphan Files (126)</h2>
+        <ul><li>check.ts</li>
+<li>dist-electron/notifications-6_apHQoY.js</li>
+<li>dist-electron/notifications-e_XN0yxu.js</li>
+<li>electron/git.ts</li>
+<li>electron/github.ts</li>
+<li>electron/history.ts</li>
+<li>electron/ipc/bridge.ts</li>
+<li>electron/ipc/handlers.ts</li>
+<li>electron/ipc/util.ts</li>
+<li>electron/jules-events.ts</li>
+<li>electron/jules-worker.ts</li>
+<li>electron/notifications/dispatch.ts</li>
+<li>electron/notifications/index.ts</li>
+<li>electron/notifications/log.ts</li>
+<li>electron/notifications/preload.ts</li>
+<li>electron/notifications/scheduler.ts</li>
+<li>electron/popup.ts</li>
+<li>electron/queues.ts</li>
+<li>electron/store.ts</li>
+<li>electron/Terminal.ts</li>
+<li>eslint.config.js</li>
+<li>scratch/not sys.ts</li>
+<li>scratch/setting.ts</li>
+<li>scratch/xref-types.ts</li>
+<li>scripts/extract-sdk-full.ts</li>
+<li>scripts/extract-sdk.ts</li>
+<li>scripts/fleet/fleet-analyze.ts</li>
+<li>scripts/fleet/fleet-dispatch.ts</li>
+<li>scripts/fleet/fleet-merge.ts</li>
+<li>scripts/fleet/fleet-plan.ts</li>
+<li>scripts/fleet/github/cache-plugin.ts</li>
+<li>scripts/fleet/github/git.ts</li>
+<li>scripts/fleet/github/issues.ts</li>
+<li>scripts/fleet/github/markdown.ts</li>
+<li>scripts/fleet/prompts/analyze-issues.ts</li>
+<li>scripts/fleet/prompts/bootstrap.ts</li>
+<li>scripts/fleet/types.ts</li>
+<li>scripts/mcp-server.ts</li>
+<li>scripts/monitor.ts</li>
+<li>scripts/scan-ipc-chain.ts</li>
+<li>scripts/scan-ipc-usage.ts</li>
+<li>scripts/stream.ts</li>
+<li>src/renderer/App.tsx</li>
+<li>src/renderer/base/types.ts</li>
+<li>src/renderer/base/utils.ts</li>
+<li>src/renderer/components/git/GitSyncButton.tsx</li>
+<li>src/renderer/components/shared/Clock.tsx</li>
+<li>src/renderer/components/shared/DynamicDropdown.tsx</li>
+<li>src/renderer/components/shared/ScheduleForm.tsx</li>
+<li>src/renderer/components/shared/SnippetPicker.tsx</li>
+<li>src/renderer/components/ship/Dropdown.tsx</li>
+<li>src/renderer/components/ship/Header.tsx</li>
+<li>src/renderer/components/workspace/changeset-summary.tsx</li>
+<li>src/renderer/components/workspace/code-diff-sidebar.tsx</li>
+<li>src/renderer/components/workspace/flying-jules.tsx</li>
+<li>src/renderer/components/workspace/new-session-dialog.tsx</li>
+<li>src/renderer/components/workspace/plan-content.tsx</li>
+<li>src/renderer/core/ErrorBoundary.tsx</li>
+<li>src/renderer/hooks/use-activity-groups.ts</li>
+<li>src/renderer/hooks/use-app-sync.ts</li>
+<li>src/renderer/hooks/use-file-tree.ts</li>
+<li>src/renderer/hooks/use-history.ts</li>
+<li>src/renderer/hooks/use-new-session-form.ts</li>
+<li>src/renderer/hooks/use-presets.ts</li>
+<li>src/renderer/hooks/use-resizable.ts</li>
+<li>src/renderer/hooks/use-session-list.ts</li>
+<li>src/renderer/hooks/use-snippets.ts</li>
+<li>src/renderer/hooks/use-todos.ts</li>
+<li>src/renderer/layouts/RootLayout.tsx</li>
+<li>src/renderer/lib/languages.tsx</li>
+<li>src/renderer/lib/monaco.ts</li>
+<li>src/renderer/lib/presets.ts</li>
+<li>src/renderer/lib/todos.ts</li>
+<li>src/renderer/main.tsx</li>
+<li>src/renderer/pages/electron/ActivityPage.tsx</li>
+<li>src/renderer/pages/electron/ExplorerPage.tsx</li>
+<li>src/renderer/pages/electron/GanttPage.tsx</li>
+<li>src/renderer/pages/electron/KitPage.tsx</li>
+<li>src/renderer/pages/electron/QueuesPage.tsx</li>
+<li>src/renderer/pages/electron/ShipPage.tsx</li>
+<li>src/renderer/pages/electron/SnapshotPage.tsx</li>
+<li>src/renderer/pages/electron/SnippetsPage.tsx</li>
+<li>src/renderer/pages/electron/TardisPage.tsx</li>
+<li>src/renderer/pages/electron/TimePage.tsx</li>
+<li>src/renderer/pages/shared/HomePage.tsx</li>
+<li>src/renderer/pages/shared/JulesPage.tsx</li>
+<li>src/renderer/pages/shared/NotesPage.tsx</li>
+<li>src/renderer/pages/shared/settings/panels/SessionPicker.tsx</li>
+<li>src/renderer/providers/theme.tsx</li>
+<li>src/renderer/router.tsx</li>
+<li>src/renderer/store/commands.ts</li>
+<li>src/renderer/store/explorer.ts</li>
+<li>src/renderer/store/sync.ts</li>
+<li>src/renderer/ui/accordion.tsx</li>
+<li>src/renderer/ui/avatar.tsx</li>
+<li>src/renderer/ui/background-beams.tsx</li>
+<li>src/renderer/ui/badge.tsx</li>
+<li>src/renderer/ui/border-glow.tsx</li>
+<li>src/renderer/ui/button.tsx</li>
+<li>src/renderer/ui/card-spotlight.tsx</li>
+<li>src/renderer/ui/card.tsx</li>
+<li>src/renderer/ui/chat-panel.tsx</li>
+<li>src/renderer/ui/code-editor.tsx</li>
+<li>src/renderer/ui/combobox.tsx</li>
+<li>src/renderer/ui/command.tsx</li>
+<li>src/renderer/ui/context-menu.tsx</li>
+<li>src/renderer/ui/dialog.tsx</li>
+<li>src/renderer/ui/diff-viewer.tsx</li>
+<li>src/renderer/ui/dropdown-menu.tsx</li>
+<li>src/renderer/ui/grid-background.tsx</li>
+<li>src/renderer/ui/inline-edit.tsx</li>
+<li>src/renderer/ui/input.tsx</li>
+<li>src/renderer/ui/label.tsx</li>
+<li>src/renderer/ui/popover.tsx</li>
+<li>src/renderer/ui/scroll-area.tsx</li>
+<li>src/renderer/ui/select.tsx</li>
+<li>src/renderer/ui/separator.tsx</li>
+<li>src/renderer/ui/sheet.tsx</li>
+<li>src/renderer/ui/tabs.tsx</li>
+<li>src/renderer/ui/textarea.tsx</li>
+<li>src/renderer/ui/theme-toggle.tsx</li>
+<li>src/renderer/ui/toggle.tsx</li>
+<li>src/renderer/ui/tooltip.tsx</li>
+<li>src/types/css.d.ts</li>
+<li>src/types/snippets.ts</li>
+<li>vite.config.ts</li></ul>
+      </div>
+  <p class="timestamp">Generated 2026-06-16T16:54:04.995Z</p>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+  </script>
+</body>
+</html>

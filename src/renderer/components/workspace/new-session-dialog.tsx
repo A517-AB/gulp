@@ -20,6 +20,7 @@ interface NewSessionDialogProps {
 
 export function NewSessionDialog({ onSessionCreated, initialValues, trigger, open: controlledOpen, onOpenChange }: NewSessionDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null);
   const isControlled = controlledOpen !== undefined;
     const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = isControlled ? (onOpenChange ?? setInternalOpen) : setInternalOpen;
@@ -42,6 +43,7 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-[480px] border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+        <div ref={setPortalContainer} />
         <DialogHeader>
           <DialogTitle>Create New Session</DialogTitle>
             <DialogDescription className="text-xs">Describe what Jules should do. Attach a repository or leave it
@@ -63,12 +65,13 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
                   }}
                   placeholder="Select a repository"
                   className="w-full h-9 justify-between px-3"
+                  container={portalContainer}
               />
           </div>
           {branches.length > 0 && (
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Branch (Optional)</Label>
-              <DynamicDropdown items={branches.map(b => ({ id: b, label: b }))} value={formData.startingBranch || null} onChange={(v) => { setFormData((p) => ({ ...p, startingBranch: v })); }} placeholder="main" className="w-full h-9 justify-between px-3" />
+              <DynamicDropdown items={branches.map(b => ({ id: b, label: b }))} value={formData.startingBranch || null} onChange={(v) => { setFormData((p) => ({ ...p, startingBranch: v })); }} placeholder="main" className="w-full h-9 justify-between px-3" container={portalContainer} />
             </div>
           )}
           <div className="space-y-1.5">

@@ -1,3 +1,4 @@
+// Ship page store — Jules session patch viewer (diff, apply, snapshot). NOT for Explorer or Sync.
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useStore } from './app';

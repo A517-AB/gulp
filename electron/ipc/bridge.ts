@@ -90,7 +90,6 @@ export const sdk: SdkIpc = {
         archive: (id) => invoke('sdk:session.archive', id),
         unarchive: (id) => invoke('sdk:session.unarchive', id),
         select: (id, options?) => invoke('sdk:session.select', id, options),
-        hydrate: (id) => invoke('sdk:session.hydrate', id),
         applyPatch: (id, options) => invoke('sdk:session.applyPatch', id, options),
         stream: (id, onItem, onDone?, options?) => {
             invoke('sdk:session.stream.start', id, options).catch(console.error)

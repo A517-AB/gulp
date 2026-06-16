@@ -46,7 +46,6 @@ export interface SdkIpc {
     archive:   (id: string) => Promise<void>
     unarchive: (id: string) => Promise<void>
     select:    (id: string, options?: SelectOptions) => Promise<Activity[]>
-    hydrate:   (id: string) => Promise<number>
     applyPatch: (id: string, options: { cwd: string }) => Promise<{ success: boolean; branch?: string; error?: string }>
     stream:    (id: string, onItem: (item: Activity) => void, onDone?: () => void, options?: StreamActivitiesOptions) => Unsubscribe
     history:   (id: string, onItem: (item: Activity) => void, onDone?: () => void) => Unsubscribe
@@ -64,7 +63,7 @@ export interface SdkIpc {
   sources: {
     list:    () => Promise<Source[]>
     get:     (filter: { github: string }) => Promise<Source | undefined>
-    resolve: (cwd?: string) => Promise<Source | null>
+    resolve: (cwd?: string) => Promise<{ github: string | null; baseBranch: string }>
   }
   artifact: {
       save: (data: string, filepath: string) => Promise<string>

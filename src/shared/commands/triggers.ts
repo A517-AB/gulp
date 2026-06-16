@@ -18,7 +18,7 @@ export const AT_META = {
 // Refresher pattern: hydrate syncs from network, select finds last agentMessaged.
 // message field on agentMessaged activity is the markdown content.
 
-type HydrateFn = SdkIpc['session']['hydrate']
+type HydrateFn = SdkIpc['activities']['hydrate']
 type SelectFn  = SdkIpc['session']['select']
 
 export interface DisplaySession {

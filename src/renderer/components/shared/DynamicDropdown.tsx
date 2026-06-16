@@ -16,9 +16,10 @@ export interface DynamicDropdownProps {
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  container?: Element | DocumentFragment | null
 }
 
-export function DynamicDropdown({ items, value, onChange, placeholder = "Select...", className }: DynamicDropdownProps) {
+export function DynamicDropdown({ items, value, onChange, placeholder = "Select...", className, container }: DynamicDropdownProps) {
   const [open, setOpen] = React.useState(false)
   const [hoveredId, setHoveredId] = React.useState<string | null>(null)
   const selected = items.find(item => item.id === value)
@@ -55,6 +56,7 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
             align="start"
             className="w-[var(--radix-popover-trigger-width)] min-w-48 p-0 overflow-hidden bg-transparent border-none"
             sideOffset={8}
+            container={container ?? null}
           >
             <motion.div
               initial={{ opacity: 0, y: -4, scale: 0.97 }}

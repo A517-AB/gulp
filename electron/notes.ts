@@ -3,7 +3,7 @@ import type { WebContents } from 'electron'
 import fs from 'fs-extra'
 import * as path from 'path'
 import chokidar from 'chokidar'
-import type { NoteMeta } from '../src/shared/notes'
+import type { NoteMeta } from '../src/shared/local-data'
 
 const NOTES_DIR = path.join(app.getPath('userData'), 'notes')
 

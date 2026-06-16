@@ -25,6 +25,10 @@ function buildTrayIcon(): ReturnType<typeof nativeImage.createFromBuffer> {
   return nativeImage.createFromBuffer(buf, { width: size, height: size })
 }
 
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+}
+
 void app.whenReady().then(() => {
   console.log('[notif-main] notification daemon starting')
 
