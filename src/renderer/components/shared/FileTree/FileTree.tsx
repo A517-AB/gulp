@@ -19,6 +19,7 @@ interface TreeCtx {
   onSelectFile:   ((entry: FsEntry) => void) | undefined
   onSelectFolder: ((entry: FsEntry) => void) | undefined
   onDelete:       ((entry: FsEntry) => Promise<void>) | undefined
+  gitStatus:      Record<string, string>
 }
 
 const TreeContext = createContext<TreeCtx | null>(null)
@@ -29,6 +30,16 @@ function useTreeContext(): TreeCtx {
   return ctx
 }
 
+const GIT_COLORS: Record<string, string> = {
+  M: 'text-yellow-400',
+  A: 'text-green-400',
+  D: 'text-red-400/70',
+  '?': 'text-cyan-400/70',
+  U: 'text-red-500',
+}
+
+const normalize = (p: string) => p.replace(/\\/g, '/')
+
 // ── node renderer ─────────────────────────────────────────────────────────────
 
 function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
@@ -37,6 +48,9 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
   const Icon = node.data.isDir
     ? (node.isOpen ? FolderOpen : Folder)
     : File
+
+  const gitCode = ctx.gitStatus[normalize(node.data.entry.path)]
+  const gitColor = gitCode ? (GIT_COLORS[gitCode] ?? '') : ''
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -82,14 +96,19 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
         >
           <Icon
             size={12}
-            className={cn('shrink-0', node.data.isDir ? 'text-fg-muted' : 'text-fg-ghost')}
+            className={cn('shrink-0', node.data.isDir ? 'text-fg-muted' : (gitColor || 'text-fg-ghost'))}
           />
           <span className={cn(
             'truncate text-[11px] font-mono',
-            node.isSelected ? 'text-fg-primary' : 'text-fg-secondary',
+            gitColor || (node.isSelected ? 'text-fg-primary' : 'text-fg-secondary'),
           )}>
             {node.data.name}
           </span>
+          {gitCode && !node.data.isDir && (
+            <span className={cn('ml-auto text-[9px] font-bold shrink-0', gitColor)}>
+              {gitCode}
+            </span>
+          )}
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
@@ -112,7 +131,7 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
 
 // ── component ─────────────────────────────────────────────────────────────────
 
-export function FileTree({ root, onSelectFile, onSelectFolder, onDelete, className }: FileTreeProps) {
+export function FileTree({ root, onSelectFile, onSelectFolder, onDelete, className, gitStatus = {} }: FileTreeProps) {
   const { nodes, error, loadChildren, refresh } = useFileTree(root)
   const containerRef = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState<number | null>(null)
@@ -133,8 +152,8 @@ export function FileTree({ root, onSelectFile, onSelectFolder, onDelete, classNa
   }, [onDelete])
 
   const ctx = useMemo<TreeCtx>(
-    () => ({ loadChildren, refresh, onSelectFile, onSelectFolder, onDelete: onDeleteWrapped }),
-    [loadChildren, refresh, onSelectFile, onSelectFolder, onDeleteWrapped],
+    () => ({ loadChildren, refresh, onSelectFile, onSelectFolder, onDelete: onDeleteWrapped, gitStatus }),
+    [loadChildren, refresh, onSelectFile, onSelectFolder, onDeleteWrapped, gitStatus],
   )
 
   return (

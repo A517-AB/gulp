@@ -7,4 +7,5 @@ export interface FileTreeProps {
   onSelectFolder?: (entry: FsEntry) => void
   onDelete?:       (entry: FsEntry) => Promise<void>
   className?: string
+  gitStatus?: Record<string, string>
 }

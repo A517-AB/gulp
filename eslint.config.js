@@ -11,6 +11,7 @@ export default defineConfig([
     'dist-electron',
     'references/**',
     'scripts/**',
+    'primitives/**',
     'check.ts',
     'scratch/**',
     // excluded from tsconfig — Jules example files not part of this project
