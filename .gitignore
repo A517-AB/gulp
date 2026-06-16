@@ -26,6 +26,4 @@ typecheck.log
 *.sln
 *.sw?
 
-# GitHub workflows (OAuth token lacks workflow scope)
-.github/workflows/
 /coverage/
