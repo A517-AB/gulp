@@ -14,7 +14,8 @@ import {
     Send,
     Trash2,
 } from "lucide-react";
-import {isElectron, queues as electronQueues, sdkIpc} from "@shared/bridge";
+import {isElectron, queues as electronQueues} from "@shared/bridge";
+import {useStore} from "@/store/app";
 import {InlineEdit} from "@renderer/ui/inline-edit";
 import type {Source} from "@google/jules-sdk/types";
 import type {FleetTask, FleetTaskGroup} from "@jules";
@@ -123,7 +124,9 @@ function SourcePicker({ value, sources, onChange }: {
 // ── QueuesView ─────────────────────────────────────────────────────────────────
 
 export default function QueuesView() {
-  const [sources, setSources] = useState<Source[]>([]);
+  const storeSources = useStore(s => s.sources);
+  const loadSources = useStore(s => s.loadSources);
+  const runSession = useStore(s => s.runSession);
   const [tasks, setTasks] = useState<FleetTaskGroup[]>([]);
   const [queue, setQueue] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
@@ -154,9 +157,10 @@ export default function QueuesView() {
   }, []);
 
   useEffect(() => {
-      if (!sdkIpc) return;
-      void sdkIpc.sources.list().then(setSources).catch(console.error);
-  }, []);
+      void loadSources();
+  }, [loadSources]);
+
+
 
   const save = useCallback(async (updated: FleetTaskGroup[]) => {
     setTasks(updated);
@@ -212,12 +216,11 @@ export default function QueuesView() {
 
   const handleSendTask = async (group: FleetTaskGroup, task: FleetTask, e: React.MouseEvent) => {
     e.stopPropagation();
-      if (!sdkIpc) return;
     const key = `${group.group}-${task.folder}`;
-      const github = group.repo.replace(/^(?:sources\/)?github\//, '')
+    const github = group.repo.replace(/^(?:sources\/)?github\//, '')
     setSendingStates((p) => ({ ...p, [key]: true }));
     try {
-        await sdkIpc.client.run({
+        await runSession({
         prompt: task.task,
         title: `${task.topic} (${task.folder})`,
             ...(github ? {source: {github, baseBranch: group.baseBranch ?? 'main'}} : {}),
@@ -231,15 +234,13 @@ export default function QueuesView() {
 
   const handleSendGroup = async (group: FleetTaskGroup, e: React.MouseEvent) => {
     e.stopPropagation();
-      if (!sdkIpc) return;
-    const ipc = sdkIpc;
     const key = `group-${group.group}`;
-      const github = group.repo.replace(/^(?:sources\/)?github\//, '')
+    const github = group.repo.replace(/^(?:sources\/)?github\//, '')
     setSendingStates((p) => ({ ...p, [key]: true }));
     try {
       await Promise.all(
         group.tasks.map((task) =>
-            ipc.client.run({
+            runSession({
             prompt: task.task,
             title: `${task.topic} (${task.folder})`,
                 ...(github ? {source: {github, baseBranch: group.baseBranch ?? 'main'}} : {}),
@@ -254,8 +255,7 @@ export default function QueuesView() {
   };
 
   const handleSendSelected = async () => {
-      if (!sdkIpc || selectedTasks.size === 0) return;
-    const ipc = sdkIpc;
+    if (selectedTasks.size === 0) return;
     const byRepo: Record<string, { repo: string; baseBranch: string; tasks: FleetTask[] }> = {};
     tasks.forEach((group, gIdx) => {
       group.tasks.forEach((task, tIdx) => {
@@ -271,11 +271,11 @@ export default function QueuesView() {
         const prompt = `I need you to perform the following combined tasks:\n\n${
           selected.map((t, i) => `${(i + 1).toString()}. **${t.topic}** (${t.folder})\n   ${t.task}`).join("\n")
         }`;
-          const github = repo.replace(/^(?:sources\/)?github\//, '')
-          await ipc.client.run({
+        const github = repo.replace(/^(?:sources\/)?github\//, '')
+        await runSession({
           prompt,
           title: `Combined Tasks (${selected.length.toString()})`,
-              ...(github ? {source: {github, baseBranch}} : {}),
+          ...(github ? {source: {github, baseBranch}} : {}),
         });
       }
       setSelectedTasks(new Set());
@@ -331,7 +331,7 @@ export default function QueuesView() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.13 }}
                 onClick={() => { void handleSendSelected(); }}
-                disabled={sendingStates["selected"] ?? !sdkIpc}
+                disabled={sendingStates["selected"] === true}
                 className="bg-active border border-subtle text-fg-primary text-2xs px-3 py-1.5 rounded-md flex items-center gap-2 hover:bg-hover transition-colors disabled:opacity-40"
               >
                 {sendingStates["selected"] ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
@@ -401,7 +401,7 @@ export default function QueuesView() {
                   />
                   <SourcePicker
                     value={group.repo}
-                    sources={sources}
+                    sources={storeSources}
                     onChange={(v) => { updateGroup(gIdx, { repo: v }); }}
                   />
                   <InlineEdit
@@ -415,7 +415,7 @@ export default function QueuesView() {
 
                 <button
                   onClick={(e) => { void handleSendGroup(group, e); }}
-                  disabled={groupSending || !sdkIpc}
+                  disabled={groupSending}
                   className="opacity-0 group-hover/header:opacity-100 flex items-center gap-1.5 px-2.5 py-1 rounded border border-hair text-2xs font-mono text-fg-muted hover:text-fg-primary hover:border-subtle transition-all disabled:opacity-40"
                 >
                   {groupSending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
@@ -497,7 +497,7 @@ export default function QueuesView() {
                                 </button>
                                 <button
                                   onClick={(e) => { void handleSendTask(group, task, e); }}
-                                  disabled={taskSending || !sdkIpc}
+                                  disabled={taskSending}
                                   aria-label={`Send ${task.topic}`}
                                   className="flex items-center justify-center h-7 w-7 rounded border border-hair text-fg-muted hover:text-fg-primary hover:border-subtle transition-all disabled:opacity-40"
                                 >

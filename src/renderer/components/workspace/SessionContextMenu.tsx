@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import { Archive, Play } from 'lucide-react'
 import type { SessionResource } from '@google/jules-sdk/types'
 import { useStore } from '@/store/app'
-import { sdkIpc } from '@shared/bridge'
 
 const QUICK_REVIEW_PROMPT =
     "Please perform a comprehensive code review of the repository. Look for bugs, security issues, and opportunities for refactoring. Provide a detailed summary of your findings."
@@ -17,7 +16,7 @@ const itemCls = "flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[11px] 
 
 export function SessionContextMenu({ session, children }: Props) {
     const sendMessage = useStore(s => s.sendMessage)
-    const loadSessions = useStore(s => s.loadSessions)
+    const archiveSessions = useStore(s => s.archiveSessions)
 
     const isActive = session.state === 'inProgress' || session.state === 'planning'
 
@@ -42,10 +41,7 @@ export function SessionContextMenu({ session, children }: Props) {
 
                     <ContextMenu.Item
                         className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[11px] font-mono text-red-400 outline-none cursor-pointer select-none data-[highlighted]:bg-red-500/10 data-[highlighted]:text-red-300 transition-colors"
-                        onSelect={() => {
-                            void sdkIpc?.session.archive(session.id)
-                            void loadSessions()
-                        }}
+                        onSelect={() => { void archiveSessions([session.id]) }}
                     >
                         <Archive className="h-3 w-3 shrink-0" />
                         Archive

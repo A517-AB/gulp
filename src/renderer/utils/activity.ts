@@ -1,9 +1,73 @@
 import {formatDistanceToNow, isValid, parseISO} from "date-fns";
 import type {Activity} from '@google/jules-sdk/types'
-import type {ActivityGroup, ActivityType} from '@jules'
-import { parseUnidiff } from '@jules'
+import type {ActivityGroup, ActivityType, ParsedFile} from '@jules'
 
-export { parseUnidiff }
+export function parseUnidiff(patch?: string | null): ParsedFile[] {
+  if (!patch) return [];
+  const files: ParsedFile[] = [];
+  const diffSections = patch.split(/^diff --git /m).filter(Boolean);
+
+  for (const section of diffSections) {
+    const lines = section.split('\n');
+
+    let path: string;
+    let fromPath = '';
+    let toPath = '';
+
+    for (const line of lines) {
+      if (line.startsWith('--- ')) {
+        fromPath = line
+          .slice(4)
+          .replace(/^a\//, '')
+          .replace(/^\/dev\/null$/, '');
+      } else if (line.startsWith('+++ ')) {
+        toPath = line
+          .slice(4)
+          .replace(/^b\//, '')
+          .replace(/^\/dev\/null$/, '');
+      }
+    }
+
+    let changeType: 'created' | 'modified' | 'deleted';
+    if (fromPath === '' || lines.some((l) => l.startsWith('--- /dev/null'))) {
+      changeType = 'created';
+      path = toPath;
+    } else if (
+      toPath === '' ||
+      lines.some((l) => l.startsWith('+++ /dev/null'))
+    ) {
+      changeType = 'deleted';
+      path = fromPath;
+    } else {
+      changeType = 'modified';
+      path = toPath;
+    }
+
+    if (!path) continue;
+
+    let additions = 0;
+    let deletions = 0;
+    let inHunk = false;
+
+    for (const line of lines) {
+      if (line.startsWith('@@')) {
+        inHunk = true;
+        continue;
+      }
+      if (inHunk) {
+        if (line.startsWith('+') && !line.startsWith('+++')) {
+          additions++;
+        } else if (line.startsWith('-') && !line.startsWith('---')) {
+          deletions++;
+        }
+      }
+    }
+
+    files.push({ path, changeType, additions, deletions });
+  }
+
+  return files;
+}
 
 
 export function formatDate(dateString: string): string {

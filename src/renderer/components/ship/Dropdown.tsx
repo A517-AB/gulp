@@ -50,7 +50,7 @@ export function Dropdown({items, value, onChange, placeholder = "select", classN
                         animate={{opacity: 1, y: 0, scale: 1}}
                         exit={{opacity: 0, y: -4, scale: 0.97}}
                         transition={{duration: 0.13, ease: "easeOut"}}
-                        className="absolute top-full left-0 mt-1 z-50 min-w-[200px] max-w-[320px] rounded-md border border-subtle bg-overlay shadow-xl py-1"
+                        className="absolute top-full left-0 mt-1 z-50 min-w-[200px] max-w-[320px] max-h-[240px] overflow-y-auto rounded-md border border-subtle bg-overlay shadow-xl py-1 scrollbar-thin"
                     >
                         {items.length === 0 && (
                             <p className="px-3 py-2 text-2xs text-fg-ghost font-mono">{emptyMessage}</p>

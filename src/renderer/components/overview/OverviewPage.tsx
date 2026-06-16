@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import {sdkIpc, terminal, filesystem, store} from '@shared/bridge'
+import {terminal, filesystem, store} from '@shared/bridge'
 import { useCommands } from '@/store/commands'
+import { useStore } from '@/store/app'
 import {executeAt, executeDisplay, executeTerminal, executePreview} from '@shared/commands'
 import { CommandInput } from './CommandInput'
 import { BlockDisplay } from './BlockDisplay'
@@ -14,6 +15,11 @@ type PanelMode = 'markdown' | 'terminal' | 'preview'
 export function OverviewPage() {
     const commands = useCommands(s => s.commands)
     const load = useCommands(s => s.load)
+    const sessionSnapshot = useStore(s => s.sessionSnapshot)
+    const hydrateSession = useStore(s => s.hydrateSession)
+    const selectSessionActivities = useStore(s => s.selectSessionActivities)
+    const sendMessage = useStore(s => s.sendMessage)
+    const subscribeActivity = useStore(s => s.subscribeActivity)
 
     useEffect(() => {
         void load()
@@ -38,8 +44,7 @@ export function OverviewPage() {
     const handleDownloadFile = useCallback(async (filename: string) => {
         if (!activeSessionId) return
         try {
-            if (!sdkIpc) throw new Error("Jules SDK IPC is not available")
-            const snapshot = await sdkIpc.session.snapshot(activeSessionId)
+            const snapshot = await sessionSnapshot(activeSessionId)
             const matchedFile = snapshot.generatedFiles.find(f => f.path === filename)
             const defaultName = filename.split("/").pop() ?? "file"
 
@@ -81,21 +86,16 @@ export function OverviewPage() {
             console.error("[OverviewPage] failed to download file:", err)
             throw err
         }
-    }, [activeSessionId])
+    }, [activeSessionId, sessionSnapshot])
 
     const handlePreview = useCallback(async (command: PreviewCommand) => {
-        if (!sdkIpc) {
-            setStatus('no connection')
-            return
-        }
-
         if (unsubRef.current) {
             unsubRef.current()
             unsubRef.current = null
         }
 
         setStatus('refreshing...')
-        const result = await executePreview({hydrate: sdkIpc.session.hydrate, select: sdkIpc.session.select}, command)
+        const result = await executePreview({hydrate: hydrateSession, select: selectSessionActivities}, command)
 
         if (result.status === 'ok') {
             setPreviewDiff(result.patch)
@@ -110,37 +110,23 @@ export function OverviewPage() {
         }
 
         try {
-            const unsub = sdkIpc.activities.updates(command.sessionId, (activity) => {
+            const unsub = subscribeActivity(command.sessionId, (activity) => {
                 const artifacts = (activity as { artifacts?: { type?: string }[] }).artifacts ?? []
-                let hasChangeSet = false
-                for (const art of artifacts) {
-                    if (art.type === 'changeSet') {
-                        hasChangeSet = true
-                        break
-                    }
-                }
-                if (hasChangeSet && sdkIpc) {
-                    void executePreview({hydrate: sdkIpc.session.hydrate, select: sdkIpc.session.select}, command)
-                        .then(res => {
-                            if (res.status === 'ok') {
-                                setPreviewDiff(res.patch)
-                            }
-                        })
+                const hasChangeSet = artifacts.some(art => art.type === 'changeSet')
+                if (hasChangeSet) {
+                    void executePreview({hydrate: hydrateSession, select: selectSessionActivities}, command)
+                        .then(res => { if (res.status === 'ok') { setPreviewDiff(res.patch) } })
                 }
             })
             unsubRef.current = unsub
         } catch (err) {
             console.warn('[OverviewPage] failed to start real-time updates watcher:', err)
         }
-    }, [])
+    }, [hydrateSession, selectSessionActivities, subscribeActivity])
 
     const handleDisplay = useCallback(async (command: DisplayCommand) => {
-        if (!sdkIpc) {
-            setStatus('no connection');
-            return
-        }
         setStatus('refreshing...')
-        const result = await executeDisplay({hydrate: sdkIpc.session.hydrate, select: sdkIpc.session.select}, command)
+        const result = await executeDisplay({hydrate: hydrateSession, select: selectSessionActivities}, command)
         if (result.status === 'ok') {
             setMarkdown(result.markdown)
             setMode('markdown')
@@ -148,24 +134,22 @@ export function OverviewPage() {
         } else {
             setStatus(result.status === 'empty' ? 'no messages yet' : (result.error ?? 'error'))
         }
-    }, [])
+    }, [hydrateSession, selectSessionActivities])
 
     const handleSend = useCallback(async (command: AtCommand, prompt: string) => {
-        if (!sdkIpc) {
-            setStatus('no connection');
-            return
-        }
         setStatus('sending...')
-        const result = await executeAt(sdkIpc.session.send, command, prompt)
+        const result = await executeAt(
+            (sessionId, msg) => sendMessage(sessionId, msg),
+            command,
+            prompt,
+        )
         if (result.status === 'sent') {
             setStatus('sent')
-            setTimeout(() => {
-                setStatus(null)
-            }, 2000)
+            setTimeout(() => { setStatus(null) }, 2000)
         } else {
             setStatus(result.error ?? 'error')
         }
-    }, [])
+    }, [sendMessage])
 
     const handleRun = useCallback((command: TerminalCommand) => {
         if (!terminal) {

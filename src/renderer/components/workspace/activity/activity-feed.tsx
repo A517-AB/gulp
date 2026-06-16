@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollArea } from "@/ui/scroll-area.tsx";
 import { Button } from "@/ui/button.tsx";
 import { useActivityGroups } from "@/hooks/use-activity-groups.ts";
-import { filesystem, sdkIpc } from "@jules";
 import { useStore } from "@/store/app.ts";
 import type { Activity, ActivityFeedProps } from "./types";
 import { ActivityItem } from "./activity-item.tsx";
@@ -26,9 +25,13 @@ export function ActivityFeed({
     const loadActivities = useStore((s) => s.loadActivities);
     const streamActivities = useStore((s) => s.streamActivities);
 
-    const [latestSummary, setLatestSummary] = useState<string>("");
+    const applyPatch = useStore((s) => s.applyPatch);
+    const approvePlan = useStore((s) => s.approvePlan);
+    const sendMessage = useStore((s) => s.sendMessage);
 
     const { grouped, latest } = useActivityGroups(activities);
+
+    const latestSummary = useStore((s) => s.activitySummaries[session.id]?.[latest?.id ?? ""] ?? "");
 
     const [sending, setSending] = useState(false);
     const [approving, setApproving] = useState(false);
@@ -54,27 +57,6 @@ export function ActivityFeed({
     }, [session.id, loadActivities, streamActivities]);
 
     useEffect(() => {
-        if (!sdkIpc || !latest) {
-            void Promise.resolve().then(() => {
-                setLatestSummary("");
-            });
-            return;
-        }
-        let cancelled = false;
-        void sdkIpc.util
-            .toSummary(latest)
-            .then((s: { summary: string }) => {
-                if (!cancelled) setLatestSummary(s.summary);
-            })
-            .catch(() => {
-                if (!cancelled) setLatestSummary("");
-            });
-        return () => {
-            cancelled = true;
-        };
-    }, [latest]);
-
-    useEffect(() => {
         const newIds = activities.filter((a) => !prevIdsRef.current.has(a.id)).map((a) => a.id);
         prevIdsRef.current = new Set(activities.map((a) => a.id));
         if (!newIds.length) return;
@@ -94,25 +76,19 @@ export function ActivityFeed({
     }, [activities]);
 
     const handleApplyLocally = useCallback(async () => {
-        if (!sdkIpc || !filesystem) return;
-        const cwd = await filesystem.showOpenDialog();
-        if (!cwd) return;
         setApplyState({ status: "applying" });
-        const result = await sdkIpc.session.applyPatch(session.id, { cwd });
+        const result = await applyPatch(session.id);
         if (result.success) {
             setApplyState({ status: "done", message: `Applied to branch: ${result.branch ?? "unknown"}` });
         } else {
             setApplyState({ status: "error", message: result.error ?? "Unknown error" });
         }
-    }, [session.id]);
+    }, [session.id, applyPatch]);
 
     const handleApprovePlan = useCallback(() => {
-        const ipc = sdkIpc;
-        if (!ipc) return;
         setApproving((prev) => {
             if (prev) return prev;
-            ipc.session
-                .approve(session.id)
+            void approvePlan(session.id)
                 .catch((err: unknown) => {
                     console.error("Failed to approve plan:", err);
                 })
@@ -121,16 +97,14 @@ export function ActivityFeed({
                 });
             return true;
         });
-    }, [session.id]);
+    }, [session.id, approvePlan]);
 
     const onSubmitMessage = useCallback(
         (msg: string) => {
-            const ipc = sdkIpc;
-            if (!msg.trim() || !ipc) return;
+            if (!msg.trim()) return;
             setSending((prev) => {
                 if (prev) return prev;
-                ipc.session
-                    .send(session.id, msg)
+                void sendMessage(session.id, msg)
                     .catch((err: unknown) => {
                         console.error("Failed to send:", err);
                     })
@@ -140,16 +114,13 @@ export function ActivityFeed({
                 return true;
             });
         },
-        [session.id]
+        [session.id, sendMessage]
     );
 
     const handleQuickReview = useCallback(() => {
-        const ipc = sdkIpc;
-        if (!ipc) return;
         setSending((prev) => {
             if (prev) return prev;
-            ipc.session
-                .send(session.id, QUICK_REVIEW_PROMPT)
+            void sendMessage(session.id, QUICK_REVIEW_PROMPT)
                 .catch((err: unknown) => {
                     console.error("Failed to send review:", err);
                 })
@@ -158,7 +129,7 @@ export function ActivityFeed({
                 });
             return true;
         });
-    }, [session.id]);
+    }, [session.id, sendMessage]);
 
     return (
         <div className="flex flex-col h-full bg-base">

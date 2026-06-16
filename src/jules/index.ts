@@ -135,9 +135,8 @@ export type {
 };
 
 // These live in the main entry, not /types
-import {type ListSessionsOptions, type ListSessionsResponse, type DomainSchema, type ValidationResult, parseUnidiff} from '@google/jules-sdk'
+import type {ListSessionsOptions, ListSessionsResponse, DomainSchema, ValidationResult} from '@google/jules-sdk'
 export type {ListSessionsOptions, ListSessionsResponse, DomainSchema, ValidationResult}
-export {parseUnidiff}
 
 // ── SdkIpc Interface ──────────────────────────────────────────────────────────
 
@@ -157,7 +156,3 @@ export type { SessionStatus, SessionStatusInfo, SessionInitialValues } from './s
 // ── Fleet ─────────────────────────────────────────────────────────────────────
 
 export type { FleetTask, FleetTaskGroup } from './types'
-
-// ── Bridge values ─────────────────────────────────────────────────────────────
-
-export { filesystem, sdkIpc } from "@shared/bridge";

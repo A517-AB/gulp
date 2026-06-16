@@ -1,10 +1,11 @@
-import {useEffect, useRef, useState} from 'react'
+import {useEffect, useRef} from 'react'
 import {useParams} from 'react-router'
-import {sdkIpc} from '@shared/bridge'
+import {useStore} from '@/store/app'
 import type {Activity, ChangeSetArtifact, PlanStep} from '@google/jules-sdk/types'
 import {parseUnidiff} from '@/utils/activity'
 import {Input} from '@/ui/input'
 import {Button} from '@/ui/button'
+import {useState} from 'react'
 import {CheckCircle2, ChevronDown, ChevronRight, FileText, Send, XCircle} from 'lucide-react'
 
 function ChangeSetDropdown({artifact}: { artifact: ChangeSetArtifact }) {
@@ -18,9 +19,7 @@ function ChangeSetDropdown({artifact}: { artifact: ChangeSetArtifact }) {
     return (
         <div className="mt-2">
             <button
-                onClick={() => {
-                    setOpen(o => !o)
-                }}
+                onClick={() => { setOpen(o => !o) }}
                 className="flex items-center gap-1.5 text-3xs font-mono text-fg-dim hover:text-fg-secondary transition-colors"
             >
                 {open ? <ChevronDown className="size-3"/> : <ChevronRight className="size-3"/>}
@@ -131,14 +130,31 @@ function ActivityItem({a, onApprove, approving, changeset}: {
   }
 }
 
+const EMPTY: Activity[] = []
+
 export default function ActivityPage() {
   const { id } = useParams<{ id: string }>()
-  const [activities, setActivities] = useState<Activity[]>([])
+  const activities = useStore(s => s.activities[id ?? ''] ?? EMPTY)
+  const loadActivities = useStore(s => s.loadActivities)
+  const streamActivities = useStore(s => s.streamActivities)
+  const sendMessage = useStore(s => s.sendMessage)
+  const approvePlan = useStore(s => s.approvePlan)
+
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [approving, setApproving] = useState(false)
-    const viewportRef = useRef<HTMLDivElement>(null)
-    const hasScrolled = useRef(false)
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const hasScrolled = useRef(false)
+
+  useEffect(() => {
+      hasScrolled.current = false
+  }, [id])
+
+  useEffect(() => {
+      if (!id) return
+      void loadActivities(id)
+      return streamActivities(id)
+  }, [id, loadActivities, streamActivities])
 
   useEffect(() => {
       if (activities.length === 0) return
@@ -152,63 +168,33 @@ export default function ActivityPage() {
       hasScrolled.current = true
   }, [activities])
 
-    useEffect(() => {
-        hasScrolled.current = false
-    }, [id])
-
-  useEffect(() => {
-    if (!sdkIpc || !id) return
-    let cancelled = false
-
-    sdkIpc.activities.list(id).then(({ activities: list }) => {
-      if (!cancelled) setActivities(list)
-    }).catch(console.error)
-
-    const unsub = sdkIpc.activities.updates(id, (item) => {
-      if (!cancelled) setActivities(prev => [...prev, item])
-    })
-
-    return () => {
-      cancelled = true
-      unsub()
-    }
-  }, [id])
-
   const send = async () => {
-    if (!sdkIpc || !id || !input.trim() || sending) return
+    if (!id || !input.trim() || sending) return
     const msg = input.trim()
     setInput('')
     setSending(true)
     try {
-      await sdkIpc.session.send(id, msg)
+      await sendMessage(id, msg)
     } finally {
       setSending(false)
     }
   }
 
   const approve = async () => {
-    if (!sdkIpc || !id || approving) return
+    if (!id || approving) return
     setApproving(true)
     try {
-      await sdkIpc.session.approve(id)
+      await approvePlan(id)
     } finally {
       setApproving(false)
     }
   }
 
-  if (!sdkIpc) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-fg-ghost text-sm font-mono select-none">Desktop only</p>
-      </div>
-    )
-  }
-
   if (!id) return null
 
-    const changeset = activities
-        .flatMap(a => Array.isArray(a.artifacts) ? a.artifacts : [])
-        .find((x): x is ChangeSetArtifact => x.type === 'changeSet')
+  const changeset = activities
+      .flatMap(a => Array.isArray(a.artifacts) ? a.artifacts : [])
+      .find((x): x is ChangeSetArtifact => x.type === 'changeSet')
 
   return (
     <div className="flex flex-col h-full">
@@ -218,9 +204,7 @@ export default function ActivityPage() {
             <p className="text-fg-ghost text-xs font-mono text-center pt-16 select-none">No activities yet</p>
           )}
           {activities.map((a, i) => (
-              <ActivityItem key={i} a={a} onApprove={() => {
-                  void approve()
-              }} approving={approving} changeset={a.type === 'sessionCompleted' ? changeset : undefined}/>
+              <ActivityItem key={i} a={a} onApprove={() => { void approve() }} approving={approving} changeset={a.type === 'sessionCompleted' ? changeset : undefined}/>
           ))}
         </div>
         </div>

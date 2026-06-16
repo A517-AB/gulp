@@ -4,7 +4,7 @@ import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {DiffViewer} from "@/ui/diff-viewer.tsx";
 import type {ChangeSetArtifact} from "@jules";
 import {useStore} from "@/store/app.ts";
-import {filesystem, sdkIpc} from "@shared/bridge";
+import {filesystem} from "@shared/bridge";
 
 interface CodeDiffSidebarProps {
     sessionId: string;
@@ -15,6 +15,7 @@ const EMPTY_ACTIVITIES: never[] = [];
 
 export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
     const activities = useStore(s => s.activities[sessionId] ?? EMPTY_ACTIVITIES);
+    const sessionSnapshot = useStore(s => s.sessionSnapshot);
     const finalDiff = useMemo(() => activities
         .flatMap(a => {
             const cs = (a as {artifacts?: unknown[]}).artifacts?.find((art): art is ChangeSetArtifact => (art as {type?: string}).type === 'changeSet');
@@ -24,8 +25,7 @@ export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
 
     const handleDownloadFile = async (filename: string) => {
         try {
-            if (!sdkIpc) throw new Error("Jules SDK IPC is not available");
-            const snapshot = await sdkIpc.session.snapshot(sessionId);
+            const snapshot = await sessionSnapshot(sessionId);
             const matchedFile = snapshot.generatedFiles.find(f => f.path === filename);
 
             if (!matchedFile) {

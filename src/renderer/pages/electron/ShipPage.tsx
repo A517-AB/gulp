@@ -1,4 +1,4 @@
-import {useState, useMemo} from "react";
+import {useMemo, useEffect} from "react";
 import {AnimatePresence, motion} from "framer-motion";
 import {
     Archive,
@@ -9,27 +9,22 @@ import {
     Loader2,
 } from "lucide-react";
 import {formatDistanceToNow} from "date-fns";
-import {parse as parseDiff} from "diff2html";
 import type {DiffFile} from "diff2html/lib-esm/types";
 import {LineType} from "diff2html/lib-esm/types";
-import {toast} from "sonner";
 import {ScrollArea} from "@/ui/scroll-area";
 import {Dropdown} from "@/components/ship/Dropdown";
 import {cn} from "@/utils";
 import {useStore} from "@/store/app";
-import {sdkIpc, filesystem, store} from "@shared/bridge";
-import type {ParsedFile} from "@jules";
+import {SyncManager} from "@/components/ship/SyncManager";
+import {useSyncStore} from "@/store/sync";
+import {useShipStore} from "@/store/ship";
+import type {ActionState, ShipFile} from "@/store/ship";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-type ActionState = "idle" | "busy" | "done";
-interface PatchEntry { files: ParsedFile[]; patch: string }
-
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-const STORE_KEY = "ship.repoPaths";
-
-const STATUS_DOT: Record<ParsedFile["changeType"], string> = {
+const STATUS_DOT: Record<ShipFile["changeType"], string> = {
     created:  "bg-green-500",
     deleted:  "bg-red-500",
     modified: "bg-yellow-500",
@@ -39,20 +34,6 @@ const ACTIVE_STATES = new Set([
     "queued", "planning", "inProgress",
     "awaitingPlanApproval", "awaitingUserFeedback", "paused",
 ]);
-
-function toBase64(text: string): string {
-    const bytes = new TextEncoder().encode(text);
-    let binary = "";
-    for (let i = 0; i < bytes.length; i += 8192) {
-        binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + 8192, bytes.length)));
-    }
-    return btoa(binary);
-}
-
-function extractFilePatch(unidiff: string, filePath: string): string {
-    const sections = unidiff.split(/(?=^diff --git )/m).filter(Boolean);
-    return sections.find(s => s.includes(`b/${filePath}`) || s.includes(`/${filePath}`)) ?? "";
-}
 
 function fmtAge(createTime: string): string {
     try {
@@ -154,16 +135,38 @@ export default function ShipPage() {
     const sources     = useStore(s => s.sources);
     const sessionList = useStore(s => s.sessionList);
 
-    const [sourceId,       setSourceId]       = useState("");
-    const [openPatchId,    setOpenPatchId]    = useState("");
-    const [openFileKey,    setOpenFileKey]    = useState("");
-    const [patchData,      setPatchData]      = useState<Record<string, PatchEntry | null>>({});
-    const [patchLoading,   setPatchLoading]   = useState<Record<string, boolean>>({});
-    const [parsedDiffs,    setParsedDiffs]    = useState<Record<string, DiffFile[]>>({});
-    const [fileStates,     setFileStates]     = useState<Record<string, ActionState>>({});
-    const [snapshotStates, setSnapshotStates] = useState<Record<string, ActionState>>({});
+    const {
+        sourceId,
+        openPatchId,
+        openFileKey,
+        patchData,
+        patchLoading,
+        parsedDiffs,
+        fileStates,
+        snapshotStates,
+        viewMode,
+        setSourceId,
+        setViewMode,
+        handlePatchClick,
+        handleFileClick,
+        handleGetFile,
+        handleSnapshot,
+    } = useShipStore();
+
+    const {
+        localRepoPath,
+        loadLocalRepoPath,
+        selectLocalFolder,
+    } = useSyncStore();
 
     const effectiveSourceId = sourceId !== "" ? sourceId : (sources[0]?.id ?? "");
+
+    // Load local repo path when sourceId changes
+    useEffect(() => {
+        if (effectiveSourceId) {
+            void loadLocalRepoPath(effectiveSourceId);
+        }
+    }, [effectiveSourceId, loadLocalRepoPath]);
 
     const selectedSource = useMemo(
         () => sources.find(s => s.id === effectiveSourceId),
@@ -181,127 +184,6 @@ export default function ShipPage() {
             })
             .sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime());
     }, [sessionList, selectedSource]);
-
-    async function loadPatch(sessionId: string) {
-        if (patchData[sessionId] !== undefined || patchLoading[sessionId] || !sdkIpc) return;
-        setPatchLoading(p => ({...p, [sessionId]: true}));
-        try {
-            await sdkIpc.activities.hydrate(sessionId);
-            const activities = await sdkIpc.activities.select(sessionId);
-
-            let patch: string | null = null;
-            outer: for (const act of [...activities].reverse()) {
-                for (const art of [...act.artifacts].reverse()) {
-                    if (art.type === "changeSet") {
-                        if (art.gitPatch.unidiffPatch) {
-                            patch = art.gitPatch.unidiffPatch;
-                            break outer;
-                        }
-                    }
-                }
-            }
-
-            if (patch) {
-                const files = await sdkIpc.artifact.parseUnidiff(patch);
-                setPatchData(p => ({...p, [sessionId]: {files, patch}}));
-            } else {
-                setPatchData(p => ({...p, [sessionId]: null}));
-            }
-        } catch {
-            setPatchData(p => ({...p, [sessionId]: null}));
-        } finally {
-            setPatchLoading(p => ({...p, [sessionId]: false}));
-        }
-    }
-
-    function handlePatchClick(sessionId: string) {
-        if (openPatchId === sessionId) {
-            setOpenPatchId("");
-            setOpenFileKey("");
-        } else {
-            setOpenPatchId(sessionId);
-            setOpenFileKey("");
-            void loadPatch(sessionId);
-        }
-    }
-
-    function handleFileClick(sessionId: string, file: ParsedFile, patch: string) {
-        const key = `${sessionId}/${file.path}`;
-        if (openFileKey === key) {
-            setOpenFileKey("");
-            return;
-        }
-        setOpenFileKey(key);
-        if (!parsedDiffs[key]) {
-            const section = extractFilePatch(patch, file.path) || patch;
-            const parsed  = parseDiff(section, {drawFileList: false, outputFormat: "line-by-line"});
-            if (parsed.length > 0) {
-                setParsedDiffs(p => ({...p, [key]: parsed}));
-            }
-        }
-    }
-
-    async function handleGetFile(sessionId: string, file: ParsedFile) {
-        const key  = `${sessionId}/${file.path}`;
-        const data = patchData[sessionId];
-        if (!data || !filesystem || !sdkIpc) return;
-        setFileStates(p => ({...p, [key]: "busy"}));
-        const toastId = `get-${key}`;
-        const name    = file.path.split("/").pop() ?? "file";
-        toast.loading(`Saving ${name}…`, {id: toastId});
-        try {
-            const savePath = await filesystem.showSaveDialog(`${name}.patch`);
-            if (!savePath) {
-                toast.dismiss(toastId);
-                setFileStates(p => ({...p, [key]: "idle"}));
-                return;
-            }
-            const filePatch = extractFilePatch(data.patch, file.path) || data.patch;
-            await sdkIpc.artifact.save(toBase64(filePatch), savePath);
-            toast.success("Saved", {id: toastId});
-            setFileStates(p => ({...p, [key]: "done"}));
-            setTimeout(() => { setFileStates(p => ({...p, [key]: "idle"})); }, 1800);
-        } catch {
-            toast.error("Save failed", {id: toastId});
-            setFileStates(p => ({...p, [key]: "idle"}));
-        }
-    }
-
-    async function handleSnapshot(sessionId: string) {
-        if (!sdkIpc || !filesystem) return;
-
-        const storeKey = `${STORE_KEY}.${effectiveSourceId}`;
-        let cwd: string | null = null;
-
-        if (store) {
-            const stored = await store.get(storeKey);
-            if (typeof stored === "string" && stored) cwd = stored;
-        }
-
-        if (!cwd) {
-            cwd = await filesystem.showOpenDialog();
-            if (!cwd) return;
-            if (store) await store.set(storeKey, cwd);
-        }
-
-        const toastId = `snap-${sessionId}`;
-        toast.loading("Applying patch…", {id: toastId});
-        setSnapshotStates(p => ({...p, [sessionId]: "busy"}));
-        try {
-            const result = await sdkIpc.session.applyPatch(sessionId, {cwd});
-            if (result.success) {
-                toast.success(result.branch ? `Applied → ${result.branch}` : "Patch applied", {id: toastId});
-                setSnapshotStates(p => ({...p, [sessionId]: "done"}));
-                setTimeout(() => { setSnapshotStates(p => ({...p, [sessionId]: "idle"})); }, 2500);
-            } else {
-                toast.error(result.error ?? "Patch failed", {id: toastId});
-                setSnapshotStates(p => ({...p, [sessionId]: "idle"}));
-            }
-        } catch {
-            toast.error("Snapshot failed", {id: toastId});
-            setSnapshotStates(p => ({...p, [sessionId]: "idle"}));
-        }
-    }
 
     const loadedStats = useMemo(() => {
         let add = 0, del = 0;
@@ -322,7 +204,7 @@ export default function ShipPage() {
                 initial={{opacity: 0, y: -6}}
                 animate={{opacity: 1, y: 0}}
                 transition={{duration: 0.18}}
-                className="flex items-center gap-3 px-6 pt-5 pb-4 shrink-0"
+                className="flex items-center gap-3 px-6 pt-5 pb-4 shrink-0 relative z-10"
             >
                 <Dropdown
                     items={sources.map(s => ({
@@ -331,10 +213,35 @@ export default function ShipPage() {
                         ...(s.githubRepo.defaultBranch ? {meta: s.githubRepo.defaultBranch} : {}),
                     }))}
                     value={effectiveSourceId}
-                    onChange={id => { setSourceId(id); setOpenPatchId(""); setOpenFileKey(""); }}
+                    onChange={setSourceId}
                     placeholder="select repo"
                     emptyMessage="No repos found"
                 />
+
+                <div className="flex items-center bg-hover/80 p-0.5 rounded-md border border-hair shrink-0">
+                    <button
+                        onClick={() => { setViewMode('jules'); }}
+                        className={cn(
+                            "px-2.5 py-0.5 rounded text-[9px] font-mono font-bold transition-all uppercase tracking-wider",
+                            viewMode === 'jules'
+                                ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                : "text-fg-ghost hover:text-fg-secondary"
+                        )}
+                    >
+                        Jules Sessions
+                    </button>
+                    <button
+                        onClick={() => { setViewMode('sync'); }}
+                        className={cn(
+                            "px-2.5 py-0.5 rounded text-[9px] font-mono font-bold transition-all uppercase tracking-wider",
+                            viewMode === 'sync'
+                                ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                : "text-fg-ghost hover:text-fg-secondary"
+                        )}
+                    >
+                        Sync & Backup
+                    </button>
+                </div>
 
                 <AnimatePresence>
                     {activeCount > 0 && (
@@ -368,8 +275,9 @@ export default function ShipPage() {
                 )}
             </motion.div>
 
-            {/* ── Session list ──────────────────────────────────────────────── */}
-            <AnimatePresence mode="wait">
+            {/* ── Page Content ──────────────────────────────────────────────── */}
+            {viewMode === 'jules' ? (
+                <AnimatePresence mode="wait">
                 <motion.div
                     key={effectiveSourceId}
                     initial={{opacity: 0}}
@@ -613,6 +521,36 @@ export default function ShipPage() {
                     </ScrollArea>
                 </motion.div>
             </AnimatePresence>
+            ) : (
+                <div className="flex-1 px-6 py-4 overflow-y-auto min-h-0">
+                    {localRepoPath ? (
+                        <div className="max-w-xl mx-auto">
+                            <SyncManager
+                                repoPath={localRepoPath}
+                                repoName={selectedSource ? `${selectedSource.githubRepo.owner}/${selectedSource.githubRepo.repo}` : 'Local Repository'}
+                            />
+                        </div>
+                    ) : (
+                        <div className="bg-surface/30 border border-hair rounded-lg p-8 text-center flex flex-col items-center justify-center gap-4 max-w-sm mx-auto mt-8 backdrop-blur-sm">
+                            <Archive className="h-8 w-8 text-fg-ghost opacity-60" />
+                            <div>
+                                <h4 className="text-xxs font-bold uppercase tracking-wider text-fg-primary">
+                                    Link Local Folder
+                                </h4>
+                                <p className="text-3xs text-fg-ghost mt-1.5 leading-relaxed">
+                                    To use local git sync and backups, you must link this repository to its local directory on your device.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => { void selectLocalFolder(effectiveSourceId) }}
+                                className="px-4 py-1.5 bg-purple-600 text-white rounded border border-purple-500 text-3xs font-mono font-bold hover:bg-purple-700 transition-colors cursor-pointer"
+                            >
+                                Select Local Folder
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

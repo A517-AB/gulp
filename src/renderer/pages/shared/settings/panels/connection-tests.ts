@@ -1,5 +1,11 @@
-import {isElectron, sdkIpc} from '@shared/bridge'
+import {isElectron} from '@shared/bridge'
+import type {SdkIpc} from '@jules'
 import type {TestDef} from '../types'
+
+function getSdkIpc(): SdkIpc | null {
+    if (!isElectron) return null
+    return (globalThis as unknown as {electron?: {sdk?: SdkIpc}}).electron?.sdk ?? null
+}
 
 function getConnectionTests(): TestDef[] {
   return [
@@ -20,6 +26,7 @@ function getConnectionTests(): TestDef[] {
       key: 'client_sources',
         label: 'sdkIpc.sources.list()',
       fn: async () => {
+          const sdkIpc = getSdkIpc()
           if (!sdkIpc) throw new Error('no sdkIpc — Electron only')
           const s = await sdkIpc.sources.list()
         return { summary: `${String(s.length)} sources`, items: s.map(x => x.name) }
@@ -29,6 +36,7 @@ function getConnectionTests(): TestDef[] {
       key: 'client_sessions',
         label: 'sdkIpc.client.sessions()',
       fn: async () => {
+          const sdkIpc = getSdkIpc()
           if (!sdkIpc) throw new Error('no sdkIpc')
           const s = await sdkIpc.client.sessions()
         return {
@@ -41,7 +49,7 @@ function getConnectionTests(): TestDef[] {
       key: 'client_first_activities',
         label: 'sdkIpc.activities.list(first session)',
       fn: async () => {
-          const ipc = sdkIpc
+          const ipc = getSdkIpc()
           if (!ipc) throw new Error('no sdkIpc')
           const sessions = await ipc.client.sessions()
         const [s] = sessions

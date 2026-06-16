@@ -57,6 +57,26 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [
+          {
+            name: '@shared/bridge',
+            importNames: ['sdkIpc'],
+            message: 'Direct bridge/IPC access is restricted in the renderer. Use the Zustand store instead.',
+          },
+          {
+            name: '@jules',
+            importNames: ['sdkIpc', 'filesystem'],
+            message: 'Direct bridge/IPC access is restricted in the renderer. Use the Zustand store instead.',
+          },
+          {
+            name: '@google/jules-sdk',
+            message: 'Do not import from @google/jules-sdk in the renderer. It is Node-only and will crash. Use types from @google/jules-sdk/types or the Zustand store.',
+          }
+        ],
+      }],
+    },
   },
   {
       files: ['electron/**/*.{ts,mts}', 'vite.config.ts'],
@@ -71,6 +91,13 @@ export default defineConfig([
       'no-restricted-imports': ['error', {
         patterns: ['*jules*', '*sdk*', '@google/*'],
       }],
+    },
+  },
+  {
+    // store legitimately uses sdkIpc — it's the Node-to-renderer firewall
+    files: ['src/renderer/store/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
   {

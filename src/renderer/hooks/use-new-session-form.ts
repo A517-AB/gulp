@@ -1,6 +1,5 @@
 import {type SyntheticEvent, useCallback, useEffect, useMemo} from "react";
 import {useStore} from "@/store/app";
-import {sdkIpc} from "@shared/bridge";
 import type {SessionFormData} from "@/store/app";
 import type {SessionInitialValues} from '@jules';
 import type {Source} from "@google/jules-sdk/types";
@@ -32,6 +31,8 @@ export function useNewSessionForm({
     const setFormData = useStore(s => s.setNewSessionForm);
     const resetForm = useStore(s => s.resetNewSessionForm);
     const loadSources = useStore(s => s.loadSources);
+    const runSession = useStore(s => s.runSession);
+    const createSession = useStore(s => s.createSession);
 
   useEffect(() => {
     if (!open) return;
@@ -50,7 +51,7 @@ export function useNewSessionForm({
 
     const handleSubmit = useCallback(async (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-        if (!sdkIpc || !formData.prompt) return;
+        if (!formData.prompt) return;
     try {
         const ownerRepo = formData.sourceId.replace(/^(?:sources\/)?github\//, '')
         const config = {
@@ -59,16 +60,14 @@ export function useNewSessionForm({
             ...(formData.autoCreatePr ? {autoPr: true} : {}),
             ...(ownerRepo ? {source: {github: ownerRepo, baseBranch: formData.startingBranch || 'main'}} : {}),
         }
-        await (formData.interactive
-            ? sdkIpc.session.create(config)
-            : sdkIpc.client.run(config))
+        await (formData.interactive ? createSession(config) : runSession(config))
       resetForm();
       onClose();
       onSessionCreated?.();
     } catch (err) {
       console.error('[useNewSessionForm] createSession failed:', err);
     }
-    }, [formData, onClose, onSessionCreated, resetForm]);
+    }, [formData, onClose, onSessionCreated, resetForm, createSession, runSession]);
 
   return {
     sources,

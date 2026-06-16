@@ -1,6 +1,5 @@
 import {useEffect, useRef, useState} from "react";
 import {Archive, Code, GitBranch, Loader2, MoreVertical, Play, Plus, Send} from "lucide-react";
-import {filesystem, sdkIpc} from "@shared/bridge";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {Textarea} from "@/ui/textarea.tsx";
 import {Button} from "@/ui/button.tsx";
@@ -33,6 +32,8 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
     const streamActivities = useStore(s => s.streamActivities);
   const sendMessage = useStore(s => s.sendMessage);
   const approvePlan = useStore(s => s.approvePlan);
+  const archiveSessions = useStore(s => s.archiveSessions);
+  const applyPatch = useStore(s => s.applyPatch);
 
   const { grouped, latest } = useActivityGroups(activities);
     const summaries = useStore(s => s.activitySummaries[session.id] ?? EMPTY_SUMMARIES);
@@ -79,15 +80,12 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
   };
 
   const handleApplyLocally = async () => {
-    if (!sdkIpc || !filesystem) return;
-    const cwd = await filesystem.showOpenDialog();
-    if (!cwd) return;
     setApplyState({ status: "applying" });
-    const result = await sdkIpc.session.applyPatch(session.id, { cwd });
+    const result = await applyPatch(session.id);
     if (result.success) {
         setApplyState({status: "done", message: `Applied to branch: ${result.branch ?? 'unknown'}`});
     } else {
-        setApplyState({status: "error", message: result.error ?? "Unknown error"});
+        setApplyState({status: result.error === 'cancelled' ? 'idle' : 'error', message: result.error ?? "Unknown error"});
     }
   };
 
@@ -124,7 +122,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
     const statusInfo = getStatusInfo(session.state);
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const hasDiffs = session.outputs?.some(o => o.type === 'changeSet') ?? false;
-    const canApplyLocally = sdkIpc !== null && session.state === "completed" && hasDiffs;
+    const canApplyLocally = session.state === "completed" && hasDiffs;
 
   return (
     <div className="flex flex-col h-full bg-base">
@@ -183,8 +181,7 @@ export function ActivityFeed({ session, onArchive, onNewSession, showCodeDiffs, 
                   </DropdownMenuItem>
                 )}
                   <DropdownMenuItem onClick={() => {
-                      void sdkIpc?.session.archive(session.id);
-                      onArchive?.();
+                      void archiveSessions([session.id]).then(() => { onArchive?.(); });
                   }} className="focus:bg-hover text-xs cursor-pointer text-red-400 focus:text-red-400">
                   <Archive className="mr-2 h-3.5 w-3.5" /><span>Archive Session</span>
                 </DropdownMenuItem>

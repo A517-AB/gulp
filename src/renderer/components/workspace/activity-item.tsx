@@ -12,7 +12,8 @@ import { PlanContent } from "./plan-content.tsx";
 import { formatDate, getActivityTypeColor } from "@/utils/activity.ts";
 import { ChangeSetSummary } from "./changeset-summary.tsx";
 import type { Activity, BashArtifact, ChangeSetArtifact, MediaArtifact, ActivityGroup, ActivityRole, ActivityType } from '@jules';
-import { filesystem, sdkIpc } from "@shared/bridge";
+import { filesystem } from "@shared/bridge";
+import { useStore } from "@/store/app.ts";
 import { useState } from "react";
 import log from 'electron-log/renderer';
 
@@ -175,6 +176,7 @@ function ActivityArtifacts({ activity, expandedBash, onToggleBash, only }: {
     only?: 'bash' | 'changeset' | 'media';
 }) {
     const [downloadState, setDownloadState] = useState<"idle" | "saving" | "done" | "error">("idle");
+    const saveArtifact = useStore(s => s.saveArtifact);
     const bash      = only !== 'changeset' && only !== 'media'    ? activity.artifacts.find((a): a is BashArtifact      => a.type === 'bashOutput') : undefined;
     const media     = only !== 'bash'      && only !== 'changeset' ? activity.artifacts.find((a): a is MediaArtifact     => a.type === 'media')      : undefined;
     const changeset = only !== 'bash'      && only !== 'media'    ? activity.artifacts.find((a): a is ChangeSetArtifact  => a.type === 'changeSet')  : undefined;
@@ -184,10 +186,10 @@ function ActivityArtifacts({ activity, expandedBash, onToggleBash, only }: {
             setDownloadState("saving");
             const ext = med.format.split("/").pop() ?? "bin";
             const defaultName = `jules_media_${activity.id}.${ext}`;
-            if (filesystem && sdkIpc) {
+            if (filesystem) {
                 const savePath = await filesystem.showSaveDialog(defaultName);
                 if (!savePath) { setDownloadState("idle"); return; }
-                await sdkIpc.artifact.save(med.data, savePath);
+                await saveArtifact(med.data, savePath);
             } else {
                 const binaryString = window.atob(med.data);
                 const bytes = new Uint8Array(binaryString.length);

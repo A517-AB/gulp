@@ -1,4 +1,4 @@
-import { ipcMain, dialog, shell } from 'electron'
+import { ipcMain, dialog, shell, BrowserWindow } from 'electron'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import ignore from 'ignore'
@@ -132,26 +132,34 @@ export function registerFilesystemHandlers(): void {
 
   // ── dialogs ───────────────────────────────────────────────────────────────────
 
+  const getParentWindow = (): BrowserWindow | undefined => {
+    return BrowserWindow.getFocusedWindow() ?? BrowserWindow.getAllWindows()[0] ?? undefined
+  };
+
   ipcMain.handle('fs.showOpenDialog', async (): Promise<string | null> => {
-    const result = await dialog.showOpenDialog({
+    const win = getParentWindow()
+    const options: Electron.OpenDialogOptions = {
       properties: ['openDirectory'],
       title: 'Select working directory',
-    })
+    }
+    const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options)
     return result.canceled ? null : (result.filePaths[0] ?? null)
   })
 
   ipcMain.handle('fs.showOpenFileDialog', async (_e, filters?: FileFilter[]): Promise<string | null> => {
-    const result = await dialog.showOpenDialog({
+    const win = getParentWindow()
+    const options: Electron.OpenDialogOptions = {
       properties: ['openFile'],
       filters: filters ?? [],
-    })
+    }
+    const result = win ? await dialog.showOpenDialog(win, options) : await dialog.showOpenDialog(options)
     return result.canceled ? null : (result.filePaths[0] ?? null)
   })
 
   ipcMain.handle('fs.showSaveDialog', async (_e, defaultName?: string): Promise<string | null> => {
-    const result = await dialog.showSaveDialog(
-      defaultName !== undefined ? { defaultPath: defaultName } : {},
-    )
+    const win = getParentWindow()
+    const options: Electron.SaveDialogOptions = defaultName !== undefined ? { defaultPath: defaultName } : {}
+    const result = win ? await dialog.showSaveDialog(win, options) : await dialog.showSaveDialog(options)
     return result.canceled ? null : result.filePath
   })
 }

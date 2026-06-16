@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { Check, Download } from "lucide-react";
-import { filesystem, sdkIpc } from "@jules";
+import { useStore } from "@/store/app.ts";
 import type { Activity, BashArtifact, ChangeSetArtifact, MediaArtifact } from "./types";
 import { ChangeSetSummary } from "@/components/workspace/changeset-summary.tsx";
 import { TerminalConsole } from "./terminal-console.tsx";
@@ -13,20 +13,15 @@ interface MediaItemProps {
 
 export const MediaItemDownloader = memo(function MediaItemDownloader({ media, activityId, index }: MediaItemProps) {
     const [downloadState, setDownloadState] = useState<"idle" | "saving" | "done" | "error" >("idle");
+    const downloadMedia = useStore((s) => s.downloadMedia);
 
     const handleDownload = async () => {
         try {
             setDownloadState("saving");
             const ext = media.format.split("/").pop() ?? "bin";
             const defaultName = `jules_media_${activityId}_${index}.${ext}`;
-            if (filesystem && sdkIpc) {
-                const savePath = await filesystem.showSaveDialog(defaultName);
-                if (!savePath) {
-                    setDownloadState("idle");
-                    return;
-                }
-                await sdkIpc.artifact.save(media.data, savePath);
-            } else {
+            const success = await downloadMedia(media.data, defaultName);
+            if (!success) {
                 const binaryString = window.atob(media.data);
                 const bytes = new Uint8Array(binaryString.length);
                 for (let i = 0; i < binaryString.length; i++) {

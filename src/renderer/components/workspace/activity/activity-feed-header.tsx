@@ -1,12 +1,12 @@
 import { memo } from "react";
 import { Archive, Code, GitBranch, MoreVertical, Play, Plus } from "lucide-react";
-import { sdkIpc } from "@jules";
 import type { Activity, SessionResource } from "./types";
 import { Button } from "@/ui/button.tsx";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/ui/dropdown-menu.tsx";
 import { FlyingJules } from "@/components/workspace/flying-jules.tsx";
 import { getSessionDuration, getStatusInfo } from "../session-status.ts";
 import { formatDistanceToNow, isValid, parseISO } from "date-fns";
+import { useStore } from "@/store/app.ts";
 
 const formatDate = (dateString: string): string => {
     if (!dateString) return "Unknown date";
@@ -54,6 +54,7 @@ export const ActivityFeedHeader = memo(
         onNewSession,
         onArchive,
     }: ActivityFeedHeaderProps) {
+        const archiveSessions = useStore((s) => s.archiveSessions);
         const sourceContext = session.sourceContext as typeof session.sourceContext | undefined | null;
         const outputs = session.outputs as typeof session.outputs | undefined | null;
 
@@ -64,7 +65,7 @@ export const ActivityFeedHeader = memo(
 
         const statusInfo = getStatusInfo(session.state);
         const hasDiffs = outputs?.some((o) => o.type === "changeSet") ?? false;
-        const canApplyLocally = sdkIpc !== null && session.state === "completed" && hasDiffs;
+        const canApplyLocally = session.state === "completed" && hasDiffs;
 
         return (
             <div className="border-b border-hair bg-surface px-4 py-3">
@@ -161,7 +162,7 @@ export const ActivityFeedHeader = memo(
                                 )}
                                 <DropdownMenuItem
                                     onClick={() => {
-                                        void sdkIpc?.session.archive(session.id);
+                                        void archiveSessions([session.id]);
                                         onArchive?.();
                                     }}
                                     className="focus:bg-hover text-xs cursor-pointer text-red-400 focus:text-red-400"
