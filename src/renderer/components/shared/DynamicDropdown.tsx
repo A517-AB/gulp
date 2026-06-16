@@ -30,7 +30,8 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
       <PopoverTrigger asChild>
         <button
           className={cn(
-            "flex items-center justify-center size-9 rounded-lg transition-all hover:bg-hover active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring relative",
+            "flex items-center justify-center rounded-lg transition-all hover:bg-hover active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring relative",
+            TriggerIcon ? "size-9" : "h-9 px-3",
             className
           )}
           style={{ color: selected?.color ?? 'var(--fg-secondary)' }}
@@ -56,10 +57,10 @@ export function DynamicDropdown({ items, value, onChange, placeholder = "Select.
             sideOffset={8}
           >
             <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.96, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -4, scale: 0.98, filter: "blur(2px)" }}
-              transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+              initial={{ opacity: 0, y: -4, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -2, scale: 0.98 }}
+              transition={{ type: "spring", bounce: 0, duration: 0.15 }}
               className="z-50 bg-overlay/90 backdrop-blur-xl border border-subtle rounded-xl shadow-xl overflow-hidden"
               onMouseLeave={() => { setHoveredId(null); }}
             >

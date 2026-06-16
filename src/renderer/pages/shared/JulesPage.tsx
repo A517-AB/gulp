@@ -18,7 +18,6 @@ export default function JulesPage() {
   const [codeDiffCollapsed, setCodeDiffCollapsed] = useState(false);
   const [newSessionOpen, setNewSessionOpen] = useState(false);
   const [newSessionValues, setNewSessionValues] = useState<SessionInitialValues | undefined>();
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const { width: diffWidth, isResizing, handleProps: resizeHandleProps } = useResizable({ defaultWidth: 600 });
   const sessionList = useStore(s => s.sessionList);
@@ -27,13 +26,11 @@ export default function JulesPage() {
     : null;
 
   const handleSessionCreated = () => {
-    setRefreshKey((k) => k + 1);
     setNewSessionOpen(false);
   };
 
   const handleArchive = () => {
     setSelectedSession(null);
-    setRefreshKey((k) => k + 1);
   };
 
   const openNewSession = (values?: SessionInitialValues) => {
@@ -51,7 +48,7 @@ export default function JulesPage() {
           </button>
         </div>
         {!sidebarCollapsed && (
-          <SessionList key={refreshKey} onSelectSession={setSelectedSession} {...(selectedSession ? { selectedSessionId: selectedSession.id } : {})} />
+          <SessionList onSelectSession={setSelectedSession} {...(selectedSession ? { selectedSessionId: selectedSession.id } : {})} />
         )}
       </aside>
 

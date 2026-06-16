@@ -56,6 +56,24 @@ The `SchedulerSection` in `TimePage.tsx` shows a fired-items log (`fired: Test (
 - Sound + action + cancel combinations need a consistent pass
 - Consider whether `NotificationSection` / `ActionSection` in `TimePage.tsx` should become real notification settings vs. test bed
 
+## 9. Snippets — doesn't save
+
+Snippets are not persisting. Investigate where save is wired up and fix.
+
+## 10. Preview popup
+
+Add a preview popup (always-on-top floating window, like the notification popup). Discuss approach before implementing.
+
+## 11. Dropdown UI system
+
+Pick one standard dropdown component for branch, session, and repo pickers so it's not repeated everywhere. Candidates: Radix DropdownMenu (already installed) vs DynamicDropdown. Also need a shared accordion/collapsible component.
+
+## 12. Ship page improvements
+
+Bring back ship page properly — needs more store coverage. Specifically:
+- Snippets store
+- Git status store
+
 ## Notes
 
 - SDK types are from an older clone, runtime shape may differ from type definitions — always guard defensively
