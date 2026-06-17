@@ -39,7 +39,7 @@ export default function JulesPage() {
   return (
     <div className="flex h-full overflow-hidden bg-base">
       <aside className={`hidden md:flex flex-col border-r border-hair bg-surface transition-all duration-200 ${sidebarCollapsed ? "w-12" : "w-64"}`}>
-        <div className="px-3 py-2 border-b border-hair flex items-center justify-between">
+        <div className="px-3 py-2 flex items-center justify-between">
           {!sidebarCollapsed && <span className="text-[10px] font-bold text-fg-dim uppercase tracking-widest">Sessions</span>}
           <button onClick={() => { setSidebarCollapsed((c) => !c); }} className="ml-auto text-fg-dim hover:text-fg-secondary text-xs px-1">
             {sidebarCollapsed ? "›" : "‹"}

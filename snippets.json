@@ -2,6 +2,17 @@
   "version": 1,
   "items": [
     {
+      "id": "a97fe630-3ad1-4645-88e8-6bd60d589bae",
+      "title": "lazy-parser",
+      "languageId": "typescript",
+      "type": "snippet",
+      "file": "snippets/typescript/lazy-parser.ts",
+      "preview": "import React, { useState } from 'react'; import { AnimatePresence, motion } from 'framer-motion';",
+      "tags": [],
+      "createdAt": "2026-06-17T12:28:32.250Z",
+      "updatedAt": "2026-06-17T12:28:56.798Z"
+    },
+    {
       "id": "b5ca8111-7c1f-4423-876e-cebd3ed56bd0",
       "title": "swift-probe",
       "languageId": "python",

@@ -44,7 +44,7 @@ export default function RootLayout(): ReactNode {
                 key={path}
                 to={path}
                 className={({ isActive }) =>
-                    `px-3 py-1 text-xs font-mono rounded transition-colors whitespace-nowrap ${
+                    `px-3 py-1 text-3xs font-sans font-medium rounded transition-colors whitespace-nowrap ${
                         isActive
                             ? 'bg-active text-fg-primary'
                             : 'text-fg-secondary hover:text-fg-primary hover:bg-hover'

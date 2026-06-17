@@ -14,6 +14,8 @@ export interface SessionFormData {
 const activeStreams = new Map<string, () => void>()
 const loadedSessions = new Set<string>()
 let syncInProgress = false
+let lastSyncAt = 0
+const SYNC_COOLDOWN_MS = 5 * 60 * 1000
 
 const DEFAULT_FORM: SessionFormData = {
     sourceId: '',
@@ -108,8 +110,10 @@ export const useStore = create<AppStore>((set, get) => ({
     },
 
     sync: async () => {
-        if (!sdkIpc || syncInProgress) return
+        const now = Date.now()
+        if (!sdkIpc || syncInProgress || now - lastSyncAt < SYNC_COOLDOWN_MS) return
         syncInProgress = true
+        lastSyncAt = now
         try {
             await sdkIpc.client.sync()
             await get().loadSessions()
@@ -141,16 +145,26 @@ export const useStore = create<AppStore>((set, get) => ({
                     return true
                 })
                 const streamed = state.activities[sessionId] ?? []
-                const merged = [...deduped]
+                // streamed wins on conflict — stream() delivers live updates; select() is a point-in-time snapshot
+                const streamedById = new Map(streamed.map(a => [a.id, a]))
+                const merged = deduped.map(a => streamedById.get(a.id) ?? a)
                 for (const a of streamed) {
-                    if (!merged.some(m => m.id === a.id)) merged.push(a)
+                    if (!deduped.some(d => d.id === a.id)) merged.push(a)
                 }
                 console.log(`[store] merged ${merged.length} activities (${streamed.length} streamed, ${deduped.length} loaded)`)
                 return {activities: {...state.activities, [sessionId]: merged}}
             })
         } catch (err) {
             const is404 = err instanceof Error && err.message.includes('404')
-            if (!is404) loadedSessions.delete(sessionId)
+            if (is404) {
+                console.warn(`[store] session not found ${sessionId} (404) — treating as empty`)
+                set(state => ({
+                    activities: {...state.activities, [sessionId]: []},
+                    activitiesError: {...state.activitiesError, [sessionId]: null},
+                }))
+                return
+            }
+            loadedSessions.delete(sessionId)
             console.error(`[store] loadActivities failed ${sessionId}:`, err)
             set(state => ({
                 activitiesError: {
@@ -169,7 +183,7 @@ export const useStore = create<AppStore>((set, get) => ({
         }
         console.log(`[store] streamActivities start ${sessionId}`)
         const ipc = sdkIpc
-        const unsub = ipc.activities.updates(sessionId, (activity) => {
+        const unsub = ipc.activities.stream(sessionId, (activity) => {
             console.log(`[store] activity update ${sessionId} type=${activity.type} id=${activity.id}`)
             set(s => {
                 const existing = s.activities[sessionId] ?? []

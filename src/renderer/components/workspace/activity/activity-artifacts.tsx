@@ -145,12 +145,10 @@ export const ActivityArtifacts = memo(
         if (prevProps.only !== nextProps.only) return false;
         if (prevProps.activity.id !== nextProps.activity.id) return false;
 
-        // Compare artifacts length
         const pArt = prevProps.activity.artifacts;
         const nArt = nextProps.activity.artifacts;
         if (pArt.length !== nArt.length) return false;
 
-        // Shallow check of artifacts
         return pArt.every((prev, idx) => {
             const next = nArt[idx];
             if (!next) return false;

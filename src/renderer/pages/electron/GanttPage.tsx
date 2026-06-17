@@ -5,6 +5,30 @@ import { Gantt, Edit, Filter, Selection, Sort, Toolbar } from '@syncfusion/ej2-g
 import type { GanttTask } from '@shared/local-data'
 import { loadGanttTasks, saveGanttTasks } from '@shared/local-data'
 import { NoteEditor } from '@/components/markdown/NoteEditor'
+import { useTheme } from '@renderer/providers/theme'
+import type { NoteBlock } from '@/components/markdown/types'
+
+function blockText(block: NoteBlock): string {
+  if (!Array.isArray(block.content)) return ''
+  return (block.content as { text?: string }[]).map(c => c.text ?? '').join('')
+}
+
+function extractNoteTasks(blocks: NoteBlock[]): { name: string; today: boolean }[] {
+  const out: { name: string; today: boolean }[] = []
+  for (const block of blocks) {
+    const text = blockText(block).trim()
+    const m = /^@(today|to-?do)\s+(.+)$/i.exec(text) as [string, string, string] | null
+    if (m) out.push({ name: m[2].trim(), today: m[1].toLowerCase() === 'today' })
+    for (const child of block.children) {
+      out.push(...extractNoteTasks([child]))
+    }
+  }
+  return out
+}
+
+function dateStr(offset = 0): string {
+  return new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10)
+}
 
 Gantt.Inject(Edit, Filter, Selection, Sort, Toolbar)
 
@@ -54,6 +78,7 @@ function extractPlain(item: unknown): GanttTask {
 }
 
 export default function GanttPage(): ReactNode {
+  const { theme } = useTheme()
   const [tasks, setTasks] = useState<GanttTask[]>([])
   const [selectedTask, setSelectedTask] = useState<{ id: number; name: string } | null>(null)
   const ganttRef = useRef<GanttComponent>(null)
@@ -61,6 +86,19 @@ export default function GanttPage(): ReactNode {
   useEffect(() => {
     void loadGanttTasks().then(setTasks)
   }, [])
+
+  useEffect(() => {
+    const id = 'syncfusion-gantt-theme'
+    let link = document.getElementById(id) as HTMLLinkElement | null
+    if (!link) {
+      link = document.createElement('link')
+      link.id = id
+      link.rel = 'stylesheet'
+      document.head.appendChild(link)
+    }
+    link.href = theme === 'dark' ? '/gantt-dark.css' : '/gantt-light.css'
+    return () => { document.getElementById(id)?.remove() }
+  }, [theme])
 
   const handleActionComplete = useCallback((args: { requestType: string }) => {
     if (!['save', 'delete', 'add'].includes(args.requestType)) return
@@ -80,6 +118,32 @@ export default function GanttPage(): ReactNode {
   const handleRowDeselected = useCallback(() => {
     setSelectedTask(null)
   }, [])
+
+  const handleNoteBlocks = useCallback((blocks: NoteBlock[]) => {
+    if (selectedTask) return
+    const extracted = extractNoteTasks(blocks)
+    if (extracted.length === 0) return
+    setTasks(prev => {
+      const existing = new Set(prev.map(t => t.TaskName.toLowerCase()))
+      const maxId = prev.reduce((m, t) => Math.max(m, t.TaskID), 0)
+      let nextId = maxId + 1
+      const added: GanttTask[] = []
+      for (const { name, today } of extracted) {
+        if (existing.has(name.toLowerCase())) continue
+        added.push({
+          TaskID: nextId++,
+          TaskName: name,
+          StartDate: dateStr(),
+          EndDate: today ? dateStr() : dateStr(7),
+          Progress: 0,
+        })
+      }
+      if (added.length === 0) return prev
+      const next = [...prev, ...added]
+      void saveGanttTasks(next)
+      return next
+    })
+  }, [selectedTask])
 
   const noteId = selectedTask ? `gantt-task-${selectedTask.id}` : 'default'
   const noteTitle = selectedTask ? `Task: ${selectedTask.name}` : 'Notes'
@@ -104,7 +168,7 @@ export default function GanttPage(): ReactNode {
         </GanttComponent>
       </div>
       <div className="w-[450px] border-l border-hair h-full bg-surface overflow-y-auto">
-        <NoteEditor key={noteId} id={noteId} title={noteTitle} className="h-full" />
+        <NoteEditor key={noteId} id={noteId} title={noteTitle} className="h-full" onBlocks={handleNoteBlocks} />
       </div>
     </div>
   )

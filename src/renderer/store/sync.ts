@@ -30,6 +30,8 @@ export interface SyncState {
     checkGitStatus: (repoPath: string) => Promise<void>;
     syncRepo: (repoPath: string) => Promise<void>;
     fetchRepo: (repoPath: string) => Promise<void>;
+    commitRepo: (repoPath: string, message: string) => Promise<void>;
+    pushRepo: (repoPath: string) => Promise<void>;
     loadTrackedFiles: (repoPath: string) => Promise<void>;
     downloadFile: (repoPath: string, fileSubPath: string) => Promise<void>;
 }
@@ -184,6 +186,36 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         } catch (err) {
             toast.error(err instanceof Error ? err.message : 'Fetch failed', { id: toastId });
             set({ fetchState: 'idle' });
+        }
+    },
+
+    commitRepo: async (repoPath, message) => {
+        if (!git) return;
+        const toastId = 'commit-repo';
+        toast.loading('Staging & committing…', { id: toastId });
+        try {
+            await git.add(repoPath, ['.']);
+            const msg = message.trim() || `snapshot ${new Date().toLocaleString()}`;
+            const res = await git.commit(repoPath, msg, true);
+            if (!res.ok && !res.stderr.includes('nothing to commit')) throw new Error(res.stderr);
+            toast.success('Committed', { id: toastId });
+            await get().checkGitStatus(repoPath);
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Commit failed', { id: toastId });
+        }
+    },
+
+    pushRepo: async (repoPath) => {
+        if (!git) return;
+        const toastId = 'push-repo';
+        toast.loading('Pushing…', { id: toastId });
+        try {
+            const branch = get().currentBranch;
+            const res = await git.push(repoPath, 'origin', branch);
+            if (!res.ok) throw new Error(res.stderr);
+            toast.success('Pushed', { id: toastId });
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Push failed', { id: toastId });
         }
     },
 

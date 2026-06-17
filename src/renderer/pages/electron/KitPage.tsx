@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DynamicDropdown } from '@/components/shared/DynamicDropdown'
+import { TerminalConsole } from '@/components/workspace/activity/terminal-console'
 import { Folder, GitBranch, Zap } from 'lucide-react'
 import { Button } from '@/ui/button'
 import { Badge } from '@/ui/badge'
@@ -275,6 +276,18 @@ export default function KitPage() {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
+            </div>
+          </Section>
+
+          <Separator />
+
+          <Section title="TerminalConsole">
+            <div className="w-full">
+              <TerminalConsole bashOutputs={[
+                { type: 'bashOutput', command: 'npm install', stdout: 'added 142 packages in 3.2s\n\n142 packages are up to date.', stderr: '', exitCode: 0 },
+                { type: 'bashOutput', command: 'tsc --noEmit', stdout: '', stderr: "src/foo.ts(12,5): error TS2322: Type 'string' is not assignable to type 'number'.", exitCode: 1 },
+                { type: 'bashOutput', command: 'git status', stdout: 'On branch main\nYour branch is up to date.\n\nnothing to commit, working tree clean', stderr: '', exitCode: 0 },
+              ]} />
             </div>
           </Section>
 

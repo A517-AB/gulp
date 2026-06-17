@@ -8,8 +8,6 @@ import { Card, CardContent } from "@/ui/card.tsx";
 import { Badge } from "@/ui/badge.tsx";
 import { Avatar, AvatarFallback } from "@/ui/avatar.tsx";
 import { Button } from "@/ui/button.tsx";
-import { BorderGlow } from "@/ui/border-glow.tsx";
-import { CardSpotlight } from "@/ui/card-spotlight.tsx";
 import { FlyingJules } from "@/components/workspace/flying-jules.tsx";
 import { PlanContent } from "@/components/workspace/plan-content.tsx";
 import { formatDistanceToNow, isValid, parseISO } from "date-fns";
@@ -57,11 +55,9 @@ function TypeBadge({ type }: { type: ActivityType }) {
 
 function AgentCard({ children }: { children: ReactNode }) {
     return (
-        <BorderGlow className="max-w-[90%] md:max-w-[80%]" containerClassName="bg-surface/50" glowOnHover={false}>
-            <CardSpotlight className="border-0 bg-transparent rounded-lg" spotlightOnHover={false}>
-                <CardContent className="p-3">{children}</CardContent>
-            </CardSpotlight>
-        </BorderGlow>
+        <div className="max-w-[90%] md:max-w-[80%] rounded-lg bg-surface/50">
+            <CardContent className="p-3">{children}</CardContent>
+        </div>
     );
 }
 
@@ -152,23 +148,14 @@ function renderContent(activity: Activity): ReactNode {
 }
 
 export const SingleActivity = memo(
-    function SingleActivity({ activity, onApprovePlan, approvingPlan, planApproved, isNew }: SingleActivityProps) {
+    function SingleActivity({ activity, onApprovePlan, approvingPlan, planApproved }: SingleActivityProps) {
         const isUser = activity.originator === "user";
         const isPlanPending = activity.type === "planGenerated" && !planApproved;
         const content = renderContent(activity);
 
         return (
-            <motion.div
-                {...(isNew
-                    ? {
-                          initial: { opacity: 0, y: 10 },
-                          animate: { opacity: 1, y: 0 },
-                      }
-                    : {})}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className={`flex gap-2.5 w-full ${isUser ? "flex-row-reverse" : ""} ${
-                    isNew ? "ring-2 ring-purple-500/20 rounded-xl p-1" : ""
-                }`}
+            <div
+                className={`flex gap-2.5 w-full ${isUser ? "flex-row-reverse" : ""}`}
             >
                 <Av role={activity.originator} />
                 {isUser ? (
@@ -208,7 +195,7 @@ export const SingleActivity = memo(
                         )}
                     </AgentCard>
                 )}
-            </motion.div>
+            </div>
         );
     },
     (prevProps, nextProps) => {

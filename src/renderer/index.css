@@ -6,8 +6,8 @@
 
 @theme inline {
   /* ── shadcn/radix passthrough ────────────────────────────────────────────── */
-    --font-sans: 'Roboto', sans-serif;
-    --font-mono: 'JetBrains Mono', 'JetBrainsMono Nerd Font';
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
 
   /* ── code syntax colors ──────────────────────────────────────────────────── */
   --color-code-keyword:    var(--code-keyword);
@@ -202,11 +202,11 @@
   --border-moderate: color-mix(in srgb, white 20%, transparent);
 
   /* foreground scale — dark */
-  --fg-primary:   oklch(0.90 0 0);
-  --fg-secondary: oklch(0.75 0 0);
-  --fg-muted:     oklch(0.58 0 0);
-  --fg-dim:       oklch(0.52 0 0);
-  --fg-ghost:     oklch(0.42 0 0);
+  --fg-primary:   oklch(0.93 0 0);
+  --fg-secondary: oklch(0.80 0 0);
+  --fg-muted:     oklch(0.65 0 0);
+  --fg-dim:       oklch(0.57 0 0);
+  --fg-ghost:     oklch(0.50 0 0);
 
   /* interactive — dark */
   --interactive-hover:    color-mix(in srgb, white 5%,  transparent);
@@ -257,7 +257,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-base text-fg-primary font-sans;
+    @apply bg-base text-fg-primary;
+    font-family: var(--font-sans) !important;
     overflow-x: hidden;
     position: relative;
     font-feature-settings:
@@ -266,10 +267,29 @@
     text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-    line-height: 1.5;
+    line-height: var(--line-height-base, 1.5);
+    letter-spacing: var(--letter-spacing-base, normal);
+    word-spacing: var(--word-spacing-base, normal);
   }
   html {
     overflow-x: hidden;
+    font-size: 16px;
+  }
+
+  /* ── Markdown viewer & editor font mapping ── */
+  .prose,
+  .bn-container {
+    --bn-font-family: var(--font-markdown);
+    font-family: var(--font-markdown) !important;
+  }
+
+  /* ── Force minimum typography sizes of 13px (0.8125rem) ── */
+  .text-\[8px\], 
+  .text-\[9px\], 
+  .text-\[10px\], 
+  .text-\[11px\], 
+  .text-\[12px\] {
+    font-size: var(--text-3xs) !important;
   }
 
   h1,
@@ -278,7 +298,7 @@
   h4,
   h5,
   h6 {
-    font-weight: 600;
+    font-weight: var(--font-weight-bold, 600);
     letter-spacing: -0.025em;
   }
 
@@ -286,7 +306,7 @@
   pre,
   kbd,
   samp {
-    @apply font-mono;
+    font-family: var(--font-mono) !important;
     font-feature-settings:
       "liga" 1,
       "calt" 1,
@@ -294,6 +314,24 @@
       "zero" 1;
     letter-spacing: -0.01em;
   }
+
+  /* ── Dynamic Utility Overrides to prevent static Tailwind compiler inlining ── */
+  .font-sans {
+    font-family: var(--font-sans) !important;
+  }
+  .font-mono {
+    font-family: var(--font-mono) !important;
+  }
+  .font-markdown {
+    font-family: var(--font-markdown) !important;
+  }
+
+  .font-thin { font-weight: var(--font-weight-thin) !important; }
+  .font-light { font-weight: var(--font-weight-light) !important; }
+  .font-normal { font-weight: var(--font-weight-normal) !important; }
+  .font-medium { font-weight: var(--font-weight-medium) !important; }
+  .font-semibold { font-weight: var(--font-weight-semibold) !important; }
+  .font-bold { font-weight: var(--font-weight-bold) !important; }
 
   code {
     @apply px-1.5 py-0.5 rounded text-xs bg-muted;
@@ -375,21 +413,21 @@
 
 /* ── BLOCKNOTE OVERRIDES ────────────────────────────────────────────────────── */
 .bn-container {
-    --bn-code-font-family: 'JetBrains Mono', monospace !important;
-    --bn-font-family: 'Roboto', sans-serif !important;
+    --bn-code-font-family: var(--font-mono);
+    --bn-font-family: var(--font-sans);
 }
 
 .bn-inline-content code {
-    font-size: 0.9em !important;
+    font-size: 0.9em;
 }
 
 .bn-block[data-content-type="codeBlock"] pre {
-    font-size: 0.95em !important;
+    font-size: 0.95em;
 }
 
 /* ── XTERM OVERRIDES ───────────────────────────────────────────────────────── */
 .xterm-viewport, .xterm-screen {
-    background-color: transparent !important;
+    background-color: transparent;
 }
 
 /* ── SMALL WINDOW / WIDGET MODE TOPBAR OVERRIDES ───────────────────────────── */
@@ -400,10 +438,10 @@
     left: 0;
     right: 0;
     z-index: 50;
-    height: 12px !important;
-    min-height: 12px !important;
+    height: 12px;
+    min-height: 12px;
     overflow: hidden;
-    background-color: transparent !important;
+    background-color: transparent;
     border-bottom: 1px solid transparent;
     transition: height 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
   }
@@ -415,9 +453,9 @@
   }
   
   header.app-drag-region:hover {
-    height: var(--height-toolbar) !important;
-    min-height: var(--height-toolbar) !important;
-    background-color: var(--surface-overlay) !important;
+    height: var(--height-toolbar);
+    min-height: var(--height-toolbar);
+    background-color: var(--surface-overlay);
     backdrop-filter: blur(12px);
     border-bottom-color: var(--border-hair);
   }

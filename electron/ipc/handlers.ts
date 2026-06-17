@@ -142,7 +142,7 @@ function serialize<T>(data: T): T {
 }
 
 function send(sender: Sender, ch: string, payload?: unknown) {
-    if (!sender.isDestroyed()) sender.send(ch, payload)
+    if (!sender.isDestroyed()) sender.send(ch, serialize(payload))
 }
 
 // ── registration ──────────────────────────────────────────────────────────────

@@ -30,12 +30,8 @@ export const TerminalConsole = memo(
         };
 
         return (
-            <motion.div
-                initial={{ opacity: 0, scale: 0.98, y: 8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                whileHover={{ boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
-                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="relative mt-3 rounded-lg border border-zinc-800/60 bg-zinc-950/95 text-zinc-300 font-mono text-xxs overflow-hidden shadow-xl backdrop-blur-md transition-shadow duration-300"
+            <div
+                className="relative mt-3 rounded-lg border border-zinc-800/60 bg-zinc-950/95 text-zinc-300 font-mono text-xxs overflow-hidden shadow-xl backdrop-blur-md"
             >
                 {/* Terminal Top Bar */}
                 <div className="flex items-center justify-between px-3 py-2 bg-zinc-900/80 border-b border-zinc-800/30 select-none">
@@ -87,7 +83,7 @@ export const TerminalConsole = memo(
                         </div>
                     ))}
                 </div>
-            </motion.div>
+            </div>
         );
     },
     (prevProps, nextProps) => {

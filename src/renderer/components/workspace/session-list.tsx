@@ -1,4 +1,3 @@
-import {isToday, parseISO} from "date-fns";
 import {Search, CheckSquare} from "lucide-react";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {Input} from "@/ui/input.tsx";
@@ -12,7 +11,7 @@ import {useStore} from "@/store/app.ts";
 import {STATE_BADGE, STATE_DOT, getStatusInfo} from "./session-status.ts";
 import {SessionContextMenu} from "./SessionContextMenu.tsx";
 import type {SessionResource} from "@google/jules-sdk/types";
-import {useMemo, useState} from "react";
+import {useState} from "react";
 
 interface SessionListProps {
     onSelectSession: (session: SessionResource) => void;
@@ -25,21 +24,15 @@ function truncateText(text: string, maxLength: number) {
     return text.slice(0, maxLength) + "...";
 }
 
-const LIMIT = 100;
-
 export function SessionList({ onSelectSession, selectedSessionId }: SessionListProps) {
-  const { sessions, allSessions, error, searchQuery, setSearchQuery, loadSessions } = useSessionList();
+  const { sessions, error, searchQuery, setSearchQuery, loadSessions } = useSessionList();
   const sources = useStore(s => s.sources);
   const archiveSessions = useStore(s => s.archiveSessions);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [archiving, setArchiving] = useState(false);
 
-  const dailyCount = useMemo(() => allSessions.filter((s) => {
-    try { return s.createTime ? isToday(parseISO(s.createTime)) : false; }
-    catch { return false; }
-  }).length, [allSessions]);
-  const pct = Math.min((dailyCount / LIMIT) * 100, 100);
+
 
   function toggleSelect(id: string) {
     setSelected(prev => {
@@ -71,7 +64,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
 
   return (
     <div className="flex-1 min-h-0 flex flex-col bg-surface overflow-hidden">
-      <div className="px-3 py-2 border-b border-hair shrink-0">
+      <div className="px-3 py-2 shrink-0">
         <div className="relative flex items-center gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-fg-ghost" />
@@ -140,7 +133,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
                           <div className="flex items-center justify-between gap-2 mb-0.5 w-full min-w-0">
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="text-[10px] font-bold leading-tight text-fg-primary uppercase tracking-wide flex-1 min-w-0 block overflow-hidden text-ellipsis whitespace-nowrap">
+                                <div className="text-2xs font-bold leading-tight text-fg-primary flex-1 min-w-0 block overflow-hidden text-ellipsis whitespace-nowrap">
                                   {truncateText(s.title || "Untitled", 28)}
                                 </div>
                               </TooltipTrigger>
@@ -161,7 +154,7 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
                               return (
                                 <>
                                   <span className="text-3xs text-fg-ghost font-mono">•</span>
-                                  <Badge className={`shrink-0 text-[8px] px-1 h-3.5 border rounded-sm uppercase tracking-wider leading-none ${STATE_BADGE[s.state]}`}>
+                                  <Badge className={`shrink-0 text-3xs px-1.5 h-4 border rounded-sm uppercase tracking-wider leading-none ${STATE_BADGE[s.state]}`}>
                                     {repo.repo}
                                   </Badge>
                                 </>
@@ -179,8 +172,9 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
         </div>
       </ScrollArea>
 
-      {selectMode ? (
-        <div className="border-t border-hair px-3 py-2.5 bg-raised shrink-0 flex items-center justify-between gap-2">
+      {selectMode && (
+        <div className="px-3 py-2.5 bg-raised shrink-0 relative flex items-center justify-between gap-2">
+          <div className="absolute top-0 left-3 right-3 h-[1px] bg-hair" />
           <span className="text-[10px] font-mono text-fg-ghost">
             {selected.size === 0 ? 'Select sessions' : `${selected.size} selected`}
           </span>
@@ -196,28 +190,6 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
               {archiving ? 'archiving…' : `archive${selected.size > 0 ? ` (${selected.size})` : ''}`}
             </button>
           </div>
-        </div>
-      ) : (
-        <div className="border-t border-hair px-3 py-2.5 bg-raised shrink-0">
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="text-3xs font-bold text-fg-ghost uppercase tracking-widest">Daily Limit</span>
-            <span className="text-[10px] font-mono font-bold text-fg-dim">{dailyCount}/{LIMIT}</span>
-          </div>
-          <div className="w-full h-1 bg-surface overflow-hidden rounded-full">
-            <div
-              className={`h-full transition-all duration-300 ${
-                dailyCount >= LIMIT ? "bg-red-500" : dailyCount >= LIMIT * 0.8 ? "bg-yellow-500" : "bg-primary"
-              }`}
-              style={{width: `${String(pct)}%`}}
-            />
-          </div>
-          {dailyCount >= LIMIT * 0.8 && (
-            <p className={`text-[8px] font-mono mt-1 leading-tight uppercase tracking-wider font-bold ${
-              dailyCount >= LIMIT ? "text-red-500" : "text-yellow-500"
-            }`}>
-              {dailyCount >= LIMIT ? "Limit Reached" : "Approaching Limit"}
-            </p>
-          )}
         </div>
       )}
     </div>

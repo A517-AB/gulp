@@ -6,7 +6,7 @@ import {
   Star, StarOff
 } from 'lucide-react'
 import { FileTree } from '@/components/shared/FileTree'
-import { CodeEditor } from '@/ui/code-editor'
+import { FileEditor } from './FileEditor'
 import { filesystem, git } from '@shared/bridge'
 import { cn } from '@/utils'
 import { useExplorerStore } from '@/store/explorer'
@@ -15,25 +15,32 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/ui/dropdown-menu'
+import { useQuickie } from '@/components/quickie/use-quickie'
+import type { QuickiePreset } from '@/components/quickie/types'
 
-
-// ── constants ──────────────────────────────────────────────────────────────────
-
-const LANG_MAP: Record<string, string> = {
-  py: 'python', ts: 'typescript', tsx: 'typescript',
-  js: 'javascript', jsx: 'javascript', sh: 'shell',
-  json: 'json', md: 'markdown', html: 'html', css: 'css',
-  yaml: 'yaml', yml: 'yaml', rs: 'rust', go: 'go',
-  rb: 'ruby', php: 'php', java: 'java', cs: 'csharp',
-  cpp: 'cpp', c: 'c', kt: 'kotlin', swift: 'swift',
-  toml: 'ini', env: 'ini', sql: 'sql', graphql: 'graphql',
+const FILE_PRESETS: Record<string, QuickiePreset<'repoless_file'>> = {
+  explain: {
+    id: 'explain',
+    label: 'Explain this file',
+    contextType: 'repoless_file',
+    generatePrompt: ({ filename, content }) =>
+      `Explain what this file does:\n\n**${filename}**\n\`\`\`\n${content}\n\`\`\``,
+  },
+  review: {
+    id: 'review',
+    label: 'Review for issues',
+    contextType: 'repoless_file',
+    generatePrompt: ({ filename, content }) =>
+      `Review this file for bugs, issues, or improvements:\n\n**${filename}**\n\`\`\`\n${content}\n\`\`\``,
+  },
+  improve: {
+    id: 'improve',
+    label: 'Suggest improvements',
+    contextType: 'repoless_file',
+    generatePrompt: ({ filename, content }) =>
+      `Suggest specific improvements for:\n\n**${filename}**\n\`\`\`\n${content}\n\`\`\``,
+  },
 }
-
-function langFor(path: string): string {
-  return LANG_MAP[path.split('.').pop()?.toLowerCase() ?? ''] ?? 'plaintext'
-}
-
-// ── component ──────────────────────────────────────────────────────────────────
 
 export function ExplorerPage() {
   const {
@@ -44,8 +51,26 @@ export function ExplorerPage() {
     gitCache, setGitCache
   } = useExplorerStore()
 
+  const quickie = useQuickie()
+
+  const handleQuickie = useCallback(async (path: string, presetId: string) => {
+    if (!filesystem) return
+    const preset = FILE_PRESETS[presetId]
+    if (!preset) return
+    const content = await filesystem.readFile(path)
+    const filename = path.split(/[\\/]/).pop() ?? path
+    void quickie.execute(preset, { filename, content })
+  }, [quickie])
+
   const [fileContents, setFileContents] = useState<Record<string, string>>({})
   const [dirtyPaths, setDirtyPaths] = useState<Set<string>>(new Set())
+  const [editorMode, setEditorMode] = useState<'default' | 'raw'>('default')
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setEditorMode('default')
+    })
+  }, [activePath])
 
   // git
   const [isGitRepo, setIsGitRepo] = useState(false)
@@ -55,16 +80,19 @@ export function ExplorerPage() {
   const [commitState, setCommitState] = useState<'idle' | 'busy' | 'done'>('idle')
   const [stagedPaths, setStagedPaths] = useState<Set<string>>(new Set())
 
+  // for code files use editorRef; for md files track content in contentRef
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
   const activeSavedRef = useRef('')
+  const pendingContentRef = useRef<string>('')
 
   const gitChanges = useMemo(() => rootDir ? (gitCache[rootDir] ?? []) : [], [rootDir, gitCache])
 
   useEffect(() => {
-    activeSavedRef.current = (activePath ? fileContents[activePath] : '') ?? ''
+    const saved = (activePath ? fileContents[activePath] : '') ?? ''
+    activeSavedRef.current = saved
+    pendingContentRef.current = saved
   }, [activePath, fileContents])
 
-  // load active path content if missing
   useEffect(() => {
     if (activePath && fileContents[activePath] === undefined && filesystem) {
       filesystem.readFile(activePath).then(content => {
@@ -73,7 +101,7 @@ export function ExplorerPage() {
     }
   }, [activePath, fileContents])
 
-  // ── git ────────────────────────────────────────────────────────────────────
+  // ── git ──────────────────────────────────────────────────────────────────────
 
   const loadGitStatus = useCallback(async (dir: string) => {
     if (!git) return
@@ -81,17 +109,12 @@ export function ExplorerPage() {
       const check = await git.run(dir, ['rev-parse', '--git-dir'])
       if (!check.ok) { setIsGitRepo(false); return }
       setIsGitRepo(true)
-
       const [branchRes, statusRes] = await Promise.all([
         git.run(dir, ['rev-parse', '--abbrev-ref', 'HEAD']),
         git.status(dir),
       ])
-
       if (branchRes.ok) setGitBranch(branchRes.stdout.trim())
-
-      if (statusRes.ok) {
-        setGitCache(dir, parseGitStatusPorcelain(statusRes.stdout))
-      }
+      if (statusRes.ok) setGitCache(dir, parseGitStatusPorcelain(statusRes.stdout))
     } catch {
       setIsGitRepo(false)
     }
@@ -99,9 +122,7 @@ export function ExplorerPage() {
 
   useEffect(() => {
     if (!rootDir) return
-    void Promise.resolve().then(() => {
-      void loadGitStatus(rootDir)
-    })
+    void Promise.resolve().then(() => { void loadGitStatus(rootDir) })
   }, [rootDir, loadGitStatus])
 
   const gitStatusMap = useMemo(() => {
@@ -113,12 +134,9 @@ export function ExplorerPage() {
     return map
   }, [gitChanges, rootDir])
 
-  // ── file ops ───────────────────────────────────────────────────────────────
+  // ── file ops ─────────────────────────────────────────────────────────────────
 
-  const handleSelectFolder = useCallback(async () => {
-    if (!filesystem) return
-    const path = await filesystem.showOpenDialog()
-    if (!path) return
+  const resetFolderState = useCallback((path: string) => {
     setRootDir(path)
     setOpenPaths([])
     setActivePath(null)
@@ -128,12 +146,16 @@ export function ExplorerPage() {
     setStagedPaths(new Set())
   }, [setRootDir, setOpenPaths, setActivePath])
 
+  const handleSelectFolder = useCallback(async () => {
+    if (!filesystem) return
+    const path = await filesystem.showOpenDialog()
+    if (!path) return
+    resetFolderState(path)
+  }, [resetFolderState])
+
   const handleSelectFile = useCallback(async (filePath: string) => {
     if (!filesystem) return
-    if (openPaths.includes(filePath)) {
-      setActivePath(filePath)
-      return
-    }
+    if (openPaths.includes(filePath)) { setActivePath(filePath); return }
     try {
       const content = await filesystem.readFile(filePath)
       setFileContents(prev => ({ ...prev, [filePath]: content }))
@@ -144,7 +166,7 @@ export function ExplorerPage() {
     }
   }, [openPaths, setActivePath, setOpenPaths])
 
-  const closeTab = useCallback((filePath: string) => {
+  const closeFile = useCallback((filePath: string) => {
     const idx = openPaths.indexOf(filePath)
     const next = openPaths.filter(p => p !== filePath)
     setOpenPaths(next)
@@ -155,17 +177,26 @@ export function ExplorerPage() {
   }, [openPaths, activePath, setOpenPaths, setActivePath])
 
   const handleSaveFile = useCallback(async () => {
-    if (!filesystem || !activePath) return
-    const content = editorRef.current?.getValue() ?? ''
+    if (!activePath || !filesystem) return
+    const lower = activePath.toLowerCase()
+    const isMdOrTxt = lower.endsWith('.md') || lower.endsWith('.txt')
+    const content = isMdOrTxt && editorMode === 'default'
+      ? pendingContentRef.current
+      : (editorRef.current?.getValue() ?? '')
     try {
       await filesystem.writeFile(activePath, content)
       setFileContents(prev => ({ ...prev, [activePath]: content }))
-      setDirtyPaths(prev => { const s = new Set(prev); s.delete(activePath); return s })
+      activeSavedRef.current = content
+      setDirtyPaths(prev => {
+        const s = new Set(prev)
+        s.delete(activePath)
+        return s
+      })
       if (rootDir) void loadGitStatus(rootDir)
     } catch (err) {
       console.error('[Explorer] save failed:', err)
     }
-  }, [activePath, rootDir, loadGitStatus])
+  }, [activePath, editorMode, rootDir, loadGitStatus])
 
   const handleNewFile = useCallback(async () => {
     if (!filesystem || !rootDir) return
@@ -183,6 +214,7 @@ export function ExplorerPage() {
 
   const handleEditorChange = useCallback((value: string | undefined) => {
     if (!activePath) return
+    pendingContentRef.current = value ?? ''
     const isDirty = value !== activeSavedRef.current
     setDirtyPaths(prev => {
       const s = new Set(prev)
@@ -191,7 +223,7 @@ export function ExplorerPage() {
     })
   }, [activePath])
 
-  // ── git ops ────────────────────────────────────────────────────────────────
+  // ── git ops ──────────────────────────────────────────────────────────────────
 
   const toggleStaged = useCallback((fullPath: string) => {
     setStagedPaths(prev => {
@@ -224,30 +256,44 @@ export function ExplorerPage() {
     }
   }, [rootDir, commitState, gitChanges.length, stagedPaths, commitMsg, loadGitStatus])
 
-  // ── keyboard ───────────────────────────────────────────────────────────────
+  // ── keyboard ─────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey)) return
       if (e.key === 's') { e.preventDefault(); void handleSaveFile() }
-      if (e.key === 'w') { e.preventDefault(); if (activePath) closeTab(activePath) }
+      if (e.key === 'w') { e.preventDefault(); if (activePath) closeFile(activePath) }
+      if (e.key === 'e') {
+        e.preventDefault()
+        if (activePath) {
+          const lower = activePath.toLowerCase()
+          const isMdOrTxt = lower.endsWith('.md') || lower.endsWith('.txt')
+          if (isMdOrTxt) {
+            const currentText = editorMode === 'default'
+              ? pendingContentRef.current
+              : (editorRef.current?.getValue() ?? '')
+            setFileContents(prev => ({ ...prev, [activePath]: currentText }))
+            setEditorMode(prev => prev === 'default' ? 'raw' : 'default')
+          }
+        }
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => { window.removeEventListener('keydown', onKey) }
-  }, [handleSaveFile, closeTab, activePath])
+  }, [handleSaveFile, closeFile, activePath, editorMode])
 
-  // ── derived ────────────────────────────────────────────────────────────────
+  // ── render ───────────────────────────────────────────────────────────────────
 
   const activeContent = activePath ? fileContents[activePath] : undefined
 
   return (
     <div className="flex flex-row h-full overflow-hidden w-full text-fg-primary bg-base">
 
-      {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
-      <div className="w-52 flex flex-col h-full overflow-hidden shrink-0 border-r border-hair">
+      {/* ── Sidebar ───────────────────────────────────────────────────────────── */}
+      <div className="w-52 flex flex-col h-full overflow-hidden shrink-0">
 
         {/* Sidebar header */}
-        <div className="flex items-center gap-1 px-2 h-9 shrink-0 border-b border-hair">
+        <div className="flex items-center gap-1 px-2 h-9 shrink-0">
           <div className="flex items-center gap-0.5 min-w-0 flex-1">
             <button
               onClick={() => { void handleSelectFolder() }}
@@ -262,7 +308,7 @@ export function ExplorerPage() {
                   className="flex items-center gap-1 min-w-0 flex-1 px-1 rounded hover:bg-hover group transition-colors"
                   title={rootDir ?? 'Open folder'}
                 >
-                  <span className="text-[10px] font-mono text-fg-ghost truncate group-hover:text-fg-muted">
+                  <span className="text-3xs font-sans text-fg-ghost truncate group-hover:text-fg-muted">
                     {rootDir ? rootDir.split(/[\\/]/).pop() : 'open folder'}
                   </span>
                   {favoritePaths.length > 0 && (
@@ -275,15 +321,15 @@ export function ExplorerPage() {
                   {favoritePaths.map(p => (
                     <DropdownMenuItem
                       key={p}
-                      onClick={() => { setRootDir(p); setOpenPaths([]); setActivePath(null); setFileContents({}); setDirtyPaths(new Set()); setIsGitRepo(false); setStagedPaths(new Set()) }}
-                      className={cn('font-mono text-[10px]', p === rootDir && 'text-fg-primary')}
+                      onClick={() => { resetFolderState(p) }}
+                      className={cn('font-sans text-3xs', p === rootDir && 'text-fg-primary')}
                     >
                       <Star className="h-3 w-3 text-yellow-400 shrink-0" />
                       <span className="truncate">{p}</span>
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => { void handleSelectFolder() }} className="font-mono text-[10px]">
+                  <DropdownMenuItem onClick={() => { void handleSelectFolder() }} className="font-sans text-3xs">
                     <FolderOpen className="h-3 w-3 shrink-0" />
                     Open folder…
                   </DropdownMenuItem>
@@ -299,7 +345,7 @@ export function ExplorerPage() {
                   else addFavorite(rootDir)
                 }}
                 className="p-1 rounded hover:bg-hover text-fg-ghost hover:text-fg-primary transition-colors"
-                title={favoritePaths.includes(rootDir) ? "Remove from favorites" : "Add to favorites"}
+                title={favoritePaths.includes(rootDir) ? 'Remove from favorites' : 'Add to favorites'}
               >
                 {favoritePaths.includes(rootDir) ? <Star className="h-3 w-3 text-yellow-400" /> : <StarOff className="h-3 w-3" />}
               </button>
@@ -322,15 +368,50 @@ export function ExplorerPage() {
         </div>
 
         {/* File tree */}
-        <div className="flex-1 overflow-hidden py-1">
+        <div className="flex-1 overflow-hidden py-1 min-h-0">
           {rootDir && (
             <FileTree
               root={rootDir}
               gitStatus={gitStatusMap}
               onSelectFile={(entry) => { void handleSelectFile(entry.path) }}
+              onQuickie={(path, presetId) => { void handleQuickie(path, presetId) }}
             />
           )}
         </div>
+
+        {/* Open files list */}
+        {openPaths.length > 0 && (
+          <div className="shrink-0 border-t border-hair max-h-40 overflow-y-auto">
+            {openPaths.map(p => {
+              const name = p.split(/[\\/]/).pop() ?? p
+              const isActive = p === activePath
+              const isDirty = dirtyPaths.has(p)
+              const gitCode = gitStatusMap[normalizePath(p)]
+              return (
+                <div
+                  key={p}
+                  className={cn(
+                    'flex items-center gap-1.5 px-2 py-1 cursor-pointer hover:bg-hover transition-colors group',
+                    isActive && 'bg-hover',
+                  )}
+                  onClick={() => { setActivePath(p) }}
+                  onMouseDown={e => { if (e.button === 1) { e.preventDefault(); closeFile(p) } }}
+                >
+                  {isDirty && <span className="h-1 w-1 rounded-full bg-yellow-400 shrink-0" />}
+                  <span className={cn('flex-1 text-3xs truncate', gitCode ? GIT_COLORS[gitCode] : isActive ? 'text-fg-primary' : 'text-fg-secondary')}>
+                    {name}
+                  </span>
+                  <button
+                    onClick={e => { e.stopPropagation(); closeFile(p) }}
+                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-active text-fg-ghost hover:text-fg-primary transition-all shrink-0"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* Git toggle — sidebar footer */}
         {isGitRepo && gitBranch && (
@@ -349,56 +430,18 @@ export function ExplorerPage() {
         )}
       </div>
 
-      {/* ── Main ────────────────────────────────────────────────────────────── */}
+      {/* ── Main ──────────────────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0 relative">
-
-        {/* Tab bar */}
-        {openPaths.length > 0 && (
-          <div className="flex items-stretch h-9 border-b border-hair overflow-x-auto shrink-0 bg-base scrollbar-none">
-            {openPaths.map(tabPath => {
-              const name = tabPath.split(/[\\/]/).pop() ?? tabPath
-              const isActive = tabPath === activePath
-              const isDirty = dirtyPaths.has(tabPath)
-              const gitCode = gitStatusMap[normalizePath(tabPath)]
-              return (
-                <button
-                  key={tabPath}
-                  onClick={() => { setActivePath(tabPath) }}
-                  onMouseDown={(e) => { if (e.button === 1) { e.preventDefault(); closeTab(tabPath) } }}
-                  title={tabPath}
-                  className={cn(
-                    'flex items-center gap-1.5 px-3 h-full border-r border-hair text-[10px] font-mono shrink-0 transition-colors group/tab select-none',
-                    isActive ? 'bg-hover text-fg-primary' : 'text-fg-ghost hover:text-fg-secondary hover:bg-hover/40',
-                  )}
-                >
-                  {isDirty && <span className="h-1.5 w-1.5 rounded-full bg-yellow-400 shrink-0" />}
-                  <span className={cn('truncate max-w-[100px]', gitCode ? GIT_COLORS[gitCode] : '')}>
-                    {name}
-                  </span>
-                  <span
-                    role="button"
-                    onClick={(e) => { e.stopPropagation(); closeTab(tabPath) }}
-                    className="ml-0.5 p-0.5 rounded hover:bg-active text-fg-ghost hover:text-fg-primary opacity-0 group-hover/tab:opacity-100 transition-all shrink-0"
-                  >
-                    <X className="h-2.5 w-2.5" />
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        )}
 
         {/* Editor */}
         <div className="flex-1 overflow-hidden">
           {activePath && activeContent !== undefined ? (
-            <CodeEditor
+            <FileEditor
               path={activePath}
-              defaultValue={activeContent}
-              language={langFor(activePath)}
-              onMount={(ed) => { editorRef.current = ed }}
+              content={activeContent}
+              mode={editorMode}
+              onMount={ed => { editorRef.current = ed }}
               onChange={handleEditorChange}
-              options={{ lineNumbers: 'on' }}
-              containerClassName="rounded-none border-none border-0"
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full gap-3 select-none">
@@ -415,14 +458,14 @@ export function ExplorerPage() {
                     Open folder
                   </button>
                   {favoritePaths.length > 0 && (
-                    <div className="mt-4 flex flex-col gap-1.5 w-64 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="mt-4 flex flex-col gap-1.5 w-64 max-h-[40vh] overflow-y-auto pr-2">
                       <div className="text-[10px] font-mono text-fg-ghost/50 uppercase tracking-widest text-center mb-1 flex items-center justify-center gap-1.5">
                         <Star className="h-3 w-3" /> Favorites
                       </div>
                       {favoritePaths.map(p => (
                         <div key={p} className="flex items-center gap-1 group">
                           <button
-                            onClick={() => { setRootDir(p) }}
+                            onClick={() => { resetFolderState(p) }}
                             className="flex-1 px-2 py-1.5 rounded bg-hover/30 border border-hair text-[10px] font-mono text-fg-secondary hover:text-fg-primary hover:border-subtle transition-colors text-left truncate"
                             title={p}
                           >
@@ -431,7 +474,6 @@ export function ExplorerPage() {
                           <button
                             onClick={() => { removeFavorite(p) }}
                             className="p-1.5 rounded text-fg-ghost hover:text-red-400 hover:bg-red-400/10 opacity-0 group-hover:opacity-100 transition-all shrink-0"
-                            title="Remove favorite"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -445,43 +487,32 @@ export function ExplorerPage() {
           )}
         </div>
 
-        {/* ── Git panel overlay ──────────────────────────────────────────────── */}
+        {/* ── Git panel overlay ─────────────────────────────────────────────── */}
         {isGitRepo && rootDir && (
           <div className={cn(
             'absolute bottom-0 left-0 right-0 h-64 border-t border-hair bg-base z-10 flex flex-col transition-transform duration-200 ease-in-out',
             gitPanelOpen ? 'translate-y-0' : 'translate-y-full',
           )}>
-            {/* Panel header */}
             <div className="flex items-center gap-2 px-3 h-8 shrink-0 border-b border-hair">
               <GitBranch className="h-3 w-3 text-purple-400 shrink-0" />
-              <span className="text-[10px] font-mono text-purple-400 font-semibold">{gitBranch}</span>
+              <span className="text-3xs font-sans text-purple-400 font-semibold">{gitBranch}</span>
               {gitChanges.length > 0 && (
-                <span className="text-[9px] font-mono px-1.5 rounded bg-yellow-500/10 text-yellow-400 font-bold">
+                <span className="text-3xs font-sans px-1.5 rounded bg-yellow-500/10 text-yellow-400 font-bold">
                   {gitChanges.length} changed
                 </span>
               )}
               <div className="flex-1" />
-              <button
-                onClick={() => { void loadGitStatus(rootDir) }}
-                className="p-0.5 rounded hover:bg-hover text-fg-ghost hover:text-fg-primary transition-colors"
-                title="Refresh"
-              >
+              <button onClick={() => { void loadGitStatus(rootDir) }} className="p-0.5 rounded hover:bg-hover text-fg-ghost hover:text-fg-primary transition-colors" title="Refresh">
                 <RefreshCw className="h-2.5 w-2.5" />
               </button>
-              <button
-                onClick={() => { setGitPanelOpen(false) }}
-                className="p-0.5 rounded hover:bg-hover text-fg-ghost hover:text-fg-primary transition-colors"
-              >
+              <button onClick={() => { setGitPanelOpen(false) }} className="p-0.5 rounded hover:bg-hover text-fg-ghost hover:text-fg-primary transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </div>
 
-            {/* Changed files */}
             <div className="flex-1 overflow-y-auto min-h-0">
               {gitChanges.length === 0 ? (
-                <p className="text-[10px] font-mono text-fg-ghost/40 text-center py-8 uppercase tracking-widest">
-                  nothing to commit
-                </p>
+                <p className="text-3xs font-sans text-fg-ghost/40 text-center py-8 uppercase tracking-widest">nothing to commit</p>
               ) : (
                 gitChanges.map(ch => {
                   const fullPath = normalizePath(rootDir) + '/' + ch.path
@@ -490,23 +521,17 @@ export function ExplorerPage() {
                     <div
                       key={ch.path}
                       onClick={() => { toggleStaged(fullPath) }}
-                      className={cn(
-                        'flex items-center gap-2 px-3 py-1 text-[10px] font-mono cursor-pointer hover:bg-hover/60 transition-colors',
-                        isStaged && 'bg-hover/30',
-                      )}
+                      className={cn('flex items-center gap-2 px-3 py-1 text-3xs font-sans cursor-pointer hover:bg-hover/60 transition-colors', isStaged && 'bg-hover/30')}
                     >
-                      <span className={cn('font-bold text-[9px] w-3 shrink-0 text-center', GIT_COLORS[ch.code] ?? 'text-fg-ghost')}>
-                        {ch.code}
-                      </span>
+                      <span className={cn('font-bold text-3xs w-3 shrink-0 text-center', GIT_COLORS[ch.code] ?? 'text-fg-ghost')}>{ch.code}</span>
                       <span className="truncate text-fg-secondary flex-1 min-w-0">{ch.path}</span>
-                      {isStaged && <span className="text-[9px] font-bold text-green-400 shrink-0">✓</span>}
+                      {isStaged && <span className="text-3xs font-bold text-green-400 shrink-0">✓</span>}
                     </div>
                   )
                 })
               )}
             </div>
 
-            {/* Commit row */}
             <div className="flex items-center gap-2 px-3 py-2 shrink-0 border-t border-hair">
               <input
                 type="text"
@@ -514,13 +539,13 @@ export function ExplorerPage() {
                 onChange={e => { setCommitMsg(e.target.value) }}
                 onKeyDown={e => { if (e.key === 'Enter') void handleCommit() }}
                 placeholder={stagedPaths.size > 0 ? `commit ${stagedPaths.size} file(s)…` : 'message (empty = stage all)…'}
-                className="flex-1 min-w-0 bg-hover border border-hair rounded px-2 py-1 text-[10px] font-mono text-fg-primary placeholder-fg-ghost/40 outline-none focus:border-purple-500/40 transition-colors"
+                className="flex-1 min-w-0 bg-hover border border-hair rounded px-2 py-1 text-3xs font-sans text-fg-primary placeholder-fg-ghost/40 outline-none focus:border-purple-500/40 transition-colors"
               />
               <button
                 onClick={() => { void handleCommit() }}
                 disabled={commitState === 'busy' || gitChanges.length === 0}
                 className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1 rounded border text-[10px] font-mono font-bold shrink-0 transition-all',
+                  'flex items-center gap-1.5 px-2.5 py-1 rounded border text-3xs font-sans font-bold shrink-0 transition-all',
                   commitState === 'done'
                     ? 'bg-green-500/10 border-green-500/30 text-green-400'
                     : 'bg-purple-600 border-purple-500 text-white hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed',
@@ -528,9 +553,8 @@ export function ExplorerPage() {
               >
                 {commitState === 'done'
                   ? <><CheckCircle2 className="h-3 w-3" /><span>Done</span></>
-                  : commitState === 'busy'
-                    ? <span>…</span>
-                    : <><Save className="h-3 w-3" /><span>Commit</span></>}
+                  : commitState === 'busy' ? <span>…</span>
+                  : <><Save className="h-3 w-3" /><span>Commit</span></>}
               </button>
             </div>
           </div>

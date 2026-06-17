@@ -2,7 +2,8 @@ import {useMemo} from "react";
 import {FileCode} from "lucide-react";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {DiffViewer} from "@/ui/diff-viewer.tsx";
-import type {ChangeSetArtifact} from "@jules";
+import {MediaItemDownloader} from "@/components/workspace/activity/activity-artifacts.tsx";
+import type {ChangeSetArtifact, MediaArtifact} from "@jules";
 import {useStore} from "@/store/app.ts";
 import {filesystem} from "@shared/bridge";
 
@@ -22,6 +23,12 @@ export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
             return cs ? [{id: a.id, patch: cs.gitPatch.unidiffPatch}] : [];
         })
         .slice(-1), [activities]);
+
+    const mediaItems = useMemo(() => activities.flatMap(a =>
+        ((a as {artifacts?: unknown[]}).artifacts ?? [])
+            .filter((art): art is MediaArtifact => (art as {type?: string}).type === 'media')
+            .map((media, i) => ({ media, activityId: a.id, index: i }))
+    ), [activities]);
 
     const handleDownloadFile = async (filename: string) => {
         try {
@@ -56,7 +63,7 @@ export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
         }
     };
 
-  if (finalDiff.length === 0) {
+  if (finalDiff.length === 0 && mediaItems.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center space-y-4">
         <div className="w-12 h-12 rounded-full bg-raised flex items-center justify-center">
@@ -72,15 +79,18 @@ export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
 
   return (
     <ScrollArea className="h-full">
-      <div className="p-4">
+      <div className="p-4 space-y-4">
           {finalDiff.map((x) => (
-              <DiffViewer 
-                  key={x.id} 
-                  diff={x.patch} 
-                  onDownloadFile={handleDownloadFile} 
-                  {...(repoUrl ? {repoUrl} : {})} 
+              <DiffViewer
+                  key={x.id}
+                  diff={x.patch}
+                  onDownloadFile={handleDownloadFile}
+                  {...(repoUrl ? {repoUrl} : {})}
                   branch="main"
               />
+          ))}
+          {mediaItems.map(({ media, activityId, index }) => (
+              <MediaItemDownloader key={`${activityId}-${index}`} media={media} activityId={activityId} index={index} />
           ))}
       </div>
     </ScrollArea>

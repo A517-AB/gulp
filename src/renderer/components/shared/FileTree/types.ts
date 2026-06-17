@@ -6,6 +6,7 @@ export interface FileTreeProps {
   onSelectFile?:   (entry: FsEntry) => void
   onSelectFolder?: (entry: FsEntry) => void
   onDelete?:       (entry: FsEntry) => Promise<void>
+  onQuickie?:      (path: string, presetId: string) => void
   className?: string
   gitStatus?: Record<string, string>
 }

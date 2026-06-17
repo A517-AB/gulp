@@ -9,6 +9,7 @@ import { filesystem } from '@shared/bridge'
 import {
   ContextMenu, ContextMenuContent, ContextMenuItem,
   ContextMenuSeparator, ContextMenuTrigger,
+  ContextMenuSub, ContextMenuSubTrigger, ContextMenuSubContent,
 } from '@/ui/context-menu'
 import { GIT_COLORS, normalizePath } from '@/utils/git'
 
@@ -20,6 +21,7 @@ interface TreeCtx {
   onSelectFile:   ((entry: FsEntry) => void) | undefined
   onSelectFolder: ((entry: FsEntry) => void) | undefined
   onDelete:       ((entry: FsEntry) => Promise<void>) | undefined
+  onQuickie:      ((path: string, presetId: string) => void) | undefined
   gitStatus:      Record<string, string>
 }
 
@@ -124,13 +126,13 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
             )}
           />
           <span className={cn(
-            'truncate text-[11px] font-mono transition-colors duration-200',
+            'truncate text-[13px] transition-colors duration-200',
             gitColor || (node.isSelected ? 'text-fg-primary' : 'text-fg-secondary group-hover:text-fg-primary'),
           )}>
             {node.data.name}
           </span>
           {gitCode && !node.data.isDir && (
-            <span className={cn('ml-auto text-[9px] font-bold shrink-0', gitColor)}>
+            <span className={cn('ml-auto text-3xs font-bold shrink-0', gitColor)}>
               {gitCode}
             </span>
           )}
@@ -141,6 +143,19 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
         <ContextMenuItem onClick={copyName}>Copy name</ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem onClick={reveal}>Reveal in explorer</ContextMenuItem>
+        {!node.data.isDir && ctx.onQuickie && (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuSub>
+              <ContextMenuSubTrigger>Ask Jules…</ContextMenuSubTrigger>
+              <ContextMenuSubContent>
+                <ContextMenuItem onClick={() => { ctx.onQuickie?.(node.data.entry.path, 'explain') }}>Explain this file</ContextMenuItem>
+                <ContextMenuItem onClick={() => { ctx.onQuickie?.(node.data.entry.path, 'review') }}>Review for issues</ContextMenuItem>
+                <ContextMenuItem onClick={() => { ctx.onQuickie?.(node.data.entry.path, 'improve') }}>Suggest improvements</ContextMenuItem>
+              </ContextMenuSubContent>
+            </ContextMenuSub>
+          </>
+        )}
         {!node.data.isDir && (
           <>
             <ContextMenuSeparator />
@@ -156,7 +171,7 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
 
 // ── component ─────────────────────────────────────────────────────────────────
 
-export function FileTree({ root, onSelectFile, onSelectFolder, onDelete, className, gitStatus = {} }: FileTreeProps) {
+export function FileTree({ root, onSelectFile, onSelectFolder, onDelete, onQuickie, className, gitStatus = {} }: FileTreeProps) {
   const { nodes, error, loadChildren, refresh } = useFileTree(root)
   const containerRef = useRef<HTMLDivElement>(null)
   const [height, setHeight] = useState<number | null>(null)
@@ -177,8 +192,8 @@ export function FileTree({ root, onSelectFile, onSelectFolder, onDelete, classNa
   }, [onDelete])
 
   const ctx = useMemo<TreeCtx>(
-    () => ({ loadChildren, refresh, onSelectFile, onSelectFolder, onDelete: onDeleteWrapped, gitStatus }),
-    [loadChildren, refresh, onSelectFile, onSelectFolder, onDeleteWrapped, gitStatus],
+    () => ({ loadChildren, refresh, onSelectFile, onSelectFolder, onDelete: onDeleteWrapped, onQuickie, gitStatus }),
+    [loadChildren, refresh, onSelectFile, onSelectFolder, onDeleteWrapped, onQuickie, gitStatus],
   )
 
   return (
@@ -188,7 +203,7 @@ export function FileTree({ root, onSelectFile, onSelectFolder, onDelete, classNa
           {error ? (
             <div className="flex items-center gap-2 px-3 pt-4 text-destructive">
               <AlertCircle size={12} className="shrink-0" />
-              <span className="text-[11px] font-mono truncate">{error}</span>
+              <span className="text-3xs font-mono truncate">{error}</span>
             </div>
           ) : height !== null && nodes.length > 0 ? (
             <Tree
@@ -196,7 +211,7 @@ export function FileTree({ root, onSelectFile, onSelectFolder, onDelete, classNa
               idAccessor="id"
               childrenAccessor="children"
               openByDefault={false}
-              rowHeight={22}
+              rowHeight={24}
               indent={12}
               height={height}
               width="100%"

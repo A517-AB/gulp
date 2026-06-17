@@ -111,15 +111,15 @@ export const sdk: SdkIpc = {
         list: (id, options?) => invoke('sdk:activities.list', id, options),
         get: (id, activityId) => invoke('sdk:activities.get', id, activityId),
         history: (id, onItem, onDone?) => {
-            invoke('sdk:activities.history.start', id).catch(console.error)
+            invoke('sdk:activities.history.start', id).catch((err: unknown) => { console.error(err); onDone?.() })
             return onStreamLogged(`sdk:activities.history:${id}`, `sdk:activities.history.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
         updates: (id, onItem, onDone?) => {
-            invoke('sdk:activities.updates.start', id).catch(console.error)
+            invoke('sdk:activities.updates.start', id).catch((err: unknown) => { console.error(err); onDone?.() })
             return onStreamLogged(`sdk:activities.updates:${id}`, `sdk:activities.updates.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
         stream: (id, onItem, onDone?) => {
-            invoke('sdk:activities.stream.start', id).catch(console.error)
+            invoke('sdk:activities.stream.start', id).catch((err: unknown) => { console.error(err); onDone?.() })
             return onStreamLogged(`sdk:activities.stream:${id}`, `sdk:activities.stream.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
     },

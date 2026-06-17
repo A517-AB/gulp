@@ -15,7 +15,7 @@ interface GroupedActivityProps {
 }
 
 function CollapsibleProgress({ title, desc }: { title: string; desc: string }) {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(true);
     return (
         <div className="w-full max-w-2xl mx-auto border border-hair rounded-lg bg-surface/30 overflow-hidden shadow-sm transition-colors duration-200">
             {/* Header/Toggle */}
@@ -144,31 +144,25 @@ export const GroupedActivity = memo(
                         }
                         case "collapsible":
                             return (
-                                <div key={idx} className="w-full max-w-3xl mx-auto py-1 animate-in slide-in-from-bottom-2 duration-500">
+                                <div key={idx} className="w-full max-w-3xl mx-auto py-1">
                                     <CollapsibleProgress title={seg.title} desc={seg.desc} />
                                 </div>
                             );
                         case "bash":
                             return (
-                                <div key={idx} className="w-full max-w-3xl mx-auto animate-in zoom-in-95 duration-500">
+                                <div key={idx} className="w-full max-w-3xl mx-auto">
                                     <TerminalConsole bashOutputs={seg.bashOutputs} />
                                 </div>
                             );
                         case "changeset":
                             return (
-                                <div
-                                    key={idx}
-                                    className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-2 duration-500"
-                                >
+                                <div key={idx} className="w-full max-w-3xl mx-auto">
                                     <ChangeSetSummary artifact={seg.artifact} />
                                 </div>
                             );
                         case "media":
                             return (
-                                <div
-                                    key={idx}
-                                    className="w-full max-w-3xl mx-auto animate-in slide-in-from-bottom-2 duration-500"
-                                >
+                                <div key={idx} className="w-full max-w-3xl mx-auto">
                                     <MediaItemDownloader
                                         media={seg.artifact}
                                         activityId={seg.activityId}

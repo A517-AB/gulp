@@ -7,6 +7,7 @@ interface NoteEditorProps {
   id: string
   title: string
   className?: string
+  onBlocks?: (blocks: NoteBlock[]) => void
 }
 
 function lsLoad(id: string): NotePartialBlock[] | undefined {
@@ -19,7 +20,7 @@ function lsLoad(id: string): NotePartialBlock[] | undefined {
   }
 }
 
-export function NoteEditor({ id, title, className }: NoteEditorProps) {
+export function NoteEditor({ id, title, className, onBlocks }: NoteEditorProps) {
   const [content, setContent] = useState<NotePartialBlock[] | undefined>(() => {
     if (!isElectron) return lsLoad(id)
     return undefined
@@ -56,8 +57,9 @@ export function NoteEditor({ id, title, className }: NoteEditorProps) {
       } else {
         localStorage.setItem(`note:${id}`, JSON.stringify(blocks))
       }
+      onBlocks?.(blocks)
     }, 500)
-  }, [id, title])
+  }, [id, title, onBlocks])
 
   if (!ready) return null
 

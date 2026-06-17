@@ -3,49 +3,49 @@ import type { WebContents } from 'electron'
 import fs from 'fs-extra'
 import * as path from 'path'
 import chokidar from 'chokidar'
-import {FuseManifest, FUSE_ROOT} from '../src/shared/fuse'
+import { FuseManifest, FUSE_ROOT } from '../src/shared/fuse'
 import type { FuseManifest as FuseManifestType } from '../src/shared/fuse'
+import { store } from './store'
 
 const MANIFEST_PATH = path.join(app.getAppPath(), 'snippets.json')
-
 const EMPTY_MANIFEST: FuseManifestType = { version: 1, items: [] }
 
-export function registerSnippetsHandlers(getWebContents: () => WebContents | null): void {
-  const t0 = performance.now()
-  const t = (label: string) => { console.log(`[snippets] ${label} +${(performance.now() - t0).toFixed(1)}ms`) }
-  t('registering handlers')
-  t(`manifest path: ${MANIFEST_PATH}`)
-  t(`fuse root: ${FUSE_ROOT}`)
+function getFuseRoot(): string {
+  return (store.get('fuse.root') as string | undefined) ?? FUSE_ROOT
+}
 
-  // ── manifest (D:\LAST\snippets.json) ──────────────────────────────────────
+let manifestCache: FuseManifestType | null = null
 
-  ipcMain.handle('snippets.get', async (): Promise<FuseManifestType> => {
-    console.log('[snippets] get → reading', MANIFEST_PATH)
-    try {
-        const raw: unknown = await fs.readJson(MANIFEST_PATH)
-      const result = FuseManifest.safeParse(raw)
-      if (!result.success) {
-        console.warn('[snippets] get → manifest invalid, returning empty:', result.error.issues)
-        return EMPTY_MANIFEST
-      }
-        console.log(`[snippets] get → ok, ${String(result.data.items.length)} items`)
-      return result.data
-    } catch (err) {
-      console.warn('[snippets] get → no manifest yet, returning empty:', (err as Error).message)
+async function readManifest(): Promise<FuseManifestType> {
+  if (manifestCache) return manifestCache
+  try {
+    const raw: unknown = await fs.readJson(MANIFEST_PATH)
+    const result = FuseManifest.safeParse(raw)
+    if (!result.success) {
+      console.warn('[snippets] manifest invalid, returning empty:', result.error.issues)
       return EMPTY_MANIFEST
     }
-  })
+    manifestCache = result.data
+    return result.data
+  } catch {
+    return EMPTY_MANIFEST
+  }
+}
+
+export function registerSnippetsHandlers(getWebContents: () => WebContents | null): void {
+  // ── manifest ──────────────────────────────────────────────────────────────
+
+  ipcMain.handle('snippets.get', (): Promise<FuseManifestType> => readManifest())
 
   ipcMain.handle('snippets.save', async (_e, data: FuseManifestType) => {
-      console.log(`[snippets] save → ${String(data.items.length)} items → ${MANIFEST_PATH}`)
     try {
       const result = FuseManifest.safeParse(data)
       if (!result.success) {
-        console.error('[snippets] save → invalid manifest, rejected:', result.error.issues)
+        console.error('[snippets] save → invalid manifest:', result.error.issues)
         return false
       }
       await fs.outputJson(MANIFEST_PATH, result.data, { spaces: 2 })
-      console.log('[snippets] save → ok')
+      manifestCache = result.data
       return true
     } catch (err) {
       console.error('[snippets] save → failed:', err)
@@ -53,42 +53,48 @@ export function registerSnippetsHandlers(getWebContents: () => WebContents | nul
     }
   })
 
-    // ── code file ops (relative to FUSE_ROOT) ────────────────────────────────
+  // ── code file ops ─────────────────────────────────────────────────────────
 
-    ipcMain.handle('snippets.readCode', async (_e, relPath: string): Promise<string> => {
-        const abs = path.join(FUSE_ROOT, relPath)
-        return fs.readFile(abs, 'utf-8')
-    })
+  ipcMain.handle('snippets.readCode', async (_e, relPath: string): Promise<string> => {
+    return fs.readFile(path.join(getFuseRoot(), relPath), 'utf-8')
+  })
 
-    ipcMain.handle('snippets.writeCode', async (_e, relPath: string, content: string): Promise<void> => {
-        const abs = path.join(FUSE_ROOT, relPath)
-        await fs.ensureDir(path.dirname(abs))
-        await fs.writeFile(abs, content, 'utf-8')
-    })
+  ipcMain.handle('snippets.writeCode', async (_e, relPath: string, content: string): Promise<void> => {
+    const abs = path.join(getFuseRoot(), relPath)
+    await fs.ensureDir(path.dirname(abs))
+    await fs.writeFile(abs, content, 'utf-8')
+  })
 
-    ipcMain.handle('snippets.deleteCode', async (_e, relPath: string): Promise<void> => {
-        const abs = path.join(FUSE_ROOT, relPath)
-        await fs.remove(abs)
-    })
+  ipcMain.handle('snippets.deleteCode', async (_e, relPath: string): Promise<void> => {
+    await fs.remove(path.join(getFuseRoot(), relPath))
+  })
+
+  ipcMain.handle('snippets.getRoot', (): string => getFuseRoot())
+
+  ipcMain.handle('snippets.setRoot', (_e, newRoot: string) => {
+    store.set('fuse.root', newRoot)
+    manifestCache = null
+  })
 
   // ── watcher ───────────────────────────────────────────────────────────────
 
-    const snippetsDir = path.join(FUSE_ROOT, 'snippets')
-    t(`watching ${snippetsDir}`)
-    const watcher = chokidar.watch(snippetsDir, {
+  const snippetsDir = path.join(getFuseRoot(), 'snippets')
+  const watcher = chokidar.watch(snippetsDir, {
     ignoreInitial: true,
     depth: 3,
-        ignored: [/(^|[/\\])\../, '**/node_modules/**', '**/dist/**'],
+    ignored: [/(^|[/\\])\./, '**/node_modules/**', '**/dist/**'],
     awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
   })
 
-  watcher.on('ready', () => {
-      t(`watcher ready on ${snippetsDir}`)
-  })
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
   watcher.on('all', (event, filePath) => {
-    console.log(`[snippets] watcher → ${event}: ${filePath}`)
-    getWebContents()?.send('snippets.changed', { event, path: filePath })
+    console.log(`[snippets] ${event}: ${filePath}`)
+    if (debounceTimer) clearTimeout(debounceTimer)
+    debounceTimer = setTimeout(() => {
+      manifestCache = null
+      getWebContents()?.send('snippets.changed', { event, path: filePath })
+    }, 300)
   })
 
   watcher.on('error', (err) => {
