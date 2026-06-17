@@ -4,7 +4,7 @@ import { SingleActivity } from "./single-activity.tsx";
 import { GroupedActivity } from "./grouped-activity.tsx";
 
 export const ActivityItem = memo(
-    function ActivityItem({ item, onApprovePlan, approvingPlan, isNew }: ActivityItemProps) {
+    function ActivityItem({ item, onApprovePlan, approvingPlan, planApproved, isNew }: ActivityItemProps) {
         if (Array.isArray(item)) {
             return <GroupedActivity item={item} />;
         }
@@ -14,6 +14,7 @@ export const ActivityItem = memo(
                 activity={item}
                 onApprovePlan={onApprovePlan}
                 approvingPlan={approvingPlan}
+                planApproved={planApproved}
                 isNew={isNew}
             />
         );
@@ -21,6 +22,7 @@ export const ActivityItem = memo(
     (prevProps, nextProps) => {
         if (prevProps.isNew !== nextProps.isNew) return false;
         if (prevProps.approvingPlan !== nextProps.approvingPlan) return false;
+        if (prevProps.planApproved !== nextProps.planApproved) return false;
         if (prevProps.onApprovePlan !== nextProps.onApprovePlan) return false;
 
         const prevItem = prevProps.item;

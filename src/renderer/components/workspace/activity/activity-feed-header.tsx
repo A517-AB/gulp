@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { Archive, Code, GitBranch, MoreVertical, Play, Plus } from "lucide-react";
-import type { Activity, SessionResource } from "./types";
+import type { SessionResource } from "./types";
 import { Button } from "@/ui/button.tsx";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/ui/dropdown-menu.tsx";
 import { FlyingJules } from "@/components/workspace/flying-jules.tsx";
@@ -21,8 +21,6 @@ const formatDate = (dateString: string): string => {
 
 interface ActivityFeedHeaderProps {
     session: SessionResource;
-    latest: Activity | null;
-    latestSummary: string;
     showCodeDiffs: boolean;
     onToggleCodeDiffs: (show: boolean) => void;
     sending: boolean;
@@ -43,8 +41,6 @@ const mapSessionStateToJulesState = (s: SessionResource["state"]): "idle" | "inP
 export const ActivityFeedHeader = memo(
     function ActivityFeedHeader({
         session,
-        latest,
-        latestSummary,
         showCodeDiffs,
         onToggleCodeDiffs,
         sending,
@@ -95,16 +91,6 @@ export const ActivityFeedHeader = memo(
                                     </>
                                 )}
                             </div>
-                            {session.state === "inProgress" && latest && (
-                                <div className="mt-2 pt-2 border-t border-hair">
-                                    <div className="text-3xs font-bold uppercase tracking-widest text-purple-400 mb-1">
-                                        Latest
-                                    </div>
-                                    <div className="text-[11px] text-fg-secondary line-clamp-2 font-mono">
-                                        {(latestSummary || "").slice(0, 150)}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
@@ -183,13 +169,11 @@ export const ActivityFeedHeader = memo(
             prevProps.session.id === nextProps.session.id &&
             prevProps.session.state === nextProps.session.state &&
             prevProps.session.title === nextProps.session.title &&
-            prevProps.latestSummary === nextProps.latestSummary &&
             prevProps.showCodeDiffs === nextProps.showCodeDiffs &&
             prevProps.sending === nextProps.sending &&
             prevProps.applyStateStatus === nextProps.applyStateStatus &&
             prevProps.onNewSession === nextProps.onNewSession &&
-            prevProps.onArchive === nextProps.onArchive &&
-            prevProps.latest?.id === nextProps.latest?.id
+            prevProps.onArchive === nextProps.onArchive
         );
     }
 );

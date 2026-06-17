@@ -133,6 +133,7 @@ export const sdk: SdkIpc = {
     artifact: {
         save: (data, filepath) => invoke('sdk:artifact.save', data, filepath),
         parseUnidiff: (patch?) => invoke('sdk:artifact.parseUnidiff', patch),
+        parseUnidiffWithContent: (patch?) => invoke('sdk:artifact.parseUnidiffWithContent', patch),
     },
 
     util: {

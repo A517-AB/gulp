@@ -19,7 +19,7 @@ import {
     toSummary,
     validateQuery
 } from '@google/jules-sdk'
-import type {SelectOptions, StreamActivitiesOptions, SyncOptions} from '@google/jules-sdk/types'
+import type {SelectOptions, StreamActivitiesOptions, SyncOptions, GeneratedFile} from '@google/jules-sdk/types'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import {Buffer} from 'node:buffer'
@@ -32,6 +32,94 @@ interface ListOptions {
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
+
+export function parseUnidiffWithContent(patch?: string | null): GeneratedFile[] {
+    if (!patch) return [];
+    const lines = patch.split(/\r?\n/);
+    const files: GeneratedFile[] = [];
+    let currentFile: {
+        path: string;
+        changeType: 'created' | 'modified' | 'deleted';
+        addedLines: string[];
+        additions: number;
+        deletions: number;
+    } | null = null;
+    let inHunk = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line === undefined) continue;
+        if (line.startsWith('--- ')) {
+            const nextLine = lines[i + 1];
+            if (nextLine?.startsWith('+++ ')) {
+                const fromPath = line.substring(4);
+                const toPath = nextLine.substring(4);
+                
+                let changeType: 'created' | 'modified' | 'deleted';
+                let filePath: string;
+                
+                if (fromPath === '/dev/null') {
+                    changeType = 'created';
+                    filePath = toPath.startsWith('b/') ? toPath.substring(2) : toPath;
+                } else if (toPath === '/dev/null') {
+                    changeType = 'deleted';
+                    filePath = fromPath.startsWith('a/') ? fromPath.substring(2) : fromPath;
+                } else {
+                    changeType = 'modified';
+                    filePath = toPath.startsWith('b/') ? toPath.substring(2) : toPath;
+                }
+
+                if (currentFile) {
+                    files.push({
+                        path: currentFile.path,
+                        changeType: currentFile.changeType,
+                        content: currentFile.addedLines.join('\n'),
+                        additions: currentFile.additions,
+                        deletions: currentFile.deletions,
+                    });
+                }
+
+                currentFile = {
+                    path: filePath,
+                    changeType,
+                    addedLines: [],
+                    additions: 0,
+                    deletions: 0,
+                };
+                inHunk = false;
+                i++; // skip '+++ '
+                continue;
+            }
+        }
+
+        if (currentFile) {
+            if (line.startsWith('@@')) {
+                inHunk = true;
+                continue;
+            }
+            if (inHunk) {
+                if (line.startsWith('+')) {
+                    currentFile.addedLines.push(line.substring(1));
+                    currentFile.additions++;
+                } else if (line.startsWith('-')) {
+                    currentFile.deletions++;
+                }
+            }
+        }
+    }
+
+    if (currentFile) {
+        files.push({
+            path: currentFile.path,
+            changeType: currentFile.changeType,
+            content: currentFile.addedLines.join('\n'),
+            additions: currentFile.additions,
+            deletions: currentFile.deletions,
+        });
+    }
+
+    return files;
+}
 
 function resolveGitSource(cwd?: string): { github: string | null; baseBranch: string } {
     const baseBranch = process.env.BASE_BRANCH ?? 'main'
@@ -144,7 +232,7 @@ export function registerSdkHandlers() {
 
     ipcMain.handle('sdk:session.snapshot', async (_, id: string, options?: { activities?: boolean }) => {
         const snap = await jules.session(id).snapshot(options)
-        return snap.toJSON()
+        return snap.toJSON({ exclude: [] })
     })
 
     ipcMain.handle('sdk:session.archive', async (_, id: string) =>
@@ -292,6 +380,10 @@ export function registerSdkHandlers() {
 
     ipcMain.handle('sdk:artifact.parseUnidiff', (_, patch?: string | null) =>
         serialize(parseUnidiff(patch))
+    )
+
+    ipcMain.handle('sdk:artifact.parseUnidiffWithContent', (_, patch?: string | null) =>
+        serialize(parseUnidiffWithContent(patch))
     )
 
     // ── utils ─────────────────────────────────────────────────────────────────────

@@ -16,6 +16,7 @@ import type {
     SyncOptions,
     SyncProgress,
     SyncStats,
+    GeneratedFile,
 } from '@google/jules-sdk/types'
 import type {ActivitySummary, DomainSchema, ListSessionsOptions, ParsedFile, ValidationResult} from '@google/jules-sdk'
 
@@ -68,6 +69,7 @@ export interface SdkIpc {
   artifact: {
       save: (data: string, filepath: string) => Promise<string>
       parseUnidiff: (patch?: string | null) => Promise<ParsedFile[]>
+      parseUnidiffWithContent: (patch?: string | null) => Promise<GeneratedFile[]>
   }
     util: {
         toSummary: (activity: Activity) => Promise<ActivitySummary>

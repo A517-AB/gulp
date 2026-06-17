@@ -1,19 +1,23 @@
-import {useEffect, useRef} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import {useParams} from 'react-router'
 import {useStore} from '@/store/app'
-import type {Activity, ChangeSetArtifact, PlanStep} from '@google/jules-sdk/types'
-import {parseUnidiff} from '@/utils/activity'
+import type {Activity, ChangeSetArtifact, PlanStep, ParsedFile} from '@jules'
 import {Input} from '@/ui/input'
 import {Button} from '@/ui/button'
-import {useState} from 'react'
 import {CheckCircle2, ChevronDown, ChevronRight, FileText, Send, XCircle} from 'lucide-react'
 
 function ChangeSetDropdown({artifact}: { artifact: ChangeSetArtifact }) {
     const [open, setOpen] = useState(false)
+    const [files, setFiles] = useState<ParsedFile[]>([])
     const patch = artifact.gitPatch.unidiffPatch
-    if (!patch) return null
-    const files = parseUnidiff(patch)
-    if (files.length === 0) return null
+    const parseUnidiff = useStore(s => s.parseUnidiff)
+
+    useEffect(() => {
+        if (!patch) return
+        parseUnidiff(patch).then(setFiles).catch(console.error)
+    }, [patch, parseUnidiff])
+
+    if (!patch || files.length === 0) return null
     const totalAdd = files.reduce((s, f) => s + f.additions, 0)
     const totalDel = files.reduce((s, f) => s + f.deletions, 0)
     return (
@@ -23,6 +27,7 @@ function ChangeSetDropdown({artifact}: { artifact: ChangeSetArtifact }) {
                 className="flex items-center gap-1.5 text-3xs font-mono text-fg-dim hover:text-fg-secondary transition-colors"
             >
                 {open ? <ChevronDown className="size-3"/> : <ChevronRight className="size-3"/>}
+                <span className="text-purple-400">◆</span>
                 <span>{files.length} file{files.length !== 1 ? 's' : ''} changed</span>
                 <span className="text-green-400">+{totalAdd}</span>
                 <span className="text-red-400">-{totalDel}</span>

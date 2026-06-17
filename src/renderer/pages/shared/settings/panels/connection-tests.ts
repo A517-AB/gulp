@@ -269,6 +269,17 @@ function getConnectionTests(): TestDef[] {
         return { summary: `${String(files.length)} files — null input correctly returns empty`, data: files }
       },
     },
+    {
+      key: 'artifact_parseUnidiffWithContent',
+      label: 'artifact.parseUnidiffWithContent(null)',
+      electronOnly: e(),
+      fn: async () => {
+        const ipc = getSdkIpc()
+        if (!ipc) throw new Error('no sdk')
+        const files = await ipc.artifact.parseUnidiffWithContent(null)
+        return { summary: `${String(files.length)} files — null input correctly returns empty`, data: files }
+      },
+    },
 
     // ── query ─────────────────────────────────────────────────────────────────
 

@@ -3,8 +3,6 @@ import {ActivityFeed} from "@/components/workspace/activity";
 import {SessionList} from "@/components/workspace/session-list.tsx";
 import {CodeDiffSidebar} from "@/components/workspace/code-diff-sidebar.tsx";
 import {NewSessionDialog} from "@/components/workspace/new-session-dialog.tsx";
-import {GridBackground} from "@/ui/grid-background";
-import {BackgroundBeams} from "@/ui/background-beams";
 import {useResizable} from "@renderer/hooks/use-resizable";
 import {useStore} from "@/store/app.ts";
 import {FlyingJules} from "@/components/workspace/flying-jules.tsx";
@@ -62,20 +60,17 @@ export default function JulesPage() {
             onToggleCodeDiffs={setShowCodeDiffs}
           />
         ) : (
-          <GridBackground className="h-full">
-            <BackgroundBeams />
-            <div className="relative z-10 flex h-full items-center justify-center">
-              <div className="text-center space-y-5 flex flex-col items-center justify-center">
-                <FlyingJules size={100} state="idle" />
-                <div className="space-y-3">
-                  <p className="text-[10px] font-mono text-fg-dim uppercase tracking-widest">No session selected</p>
-                  <button onClick={() => { openNewSession(); }} className="text-[10px] font-mono uppercase tracking-widest text-purple-400 hover:text-purple-300">
-                    + New Session
-                  </button>
-                </div>
+          <div className="flex h-full items-center justify-center">
+            <div className="text-center space-y-5 flex flex-col items-center justify-center">
+              <FlyingJules size={100} state="idle" />
+              <div className="space-y-3">
+                <p className="text-[10px] font-mono text-fg-dim uppercase tracking-widest">No session selected</p>
+                <button onClick={() => { openNewSession(); }} className="text-[10px] font-mono uppercase tracking-widest text-purple-400 hover:text-purple-300">
+                  + New Session
+                </button>
               </div>
             </div>
-          </GridBackground>
+          </div>
         )}
       </main>
 

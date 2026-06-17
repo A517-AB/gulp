@@ -1,7 +1,7 @@
 /* eslint-disable */
 import type { SdkIpc } from '../jules'
 import type { Activity, ActivitySummary, SessionConfig, SessionResource, Source } from '../jules'
-
+// not for now
 const BASE = 'http://127.0.0.1:3939'
 const WS   = 'ws://127.0.0.1:3939'
 
@@ -120,6 +120,10 @@ export const webSdk: SdkIpc = {
     parseUnidiff: async (patch) => {
       if (!patch) return []
       return post('/utils/parse-diff', { patch })
+    },
+    parseUnidiffWithContent: async (patch) => {
+      if (!patch) return []
+      return post('/utils/parse-diff-with-content', { patch })
     },
   },
 

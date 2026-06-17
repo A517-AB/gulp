@@ -2,18 +2,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useStore } from './app';
+import { sdkIpc, filesystem, store } from '@shared/bridge';
+import type { ParsedFile } from '@jules';
 import { parse as parseDiff } from 'diff2html';
 import type { DiffFile } from 'diff2html/lib-esm/types';
 import { toast } from 'sonner';
 
 export type ActionState = "idle" | "busy" | "done";
 
-export interface ShipFile {
-    path: string;
-    changeType: "created" | "deleted" | "modified";
-    additions: number;
-    deletions: number;
-}
+export type ShipFile = ParsedFile;
 
 export interface PatchEntry {
     files: ShipFile[];
@@ -72,9 +69,27 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
         set(state => ({ patchLoading: { ...state.patchLoading, [sessionId]: true } }));
 
         try {
-            const loadSessionPatch = useStore.getState().loadSessionPatch;
-            const result = await loadSessionPatch(sessionId);
-            set(state => ({ patchData: { ...state.patchData, [sessionId]: result } }));
+            if (!sdkIpc) {
+                set(state => ({ patchData: { ...state.patchData, [sessionId]: null } }));
+                return;
+            }
+            await sdkIpc.activities.hydrate(sessionId);
+            const activities = await sdkIpc.activities.select(sessionId);
+            let patch: string | null = null;
+            outer: for (const act of [...activities].reverse()) {
+                for (const art of [...act.artifacts].reverse()) {
+                    if (art.type === 'changeSet' && art.gitPatch.unidiffPatch) {
+                        patch = art.gitPatch.unidiffPatch;
+                        break outer;
+                    }
+                }
+            }
+            if (!patch) {
+                set(state => ({ patchData: { ...state.patchData, [sessionId]: null } }));
+                return;
+            }
+            const files = await sdkIpc.artifact.parseUnidiff(patch);
+            set(state => ({ patchData: { ...state.patchData, [sessionId]: { files, patch } } }));
         } catch {
             set(state => ({ patchData: { ...state.patchData, [sessionId]: null } }));
         } finally {
@@ -112,7 +127,7 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
     handleGetFile: async (sessionId, file) => {
         const key = `${sessionId}/${file.path}`;
         const data = get().patchData[sessionId];
-        if (!data) return;
+        if (!data || !sdkIpc || !filesystem) return;
 
         set(state => ({ fileStates: { ...state.fileStates, [key]: "busy" } }));
         const toastId = `get-${key}`;
@@ -120,14 +135,31 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
         toast.loading(`Saving ${name}…`, { id: toastId });
 
         try {
-            const saveFilePatch = useStore.getState().saveFilePatch;
-            await saveFilePatch(sessionId, file.path, data.patch);
+            const savePath = await filesystem.showSaveDialog(`${name}.patch`);
+            if (!savePath) {
+                toast.dismiss(toastId);
+                set(state => ({ fileStates: { ...state.fileStates, [key]: "idle" } }));
+                return;
+            }
+
+            const sections = data.patch.split(/(?=^diff --git )/m).filter(Boolean);
+            const filePatch = sections.find(s => s.includes(`b/${file.path}`) || s.includes(`/${file.path}`)) ?? data.patch;
+
+            const bytes = new TextEncoder().encode(filePatch);
+            let binary = "";
+            for (let i = 0; i < bytes.length; i += 8192) {
+                binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + 8192, bytes.length)));
+            }
+            const base64Patch = btoa(binary);
+
+            await sdkIpc.artifact.save(base64Patch, savePath);
             toast.success("Saved", { id: toastId });
             set(state => ({ fileStates: { ...state.fileStates, [key]: "done" } }));
             setTimeout(() => {
                 set(state => ({ fileStates: { ...state.fileStates, [key]: "idle" } }));
             }, 1800);
-        } catch {
+        } catch (err) {
+            console.error('[shipStore] saveFilePatch error:', err);
             toast.error("Save failed", { id: toastId });
             set(state => ({ fileStates: { ...state.fileStates, [key]: "idle" } }));
         }
@@ -139,15 +171,19 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
             : (get().sourceId !== "")
             ? get().sourceId
             : (useStore.getState().sources[0]?.id ?? "");
-        if (!resolvedSourceId) return;
+        if (!resolvedSourceId || !sdkIpc) return;
 
         const toastId = `snap-${sessionId}`;
         toast.loading("Applying patch…", { id: toastId });
         set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "busy" } }));
 
         try {
-            const applyPatch = useStore.getState().applyPatch;
-            const result = await applyPatch(sessionId, resolvedSourceId);
+            let cwd = '';
+            if (resolvedSourceId && store) {
+                const stored = await store.get(`ship.repoPaths.${resolvedSourceId}`);
+                if (typeof stored === 'string' && stored) cwd = stored;
+            }
+            const result = await sdkIpc.session.applyPatch(sessionId, { cwd });
             if (result.success) {
                 toast.success(result.branch ? `Applied → ${result.branch}` : "Patch applied", { id: toastId });
                 set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "done" } }));
@@ -158,7 +194,8 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
                 toast.error(result.error ?? "Patch failed", { id: toastId });
                 set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "idle" } }));
             }
-        } catch {
+        } catch (err) {
+            console.error('[shipStore] applyPatch error:', err);
             toast.error("Snapshot failed", { id: toastId });
             set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "idle" } }));
         }

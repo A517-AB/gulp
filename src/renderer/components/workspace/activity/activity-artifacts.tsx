@@ -1,7 +1,8 @@
 import { memo, useState } from "react";
 import { Check, Download } from "lucide-react";
-import { useStore } from "@/store/app.ts";
-import type { Activity, BashArtifact, ChangeSetArtifact, MediaArtifact } from "./types";
+import { filesystem } from "@shared/bridge";
+import { useStore } from "@/store/app";
+import type { Activity, BashArtifact, ChangeSetArtifact, MediaArtifact } from "@jules";
 import { ChangeSetSummary } from "@/components/workspace/changeset-summary.tsx";
 import { TerminalConsole } from "./terminal-console.tsx";
 
@@ -13,14 +14,25 @@ interface MediaItemProps {
 
 export const MediaItemDownloader = memo(function MediaItemDownloader({ media, activityId, index }: MediaItemProps) {
     const [downloadState, setDownloadState] = useState<"idle" | "saving" | "done" | "error" >("idle");
-    const downloadMedia = useStore((s) => s.downloadMedia);
 
     const handleDownload = async () => {
         try {
             setDownloadState("saving");
             const ext = media.format.split("/").pop() ?? "bin";
             const defaultName = `jules_media_${activityId}_${index}.${ext}`;
-            const success = await downloadMedia(media.data, defaultName);
+            
+            let success = false;
+            if (filesystem) {
+                const savePath = await filesystem.showSaveDialog(defaultName);
+                if (savePath) {
+                    await useStore.getState().saveArtifact(media.data, savePath);
+                    success = true;
+                } else {
+                    setDownloadState("idle");
+                    return;
+                }
+            }
+
             if (!success) {
                 const binaryString = window.atob(media.data);
                 const bytes = new Uint8Array(binaryString.length);

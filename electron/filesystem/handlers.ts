@@ -4,6 +4,13 @@ import * as path from 'path'
 import ignore from 'ignore'
 import type { FsEntry, FsStat, ReaddirOptions, FileFilter } from './types'
 
+const SKIP_DIRS = new Set([
+  'node_modules', '.git', 'dist', 'build', '.next', 'out', '.output',
+  '__pycache__', '.venv', 'venv', '.tox', '.mypy_cache', '.ruff_cache',
+  'target', '.cargo', '.gradle', '.idea', '.vs', '.vscode',
+  'coverage', '.nyc_output', '.turbo', '.cache',
+])
+
 export function registerFilesystemHandlers(): void {
   // ── read ──────────────────────────────────────────────────────────────────────
 
@@ -23,6 +30,7 @@ export function registerFilesystemHandlers(): void {
     const results = await Promise.all(
       entries
         .filter(e => options?.showHidden === true || !e.name.startsWith('.'))
+        .filter(e => !(e.isDirectory() && SKIP_DIRS.has(e.name)))
         .filter(e => ig ? !ig.ignores(e.name) : true)
         .map(async e => {
           const stat = await fs.stat(path.join(dir, e.name)).catch(() => null)

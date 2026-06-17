@@ -152,9 +152,9 @@ function renderContent(activity: Activity): ReactNode {
 }
 
 export const SingleActivity = memo(
-    function SingleActivity({ activity, onApprovePlan, approvingPlan, isNew }: SingleActivityProps) {
+    function SingleActivity({ activity, onApprovePlan, approvingPlan, planApproved, isNew }: SingleActivityProps) {
         const isUser = activity.originator === "user";
-        const isPlanPending = activity.type === "planGenerated";
+        const isPlanPending = activity.type === "planGenerated" && !planApproved;
         const content = renderContent(activity);
 
         return (
@@ -214,6 +214,7 @@ export const SingleActivity = memo(
     (prevProps, nextProps) => {
         if (prevProps.isNew !== nextProps.isNew) return false;
         if (prevProps.approvingPlan !== nextProps.approvingPlan) return false;
+        if (prevProps.planApproved !== nextProps.planApproved) return false;
         if (prevProps.onApprovePlan !== nextProps.onApprovePlan) return false;
         if (prevProps.activity.id !== nextProps.activity.id) return false;
 

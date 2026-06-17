@@ -26,12 +26,13 @@ export function ActivityFeed({
     const streamActivities = useStore((s) => s.streamActivities);
 
     const applyPatch = useStore((s) => s.applyPatch);
+
     const approvePlan = useStore((s) => s.approvePlan);
     const sendMessage = useStore((s) => s.sendMessage);
 
-    const { grouped, latest } = useActivityGroups(activities);
+    const { grouped } = useActivityGroups(activities);
 
-    const latestSummary = useStore((s) => s.activitySummaries[session.id]?.[latest?.id ?? ""] ?? "");
+    const planApproved = activities.some((a) => a.type === "planApproved");
 
     const [sending, setSending] = useState(false);
     const [approving, setApproving] = useState(false);
@@ -77,13 +78,13 @@ export function ActivityFeed({
 
     const handleApplyLocally = useCallback(async () => {
         setApplyState({ status: "applying" });
-        const result = await applyPatch(session.id);
+        const result = await applyPatch(session.id, session.source?.id);
         if (result.success) {
             setApplyState({ status: "done", message: `Applied to branch: ${result.branch ?? "unknown"}` });
         } else {
             setApplyState({ status: "error", message: result.error ?? "Unknown error" });
         }
-    }, [session.id, applyPatch]);
+    }, [session.id, session.source?.id, applyPatch]);
 
     const handleApprovePlan = useCallback(() => {
         setApproving((prev) => {
@@ -135,8 +136,6 @@ export function ActivityFeed({
         <div className="flex flex-col h-full bg-base">
             <ActivityFeedHeader
                 session={session}
-                latest={latest}
-                latestSummary={latestSummary}
                 showCodeDiffs={showCodeDiffs}
                 onToggleCodeDiffs={onToggleCodeDiffs}
                 sending={sending}
@@ -198,6 +197,7 @@ export function ActivityFeed({
                                 item={item}
                                 onApprovePlan={handleApprovePlan}
                                 approvingPlan={approving}
+                                planApproved={planApproved}
                                 isNew={!Array.isArray(item) && newActivityIds.has(item.id)}
                             />
                         ))}

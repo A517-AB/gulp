@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Tree, type NodeRendererProps } from 'react-arborist'
-import { File, Folder, FolderOpen, AlertCircle } from 'lucide-react'
+import { File, Folder, FolderOpen, AlertCircle, ChevronRight } from 'lucide-react'
 import { cn } from '@/utils'
 import { useFileTree } from '@/hooks/use-file-tree'
 import type { FileTreeNode, FileTreeProps } from './types'
@@ -10,6 +10,7 @@ import {
   ContextMenu, ContextMenuContent, ContextMenuItem,
   ContextMenuSeparator, ContextMenuTrigger,
 } from '@/ui/context-menu'
+import { GIT_COLORS, normalizePath } from '@/utils/git'
 
 // ── context ───────────────────────────────────────────────────────────────────
 
@@ -30,15 +31,22 @@ function useTreeContext(): TreeCtx {
   return ctx
 }
 
-const GIT_COLORS: Record<string, string> = {
-  M: 'text-yellow-400',
-  A: 'text-green-400',
-  D: 'text-red-400/70',
-  '?': 'text-cyan-400/70',
-  U: 'text-red-500',
+const getFileIconColor = (filename: string) => {
+  const ext = filename.split('.').pop()?.toLowerCase() ?? ''
+  const colorMap: Record<string, string> = {
+    tsx: "text-[#61dafb]",
+    ts: "text-[#3178c6]",
+    jsx: "text-[#61dafb]",
+    js: "text-[#f7df1e]",
+    css: "text-[#264de4]",
+    json: "text-[#cb3837]",
+    md: "text-muted-foreground",
+    svg: "text-[#ffb13b]",
+    png: "text-[#a1a1aa]",
+    default: "text-muted-foreground",
+  }
+  return colorMap[ext] ?? colorMap['default']
 }
-
-const normalize = (p: string) => p.replace(/\\/g, '/')
 
 // ── node renderer ─────────────────────────────────────────────────────────────
 
@@ -49,8 +57,9 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
     ? (node.isOpen ? FolderOpen : Folder)
     : File
 
-  const gitCode = ctx.gitStatus[normalize(node.data.entry.path)]
+  const gitCode = ctx.gitStatus[normalizePath(node.data.entry.path)]
   const gitColor = gitCode ? (GIT_COLORS[gitCode] ?? '') : ''
+  const fileColor = !node.data.isDir && !gitColor ? getFileIconColor(node.data.name) : ''
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -88,19 +97,35 @@ function FileNode({ node, style }: NodeRendererProps<FileTreeNode>) {
         <div
           style={style}
           className={cn(
-            'flex items-center gap-1.5 px-2 rounded-sm cursor-pointer select-none',
-            'hover:bg-hover transition-colors',
+            'group flex items-center gap-1.5 px-2 py-0.5 rounded-sm cursor-pointer select-none',
+            'transition-colors duration-200 ease-out hover:bg-hover',
             node.isSelected && 'bg-selected text-fg-primary',
           )}
           onClick={handleClick}
         >
+          {/* Chevron for folders */}
+          <div className="w-3 flex items-center justify-center shrink-0">
+            {node.data.isDir && (
+              <ChevronRight
+                size={12}
+                className={cn(
+                  "text-fg-ghost transition-transform duration-200",
+                  node.isOpen && "rotate-90"
+                )}
+              />
+            )}
+          </div>
+
           <Icon
             size={12}
-            className={cn('shrink-0', node.data.isDir ? 'text-fg-muted' : (gitColor || 'text-fg-ghost'))}
+            className={cn(
+              'shrink-0 transition-transform duration-200 group-hover:scale-110',
+              node.data.isDir ? 'text-fg-muted' : (gitColor || fileColor)
+            )}
           />
           <span className={cn(
-            'truncate text-[11px] font-mono',
-            gitColor || (node.isSelected ? 'text-fg-primary' : 'text-fg-secondary'),
+            'truncate text-[11px] font-mono transition-colors duration-200',
+            gitColor || (node.isSelected ? 'text-fg-primary' : 'text-fg-secondary group-hover:text-fg-primary'),
           )}>
             {node.data.name}
           </span>

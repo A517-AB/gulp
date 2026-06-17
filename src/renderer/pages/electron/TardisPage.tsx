@@ -40,11 +40,11 @@ export default function TardisPage() {
 
       if (!ids.has(TEMP_ITEM.id)) {
         const saved = await s.add(TEMP_ITEM)
-        setItems(p => [...p, saved])
+        setItems(p => p.some(i => i.id === saved.id) ? p : [...p, saved])
       }
       if (!ids.has(WORK_ITEM.id)) {
         const saved = await s.add(WORK_ITEM)
-        setItems(p => [...p, saved])
+        setItems(p => p.some(i => i.id === saved.id) ? p : [...p, saved])
       }
     }).catch((err: unknown) => {
         console.error('[TardisPage] init failed:', err)
@@ -54,7 +54,7 @@ export default function TardisPage() {
   async function add(item: ScheduledItem) {
     if (!scheduler) return
     const saved = await scheduler.add(item)
-    setItems(p => [...p, saved])
+    setItems(p => p.some(i => i.id === saved.id) ? p.map(i => i.id === saved.id ? saved : i) : [...p, saved])
   }
 
   async function toggle(id: string, enabled: boolean) {

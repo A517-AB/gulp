@@ -12,7 +12,7 @@ import {useStore} from "@/store/app.ts";
 import {STATE_BADGE, STATE_DOT, getStatusInfo} from "./session-status.ts";
 import {SessionContextMenu} from "./SessionContextMenu.tsx";
 import type {SessionResource} from "@google/jules-sdk/types";
-import {useState} from "react";
+import {useMemo, useState} from "react";
 
 interface SessionListProps {
     onSelectSession: (session: SessionResource) => void;
@@ -35,10 +35,10 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [archiving, setArchiving] = useState(false);
 
-  const dailyCount = allSessions.filter((s) => {
-    try { return s.createTime ? isToday(parseISO(s.createTime)) : false }
-    catch { return false }
-  }).length;
+  const dailyCount = useMemo(() => allSessions.filter((s) => {
+    try { return s.createTime ? isToday(parseISO(s.createTime)) : false; }
+    catch { return false; }
+  }).length, [allSessions]);
   const pct = Math.min((dailyCount / LIMIT) * 100, 100);
 
   function toggleSelect(id: string) {

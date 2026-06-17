@@ -12,6 +12,7 @@ export interface ActivityItemProps {
     item: ActivityGroup;
     onApprovePlan: () => void;
     approvingPlan: boolean;
+    planApproved: boolean;
     isNew: boolean;
 }
 
@@ -19,6 +20,7 @@ export interface SingleActivityProps {
     activity: Activity;
     onApprovePlan: () => void;
     approvingPlan: boolean;
+    planApproved: boolean;
     isNew: boolean;
 }
 

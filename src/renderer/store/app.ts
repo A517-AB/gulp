@@ -1,5 +1,5 @@
 import {create} from 'zustand'
-import type {Activity, SessionResource, SerializedSnapshot, SessionConfig, ParsedFile, Source} from '@jules'
+import type {Activity, SessionResource, SerializedSnapshot, SessionConfig, Source, ParsedFile} from '@jules'
 import {sdkIpc, filesystem, store} from '@shared/bridge'
 
 export interface SessionFormData {
@@ -48,15 +48,13 @@ export interface AppStore {
 
     runSession: (config: SessionConfig) => Promise<void>
     createSession: (config: SessionConfig) => Promise<void>
-    applyPatch: (sessionId: string, effectiveSourceId?: string) => Promise<{success: boolean; branch?: string; error?: string}>
-    saveArtifact: (data: string, savePath: string) => Promise<void>
-    saveFilePatch: (sessionId: string, filePath: string, patch: string) => Promise<void>
-    downloadMedia: (data: string, defaultName: string) => Promise<boolean>
     sessionSnapshot: (sessionId: string) => Promise<SerializedSnapshot>
     hydrateSession: (sessionId: string) => Promise<number>
     selectSessionActivities: (sessionId: string) => Promise<Activity[]>
     subscribeActivity: (sessionId: string, cb: (a: Activity) => void) => () => void
-    loadSessionPatch: (sessionId: string) => Promise<{files: ParsedFile[]; patch: string} | null>
+    parseUnidiff: (patch?: string | null) => Promise<ParsedFile[]>
+    saveArtifact: (data: string, filepath: string) => Promise<string>
+    applyPatch: (sessionId: string, effectiveSourceId?: string) => Promise<{success: boolean; branch?: string; error?: string}>
 }
 
 export const useStore = create<AppStore>((set, get) => ({
@@ -116,7 +114,8 @@ export const useStore = create<AppStore>((set, get) => ({
             await sdkIpc.client.sync()
             await get().loadSessions()
         } catch (err) {
-            if (err instanceof Error && err.constructor.name === 'SyncInProgressError') return
+            const msg = err instanceof Error ? err.message : String(err)
+            if (msg.includes('SyncInProgress')) return
             console.error('[AppStore] sync error:', err)
         } finally {
             syncInProgress = false
@@ -149,17 +148,6 @@ export const useStore = create<AppStore>((set, get) => ({
                 console.log(`[store] merged ${merged.length} activities (${streamed.length} streamed, ${deduped.length} loaded)`)
                 return {activities: {...state.activities, [sessionId]: merged}}
             })
-            const latest = activities.at(-1)
-            if (latest) {
-                void ipc.util.toSummary(latest).then(s => {
-                    set(state => ({
-                        activitySummaries: {
-                            ...state.activitySummaries,
-                            [sessionId]: {...(state.activitySummaries[sessionId] ?? {}), [s.id]: s.summary},
-                        },
-                    }))
-                })
-            }
         } catch (err) {
             const is404 = err instanceof Error && err.message.includes('404')
             if (!is404) loadedSessions.delete(sessionId)
@@ -193,14 +181,6 @@ export const useStore = create<AppStore>((set, get) => ({
                 }
                 return {activities: {...s.activities, [sessionId]: [...existing, activity]}}
             })
-            void ipc.util.toSummary(activity).then(s => {
-                set(state => ({
-                    activitySummaries: {
-                        ...state.activitySummaries,
-                        [sessionId]: {...(state.activitySummaries[sessionId] ?? {}), [s.id]: s.summary},
-                    },
-                }))
-            })
             if (activity.type === 'sessionCompleted' || activity.type === 'sessionFailed') {
                 console.log(`[store] session terminal ${activity.type} ${sessionId}`)
                 void get().loadSessions()
@@ -222,7 +202,6 @@ export const useStore = create<AppStore>((set, get) => ({
         if (!sdkIpc || !content.trim()) return
         try {
             await sdkIpc.session.send(sessionId, content)
-            void get().loadSessions()
         } catch (err) {
             console.error('[AppStore] sendMessage error:', err)
             throw err
@@ -258,54 +237,7 @@ export const useStore = create<AppStore>((set, get) => ({
         await get().loadSessions()
     },
 
-    applyPatch: async (sessionId, effectiveSourceId) => {
-        if (!sdkIpc || !filesystem) return {success: false, error: 'not available'}
-        let cwd: string | null = null
-        if (effectiveSourceId && store) {
-            const stored = await store.get(`ship.repoPaths.${effectiveSourceId}`)
-            if (typeof stored === 'string' && stored) cwd = stored
-        }
-        if (!cwd) {
-            cwd = await filesystem.showOpenDialog()
-            if (!cwd) return {success: false, error: 'cancelled'}
-            if (effectiveSourceId && store) {
-                await store.set(`ship.repoPaths.${effectiveSourceId}`, cwd)
-            }
-        }
-        return sdkIpc.session.applyPatch(sessionId, {cwd})
-    },
 
-    saveArtifact: async (data, savePath) => {
-        if (!sdkIpc) return
-        await sdkIpc.artifact.save(data, savePath)
-    },
-
-    saveFilePatch: async (_sessionId, filePath, patch) => {
-        if (!sdkIpc || !filesystem) return
-        const name = filePath.split('/').pop() ?? 'file'
-        const savePath = await filesystem.showSaveDialog(`${name}.patch`)
-        if (!savePath) return
-
-        const sections = patch.split(/(?=^diff --git )/m).filter(Boolean)
-        const filePatch = sections.find(s => s.includes(`b/${filePath}`) || s.includes(`/${filePath}`)) ?? patch
-
-        const bytes = new TextEncoder().encode(filePatch)
-        let binary = ""
-        for (let i = 0; i < bytes.length; i += 8192) {
-            binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + 8192, bytes.length)))
-        }
-        const base64Patch = btoa(binary)
-
-        await sdkIpc.artifact.save(base64Patch, savePath)
-    },
-
-    downloadMedia: async (data, defaultName) => {
-        if (!filesystem || !sdkIpc) return false
-        const savePath = await filesystem.showSaveDialog(defaultName)
-        if (!savePath) return false
-        await sdkIpc.artifact.save(data, savePath)
-        return true
-    },
 
     sessionSnapshot: async (sessionId) => {
         if (!sdkIpc) throw new Error('SDK not available')
@@ -327,27 +259,31 @@ export const useStore = create<AppStore>((set, get) => ({
         return sdkIpc.activities.updates(sessionId, cb)
     },
 
-    loadSessionPatch: async (sessionId) => {
-        if (!sdkIpc) return null
-        const ipc = sdkIpc
-        try {
-            await ipc.activities.hydrate(sessionId)
-            const activities = await ipc.activities.select(sessionId)
-            let patch: string | null = null
-            outer: for (const act of [...activities].reverse()) {
-                for (const art of [...act.artifacts].reverse()) {
-                    if (art.type === 'changeSet' && art.gitPatch.unidiffPatch) {
-                        patch = art.gitPatch.unidiffPatch
-                        break outer
-                    }
-                }
-            }
-            if (!patch) return null
-            const files = await ipc.artifact.parseUnidiff(patch)
-            return {files, patch}
-        } catch {
-            return null
+    parseUnidiff: async (patch) => {
+        if (!sdkIpc || !patch) return []
+        return sdkIpc.artifact.parseUnidiff(patch)
+    },
+
+    saveArtifact: async (data, filepath) => {
+        if (!sdkIpc) throw new Error('SDK not available')
+        return sdkIpc.artifact.save(data, filepath)
+    },
+
+    applyPatch: async (sessionId, effectiveSourceId) => {
+        if (!sdkIpc || !filesystem) return {success: false, error: 'not available'}
+        let cwd: string | null = null
+        if (effectiveSourceId && store) {
+            const stored = await store.get(`ship.repoPaths.${effectiveSourceId}`)
+            if (typeof stored === 'string' && stored) cwd = stored
         }
+        if (!cwd) {
+            cwd = await filesystem.showOpenDialog()
+            if (!cwd) return {success: false, error: 'cancelled'}
+            if (effectiveSourceId && store) {
+                await store.set(`ship.repoPaths.${effectiveSourceId}`, cwd)
+            }
+        }
+        return sdkIpc.session.applyPatch(sessionId, {cwd})
     },
 }))
 
