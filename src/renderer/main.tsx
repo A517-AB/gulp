@@ -15,6 +15,10 @@ import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gr
 import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-treegrid/styles/tailwind3.css'
 import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/styles/tailwind3.css'
 import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/styles/gantt/tailwind3.css'
+import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/styles/tailwind3.css'
+import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/styles/pdfviewer/tailwind3.css'
+
+
 
 const root = document.getElementById('root')
 if (!root) throw new Error('[main] Root element #root not found in DOM')

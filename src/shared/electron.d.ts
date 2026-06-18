@@ -175,10 +175,11 @@ export type ScheduleInput =
 export interface ScheduledItem {
   id:           string
   label:        string
+  body?:        string
   schedule:     ScheduleInput
   enabled:      boolean
   sound?:       string
-    category?: string
+  category?:    string
   createdAt:    string
   lastFiredAt?: string
 }

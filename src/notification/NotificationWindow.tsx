@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Toaster, toast } from 'sonner'
 import { BrowserSoundController } from './sounds'
+import { Welcome } from './Welcome'
 import type { SoundId } from './sounds'
 
 // ── types ──────────────────────────────────────────────────────────────────────
@@ -130,11 +131,14 @@ export function NotificationWindow() {
   }, [])
 
   return (
-    <Toaster
-      theme={theme}
-      position="bottom-right"
-      gap={8}
-      toastOptions={{ unstyled: true, classNames: { toast: 'w-full' } }}
-    />
+    <>
+      <Welcome />
+      <Toaster
+        theme={theme}
+        position="bottom-right"
+        gap={8}
+        toastOptions={{ unstyled: true, classNames: { toast: 'w-full' } }}
+      />
+    </>
   )
 }

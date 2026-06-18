@@ -1,4 +1,4 @@
-# TO NUR — Jules SDK Tasks
+[lazy-parser.ts](../fuse/snippets/typescript/lazy-parser.ts)# TO NUR — Jules SDK Tasks
 
 > Tag: task-to-nur
 > Intent: give to Jules to work on her own SDK
@@ -13,7 +13,7 @@ Reference the SDK overview at `src/jules/jules-sdk-api with overvewi.md` for the
 
 ## 2. Media — gifs, videos, all formats
 
-`MediaArtifact` has `.data` (base64), `.format` (mimeType). Currently only renders as `<img>`. 
+`MediaArtifact` has `.data` (base64), `.format` (mimeType). Currently only renders as `<img>`.
 
 - Find out what mimeTypes Jules actually sends for media artifacts (image/png, image/gif, video/mp4, etc.)
 - Handle each format correctly: animated gifs via `<img>`, video via `<video>`, images via `<img>`
@@ -85,6 +85,10 @@ Start with the languages actually used in snippets (JS/TS). Grammar WASM files l
 Replace current diff library with `diff-match-patch` compiled to WASM (or `xdiff` WASM). 10–20x faster for large files. Relevant when rendering Jules patch output — large changesets currently block the UI while the diff is computed.
 
 Candidate: `diff-match-patch-wasm` on npm, or build `xdiff` via Emscripten.
+
+## 15. Explorer — local repo browser + patch-back
+
+From the explorer page, gather local repos so files can be sent straight to Jules via quickie. After Jules finishes, patch the result back to the local repo. Very far future.
 
 ## Notes
 

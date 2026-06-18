@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { scheduler } from '@shared/bridge'
 import type { ScheduledItem } from '@shared/electron'
 import { ScheduleForm } from '@/components/shared/ScheduleForm'
+import { useNotification } from '@/library/notification'
 
 // ── hardcoded temp item — remove when real presets exist ──────────────────────
 const TEMP_ITEM: ScheduledItem = {
@@ -27,6 +28,16 @@ const WORK_ITEM: ScheduledItem = {
 export default function TardisPage() {
   const [items, setItems] = useState<ScheduledItem[]>([])
   const loaded = useRef(false)
+  const { notify, success } = useNotification()
+
+  useEffect(() => {
+    if (!scheduler) return
+    return scheduler.onFired((item) => {
+      const fn = item.sound === 'none' ? notify : success
+      fn({ title: item.label, ...(item.body ? { body: item.body } : {}), sound: item.sound as never, id: `sched-${item.id}` })
+      if (item.schedule.kind === 'once') setItems(p => p.filter(i => i.id !== item.id))
+    })
+  }, [notify, success])
 
   useEffect(() => {
     const s = scheduler

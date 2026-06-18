@@ -1,24 +1,21 @@
 "use client";
 
-import {useCallback, useEffect, useRef, useState} from "react";
-import {AnimatePresence, motion} from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-    CheckSquare,
     ChevronDown,
     ChevronRight,
     Folder,
-    ListTodo,
     ListTree,
-    Loader2,
     Plus,
     Send,
     Trash2,
 } from "lucide-react";
-import {queues as electronQueues} from "@shared/bridge";
-import {useStore} from "@/store/app";
-import {InlineEdit} from "@renderer/ui/inline-edit";
-import type {Source} from "@google/jules-sdk/types";
-import type {FleetTask, FleetTaskGroup} from "@jules";
+import { queues as electronQueues } from "@shared/bridge";
+import { useStore } from "@/store/app";
+import { InlineEdit } from "@renderer/ui/inline-edit";
+import type { Source } from "@google/jules-sdk/types";
+import type { FleetTask, FleetTaskGroup } from "@jules";
 
 const TASKS_STORAGE_KEY = "workspace:fleet-tasks";
 
@@ -65,7 +62,7 @@ function SourcePicker({ value, sources, onChange }: {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const selected = sources.find((s) => s.id === value);
-  const label = selected?.name ?? value;
+  const label = selected?.name ?? (value ? value.replace(/^(?:sources\/)?github\//, "") : "pick repo");
 
   useEffect(() => {
     if (!open) return;
@@ -82,7 +79,7 @@ function SourcePicker({ value, sources, onChange }: {
         onClick={() => { setOpen((o) => !o); }}
         className="flex items-center gap-1 text-2xs font-mono text-fg-dim bg-hover px-1.5 py-0.5 rounded hover:bg-active hover:text-fg-secondary transition-colors"
       >
-        <span className="max-w-[140px] truncate">{label || "pick repo"}</span>
+        <span className="max-w-[140px] truncate">{label}</span>
         <ChevronDown className="h-2.5 w-2.5 shrink-0 opacity-60" />
       </button>
       <AnimatePresence>
@@ -111,9 +108,73 @@ function SourcePicker({ value, sources, onChange }: {
                 onClick={() => { onChange(""); setOpen(false); }}
                 className="w-full text-left px-3 py-1.5 text-2xs font-mono text-fg-ghost hover:text-fg-muted hover:bg-hover transition-colors"
               >
-                clear
+                repoless
               </button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ── Branch picker ──────────────────────────────────────────────────────────────
+
+function BranchPicker({ value, branches, onChange }: {
+  value: string;
+  branches: string[];
+  onChange: (branch: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) { setOpen(false); }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => { document.removeEventListener("mousedown", handler); };
+  }, [open]);
+
+  if (branches.length === 0) {
+    return (
+      <InlineEdit
+        value={value}
+        onSave={onChange}
+        className="text-2xs font-mono text-fg-dim"
+        placeholder="branch"
+      />
+    );
+  }
+
+  return (
+    <div ref={ref} className="relative" onClick={(e) => { e.stopPropagation(); }}>
+      <button
+        onClick={() => { setOpen((o) => !o); }}
+        className="flex items-center gap-1 text-2xs font-mono text-fg-dim bg-hover px-1.5 py-0.5 rounded hover:bg-active hover:text-fg-secondary transition-colors"
+      >
+        <span className="max-w-[100px] truncate">{value || "branch"}</span>
+        <ChevronDown className="h-2.5 w-2.5 shrink-0 opacity-60" />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.97 }}
+            transition={{ duration: 0.13, ease: "easeOut" }}
+            className="absolute top-full left-0 mt-1 z-50 min-w-[160px] max-w-[240px] rounded-md border border-subtle bg-overlay shadow-xl py-1 max-h-48 overflow-y-auto"
+          >
+            {branches.map((b) => (
+              <button
+                key={b}
+                onClick={() => { onChange(b); setOpen(false); }}
+                className={`w-full text-left px-3 py-1.5 text-2xs font-mono truncate hover:bg-hover transition-colors ${b === value ? "text-fg-primary" : "text-fg-muted"}`}
+              >
+                {b}
+              </button>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>
@@ -128,20 +189,14 @@ export default function QueuesView() {
   const loadSources = useStore(s => s.loadSources);
   const runSession = useStore(s => s.runSession);
   const [tasks, setTasks] = useState<FleetTaskGroup[]>([]);
-  const [queue, setQueue] = useState<unknown[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
-  const [sendingStates, setSendingStates] = useState<Record<string, boolean>>({});
-  const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
+  const [sending, setSending] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function load() {
       try {
-        const [fetchedTasks, fetchedQueue] = await Promise.all([
-          electronQueues?.getTasks() ?? Promise.resolve(readBrowserTasks()),
-          electronQueues?.getQueue() ?? Promise.resolve<unknown[]>([]),
-        ]);
-        setTasks(normalizeTasks(fetchedTasks));
-        setQueue(fetchedQueue);
+        const fetched = await (electronQueues?.getTasks() ?? Promise.resolve(readBrowserTasks()));
+        setTasks(normalizeTasks(fetched));
       } catch (err) {
         console.error("Failed to load queues:", err);
       }
@@ -150,10 +205,8 @@ export default function QueuesView() {
   }, []);
 
   useEffect(() => {
-      void loadSources();
+    void loadSources();
   }, [loadSources]);
-
-
 
   const save = useCallback(async (updated: FleetTaskGroup[]) => {
     setTasks(updated);
@@ -174,7 +227,7 @@ export default function QueuesView() {
     ));
 
   const addGroup = () => {
-    const g: FleetTaskGroup = { group: "New Group", repo: "", baseBranch: "main", tasks: [] };
+    const g: FleetTaskGroup = { group: "New Group", repo: "", baseBranch: "", tasks: [] };
     void save([g, ...tasks]);
     setExpandedGroups((prev) => new Set(prev).add(g.group));
   };
@@ -199,160 +252,82 @@ export default function QueuesView() {
     });
   };
 
-  const toggleTask = (id: string) => {
-    setSelectedTasks((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); } else { next.add(id); }
-      return next;
-    });
+  const getBranches = (repo: string): string[] => {
+    const source = storeSources.find(s => s.id === repo);
+    return source?.githubRepo?.branches ?? [];
   };
 
-  const handleSendTask = async (group: FleetTaskGroup, task: FleetTask, e: React.MouseEvent) => {
+  const handleSendTask = async (group: FleetTaskGroup, task: FleetTask, gIdx: number, tIdx: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    const key = `${group.group}-${task.folder}`;
-    const github = group.repo.replace(/^(?:sources\/)?github\//, '')
-    setSendingStates((p) => ({ ...p, [key]: true }));
+    const key = `${gIdx.toString()}-${tIdx.toString()}`;
+    if (sending.has(key)) return;
+    setSending(p => new Set(p).add(key));
+    const github = group.repo.replace(/^(?:sources\/)?github\//, "");
     try {
-        await runSession({
+      await runSession({
         prompt: task.task,
         title: `${task.topic} (${task.folder})`,
-            ...(github ? {source: {github, baseBranch: group.baseBranch ?? 'main'}} : {}),
+        ...(github ? { source: { github, baseBranch: group.baseBranch || "main" } } : {}),
       });
+      updateTask(gIdx, tIdx, { sent: true });
     } catch (err) {
-      console.error("Failed to start workspace:", err);
+      console.error("Failed to start session:", err);
     } finally {
-      setSendingStates((p) => ({ ...p, [key]: false }));
+      setSending(p => { const next = new Set(p); next.delete(key); return next; });
     }
   };
 
-  const handleSendGroup = async (group: FleetTaskGroup, e: React.MouseEvent) => {
+  const handleSendGroup = async (group: FleetTaskGroup, gIdx: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    const key = `group-${group.group}`;
-    const github = group.repo.replace(/^(?:sources\/)?github\//, '')
-    setSendingStates((p) => ({ ...p, [key]: true }));
+    const key = `group-${gIdx.toString()}`;
+    if (sending.has(key)) return;
+    setSending(p => new Set(p).add(key));
+    const github = group.repo.replace(/^(?:sources\/)?github\//, "");
+    const batchSize = group.concurrency ?? group.tasks.length;
     try {
-      await Promise.all(
-        group.tasks.map((task) =>
+      for (let i = 0; i < group.tasks.length; i += batchSize) {
+        const batch = group.tasks.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map((task, bIdx) =>
             runSession({
-            prompt: task.task,
-            title: `${task.topic} (${task.folder})`,
-                ...(github ? {source: {github, baseBranch: group.baseBranch ?? 'main'}} : {}),
-          })
-        )
-      );
+              prompt: task.task,
+              title: `${task.topic} (${task.folder})`,
+              ...(github ? { source: { github, baseBranch: group.baseBranch || "main" } } : {}),
+            }).then(() => { updateTask(gIdx, i + bIdx, { sent: true }); })
+          )
+        );
+      }
     } catch (err) {
       console.error("Failed to send group:", err);
     } finally {
-      setSendingStates((p) => ({ ...p, [key]: false }));
+      setSending(p => { const next = new Set(p); next.delete(key); return next; });
     }
   };
-
-  const handleSendSelected = async () => {
-    if (selectedTasks.size === 0) return;
-    const byRepo: Record<string, { repo: string; baseBranch: string; tasks: FleetTask[] }> = {};
-    tasks.forEach((group, gIdx) => {
-      group.tasks.forEach((task, tIdx) => {
-        if (!selectedTasks.has(`${gIdx.toString()}-${tIdx.toString()}`)) return;
-        const entry = byRepo[group.repo] ?? { repo: group.repo, baseBranch: group.baseBranch ?? "main", tasks: [] };
-        entry.tasks.push(task);
-        byRepo[group.repo] = entry;
-      });
-    });
-    setSendingStates((p) => ({ ...p, selected: true }));
-    try {
-      for (const { repo, baseBranch, tasks: selected } of Object.values(byRepo)) {
-        const prompt = `I need you to perform the following combined tasks:\n\n${
-          selected.map((t, i) => `${(i + 1).toString()}. **${t.topic}** (${t.folder})\n   ${t.task}`).join("\n")
-        }`;
-        const github = repo.replace(/^(?:sources\/)?github\//, '')
-        await runSession({
-          prompt,
-          title: `Combined Tasks (${selected.length.toString()})`,
-          ...(github ? {source: {github, baseBranch}} : {}),
-        });
-      }
-      setSelectedTasks(new Set());
-    } catch (err) {
-      console.error("Failed to send selected:", err);
-    } finally {
-      setSendingStates((p) => ({ ...p, selected: false }));
-    }
-  };
-
-  const totalTasks = tasks.reduce((acc, g) => acc + g.tasks.length, 0);
 
   return (
-    <div className="flex flex-col h-full p-6 overflow-hidden max-w-7xl mx-auto w-full">
+    <div className="flex flex-col h-full p-4 overflow-hidden max-w-4xl mx-auto w-full">
 
-      {/* ── Header ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.18 }}
-        className="flex items-center justify-between mb-8"
-      >
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-md bg-hover border border-hair flex items-center justify-center">
-            <ListTodo className="h-4 w-4 text-fg-muted" />
-          </div>
-          <div>
-            <h2 className="text-sm font-bold tracking-tight text-fg-primary uppercase">Fleet Manifest</h2>
-            <p className="label-mono text-fg-ghost">tasks.json / jules-queue.json</p>
-          </div>
-        </div>
+      <div className="flex items-center justify-end mb-3">
+        <button
+          onClick={addGroup}
+          className="bg-hover border border-hair text-fg-secondary text-2xs px-3 py-1.5 rounded-md flex items-center gap-2 hover:bg-active hover:text-fg-primary transition-colors"
+        >
+          <Plus className="h-3 w-3" />
+          NEW GROUP
+        </button>
+      </div>
 
-        <div className="flex gap-2 items-center">
-          <AnimatePresence>
-            {selectedTasks.size > 0 && (
-              <motion.button
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.13 }}
-                onClick={() => { void handleSendSelected(); }}
-                disabled={sendingStates["selected"] === true}
-                className="bg-active border border-subtle text-fg-primary text-2xs px-3 py-1.5 rounded-md flex items-center gap-2 hover:bg-hover transition-colors disabled:opacity-40"
-              >
-                {sendingStates["selected"] ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
-                SEND SELECTED ({selectedTasks.size})
-              </motion.button>
-            )}
-          </AnimatePresence>
-
-          <button
-            onClick={addGroup}
-            className="bg-hover border border-hair text-fg-secondary text-2xs px-3 py-1.5 rounded-md flex items-center gap-2 hover:bg-active hover:text-fg-primary transition-colors"
-          >
-            <Plus className="h-3 w-3" />
-            NEW GROUP
-          </button>
-
-          <span className="bg-hover border border-hair text-fg-dim label-mono px-2.5 py-1 rounded-md flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            {totalTasks} TASKS
-          </span>
-          <span className="bg-hover border border-hair text-fg-dim label-mono px-2.5 py-1 rounded-md flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            {queue.length} IN QUEUE
-          </span>
-        </div>
-      </motion.div>
-
-      {/* ── Task list ── */}
       <div className="flex-1 overflow-auto pr-1 pb-12 space-y-0.5">
         {tasks.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="rounded-lg border border-dashed border-hair p-12 text-center mt-4"
-          >
-            <p className="label-mono text-fg-ghost">No tasks found in manifest.</p>
-          </motion.div>
+          <div className="rounded-lg border border-dashed border-hair p-12 text-center mt-4">
+            <p className="label-mono text-fg-ghost">No tasks in manifest.</p>
+          </div>
         )}
 
         {tasks.map((group, gIdx) => {
           const isExpanded = expandedGroups.has(group.group);
-          const groupSending = sendingStates[`group-${group.group}`] ?? false;
+          const groupSending = sending.has(`group-${gIdx.toString()}`);
+          const branches = getBranches(group.repo);
 
           return (
             <div key={`${group.group}-${gIdx.toString()}`} className="border-b border-hair last:border-0">
@@ -360,13 +335,13 @@ export default function QueuesView() {
               {/* Group header */}
               <div
                 onClick={() => { toggleGroup(group.group); }}
-                className="flex items-center justify-between py-2.5 px-2 cursor-pointer group/header hover:bg-hover rounded-md transition-colors"
+                className="flex items-center justify-between py-2.5 px-2 cursor-pointer hover:bg-hover rounded-md transition-colors"
               >
                 <div className="flex items-center gap-2.5" onClick={(e) => { e.stopPropagation(); }}>
                   <motion.div
                     animate={{ rotate: isExpanded ? 90 : 0 }}
                     transition={{ duration: 0.16, ease: [0.4, 0, 0.2, 1] }}
-                    className="text-fg-dim cursor-pointer"
+                    className="text-fg-dim cursor-pointer shrink-0"
                     onClick={() => { toggleGroup(group.group); }}
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -383,21 +358,34 @@ export default function QueuesView() {
                     sources={storeSources}
                     onChange={(v) => { updateGroup(gIdx, { repo: v }); }}
                   />
-                  <InlineEdit
-                    value={group.baseBranch ?? "main"}
-                    onSave={(v) => { updateGroup(gIdx, { baseBranch: v }); }}
-                    className="text-2xs font-mono text-primary/60"
-                    placeholder="main"
+                  <BranchPicker
+                    value={group.baseBranch ?? ""}
+                    branches={branches}
+                    onChange={(v) => { updateGroup(gIdx, { baseBranch: v }); }}
                   />
+                  <div className="flex items-center gap-1" onClick={(e) => { e.stopPropagation(); }}>
+                    <span className="text-2xs font-mono text-fg-ghost">×</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={20}
+                      value={group.concurrency ?? group.tasks.length}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value, 10);
+                        if (!isNaN(v) && v > 0) updateGroup(gIdx, { concurrency: v });
+                      }}
+                      className="w-8 text-center text-2xs font-mono text-fg-dim bg-transparent border-b border-hair focus:outline-none focus:border-subtle"
+                    />
+                  </div>
                   <span className="text-2xs font-mono text-fg-ghost">({group.tasks.length})</span>
                 </div>
 
                 <button
-                  onClick={(e) => { void handleSendGroup(group, e); }}
+                  onClick={(e) => { void handleSendGroup(group, gIdx, e); }}
                   disabled={groupSending}
-                  className="opacity-0 group-hover/header:opacity-100 flex items-center gap-1.5 px-2.5 py-1 rounded border border-hair text-2xs font-mono text-fg-muted hover:text-fg-primary hover:border-subtle transition-all disabled:opacity-40"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-hair text-2xs font-mono text-fg-muted hover:text-fg-primary hover:border-subtle transition-all disabled:opacity-40"
                 >
-                  {groupSending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
+                  <Send className="h-3 w-3" />
                   SEND ALL
                 </button>
               </div>
@@ -415,40 +403,35 @@ export default function QueuesView() {
                   >
                     <div className="pl-8 pr-2 py-1 space-y-0.5">
                       {group.tasks.map((task, tIdx) => {
-                        const taskId = `${gIdx.toString()}-${tIdx.toString()}`;
-                        const isSelected = selectedTasks.has(taskId);
-                        const taskSending = sendingStates[`${group.group}-${task.folder}`] ?? false;
+                        const taskKey = `${gIdx.toString()}-${tIdx.toString()}`;
+                        const taskSending = sending.has(taskKey);
 
                         return (
                           <motion.div
-                            key={taskId}
+                            key={taskKey}
                             initial={{ opacity: 0, x: -6 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.14, delay: tIdx * 0.025 }}
-                            className={`flex flex-col group/task py-2.5 px-2 rounded-md border transition-colors ${
-                              isSelected
-                                ? "bg-selected border-subtle"
+                            className={`flex flex-col py-2.5 px-2 rounded-md border transition-colors ${
+                              task.sent === true
+                                ? "border-transparent opacity-40"
                                 : "border-transparent hover:bg-hover hover:border-hair"
                             }`}
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex items-start gap-2.5 flex-1 pr-4">
-                                <button
-                                  className="mt-0.5 opacity-40 hover:opacity-90 transition-opacity shrink-0"
-                                  onClick={() => { toggleTask(taskId); }}
-                                >
-                                  <CheckSquare className={`h-4 w-4 ${isSelected ? "text-primary" : "text-fg-dim"}`} />
-                                </button>
-
                                 <div className="flex flex-col gap-1 flex-1">
                                   <div className="flex items-center gap-1.5">
-                                    <Folder className="h-3 w-3 text-primary/50 shrink-0" />
+                                    <Folder className="h-3 w-3 text-fg-ghost shrink-0" />
                                     <InlineEdit
                                       value={task.folder}
                                       onSave={(v) => { updateTask(gIdx, tIdx, { folder: v }); }}
                                       className="text-2xs font-mono text-fg-dim"
                                       placeholder="folder/path"
                                     />
+                                    {task.sent === true && (
+                                      <span className="text-2xs font-mono text-fg-ghost">· sent</span>
+                                    )}
                                   </div>
                                   <InlineEdit
                                     value={task.topic}
@@ -466,7 +449,7 @@ export default function QueuesView() {
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-opacity shrink-0">
+                              <div className="flex items-center gap-1 shrink-0">
                                 <button
                                   onClick={() => { removeTask(gIdx, tIdx); }}
                                   aria-label={`Remove ${task.topic}`}
@@ -475,12 +458,12 @@ export default function QueuesView() {
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
                                 <button
-                                  onClick={(e) => { void handleSendTask(group, task, e); }}
-                                  disabled={taskSending}
+                                  onClick={(e) => { void handleSendTask(group, task, gIdx, tIdx, e); }}
+                                  disabled={taskSending || task.sent === true}
                                   aria-label={`Send ${task.topic}`}
                                   className="flex items-center justify-center h-7 w-7 rounded border border-hair text-fg-muted hover:text-fg-primary hover:border-subtle transition-all disabled:opacity-40"
                                 >
-                                  {taskSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                                  <Send className="h-3.5 w-3.5" />
                                 </button>
                               </div>
                             </div>

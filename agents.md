@@ -146,4 +146,25 @@ Strict mode is on in both configs. Notable extra flags in the renderer: `exactOp
 
 ## Agent Notes
 
--
+### Notification system
+
+The notification UI is a **separate BrowserWindow** — not rendered inside the main app window.
+
+- `electron/notifications/dispatch.ts` — creates/manages the notification `BrowserWindow` (340×360, bottom-right, always-on-top, frameless, transparent). Sends payloads via `webContents.send('notif.show', payload)`.
+- `notification.html` — the HTML entry for that window. Loaded from `${devUrl}notification.html` in dev, `dist/notification.html` in prod.
+- `src/notification/main.tsx` → `NotificationWindow` — the React component that renders inside that window. This is the actual UI.
+- IPC bridge: renderer → `notif.dispatch` (ipcMain) → `dispatch.ts` → `notif.show` (webContents) → `NotificationWindow`.
+- `electron/notifications/preload.ts` is the preload for the notification window specifically (separate from the main preload).
+
+**Do not duplicate the notification window shape/styling in `dispatch.ts`** — that belongs in the React component. `dispatch.ts` only manages the window lifecycle and routing of payloads.
+
+### Notification daemon (`electron/main-notif.mts`)
+
+There is a **second Electron process** — a standalone tray-only notification daemon separate from the main app.
+
+- Entry: `electron/main-notif.mts` — built to `dist-electron/notif-main.mjs`
+- Runs independently of the main window. Intentionally stays alive when all windows are closed (`window-all-closed` handler is empty).
+- Has its own tray icon (programmatically drawn purple hexagon at 16×16).
+- Registers: `registerUINotificationHandlers`, `registerNotifLogHandlers`, `registerSchedulerHandlers`, `prewarmNotificationWindow`
+- This is the intended home for persistent notification scheduling — reminders can fire even when the main app window is not open.
+- Do not confuse with the main process (`main.mts`). They are separate Electron `app` instances.

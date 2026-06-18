@@ -26,12 +26,14 @@ type ReminderSchedule =
 export type ScheduleInput = AlarmSchedule | ReminderSchedule
 
 export interface ScheduledItem {
-  id:          string
-  label:       string
-  schedule:    ScheduleInput
-  enabled:     boolean
-  sound?:      string
-  createdAt:   string
+  id:           string
+  label:        string
+  body?:        string
+  schedule:     ScheduleInput
+  enabled:      boolean
+  sound?:       string
+  category?:    string
+  createdAt:    string
   lastFiredAt?: string
 }
 
@@ -111,13 +113,12 @@ function startJob(item: ScheduledItem, getWebContents: () => WebContents | null)
     item.lastFiredAt = new Date().toISOString()
     persistUpdate(item)
 
-    dispatchNotification({
-      title: item.label,
-      sound: item.sound,
-      id:    item.id,
-    })
-
-    getWebContents()?.send('notif.scheduler.fired', item)
+    const wc = getWebContents()
+    if (wc) {
+      wc.send('notif.scheduler.fired', item)
+    } else {
+      dispatchNotification({ title: item.label, body: item.body, sound: item.sound, id: item.id })
+    }
 
     if (item.schedule.kind === 'once') {
       stopJob(item.id)

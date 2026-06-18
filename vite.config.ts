@@ -9,7 +9,8 @@ import { isAbsolute, resolve } from 'node:path'
 const nodeExternal = (id: string) =>
   !id.startsWith('.') && !isAbsolute(id) && !id.startsWith('\0')
 
-const isWeb = process.env.VITE_TARGET === 'web';
+const isNotif     = process.env.VITE_BUILD_TARGET === 'notif'
+const keepVendors = process.env.VITE_KEEP_VENDORS  === 'true'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -19,8 +20,9 @@ export default defineConfig({
     alias: [
       { find: 'react',       replacement: resolve(__dirname, 'node_modules/react') },
       { find: 'react-dom',   replacement: resolve(__dirname, 'node_modules/react-dom') },
-      { find: '@syncfusion/ej2-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist/es6/ej2-gantt.es5.js' },
-      { find: '@syncfusion/ej2-react-gantt', replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist/es6/ej2-react-gantt.es5.js' },
+      { find: '@syncfusion/ej2-gantt',            replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist/es6/ej2-gantt.es5.js' },
+      { find: '@syncfusion/ej2-react-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist/es6/ej2-react-gantt.es5.js' },
+      { find: '@syncfusion/ej2-pdfviewer',         replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/dist/es6/ej2-pdfviewer.es5.js' },
       { find: /^@syncfusion\/(.+)$/, replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/$1' },
     ],
   },
@@ -53,19 +55,22 @@ export default defineConfig({
       },
     },
   },
-    optimizeDeps: {
-    include: [
-      '@syncfusion/ej2-gantt',
-      '@syncfusion/ej2-react-gantt',
-    ],
-  },
   // can you not change it to rollup
   build: {
-    target: 'esnext',
-      rolldownOptions: {
-      input: {
-        index:        resolve(__dirname, 'index.html'),
-        notification: resolve(__dirname, 'notification.html'),
+    target:      'esnext',
+    emptyOutDir: !keepVendors,
+    rolldownOptions: {
+      input: isNotif
+        ? { notification: resolve(__dirname, 'notification.html') }
+        : { index:        resolve(__dirname, 'index.html') },
+      output: isNotif ? {} : {
+        manualChunks(id: string): string | undefined {
+          if (id.includes('node_modules/react')) return 'vendor-react'
+          if (id.includes('monaco-editor') || id.includes('@monaco-editor')) return 'vendor-monaco'
+          if (id.includes('@blocknote')) return 'vendor-blocknote'
+          if (id.includes('@syncfusion') || id.includes('ej2-gantt') || id.includes('ej2-pdfviewer')) return 'vendor-ej2'
+          return undefined
+        },
       },
     },
   },
@@ -78,8 +83,8 @@ export default defineConfig({
     tailwindcss(),
     react(),
 
-    babel({ presets: [reactCompilerPreset()] }),
-    ...isWeb ? [] : [
+    babel({ presets: [reactCompilerPreset()], exclude: [/node_modules/, /[\\/]synco[\\/]/] }),
+    ...(!isNotif ? [
       electron({
         main: {
           entry: 'electron/main.mts',
@@ -118,6 +123,6 @@ export default defineConfig({
           },
         },
       }),
-    ],
+    ] : []),
   ],
 })

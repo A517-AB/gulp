@@ -5,7 +5,7 @@ import type { TestDef } from '../types'
 // ── shared context ────────────────────────────────────────────────────────────
 // Resolved once per panel mount; shared across all specs that need it.
 
-type Ctx = { sessionId: string; activityId: string }
+interface Ctx { sessionId: string; activityId: string }
 
 async function resolveCtx(sdk: SdkIpc, needs: 'session' | 'activity'): Promise<Ctx> {
     const [session] = await sdk.client.sessions()
@@ -17,10 +17,9 @@ async function resolveCtx(sdk: SdkIpc, needs: 'session' | 'activity'): Promise<C
     return { sessionId: session.id, activityId: first.id }
 }
 
-// ── spec table ────────────────────────────────────────────────────────────────
-// One line per method. `needs` triggers lazy context resolution.
+// ── SDK spec table ────────────────────────────────────────────────────────────
 
-type Spec = {
+interface Spec {
     key: string
     needs?: 'session' | 'activity'
     run: (sdk: SdkIpc, ctx: Ctx) => Promise<string>
@@ -62,6 +61,63 @@ const SPECS: Spec[] = [
     { key: 'query.validate',     run: async (s) => `valid: ${String((await s.query.validate({ from: 'sessions', limit: 5 })).valid)}` },
 ]
 
+// ── BlockNote spec table ──────────────────────────────────────────────────────
+
+interface BnSpec {
+    key: string
+    run: () => Promise<string>
+}
+
+const BN_SPECS: BnSpec[] = [
+    {
+        key: 'blocknote.create',
+        run: async () => {
+            const { BlockNoteEditor } = await import('@blocknote/core')
+            const ed = BlockNoteEditor.create()
+            return `headless=${String(ed.headless)}, blocks=${ed.document.length}`
+        },
+    },
+    {
+        key: 'blocknote.markdown.parse',
+        run: async () => {
+            const { BlockNoteEditor } = await import('@blocknote/core')
+            const ed = BlockNoteEditor.create()
+            const blocks = ed.tryParseMarkdownToBlocks('# Hello\n\nworld')
+            const types = blocks.map(b => b.type).join(', ')
+            return `${blocks.length} blocks: ${types}`
+        },
+    },
+    {
+        key: 'blocknote.markdown.roundtrip',
+        run: async () => {
+            const { BlockNoteEditor } = await import('@blocknote/core')
+            const ed = BlockNoteEditor.create()
+            const input = '**bold** and _italic_'
+            const blocks = ed.tryParseMarkdownToBlocks(input)
+            const out = ed.blocksToMarkdownLossy(blocks).trim()
+            return `${input.length}c in → ${out.length}c out: "${out.slice(0, 50)}"`
+        },
+    },
+    {
+        key: 'blocknote.html.parse',
+        run: async () => {
+            const { BlockNoteEditor } = await import('@blocknote/core')
+            const ed = BlockNoteEditor.create()
+            const blocks = ed.tryParseHTMLToBlocks('<h1>Test</h1><p>Hello <strong>world</strong></p>')
+            return `${blocks.length} blocks, type[0]=${blocks[0]?.type ?? 'none'}`
+        },
+    },
+    {
+        key: 'blocknote.mantine.themes',
+        run: async () => {
+            const { darkDefaultTheme, lightDefaultTheme } = await import('@blocknote/mantine')
+            const dk = darkDefaultTheme.colors.editor.background
+            const lt = lightDefaultTheme.colors.editor.background
+            return `dark="${dk}", light="${lt}"`
+        },
+    },
+]
+
 // ── export ────────────────────────────────────────────────────────────────────
 
 function getSdkIpc(): SdkIpc | null {
@@ -70,13 +126,19 @@ function getSdkIpc(): SdkIpc | null {
 }
 
 export default function getConnectionTests(): TestDef[] {
+    const bnTests: TestDef[] = BN_SPECS.map(spec => ({
+        key: spec.key,
+        label: spec.key,
+        fn: async () => ({ summary: await spec.run() }),
+    }))
+
     const sdk = getSdkIpc()
-    if (!sdk) return []
+    if (!sdk) return bnTests
 
     let sessionCtx: Promise<Ctx> | null = null
     let activityCtx: Promise<Ctx> | null = null
 
-    return SPECS.map(spec => ({
+    const sdkTests: TestDef[] = SPECS.map(spec => ({
         key: spec.key,
         label: spec.key,
         electronOnly: true,
@@ -93,4 +155,6 @@ export default function getConnectionTests(): TestDef[] {
             return { summary }
         },
     }))
+
+    return [...bnTests, ...sdkTests]
 }

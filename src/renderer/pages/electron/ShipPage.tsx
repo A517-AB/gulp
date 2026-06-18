@@ -518,12 +518,10 @@ export default function ShipPage() {
             ) : (
                 <div className="flex-1 px-6 py-4 overflow-y-auto min-h-0">
                     {localRepoPath ? (
-                        <div className="max-w-xl mx-auto">
-                            <SyncManager
-                                repoPath={localRepoPath}
-                                repoName={selectedSource ? `${selectedSource.githubRepo.owner}/${selectedSource.githubRepo.repo}` : 'Local Repository'}
-                            />
-                        </div>
+                        <SyncManager
+                            repoPath={localRepoPath}
+                            repoName={selectedSource ? `${selectedSource.githubRepo.owner}/${selectedSource.githubRepo.repo}` : 'Local Repository'}
+                        />
                     ) : (
                         <div className="bg-surface/30 border border-hair rounded-lg p-8 text-center flex flex-col items-center justify-center gap-4 max-w-sm mx-auto mt-8 backdrop-blur-sm">
                             <Archive className="h-8 w-8 text-fg-ghost opacity-60" />

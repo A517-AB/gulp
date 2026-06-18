@@ -5,19 +5,12 @@ import {useStore} from '@renderer/store/app'
 import RootLayout from '@renderer/layouts/RootLayout'
 import {RouteErrorBoundary} from '@renderer/core/ErrorBoundary'
 import HomePage from '@renderer/pages/shared/HomePage'
-import SettingsPage from '@renderer/pages/shared/settings/SettingsPage'
 import JulesPage from '@renderer/pages/shared/JulesPage'
 import NotesPage from '@renderer/pages/shared/NotesPage'
 import ActivityPage from '@renderer/pages/electron/ActivityPage'
 import SnapshotPage from '@renderer/pages/electron/SnapshotPage'
-import QueuesPage from '@renderer/pages/electron/QueuesPage'
-import {SnippetsPage} from '@renderer/pages/electron/SnippetsPage'
 import {ExplorerPage} from '@renderer/pages/electron/ExplorerPage'
-import TardisPage from '@renderer/pages/electron/TardisPage'
 import ShipPage from '@renderer/pages/electron/ShipPage'
-import KitPage from '@renderer/pages/electron/KitPage'
-import TimePage from '@renderer/pages/electron/TimePage'
-import RemindersPage from '@renderer/pages/electron/RemindersPage'
 import OverviewPage from '@renderer/pages/web/OverviewPage'
 
 // ── dev ───────────────────────────────────────────────────────────────────────
@@ -37,31 +30,32 @@ if (import.meta.env.DEV) {
 // ── types ─────────────────────────────────────────────────────────────────────
 
 export type AppRoute = Omit<RouteObject, 'handle'> & {
-    handle?: { title: string; inNav?: boolean }
+    handle?: { title: string; inNav?: boolean; inSecretNav?: boolean }
 }
 
 // ── shared ────────────────────────────────────────────────────────────────────
 
 const sharedRoutes: AppRoute[] = [
-    { index: true,       Component: HomePage,     handle: { title: 'Home',      inNav: true } },
-    { path: 'settings',  Component: SettingsPage, handle: { title: 'Settings',  inNav: true } },
-    { path: 'session',   Component: JulesPage,    handle: { title: 'Sessions',  inNav: true } },
-    { path: 'overview',  Component: OverviewPage, handle: { title: 'Overview',  inNav: true } },
-    { path: 'notes',     Component: NotesPage,    handle: { title: 'Notes',     inNav: true } },
-    { path: 'gantt',     lazy: () => import('@renderer/pages/electron/GanttPage').then(m => ({ Component: m.default })), handle: { title: 'Gantt',     inNav: true } },
+    { index: true,   Component: HomePage,     handle: { title: 'Home',     inNav: true } },
+    { path: 'session', Component: JulesPage,  handle: { title: 'Sessions', inNav: true } },
+    { path: 'overview', Component: OverviewPage, handle: { title: 'Overview', inNav: true } },
+    { path: 'notes',  Component: NotesPage,   handle: { title: 'Notes',    inNav: true } },
+    { path: 'settings', lazy: () => import('@renderer/pages/shared/settings/SettingsPage').then(m => ({ Component: m.default })), handle: { title: 'Settings', inSecretNav: true } },
+    { path: 'gantt',    lazy: () => import('@renderer/pages/electron/GanttPage').then(m => ({ Component: m.default })),           handle: { title: 'Gantt',    inSecretNav: true } },
 ]
 
 // ── electron ──────────────────────────────────────────────────────────────────
 
 const electronRoutes: AppRoute[] = [
-    { path: 'queues',       Component: QueuesPage,   handle: { title: 'Queues',   inNav: true } },
-    { path: 'snippets',     Component: SnippetsPage, handle: { title: 'Snippets', inNav: true } },
-    {path: 'explorer', Component: ExplorerPage, handle: {title: 'Explorer', inNav: true}},
-    {path: 'tardis', Component: TardisPage, handle: {title: 'Tardis', inNav: true}},
-    {path: 'time',   Component: TimePage,   handle: {title: 'Time',   inNav: true}},
-    {path: 'ship',  Component: ShipPage,  handle: {title: 'Ship',  inNav: true}},
-    {path: 'reminders', Component: RemindersPage, handle: {title: 'Reminders', inNav: true}},
-    ...(import.meta.env.DEV ? [{ path: 'kit', Component: KitPage, handle: { title: 'Kit', inNav: true } }] : []),
+    { path: 'queues',    lazy: () => import('@renderer/pages/electron/QueuesPage').then(m => ({ Component: m.default })),    handle: { title: 'Queues',    inSecretNav: true } },
+    { path: 'snippets',  lazy: () => import('@renderer/pages/electron/SnippetsPage').then(m => ({ Component: m.SnippetsPage })), handle: { title: 'Snippets', inSecretNav: true } },
+    { path: 'explorer',  Component: ExplorerPage, handle: { title: 'Explorer',  inNav: true } },
+    { path: 'tardis',    lazy: () => import('@renderer/pages/electron/TardisPage').then(m => ({ Component: m.default })),    handle: { title: 'Tardis',    inSecretNav: true } },
+    { path: 'time',      lazy: () => import('@renderer/pages/electron/TimePage').then(m => ({ Component: m.default })),      handle: { title: 'Time',      inSecretNav: true } },
+    { path: 'ship',      Component: ShipPage, handle: { title: 'Ship', inNav: true } },
+    { path: 'reminders', lazy: () => import('@renderer/pages/electron/RemindersPage').then(m => ({ Component: m.default })), handle: { title: 'Reminders', inSecretNav: true } },
+    { path: 'reading',   lazy: () => import('@renderer/pages/electron/ReadingPage').then(m => ({ Component: m.default })),   handle: { title: 'Reading',   inSecretNav: true } },
+    { path: 'kit',       lazy: () => import('@renderer/pages/electron/KitPage').then(m => ({ Component: m.default })),       handle: { title: 'Kit',       inSecretNav: true } },
     { path: 'activity/:id', Component: ActivityPage },
     { path: 'snapshot/:id', Component: SnapshotPage },
 ]
@@ -72,11 +66,15 @@ const webRoutes: AppRoute[] = []
 
 // ── nav export ────────────────────────────────────────────────────────────────
 
-export const navRoutes: AppRoute[] = [
+const allRoutes: AppRoute[] = [
     ...sharedRoutes,
     ...(isElectron ? electronRoutes : []),
     ...(isWeb      ? webRoutes      : []),
 ]
+
+export const navRoutes       = allRoutes
+export const mainNavRoutes   = allRoutes.filter(r => r.handle?.inNav)
+export const secretNavRoutes = allRoutes.filter(r => r.handle?.inSecretNav)
 
 // ── router ────────────────────────────────────────────────────────────────────
 

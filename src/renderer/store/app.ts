@@ -1,6 +1,6 @@
 import {create} from 'zustand'
 import type {Activity, SessionResource, SerializedSnapshot, SessionConfig, Source, ParsedFile} from '@jules'
-import {sdkIpc, filesystem, store} from '@shared/bridge'
+import {sdkIpc, filesystem, store, uiNotification} from '@shared/bridge'
 
 export interface SessionFormData {
     sourceId: string
@@ -197,6 +197,13 @@ export const useStore = create<AppStore>((set, get) => ({
             })
             if (activity.type === 'sessionCompleted' || activity.type === 'sessionFailed') {
                 console.log(`[store] session terminal ${activity.type} ${sessionId}`)
+                const session = get().sessionList.find(s => s.id === sessionId)
+                const title   = session?.title ?? 'Session'
+                if (activity.type === 'sessionCompleted') {
+                    uiNotification?.show({ title: 'Jules done', body: title, type: 'success', sound: 'chime', id: `jules-done-${sessionId}` })
+                } else {
+                    uiNotification?.show({ title: 'Jules failed', body: title, type: 'error', sound: 'pulse', id: `jules-failed-${sessionId}` })
+                }
                 void get().loadSessions()
             }
         }, () => {

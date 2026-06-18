@@ -1,33 +1,67 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, Plus, Trash2, ToggleLeft, ToggleRight, Clock } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/utils'
-import { useRemindersStore, type Reminder, type RepeatMode } from '@/store/reminders'
-import { useNotification } from '@/library/notification'
+import { scheduler } from '@shared/bridge'
+import type { ScheduledItem, ScheduleInput } from '@shared/electron'
 
-const SOUNDS = ['none', 'pulse', 'chime', 'alert', 'soft']
+type RepeatMode = 'none' | 'daily' | 'weekly'
+const SOUNDS    = ['none', 'pulse', 'chime', 'bell', 'beep', 'alert']
 const REPEATS: RepeatMode[] = ['none', 'daily', 'weekly']
 
-function fmtTime(iso: string): string {
-  try { return new Date(iso).toLocaleString() } catch { return iso }
+// ── helpers ───────────────────────────────────────────────────────────────────
+
+function toSchedule(isoTime: string, repeat: RepeatMode): ScheduleInput {
+  const d   = new Date(isoTime)
+  const hh  = d.getHours().toString().padStart(2, '0')
+  const mm  = d.getMinutes().toString().padStart(2, '0')
+  const t   = `${hh}:${mm}`
+  if (repeat === 'daily')  return { kind: 'daily',  time: t }
+  if (repeat === 'weekly') return { kind: 'weekly', time: t, dayOfWeek: d.getDay() as 0|1|2|3|4|5|6 }
+  return { kind: 'once', at: d.toISOString() }
 }
-function isOverdue(iso: string): boolean {
-  try { return new Date(iso) < new Date() } catch { return false }
+
+function scheduleLabel(s: ScheduleInput): string {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  if (s.kind === 'once')    return new Date(s.at).toLocaleString()
+  if (s.kind === 'daily')   return `Daily at ${s.time}`
+  if (s.kind === 'weekly')  return `${days[s.dayOfWeek] ?? ''} at ${s.time}`
+  return s.kind
 }
+
+function onceDate(s: ScheduleInput): Date | null {
+  return s.kind === 'once' ? new Date(s.at) : null
+}
+
+function isOverdue(item: ScheduledItem): boolean {
+  if (!item.enabled) return false
+  const d = onceDate(item.schedule)
+  return d !== null && d < new Date()
+}
+
+// ── AddForm ───────────────────────────────────────────────────────────────────
 
 function AddForm({ onAdd }: { onAdd: () => void }) {
-  const { add } = useRemindersStore()
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
-  const [time, setTime] = useState('')
+  const [title,  setTitle]  = useState('')
+  const [body,   setBody]   = useState('')
+  const [time,   setTime]   = useState('')
   const [repeat, setRepeat] = useState<RepeatMode>('none')
-  const [sound, setSound] = useState('chime')
+  const [sound,  setSound]  = useState('chime')
 
-  const submit = () => {
-    if (!title.trim() || !time) return
-    const trimmedBody = body.trim()
-    add({ title: title.trim(), ...(trimmedBody ? { body: trimmedBody } : {}), time: new Date(time).toISOString(), repeat, sound, enabled: true })
+  const submit = async () => {
+    if (!title.trim() || !time || !scheduler) return
+    const item: ScheduledItem = {
+      id:       crypto.randomUUID(),
+      label:    title.trim(),
+      ...(body.trim()         ? { body:  body.trim() } : {}),
+      ...(sound !== 'none'    ? { sound: sound       } : {}),
+      schedule:  toSchedule(time, repeat),
+      enabled:   true,
+      category:  'reminder',
+      createdAt: new Date().toISOString(),
+    }
+    await scheduler.add(item)
     setTitle(''); setBody(''); setTime('')
     onAdd()
   }
@@ -75,7 +109,7 @@ function AddForm({ onAdd }: { onAdd: () => void }) {
           {SOUNDS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <button
-          onClick={submit}
+          onClick={() => { void submit() }}
           disabled={!title.trim() || !time}
           className="ml-auto px-3 py-1 rounded border border-purple-500 bg-purple-600 text-white text-[10px] font-mono font-bold hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
@@ -86,9 +120,15 @@ function AddForm({ onAdd }: { onAdd: () => void }) {
   )
 }
 
-function ReminderRow({ reminder }: { reminder: Reminder }) {
-  const { remove, toggle } = useRemindersStore()
-  const overdue = isOverdue(reminder.time) && reminder.enabled
+// ── ReminderRow ───────────────────────────────────────────────────────────────
+
+function ReminderRow({ item, onRemove, onToggle }: {
+  item:     ScheduledItem
+  onRemove: (id: string) => void
+  onToggle: (id: string, enabled: boolean) => void
+}) {
+  const overdue = isOverdue(item)
+  const d       = onceDate(item.schedule)
 
   return (
     <motion.div
@@ -99,7 +139,7 @@ function ReminderRow({ reminder }: { reminder: Reminder }) {
       transition={{ duration: 0.18 }}
       className={cn(
         'flex items-center gap-3 py-3 px-3 rounded-md transition-colors group',
-        reminder.enabled ? 'hover:bg-hover/50' : 'opacity-50 hover:opacity-70',
+        item.enabled ? 'hover:bg-hover/50' : 'opacity-50 hover:opacity-70',
       )}
     >
       <div className="w-2 shrink-0 flex items-center justify-center">
@@ -109,34 +149,40 @@ function ReminderRow({ reminder }: { reminder: Reminder }) {
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-red-500" />
           </span>
         ) : (
-          <span className={cn('h-1.5 w-1.5 rounded-full', reminder.enabled ? 'bg-purple-500' : 'bg-fg-ghost/20')} />
+          <span className={cn('h-1.5 w-1.5 rounded-full', item.enabled ? 'bg-purple-500' : 'bg-fg-ghost/20')} />
         )}
       </div>
 
       <div className="flex-1 min-w-0">
-        <span className="text-[12px] font-semibold text-fg-primary block truncate">{reminder.title}</span>
-        {reminder.body && (
-          <span className="text-3xs text-fg-ghost truncate block">{reminder.body}</span>
+        <span className="text-[12px] font-semibold text-fg-primary block truncate">{item.label}</span>
+        {item.body !== undefined && (
+          <span className="text-3xs text-fg-ghost truncate block">{item.body}</span>
         )}
         <div className="flex items-center gap-2 mt-0.5">
           <Clock className="h-2.5 w-2.5 text-fg-ghost shrink-0" />
           <span className={cn('text-3xs font-mono', overdue ? 'text-red-400' : 'text-fg-ghost')}>
-            {fmtTime(reminder.time)}
-            {overdue && ` · ${formatDistanceToNow(new Date(reminder.time), { addSuffix: true })}`}
+            {scheduleLabel(item.schedule)}
+            {overdue && d !== null && ` · ${formatDistanceToNow(d, { addSuffix: true })}`}
           </span>
-          {reminder.repeat !== 'none' && (
-            <span className="text-3xs font-mono text-purple-400 uppercase">{reminder.repeat}</span>
+          {item.schedule.kind !== 'once' && (
+            <span className="text-3xs font-mono text-purple-400 uppercase">{item.schedule.kind}</span>
           )}
         </div>
       </div>
 
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <button onClick={() => { toggle(reminder.id) }} className="p-1 rounded hover:bg-hover text-fg-ghost hover:text-fg-primary transition-colors">
-          {reminder.enabled
+        <button
+          onClick={() => { onToggle(item.id, !item.enabled) }}
+          className="p-1 rounded hover:bg-hover text-fg-ghost hover:text-fg-primary transition-colors"
+        >
+          {item.enabled
             ? <ToggleRight className="h-3.5 w-3.5 text-purple-400" />
-            : <ToggleLeft className="h-3.5 w-3.5" />}
+            : <ToggleLeft  className="h-3.5 w-3.5" />}
         </button>
-        <button onClick={() => { remove(reminder.id) }} className="p-1 rounded hover:bg-red-500/10 text-fg-ghost hover:text-red-400 transition-colors">
+        <button
+          onClick={() => { onRemove(item.id) }}
+          className="p-1 rounded hover:bg-red-500/10 text-fg-ghost hover:text-red-400 transition-colors"
+        >
           <Trash2 className="h-3 w-3" />
         </button>
       </div>
@@ -144,39 +190,54 @@ function ReminderRow({ reminder }: { reminder: Reminder }) {
   )
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function RemindersPage() {
-  const { reminders, markFired } = useRemindersStore()
-  const { notify } = useNotification()
+  const [items,  setItems]  = useState<ScheduledItem[]>([])
   const [adding, setAdding] = useState(false)
+  const loaded = useRef(false)
 
-  // Fire due reminders
   useEffect(() => {
-    const check = () => {
-      const now = new Date()
-      for (const r of reminders) {
-        if (!r.enabled) continue
-        const due = new Date(r.time)
-        if (due <= now && r.firedAt !== r.time) {
-          notify({
-            title: r.title,
-            ...(r.body !== undefined ? { body: r.body } : {}),
-            sound: r.sound as never,
-            duration: 8000,
-            id: `reminder-${r.id}`,
-          })
-          markFired(r.id)
-        }
+    if (!scheduler || loaded.current) return
+    loaded.current = true
+    void scheduler.list().then(all => {
+      setItems(all.filter(i => i.category === 'reminder'))
+    })
+    return scheduler.onFired((fired) => {
+      if (fired.schedule.kind === 'once') {
+        setItems(p => p.filter(i => i.id !== fired.id))
       }
-    }
-    check()
-    const id = setInterval(check, 30000)
-    return () => { clearInterval(id) }
-  }, [reminders, notify, markFired])
+    })
+  }, [])
 
-  const sorted = [...reminders].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime())
-  const upcoming = sorted.filter(r => r.enabled && new Date(r.time) > new Date())
-  const overdue  = sorted.filter(r => r.enabled && new Date(r.time) <= new Date())
-  const disabled = sorted.filter(r => !r.enabled)
+  async function remove(id: string) {
+    if (!scheduler) return
+    await scheduler.remove(id)
+    setItems(p => p.filter(i => i.id !== id))
+  }
+
+  async function toggle(id: string, enabled: boolean) {
+    if (!scheduler) return
+    const updated = await scheduler.toggle(id, enabled)
+    setItems(p => p.map(i => i.id === updated.id ? updated : i))
+  }
+
+  if (!scheduler) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-fg-ghost text-sm font-mono select-none">Desktop only</p>
+      </div>
+    )
+  }
+
+  const sorted   = [...items].sort((a, b) => {
+    const da = onceDate(a.schedule)?.getTime() ?? 0
+    const db = onceDate(b.schedule)?.getTime() ?? 0
+    return da - db
+  })
+  const overdue  = sorted.filter(isOverdue)
+  const upcoming = sorted.filter(i => i.enabled && !isOverdue(i))
+  const disabled = sorted.filter(i => !i.enabled)
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -206,10 +267,10 @@ export default function RemindersPage() {
       <div className="flex-1 overflow-y-auto min-h-0">
         <div className="px-6 pb-8 space-y-2">
           <AnimatePresence>
-            {adding && <AddForm onAdd={() => { setAdding(false) }} />}
+            {adding && <AddForm onAdd={() => { setAdding(false); void scheduler?.list().then(all => { setItems(all.filter(i => i.category === 'reminder')) }) }} />}
           </AnimatePresence>
 
-          {reminders.length === 0 && !adding && (
+          {items.length === 0 && !adding && (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -223,7 +284,7 @@ export default function RemindersPage() {
             <div className="space-y-px">
               <p className="text-3xs font-mono text-red-400 uppercase tracking-widest px-3 pt-2 pb-1">Overdue</p>
               <AnimatePresence>
-                {overdue.map(r => <ReminderRow key={r.id} reminder={r} />)}
+                {overdue.map(i => <ReminderRow key={i.id} item={i} onRemove={id => { void remove(id) }} onToggle={(id, en) => { void toggle(id, en) }} />)}
               </AnimatePresence>
             </div>
           )}
@@ -232,7 +293,7 @@ export default function RemindersPage() {
             <div className="space-y-px">
               <p className="text-3xs font-mono text-fg-ghost uppercase tracking-widest px-3 pt-2 pb-1">Upcoming</p>
               <AnimatePresence>
-                {upcoming.map(r => <ReminderRow key={r.id} reminder={r} />)}
+                {upcoming.map(i => <ReminderRow key={i.id} item={i} onRemove={id => { void remove(id) }} onToggle={(id, en) => { void toggle(id, en) }} />)}
               </AnimatePresence>
             </div>
           )}
@@ -241,7 +302,7 @@ export default function RemindersPage() {
             <div className="space-y-px">
               <p className="text-3xs font-mono text-fg-ghost uppercase tracking-widest px-3 pt-2 pb-1">Disabled</p>
               <AnimatePresence>
-                {disabled.map(r => <ReminderRow key={r.id} reminder={r} />)}
+                {disabled.map(i => <ReminderRow key={i.id} item={i} onRemove={id => { void remove(id) }} onToggle={(id, en) => { void toggle(id, en) }} />)}
               </AnimatePresence>
             </div>
           )}

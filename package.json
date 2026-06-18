@@ -6,14 +6,13 @@
   "main": "dist-electron/main.mjs",
   "scripts": {
     "dev": "concurrently -k \"vite\"",
-    "dev:web": "cross-env VITE_TARGET=web vite",
-    "build": "tsc -b && vite build",
-    "build:web": "cross-env VITE_TARGET=web tsc -b && vite build",
+    "build": "node build.mjs",
+    "build:notif": "tsc -b && cross-env VITE_BUILD_TARGET=notif vite build",
+    "build:all": "tsc -b && concurrently \"vite build\" \"cross-env VITE_BUILD_TARGET=notif vite build\"",
     "start": "electron .",
     "run:e": "electron .",
     "run:notif": "electron dist-electron/notif-main.mjs",
     "debug": "electron . --inspect=9229",
-    "start:web": "npm run build:web && vite preview",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
     "test": "vitest"

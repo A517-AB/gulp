@@ -124,13 +124,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.style.fontSize = `${fontSize}px`
     localStorage.setItem('gulp:fontSizeVal', String(fontSize))
 
-    // Helper to format font families
-    const formatFont = (name: string, fallback: 'sans-serif' | 'monospace') => {
-      if (name === 'JetBrains Mono' || name === 'Fira Code') {
-        return `'${name}', monospace`
-      }
-      return `'${name}', ${fallback}`
-    }
+    const SYSTEM_FONTS = new Set(['system-ui', 'sans-serif', 'monospace', 'ui-monospace', 'ui-sans-serif', 'ui-serif', 'serif', 'cursive', 'fantasy'])
+    const formatFont = (name: string, fallback: 'sans-serif' | 'monospace') =>
+      SYSTEM_FONTS.has(name) ? name : `'${name}', ${fallback}`
 
     // Apply Font Families
     root.style.setProperty('--font-sans', formatFont(fontBasic, 'sans-serif'))
