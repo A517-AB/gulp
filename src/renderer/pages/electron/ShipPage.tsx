@@ -12,13 +12,15 @@ import {formatDistanceToNow} from "date-fns";
 import type {DiffFile} from "diff2html/lib-esm/types";
 import {LineType} from "diff2html/lib-esm/types";
 import {ScrollArea} from "@/ui/scroll-area";
-import {Dropdown} from "@/components/ship/Dropdown";
+import {RepoCommandPalette} from "@/components/ship/RepoCommandPalette";
+import type {RepoPaletteItem} from "@/components/ship/RepoCommandPalette";
 import {cn} from "@/utils";
 import {useStore} from "@/store/app";
 import {SyncManager} from "@/components/ship/SyncManager";
 import {useSyncStore} from "@/store/sync";
 import {useShipStore} from "@/store/ship";
 import type {ActionState, ShipFile} from "@/store/ship";
+import {useNotification} from "@/library/notification/use-notification";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -144,6 +146,7 @@ export default function ShipPage() {
         fileStates,
         snapshotStates,
         viewMode,
+        lastSessionId,
         setSourceId,
         setViewMode,
         handlePatchClick,
@@ -158,6 +161,33 @@ export default function ShipPage() {
         selectLocalFolder,
     } = useSyncStore();
 
+    const notification = useNotification({
+        onAction: (actionId, extraData) => {
+            if (actionId === 'retry') {
+                const { sessionId } = extraData as { sessionId: string };
+                void applyPatch(sessionId);
+            }
+        },
+    });
+
+    const applyPatch = async (sessionId: string) => {
+        const result = await handleSnapshot(sessionId, effectiveSourceId);
+        if (!result) return;
+        if (result.success) {
+            notification.success({
+                title: 'Patch applied',
+                ...(result.branch ? { body: `\u2192 ${result.branch}` } : {}),
+            });
+        } else {
+            notification.error({
+                title: 'Patch failed',
+                ...(result.error ? { body: result.error } : {}),
+                actions: [{ id: 'retry', label: 'Retry', style: 'primary' as const }],
+                extraData: { sessionId },
+            });
+        }
+    };
+
     const effectiveSourceId = sourceId !== "" ? sourceId : (sources[0]?.id ?? "");
 
     // Load local repo path when sourceId changes
@@ -166,6 +196,19 @@ export default function ShipPage() {
             void loadLocalRepoPath(effectiveSourceId);
         }
     }, [effectiveSourceId, loadLocalRepoPath]);
+
+    // Spacebar reopens last session when nothing is open
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key !== " " || e.target !== document.body) return;
+            if (openPatchId === "" && lastSessionId !== "") {
+                e.preventDefault();
+                handlePatchClick(lastSessionId);
+            }
+        };
+        document.addEventListener("keydown", onKey);
+        return () => { document.removeEventListener("keydown", onKey); };
+    }, [openPatchId, lastSessionId, handlePatchClick]);
 
     const selectedSource = useMemo(
         () => sources.find(s => s.id === effectiveSourceId),
@@ -195,8 +238,19 @@ export default function ShipPage() {
 
     const activeCount = sessions.filter(s => ACTIVE_STATES.has(s.state)).length;
 
+    const repoPaletteItems: RepoPaletteItem[] = sources.map(s => ({
+        id: s.id,
+        repo: s.githubRepo.repo,
+    }));
+
     return (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="relative flex flex-col h-full overflow-hidden">
+
+            <RepoCommandPalette
+                items={repoPaletteItems}
+                value={effectiveSourceId}
+                onChange={setSourceId}
+            />
 
             {/* ── Toolbar ───────────────────────────────────────────────────── */}
             <motion.div
@@ -205,40 +259,31 @@ export default function ShipPage() {
                 transition={{duration: 0.18}}
                 className="flex items-center gap-3 px-6 pt-5 pb-4 shrink-0 relative z-10"
             >
-                <Dropdown
-                    items={sources.map(s => ({
-                        id: s.id,
-                        label: `${s.githubRepo.owner}/${s.githubRepo.repo}`,
-                        ...(s.githubRepo.defaultBranch ? {meta: s.githubRepo.defaultBranch} : {}),
-                    }))}
-                    value={effectiveSourceId}
-                    onChange={setSourceId}
-                    placeholder="select repo"
-                    emptyMessage="No repos found"
-                />
 
-                <div className="flex items-center bg-hover/80 p-0.5 rounded-md border border-hair shrink-0">
+                <div className="relative flex items-center shrink-0 rounded-full overflow-hidden">
+                    <motion.div
+                        className="absolute inset-y-0 w-1/2 rounded-full"
+                        animate={{
+                            x: viewMode === 'jules' ? '0%' : '100%',
+                            backgroundColor: viewMode === 'jules'
+                                ? 'rgba(168,85,247,0.18)'
+                                : 'rgba(239,68,68,0.18)',
+                        }}
+                        transition={{type: "spring", stiffness: 380, damping: 32}}
+                    />
                     <button
                         onClick={() => { setViewMode('jules'); }}
-                        className={cn(
-                            "px-2.5 py-0.5 rounded text-[9px] font-mono font-bold transition-all uppercase tracking-wider",
-                            viewMode === 'jules'
-                                ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                                : "text-fg-ghost hover:text-fg-secondary"
-                        )}
+                        className="relative z-10 px-3 py-1 text-[9px] font-mono font-bold uppercase tracking-wider transition-colors duration-200"
+                        style={{color: viewMode === 'jules' ? 'rgb(216,180,254)' : 'var(--color-fg-ghost)'}}
                     >
-                        Jules Sessions
+                        Jules
                     </button>
                     <button
                         onClick={() => { setViewMode('sync'); }}
-                        className={cn(
-                            "px-2.5 py-0.5 rounded text-[9px] font-mono font-bold transition-all uppercase tracking-wider",
-                            viewMode === 'sync'
-                                ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                                : "text-fg-ghost hover:text-fg-secondary"
-                        )}
+                        className="relative z-10 px-3 py-1 text-[9px] font-mono font-bold uppercase tracking-wider transition-colors duration-200"
+                        style={{color: viewMode === 'sync' ? 'rgb(252,165,165)' : 'var(--color-fg-ghost)'}}
                     >
-                        Sync & Backup
+                        Sync
                     </button>
                 </div>
 
@@ -339,7 +384,7 @@ export default function ShipPage() {
                                                     </div>
 
                                                     <div className="flex-1 min-w-0">
-                                                        <span className="text-[12px] font-semibold text-fg-primary block truncate">
+                                                        <span className="text-[12px] text-fg-primary block truncate">
                                                             {session.title || session.prompt.slice(0, 80)}
                                                         </span>
                                                         {branch && (
@@ -497,7 +542,7 @@ export default function ShipPage() {
                                                                                 busyLabel="Applying…"
                                                                                 doneLabel="Applied"
                                                                                 hoverCls="hover:text-fg-primary hover:border-subtle"
-                                                                                onClick={e => { e.stopPropagation(); void handleSnapshot(session.id); }}
+                                                                                onClick={e => { e.stopPropagation(); void applyPatch(session.id); }}
                                                                             />
                                                                         </motion.div>
                                                                     </>
@@ -542,6 +587,12 @@ export default function ShipPage() {
                         </div>
                     )}
                 </div>
+            )}
+
+            {selectedSource && (
+                <span className="absolute bottom-3 right-4 text-2xs font-mono text-fg-ghost/40 select-none pointer-events-none">
+                    {selectedSource.githubRepo.repo}
+                </span>
             )}
         </div>
     );

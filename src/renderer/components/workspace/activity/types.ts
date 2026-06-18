@@ -13,7 +13,6 @@ export interface ActivityItemProps {
     onApprovePlan: () => void;
     approvingPlan: boolean;
     planApproved: boolean;
-    isNew: boolean;
 }
 
 export interface SingleActivityProps {
@@ -21,7 +20,6 @@ export interface SingleActivityProps {
     onApprovePlan: () => void;
     approvingPlan: boolean;
     planApproved: boolean;
-    isNew: boolean;
 }
 
 export interface TerminalConsoleProps {

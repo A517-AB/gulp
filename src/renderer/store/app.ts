@@ -15,6 +15,7 @@ const activeStreams = new Map<string, () => void>()
 const loadedSessions = new Set<string>()
 let syncInProgress = false
 let lastSyncAt = 0
+let firstSync = true
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000
 
 const DEFAULT_FORM: SessionFormData = {
@@ -29,7 +30,6 @@ const DEFAULT_FORM: SessionFormData = {
 export interface AppStore {
     sessionList: SessionResource[]
     activities: Record<string, Activity[]>
-    activitySummaries: Record<string, Record<string, string>>
     activitiesError: Record<string, string | null>
 
     sources: Source[]
@@ -62,7 +62,6 @@ export interface AppStore {
 export const useStore = create<AppStore>((set, get) => ({
     sessionList: [],
     activities: {},
-    activitySummaries: {},
     activitiesError: {},
 
     sources: [],
@@ -115,7 +114,9 @@ export const useStore = create<AppStore>((set, get) => ({
         syncInProgress = true
         lastSyncAt = now
         try {
-            await sdkIpc.client.sync()
+            const incremental = !firstSync
+            await sdkIpc.client.sync({ depth: 'activities', incremental, checkpoint: true })
+            firstSync = false
             await get().loadSessions()
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err)
@@ -183,7 +184,9 @@ export const useStore = create<AppStore>((set, get) => ({
         }
         console.log(`[store] streamActivities start ${sessionId}`)
         const ipc = sdkIpc
-        const unsub = ipc.activities.stream(sessionId, (activity) => {
+        // activities.stream() history phase reads local-cache only — cold cache = empty history.
+        // Use updates() so only future events come through the stream; loadActivities owns history.
+        const unsub = ipc.activities.updates(sessionId, (activity) => {
             console.log(`[store] activity update ${sessionId} type=${activity.type} id=${activity.id}`)
             set(s => {
                 const existing = s.activities[sessionId] ?? []
@@ -257,8 +260,6 @@ export const useStore = create<AppStore>((set, get) => ({
         await sdkIpc.session.create(config)
         await get().loadSessions()
     },
-
-
 
     sessionSnapshot: async (sessionId) => {
         if (!sdkIpc) throw new Error('SDK not available')

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollArea } from "@/ui/scroll-area.tsx";
 import { Button } from "@/ui/button.tsx";
 import { useActivityGroups } from "@/hooks/use-activity-groups.ts";
@@ -40,41 +40,15 @@ export function ActivityFeed({
         status: "idle",
     });
 
-    const [newActivityIds, setNewActivityIds] = useState<Set<string>>(new Set());
-    const prevIdsRef = useRef<Set<string>>(new Set());
-    const initialLoadDoneRef = useRef(false);
-    const bottomRef = useRef<HTMLDivElement>(null);
-
     const reloadActivities = useCallback(() => {
         void loadActivities(session.id);
     }, [session.id, loadActivities]);
 
     useEffect(() => {
         void loadActivities(session.id);
-        const unsub = streamActivities(session.id);
-        return () => {
-            unsub();
-        };
+        streamActivities(session.id);
+        // stream intentionally not cleaned up on session switch — activeStreams guards double-subscribe
     }, [session.id, loadActivities, streamActivities]);
-
-    useEffect(() => {
-        const newIds = activities.filter((a) => !prevIdsRef.current.has(a.id)).map((a) => a.id);
-        prevIdsRef.current = new Set(activities.map((a) => a.id));
-        if (!newIds.length) return;
-        if (!initialLoadDoneRef.current) {
-            initialLoadDoneRef.current = true;
-            bottomRef.current?.scrollIntoView();
-            return;
-        }
-        setNewActivityIds(new Set(newIds));
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        const t = setTimeout(() => {
-            setNewActivityIds(new Set());
-        }, 500);
-        return () => {
-            clearTimeout(t);
-        };
-    }, [activities]);
 
     const handleApplyLocally = useCallback(async () => {
         setApplyState({ status: "applying" });
@@ -198,10 +172,8 @@ export function ActivityFeed({
                                 onApprovePlan={handleApprovePlan}
                                 approvingPlan={approving}
                                 planApproved={planApproved}
-                                isNew={!Array.isArray(item) && newActivityIds.has(item.id)}
                             />
                         ))}
-                        <div ref={bottomRef} />
                     </div>
                 </ScrollArea>
             </div>
