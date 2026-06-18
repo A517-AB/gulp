@@ -16,8 +16,16 @@ async function importBridgeModule(windowValue?: Window): Promise<BridgeModule> {
       configurable: true,
       writable: true,
     });
+    if ("electron" in windowValue) {
+        Object.defineProperty(globalThis, "electron", {
+            value: (windowValue as any).electron,
+            configurable: true,
+            writable: true,
+        });
+    }
   } else {
     clearWindow();
+    Reflect.deleteProperty(globalThis, "electron");
   }
 
   return import("./bridge");

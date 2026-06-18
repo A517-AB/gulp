@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from 'react'
 import {useParams} from 'react-router'
 import {useStore} from '@/store/app'
+import {sdkIpc} from '@shared/bridge'
 import type {Activity, ChangeSetArtifact, PlanStep, ParsedFile} from '@jules'
 import {Input} from '@/ui/input'
 import {Button} from '@/ui/button'
@@ -139,9 +140,7 @@ const EMPTY: Activity[] = []
 
 export default function ActivityPage() {
   const { id } = useParams<{ id: string }>()
-  const activities = useStore(s => s.activities[id ?? ''] ?? EMPTY)
-  const loadActivities = useStore(s => s.loadActivities)
-  const streamActivities = useStore(s => s.streamActivities)
+  const [activities, setActivities] = useState<Activity[]>(EMPTY)
   const sendMessage = useStore(s => s.sendMessage)
   const approvePlan = useStore(s => s.approvePlan)
 
@@ -156,10 +155,21 @@ export default function ActivityPage() {
   }, [id])
 
   useEffect(() => {
-      if (!id) return
-      void loadActivities(id)
-      return streamActivities(id)
-  }, [id, loadActivities, streamActivities])
+      if (!id || !sdkIpc) return
+      setActivities(EMPTY)
+      const unsub = sdkIpc.activities.stream(id, (activity) => {
+          setActivities(prev => {
+              const idx = prev.findIndex(a => a.id === activity.id)
+              if (idx >= 0) {
+                  const next = [...prev]
+                  next[idx] = activity
+                  return next
+              }
+              return [...prev, activity]
+          })
+      })
+      return unsub
+  }, [id])
 
   useEffect(() => {
       if (activities.length === 0) return

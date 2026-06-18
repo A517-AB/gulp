@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Copy } from "lucide-react";
 import type { BashArtifact } from "./types";
@@ -7,27 +7,26 @@ interface TerminalConsoleProps {
     bashOutputs: BashArtifact[];
 }
 
-export const TerminalConsole = memo(
-    function TerminalConsole({ bashOutputs }: TerminalConsoleProps) {
-        const [copied, setCopied] = useState(false);
+export function TerminalConsole({ bashOutputs }: TerminalConsoleProps) {
+    const [copied, setCopied] = useState(false);
 
-        if (bashOutputs.length === 0) return null;
+    if (bashOutputs.length === 0) return null;
 
-        const handleCopy = async () => {
-            const cleanText = bashOutputs
-                .map((bash) => {
-                    return [`$ ${bash.command}`, bash.stdout, bash.stderr]
-                        .filter(Boolean)
-                        .join("\n")
-                        .trim();
-                })
-                .join("\n\n");
-            await navigator.clipboard.writeText(cleanText);
-            setCopied(true);
-            setTimeout(() => {
-                setCopied(false);
-            }, 2000);
-        };
+    const handleCopy = async () => {
+        const cleanText = bashOutputs
+            .map((bash) => {
+                return [`$ ${bash.command}`, bash.stdout]
+                    .filter(Boolean)
+                    .join("\n")
+                    .trim();
+            })
+            .join("\n\n");
+        await navigator.clipboard.writeText(cleanText);
+        setCopied(true);
+        setTimeout(() => {
+            setCopied(false);
+        }, 2000);
+    };
 
         return (
             <div
@@ -66,11 +65,6 @@ export const TerminalConsole = memo(
                                     {bash.stdout.trim()}
                                 </div>
                             )}
-                            {bash.stderr && (
-                                <div className="text-red-450 mt-2 pl-3 border-l border-red-950/40 select-text whitespace-pre-wrap break-all font-mono font-medium text-[11px] leading-relaxed tracking-wide">
-                                    {bash.stderr.trim()}
-                                </div>
-                            )}
                             {bash.exitCode !== null && (
                                 <div
                                     className={`mt-2 pl-3 text-[10px] font-bold ${
@@ -85,18 +79,4 @@ export const TerminalConsole = memo(
                 </div>
             </div>
         );
-    },
-    (prevProps, nextProps) => {
-        if (prevProps.bashOutputs.length !== nextProps.bashOutputs.length) return false;
-        return prevProps.bashOutputs.every((prev, idx) => {
-            const next = nextProps.bashOutputs[idx];
-            if (!next) return false;
-            return (
-                prev.command === next.command &&
-                prev.stdout === next.stdout &&
-                prev.stderr === next.stderr &&
-                prev.exitCode === next.exitCode
-            );
-        });
-    }
-);
+}
