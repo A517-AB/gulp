@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollArea } from "@/ui/scroll-area.tsx";
 import { Button } from "@/ui/button.tsx";
 import { useActivityGroups } from "@/hooks/use-activity-groups.ts";
@@ -39,19 +39,10 @@ export function ActivityFeed({
         status: "idle",
     });
 
-    const [newActivityIds, setNewActivityIds] = useState<Set<string>>(new Set());
-    const prevIdsRef = useRef<Set<string>>(new Set());
-    const initialLoadDoneRef = useRef(false);
-    const bottomRef = useRef<HTMLDivElement>(null);
-
     const reloadActivities = useCallback(() => {
         if (!sdkIpc) return;
         setActivities(EMPTY_ACTIVITIES);
         setError(null);
-        initialLoadDoneRef.current = false;
-        // The effect below will re-trigger stream because we set key on parent or we can just rely on the existing stream if we remount.
-        // For a true retry without remount, we should trigger a refetch state, but simpler is to let the effect run.
-        // Let's just re-hydrate if there's an error.
         void sdkIpc.activities.hydrate(session.id).then(() => {
             setError(null);
         }).catch(err => {
@@ -64,7 +55,6 @@ export function ActivityFeed({
         setError(null);
         // Clear previous activities when session changes
         setActivities(EMPTY_ACTIVITIES);
-        initialLoadDoneRef.current = false;
 
         console.log(`[ActivityFeed] Starting stream for ${session.id}`);
         const unsub = sdkIpc.activities.stream(
@@ -101,25 +91,6 @@ export function ActivityFeed({
             unsub();
         };
     }, [session.id, loadSessions]);
-
-    useEffect(() => {
-        const newIds = activities.filter((a) => !prevIdsRef.current.has(a.id)).map((a) => a.id);
-        prevIdsRef.current = new Set(activities.map((a) => a.id));
-        if (!newIds.length) return;
-        if (!initialLoadDoneRef.current) {
-            initialLoadDoneRef.current = true;
-            bottomRef.current?.scrollIntoView();
-            return;
-        }
-        setNewActivityIds(new Set(newIds));
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-        const t = setTimeout(() => {
-            setNewActivityIds(new Set());
-        }, 500);
-        return () => {
-            clearTimeout(t);
-        };
-    }, [activities]);
 
     const handleApplyLocally = useCallback(async () => {
         setApplyState({ status: "applying" });
@@ -243,10 +214,8 @@ export function ActivityFeed({
                                 onApprovePlan={handleApprovePlan}
                                 approvingPlan={approving}
                                 planApproved={planApproved}
-                                isNew={!Array.isArray(item) && newActivityIds.has(item.id)}
                             />
                         ))}
-                        <div ref={bottomRef} />
                     </div>
                 </ScrollArea>
             </div>
