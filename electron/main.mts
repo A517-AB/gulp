@@ -133,6 +133,8 @@ ipcMain.on("window.quit", () => {
 });
 
 // ── lifecycle ─────────────────────────────────────────────────────────────────
+app.setAppUserModelId("com.last.app");
+
 void app.whenReady().then(() => {
   console.log("[main] app ready");
   registerTerminalHandlers(() => mainWindow?.webContents ?? null);

@@ -3,6 +3,7 @@ import { ScrollArea } from "@/ui/scroll-area.tsx";
 import { Button } from "@/ui/button.tsx";
 import { useActivityGroups } from "@/hooks/use-activity-groups.ts";
 import { useStore } from "@/store/app.ts";
+import { sdkIpc, uiNotification } from "@shared/bridge";
 import type { Activity, ActivityFeedProps } from "./types";
 import { ActivityItem } from "./activity-item.tsx";
 import { ActivityFeedHeader } from "./activity-feed-header.tsx";
@@ -20,13 +21,11 @@ export function ActivityFeed({
     showCodeDiffs,
     onToggleCodeDiffs,
 }: ActivityFeedProps) {
-    const activities = useStore((s) => s.activities[session.id] ?? EMPTY_ACTIVITIES);
-    const error = useStore((s) => s.activitiesError[session.id] ?? null);
-    const loadActivities = useStore((s) => s.loadActivities);
-    const streamActivities = useStore((s) => s.streamActivities);
+    const [activities, setActivities] = useState<Activity[]>(EMPTY_ACTIVITIES);
+    const [error, setError] = useState<string | null>(null);
 
+    const loadSessions = useStore((s) => s.loadSessions);
     const applyPatch = useStore((s) => s.applyPatch);
-
     const approvePlan = useStore((s) => s.approvePlan);
     const sendMessage = useStore((s) => s.sendMessage);
 
@@ -46,16 +45,62 @@ export function ActivityFeed({
     const bottomRef = useRef<HTMLDivElement>(null);
 
     const reloadActivities = useCallback(() => {
-        void loadActivities(session.id);
-    }, [session.id, loadActivities]);
+        if (!sdkIpc) return;
+        setActivities(EMPTY_ACTIVITIES);
+        setError(null);
+        initialLoadDoneRef.current = false;
+        // The effect below will re-trigger stream because we set key on parent or we can just rely on the existing stream if we remount.
+        // For a true retry without remount, we should trigger a refetch state, but simpler is to let the effect run.
+        // Let's just re-hydrate if there's an error.
+        void sdkIpc.activities.hydrate(session.id).then(() => {
+            setError(null);
+        }).catch(err => {
+            setError(err instanceof Error ? err.message : "Failed to load activities");
+        });
+    }, [session.id]);
 
     useEffect(() => {
-        void loadActivities(session.id);
-        const unsub = streamActivities(session.id);
+        if (!sdkIpc) return;
+        setError(null);
+        // Clear previous activities when session changes
+        setActivities(EMPTY_ACTIVITIES);
+        initialLoadDoneRef.current = false;
+
+        console.log(`[ActivityFeed] Starting stream for ${session.id}`);
+        const unsub = sdkIpc.activities.stream(
+            session.id,
+            (activity) => {
+                setActivities((prev) => {
+                    const idx = prev.findIndex((a) => a.id === activity.id);
+                    if (idx >= 0) {
+                        const next = [...prev];
+                        next[idx] = activity;
+                        return next;
+                    }
+                    return [...prev, activity];
+                });
+
+                if (activity.type === "sessionCompleted" || activity.type === "sessionFailed") {
+                    const title = session.title || "Session";
+                    if (activity.type === "sessionCompleted") {
+                        uiNotification?.show({ title: "Jules done", body: title, type: "success", sound: "chime", id: `jules-done-${session.id}` });
+                    } else {
+                        uiNotification?.show({ title: "Jules failed", body: title, type: "error", sound: "pulse", id: `jules-failed-${session.id}` });
+                    }
+                    void loadSessions();
+                }
+            },
+            () => {
+                console.log(`[ActivityFeed] Stream done for ${session.id}`);
+                void loadSessions();
+            }
+        );
+
         return () => {
+            console.log(`[ActivityFeed] Unsubscribing stream for ${session.id}`);
             unsub();
         };
-    }, [session.id, loadActivities, streamActivities]);
+    }, [session.id, loadSessions]);
 
     useEffect(() => {
         const newIds = activities.filter((a) => !prevIdsRef.current.has(a.id)).map((a) => a.id);

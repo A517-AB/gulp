@@ -1,32 +1,50 @@
-import {useMemo} from "react";
+import {useMemo, useState, useEffect} from "react";
 import {FileCode} from "lucide-react";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {DiffViewer} from "@/ui/diff-viewer.tsx";
 import {MediaItemDownloader} from "@/components/workspace/activity/activity-artifacts.tsx";
-import type {ChangeSetArtifact, MediaArtifact} from "@jules";
+import type {Activity, ChangeSetArtifact, MediaArtifact} from "@jules";
 import {useStore} from "@/store/app.ts";
-import {filesystem} from "@shared/bridge";
+import {filesystem, sdkIpc} from "@shared/bridge";
 
 interface CodeDiffSidebarProps {
     sessionId: string;
     repoUrl?: string;
 }
 
-const EMPTY_ACTIVITIES: never[] = [];
+const EMPTY_ACTIVITIES: Activity[] = [];
 
 export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
-    const activities = useStore(s => s.activities[sessionId] ?? EMPTY_ACTIVITIES);
+    const [activities, setActivities] = useState<Activity[]>(EMPTY_ACTIVITIES);
+
+    useEffect(() => {
+        if (!sdkIpc) return;
+        setActivities(EMPTY_ACTIVITIES);
+        const unsub = sdkIpc.activities.stream(sessionId, (activity) => {
+            setActivities(prev => {
+                const idx = prev.findIndex(a => a.id === activity.id);
+                if (idx >= 0) {
+                    const next = [...prev];
+                    next[idx] = activity;
+                    return next;
+                }
+                return [...prev, activity];
+            });
+        });
+        return unsub;
+    }, [sessionId]);
+
     const sessionSnapshot = useStore(s => s.sessionSnapshot);
     const finalDiff = useMemo(() => activities
         .flatMap(a => {
-            const cs = (a as {artifacts?: unknown[]}).artifacts?.find((art): art is ChangeSetArtifact => (art as {type?: string}).type === 'changeSet');
+            const cs = a.artifacts?.find((art): art is ChangeSetArtifact => art.type === 'changeSet');
             return cs ? [{id: a.id, patch: cs.gitPatch.unidiffPatch}] : [];
         })
         .slice(-1), [activities]);
 
     const mediaItems = useMemo(() => activities.flatMap(a =>
-        ((a as {artifacts?: unknown[]}).artifacts ?? [])
-            .filter((art): art is MediaArtifact => (art as {type?: string}).type === 'media')
+        (a.artifacts ?? [])
+            .filter((art): art is MediaArtifact => art.type === 'media')
             .map((media, i) => ({ media, activityId: a.id, index: i }))
     ), [activities]);
 
