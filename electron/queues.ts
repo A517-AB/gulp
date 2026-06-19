@@ -4,11 +4,13 @@ import * as path from "path";
 
 const BASE_DIR = "D:\\tired";
 
-function ensureFile(filePath: string, defaultContent = "[]"): void {
-  if (!fs.existsSync(filePath)) {
+async function ensureFile(filePath: string, defaultContent = "[]"): Promise<void> {
+  try {
+    await fs.promises.access(filePath);
+  } catch {
     try {
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      fs.writeFileSync(filePath, defaultContent, "utf-8");
+      await fs.promises.mkdir(path.dirname(filePath), { recursive: true });
+      await fs.promises.writeFile(filePath, defaultContent, "utf-8");
       console.log(`[queues] created ${filePath}`);
     } catch (err) {
       console.log(`[queues] could not create ${filePath}:`, err);
@@ -16,40 +18,40 @@ function ensureFile(filePath: string, defaultContent = "[]"): void {
   }
 }
 
-function readJsonArray(filePath: string): unknown[] {
+async function readJsonArray(filePath: string): Promise<unknown[]> {
   try {
-    const raw = fs.readFileSync(filePath, "utf-8");
+    const raw = await fs.promises.readFile(filePath, "utf-8");
     const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? (parsed as unknown[]) : [];
   } catch (err) {
     console.log(`[queues] failed to read ${filePath}:`, err);
     return [];
   }
 }
 
-function resolve(filename: string): string {
+async function resolve(filename: string): Promise<string> {
   const filePath = path.join(BASE_DIR, filename);
-  ensureFile(filePath);
+  await ensureFile(filePath);
   return filePath;
 }
 
 export function registerQueuesHandlers(): void {
 
-  ipcMain.handle("queues.getTasks", () => {
-    return readJsonArray(resolve("tasks.json"));
+  ipcMain.handle("queues.getTasks", async () => {
+    return readJsonArray(await resolve("tasks.json"));
   });
 
-  ipcMain.handle("queues.getQueue", () => {
-    return readJsonArray(resolve("ipc-queue.json"));
+  ipcMain.handle("queues.getQueue", async () => {
+    return readJsonArray(await resolve("ipc-queue.json"));
   });
 
-  ipcMain.handle("queues.saveTasks", (_event, data: unknown[]) => {
-    const filePath = resolve("tasks.json");
+  ipcMain.handle("queues.saveTasks", async (_event, data: unknown[]) => {
     try {
-      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+      const filePath = await resolve("tasks.json");
+      await fs.promises.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
       return true;
     } catch (err) {
-      console.log(`[queues] failed to save ${filePath}:`, err);
+      console.log(`[queues] failed to save tasks.json:`, err);
       return false;
     }
   });
