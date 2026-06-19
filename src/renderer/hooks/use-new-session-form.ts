@@ -58,8 +58,7 @@ export function useNewSessionForm({
             ...(formData.title ? { title: formData.title } : {}),
             ...(formData.autoCreatePr ? { autoPr: true } : {}),
             ...(formData.interactive ? { requireApproval: true } : {}),
-            // repoless = omit source entirely (NOT null) — Jules SDK treats missing key as repoless, null breaks it
-            ...(ownerRepo ? { source: { github: ownerRepo, baseBranch: formData.startingBranch } } : {}),
+            ...(ownerRepo ? { source: { github: ownerRepo, baseBranch: formData.startingBranch || 'main' } } : {}),
         }
         await createSession(config)
       resetForm();

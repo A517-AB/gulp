@@ -199,6 +199,7 @@ export const SingleActivity = memo(
         );
     },
     (prevProps, nextProps) => {
+        if (prevProps.isNew !== nextProps.isNew) return false;
         if (prevProps.approvingPlan !== nextProps.approvingPlan) return false;
         if (prevProps.planApproved !== nextProps.planApproved) return false;
         if (prevProps.onApprovePlan !== nextProps.onApprovePlan) return false;

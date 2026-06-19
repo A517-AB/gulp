@@ -1,6 +1,6 @@
 import {create} from 'zustand'
 import type {Activity, SessionResource, SerializedSnapshot, SessionConfig, Source, ParsedFile} from '@jules'
-import {sdkIpc, filesystem, store, uiNotification} from '@shared/bridge'
+import {sdkIpc, filesystem, store} from '@shared/bridge'
 
 export interface SessionFormData {
     sourceId: string
@@ -13,7 +13,6 @@ export interface SessionFormData {
 
 let syncInProgress = false
 let lastSyncAt = 0
-let firstSync = true
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000
 
 const DEFAULT_FORM: SessionFormData = {
@@ -106,9 +105,7 @@ export const useStore = create<AppStore>((set, get) => ({
         syncInProgress = true
         lastSyncAt = now
         try {
-            const incremental = !firstSync
-            await sdkIpc.client.sync({ depth: 'activities', incremental, checkpoint: true })
-            firstSync = false
+            await sdkIpc.client.sync()
             await get().loadSessions()
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err)
@@ -157,6 +154,8 @@ export const useStore = create<AppStore>((set, get) => ({
         await sdkIpc.session.create(config)
         await get().loadSessions()
     },
+
+
 
     sessionSnapshot: async (sessionId) => {
         if (!sdkIpc) throw new Error('SDK not available')

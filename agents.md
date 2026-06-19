@@ -18,7 +18,6 @@ This file is a working document to track rules, architectural decisions, and spe
   - no lazy loading
   - no loading screens, no spinners, no skeleton loaders, no loading states — if data isn't ready, render nothing or render what you have
   - zero lint errors and zero typecheck errors — run `npm run lint` and `npm run typecheck` after all changes are done, not after each file. fix everything before reporting done
-  - never use left border lines (e.g., `border-l`, `border-left`) anywhere. do not use borderlines on one side.
   - there's no more bun (as of May 30 2026)
   - don't respond with wall text
   - don't give compliments. just answer if asked

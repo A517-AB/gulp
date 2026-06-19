@@ -7,6 +7,7 @@ import {useResizable} from "@renderer/hooks/use-resizable";
 import {useStore} from "@/store/app.ts";
 import {FlyingJules} from "@/components/workspace/flying-jules.tsx";
 import type {SessionResource as Session} from "@google/jules-sdk/types";
+import type {SessionInitialValues} from '@jules';
 
 export default function JulesPage() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
@@ -14,6 +15,7 @@ export default function JulesPage() {
   const [showCodeDiffs, setShowCodeDiffs] = useState(false);
   const [codeDiffCollapsed, setCodeDiffCollapsed] = useState(false);
   const [newSessionOpen, setNewSessionOpen] = useState(false);
+  const [newSessionValues, setNewSessionValues] = useState<SessionInitialValues | undefined>();
 
   const { width: diffWidth, isResizing, handleProps: resizeHandleProps } = useResizable({ defaultWidth: 600 });
   const sessionList = useStore(s => s.sessionList);
@@ -21,10 +23,24 @@ export default function JulesPage() {
     ? (sessionList.find(s => s.id === selectedSession.id) ?? selectedSession)
     : null;
 
+  const handleSessionCreated = () => {
+    setNewSessionOpen(false);
+  };
+
+  const handleArchive = () => {
+    setSelectedSession(null);
+  };
+
+  const openNewSession = (values?: SessionInitialValues) => {
+    setNewSessionValues(values);
+    setNewSessionOpen(true);
+  };
+
   return (
     <div className="flex h-full overflow-hidden bg-base">
       <aside className={`hidden md:flex flex-col border-r border-hair bg-surface transition-all duration-200 ${sidebarCollapsed ? "w-12" : "w-64"}`}>
         <div className="px-3 py-2 flex items-center justify-between">
+          {!sidebarCollapsed && <span className="text-[10px] font-bold text-fg-dim uppercase tracking-widest">Sessions</span>}
           <button onClick={() => { setSidebarCollapsed((c) => !c); }} className="ml-auto text-fg-dim hover:text-fg-secondary text-xs px-1">
             {sidebarCollapsed ? "›" : "‹"}
           </button>
@@ -38,8 +54,8 @@ export default function JulesPage() {
         {liveSelectedSession ? (
           <ActivityFeed
             session={liveSelectedSession}
-            onArchive={() => { setSelectedSession(null); }}
-            onNewSession={() => { setNewSessionOpen(true); }}
+            onArchive={handleArchive}
+            onNewSession={() => { openNewSession(); }}
             showCodeDiffs={showCodeDiffs}
             onToggleCodeDiffs={setShowCodeDiffs}
           />
@@ -49,7 +65,7 @@ export default function JulesPage() {
               <FlyingJules size={100} state="idle" />
               <div className="space-y-3">
                 <p className="text-[10px] font-mono text-fg-dim uppercase tracking-widest">No session selected</p>
-                <button onClick={() => { setNewSessionOpen(true); }} className="text-[10px] font-mono uppercase tracking-widest text-purple-400 hover:text-purple-300">
+                <button onClick={() => { openNewSession(); }} className="text-[10px] font-mono uppercase tracking-widest text-purple-400 hover:text-purple-300">
                   + New Session
                 </button>
               </div>
@@ -83,7 +99,12 @@ export default function JulesPage() {
         </>
       )}
 
-      <NewSessionDialog open={newSessionOpen} onOpenChange={setNewSessionOpen} />
+      <NewSessionDialog
+        open={newSessionOpen}
+        onOpenChange={setNewSessionOpen}
+        {...(newSessionValues ? { initialValues: newSessionValues } : {})}
+        onSessionCreated={handleSessionCreated}
+      />
     </div>
   );
 }

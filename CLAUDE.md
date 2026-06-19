@@ -100,8 +100,6 @@ Copy `.env.example` to `.env`:
 
 **No loading states** — no spinners, no skeleton loaders, no loading screens. If data isn't ready, render nothing or render what you have.
 
-**Styling constraint** — Never use left border lines (e.g., `border-l`, `border-left`) anywhere. Do not use borderlines on one side.
-
 **Zero lint and zero typecheck errors** — run `npm run lint` and `npm run typecheck` after all changes are done, not after each file. Fix everything before reporting done.
 
 **Exports** — always export types through an `index.ts` barrel in the folder they belong to. No `export *`, no ad-hoc re-exports scattered across files. If a type needs to be consumed elsewhere, it goes through the index.

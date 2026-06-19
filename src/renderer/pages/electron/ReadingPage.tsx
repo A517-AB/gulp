@@ -1,14 +1,5 @@
 import type { ReactNode, ChangeEvent } from 'react'
 import { useEffect, useRef } from 'react'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-base/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-buttons/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-dropdowns/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-inputs/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-lists/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-navigations/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-popups/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/styles/pdfviewer/tailwind3.css'
 import {
     PdfViewer, Toolbar, Magnification, Navigation, LinkAnnotation,
     BookmarkView, ThumbnailView, Print, TextSelection, TextSearch,
@@ -64,10 +55,9 @@ export default function ReadingPage(): ReactNode {
             link.rel = 'stylesheet'
             document.head.appendChild(link)
         }
-        // TOFIX: Remove this full theme swap once PdfViewer only needs scoped Tailwind styles.
         link.href = theme === 'dark'
-            ? '/ej2-js-es5/styles/tailwind3-dark.css'
-            : '/ej2-js-es5/styles/tailwind3.css'
+            ? '/ej2-js-es5/styles/material3-dark.css'
+            : '/ej2-js-es5/styles/material3.css'
         return () => { document.getElementById(id)?.remove() }
     }, [theme])
 

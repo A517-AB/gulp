@@ -1,48 +1,56 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router'
 import { TopBar } from '@renderer/shell/TopBar'
 import { ThemeProvider } from '@renderer/providers/theme'
 import { mainNavRoutes, secretNavRoutes } from '@renderer/router'
 import { useAppSync } from '@/hooks/use-app-sync'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/ui/popover'
 
 function SecretButton() {
     const [open, setOpen] = useState(false)
+    const ref = useRef<HTMLDivElement>(null)
     const navigate = useNavigate()
 
+    useEffect(() => {
+        if (!open) return
+        const handler = (e: MouseEvent) => {
+            if (!ref.current?.contains(e.target as Node)) setOpen(false)
+        }
+        document.addEventListener('mousedown', handler)
+        return () => { document.removeEventListener('mousedown', handler) }
+    }, [open])
+
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <button
-                    className="w-5 h-5 rounded-sm bg-transparent border-none outline-none cursor-pointer select-none"
-                    aria-label="More pages"
-                />
-            </PopoverTrigger>
-            <PopoverContent align="start" sideOffset={4} className="p-0 w-auto border-subtle bg-overlay shadow-xl rounded-md">
-                <div className="flex flex-col py-1">
+        <div ref={ref} className="relative">
+            <button
+                onClick={() => { setOpen(o => !o) }}
+                className="w-5 h-5 rounded-sm bg-transparent border-none outline-none cursor-pointer transition-all duration-75 active:shadow-[inset_0_2px_5px_rgba(0,0,0,0.5)] active:translate-y-px select-none"
+                aria-label="More pages"
+            />
+            {open && (
+                <div className="absolute top-full left-0 mt-1 z-50 min-w-[120px] rounded-md border border-subtle bg-overlay shadow-xl py-1">
                     {secretNavRoutes.map(route => {
                         const path = route.index ? '/' : `/${route.path ?? ''}`
                         return (
                             <button
                                 key={path}
                                 onClick={() => { void navigate(path); setOpen(false) }}
-                                className="text-left px-2 py-0.5 text-3xs font-mono text-fg-muted hover:text-fg-primary hover:bg-hover transition-colors whitespace-nowrap"
+                                className="w-full text-left px-3 py-1.5 text-2xs font-mono text-fg-muted hover:text-fg-primary hover:bg-hover transition-colors"
                             >
                                 {route.handle?.title}
                             </button>
                         )
                     })}
                 </div>
-            </PopoverContent>
-        </Popover>
+            )}
+        </div>
     )
 }
 
 export default function RootLayout(): ReactNode {
     useAppSync()
     const navigate = useNavigate()
-    const [topbarVisible, setTopbarVisible] = useState(() => localStorage.getItem('topbar-visible') !== 'false')
+    const [topbarVisible, setTopbarVisible] = useState(true)
 
     const inNavRoutes = useMemo(() => mainNavRoutes, [])
 
@@ -51,7 +59,7 @@ export default function RootLayout(): ReactNode {
             if (!(e.ctrlKey || e.metaKey)) return
             if (e.key === '\\') {
                 e.preventDefault()
-                setTopbarVisible(v => { const next = !v; localStorage.setItem('topbar-visible', String(next)); return next; })
+                setTopbarVisible(v => !v)
                 return
             }
             const num = parseInt(e.key, 10)
@@ -73,9 +81,9 @@ export default function RootLayout(): ReactNode {
             <NavLink
                 key={path}
                 to={path}
-                style={{ fontFamily: "'Roboto', sans-serif" }}
+                style={{ fontFamily: 'system-ui, sans-serif' }}
                 className={({ isActive }) =>
-                    `px-3 py-1.5 text-3xs font-light uppercase tracking-[0.1em] rounded transition-colors whitespace-nowrap ${
+                    `px-3 py-1 text-3xs font-medium rounded transition-colors whitespace-nowrap ${
                         isActive
                             ? 'bg-active text-fg-primary'
                             : 'text-fg-secondary hover:text-fg-primary hover:bg-hover'

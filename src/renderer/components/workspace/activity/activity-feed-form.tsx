@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { ArrowUp } from "lucide-react";
+import { Send } from "lucide-react";
 import { Textarea } from "@/ui/textarea.tsx";
 import { Button } from "@/ui/button.tsx";
 
@@ -20,13 +20,13 @@ export const ActivityFeedForm = memo(
         };
 
         return (
-            <form onSubmit={handleSubmit} className="border-t border-hair bg-surface px-4 py-3">
-                <div className="relative flex items-end gap-2 bg-base border border-hair rounded-lg focus-within:border-fg-muted focus-within:shadow-sm transition-all p-1">
+            <form onSubmit={handleSubmit} className="border-t border-hair bg-surface p-3">
+                <div className="flex gap-2">
                     <Textarea
                         value={message}
                         onChange={(e) => { setMessage(e.target.value); }}
-                        placeholder=""
-                        className="min-h-[40px] max-h-[300px] py-2.5 px-3 resize-none text-[12px] bg-transparent border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 text-fg-primary"
+                        placeholder="Send a message to Jules..."
+                        className="min-h-[56px] resize-none text-[11px] bg-raised border-hair text-fg-primary placeholder:text-fg-ghost focus:border-purple-500/50"
                         onKeyDown={(e) => {
                             if (e.key === "Enter" && !e.shiftKey) {
                                 e.preventDefault();
@@ -34,14 +34,8 @@ export const ActivityFeedForm = memo(
                             }
                         }}
                     />
-                    <Button
-                        type="submit"
-                        size="icon"
-                        variant="ghost"
-                        disabled={!message.trim() || sending}
-                        className="h-8 w-8 shrink-0 mb-1 mr-1 rounded-md text-fg-muted hover:text-fg-primary hover:bg-hover disabled:opacity-30 disabled:bg-transparent"
-                    >
-                        <ArrowUp className="h-4 w-4 stroke-[2.5]" />
+                    <Button type="submit" size="icon" disabled={!message.trim() || sending} className="h-9 w-9">
+                        <Send className="h-3.5 w-3.5" />
                     </Button>
                 </div>
             </form>

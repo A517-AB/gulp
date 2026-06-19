@@ -45,21 +45,17 @@ export default defineConfig({
         './src/renderer/App.tsx',
         './src/renderer/router.tsx',
         './src/renderer/layouts/RootLayout.tsx',
-        './src/renderer/shell/TopBar.tsx',
-        './src/renderer/pages/shared/HomePage.tsx',
-        './src/renderer/components/shared/Clock.tsx',
       ],
     },
-    // In case web makes a comeback.
-    // proxy: {
-    //   '/api/jules': {
-    //     target: 'https://jules.googleapis.com/v1alpha',
-    //     changeOrigin: true,
-    //     rewrite: (path) => path.replace(/^\/api\/jules\?path=/, '/'),
-    //   },
-    // },
+    proxy: {
+      '/api/jules': {
+        target: 'https://jules.googleapis.com/v1alpha',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/jules\?path=/, '/'),
+      },
+    },
   },
-  // can you not change it to rollup because this is vite 8, if you don't know you don't know
+  // can you not change it to rollup
   build: {
     target:      'esnext',
     emptyOutDir: !keepVendors,

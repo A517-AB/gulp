@@ -71,7 +71,7 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
           {branches.length > 0 && (
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Branch (Optional)</Label>
-              <DynamicDropdown items={branches.map(b => ({ id: b, label: b }))} value={formData.startingBranch || null} onChange={(v) => { setFormData((p) => ({ ...p, startingBranch: v })); }} placeholder="Default branch" className="w-full h-9 justify-between px-3" container={portalContainer} />
+              <DynamicDropdown items={branches.map(b => ({ id: b, label: b }))} value={formData.startingBranch || null} onChange={(v) => { setFormData((p) => ({ ...p, startingBranch: v })); }} placeholder="main" className="w-full h-9 justify-between px-3" container={portalContainer} />
             </div>
           )}
           <div className="space-y-1.5">
