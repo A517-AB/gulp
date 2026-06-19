@@ -1,10 +1,11 @@
 // Local array operations — filter, sort, group, aggregate, select, distinct.
 // applyQuery() applies a Query (from query.ts) to a plain array without any network calls.
 
-import { getField, FilterValue }   from './predicate.ts';
-import {
+import { getField } from './predicate.ts';
+import type { FilterValue } from './predicate.ts';
+import type {
   DataQuery, QueryOp,
-  WhereOp, SearchOp, SortOp, GroupOp,
+  WhereOp, SearchOp, SortOp,
   PageOp, RangeOp, TakeOp, SkipOp,
   SelectOp, AggregateOp,
 } from './data-query.ts';
@@ -40,11 +41,12 @@ function setField(path: string, value: unknown, obj: Record<string, unknown>): R
   const keys = path.split('.');
   let cur = obj;
   for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]!;
     if (i + 1 === keys.length) {
-      cur[keys[i]] = value;
+      cur[key] = value;
     } else {
-      if (cur[keys[i]] == null || typeof cur[keys[i]] !== 'object') cur[keys[i]] = {};
-      cur = cur[keys[i]] as Record<string, unknown>;
+      if (cur[key] == null || typeof cur[key] !== 'object') cur[key] = {};
+      cur = cur[key] as Record<string, unknown>;
     }
   }
   return obj;

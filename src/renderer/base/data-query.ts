@@ -2,7 +2,8 @@
 // DataManager and remote adaptor coupling has been removed entirely.
 // Use with applyQuery() from collection.ts to execute against local arrays.
 
-import { Predicate, FilterValue, resolveOp } from './predicate.ts';
+import { Predicate, resolveOp } from './predicate.ts';
+import type { FilterValue } from './predicate.ts';
 
 export type SortOrder    = 'ascending' | 'descending';
 export type SortComparer = (a: unknown, b: unknown, aRec?: unknown, bRec?: unknown) => number;
@@ -64,12 +65,6 @@ export interface ParamOption {
 }
 
 // ─── Sort comparers ───────────────────────────────────────────────────────────
-
-function toLower(v: unknown): string {
-  if (v == null)               return '';
-  if (typeof v === 'string')   return v.toLowerCase();
-  return String(v).toLowerCase();
-}
 
 function ascend(x: unknown, y: unknown): number {
   if (x == null && y == null) return 0;
@@ -223,11 +218,11 @@ export class DataQuery {
     this.queries.push({
       fn: 'onSearch',
       e:  {
-        fieldNames:   fields,
+        ...(fields      !== undefined && { fieldNames:   fields }),
+        ...(ignoreCase  !== undefined && { ignoreCase }),
+        ...(ignoreAccent !== undefined && { ignoreAccent }),
         operator:     op,
         searchKey,
-        ignoreCase,
-        ignoreAccent,
         comparer:     resolveOp(op),
       },
     });
@@ -416,13 +411,13 @@ export class DataQuery {
     q.queries         = [...this.queries];
     q.key             = this.key;
     q.fKey            = this.fKey;
-    q.fromTable       = this.fromTable;
+    if (this.fromTable !== undefined) q.fromTable = this.fromTable;
     q.params          = [...this.params];
     q.expands         = [...this.expands];
     q.sortedColumns   = [...this.sortedColumns];
     q.groupedColumns  = [...this.groupedColumns];
     q.distincts       = [...this.distincts];
-    q.subQuery        = this.subQuery;
+    if (this.subQuery !== undefined) q.subQuery = this.subQuery;
     q.isCountRequired = this.isCountRequired;
     return q;
   }

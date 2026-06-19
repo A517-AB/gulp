@@ -32,6 +32,8 @@
       "@/utils/*": ["./src/renderer/utils/*"],
       "@/features": ["./src/renderer/features"],
       "@/features/*": ["./src/renderer/features/*"],
+      "@base": ["./src/renderer/base/index.ts"],
+      "@base/*": ["./src/renderer/base/*"],
       "@notification": ["./src/notification"],
       "@notification/*": ["./src/notification/*"],
       "@jules": ["./src/jules/index.ts"],
@@ -47,7 +49,7 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    
+
     "moduleDetection": "force",
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,

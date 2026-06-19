@@ -2,7 +2,7 @@ import { ipcMain } from "electron";
 import * as fs from "fs";
 import * as path from "path";
 
-const BASE_DIR = "D:\\tired";
+const BASE_DIR = "D:\\last";
 
 function ensureFile(filePath: string, defaultContent = "[]"): void {
   if (!fs.existsSync(filePath)) {
@@ -39,9 +39,6 @@ export function registerQueuesHandlers(): void {
     return readJsonArray(resolve("tasks.json"));
   });
 
-  ipcMain.handle("queues.getQueue", () => {
-    return readJsonArray(resolve("ipc-queue.json"));
-  });
 
   ipcMain.handle("queues.saveTasks", (_event, data: unknown[]) => {
     const filePath = resolve("tasks.json");

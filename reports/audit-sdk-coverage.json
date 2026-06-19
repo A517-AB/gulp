@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-06-19T12:52:35.828Z",
+  "counts": {
+    "sdkPublicMethods": 57,
+    "handlerSdkCalls": 26,
+    "ghostCalls": 7,
+    "unexposedMethods": 38
+  },
+  "ghost": [
+    {
+      "key": "DefaultActivityClient.get",
+      "line": "serialize(await jules.session(id).activities.get(activityId))"
+    },
+    {
+      "key": "DefaultActivityClient.history",
+      "line": "for await (const item of jules.session(id).activities.history()) {"
+    },
+    {
+      "key": "DefaultActivityClient.hydrate",
+      "line": "await jules.session(id).activities.hydrate()"
+    },
+    {
+      "key": "DefaultActivityClient.list",
+      "line": "serialize(await jules.session(id).activities.list(options))"
+    },
+    {
+      "key": "DefaultActivityClient.select",
+      "line": "serialize(await jules.session(id).activities.select(options))"
+    },
+    {
+      "key": "DefaultActivityClient.stream",
+      "line": "for await (const item of jules.session(id).activities.stream()) {"
+    },
+    {
+      "key": "DefaultActivityClient.updates",
+      "line": "for await (const item of jules.session(id).activities.updates()) {"
+    }
+  ],
+  "unexposed": [
+    "ActivityClient.get",
+    "ActivityClient.history",
+    "ActivityClient.hydrate",
+    "ActivityClient.list",
+    "ActivityClient.select",
+    "ActivityClient.stream",
+    "ActivityClient.updates",
+    "AutomatedSession.result",
+    "AutomatedSession.stream",
+    "JulesClient.all",
+    "JulesClient.connect",
+    "JulesClient.run",
+    "JulesClient.select",
+    "JulesClient.session",
+    "JulesClient.sessions",
+    "JulesClient.sync",
+    "JulesClient.with",
+    "JulesClientImpl.connect",
+    "JulesClientImpl.getSessionResource",
+    "JulesClientImpl.session",
+    "SessionClient.approve",
+    "SessionClient.archive",
+    "SessionClient.ask",
+    "SessionClient.history",
+    "SessionClient.info",
+    "SessionClient.result",
+    "SessionClient.select",
+    "SessionClient.send",
+    "SessionClient.snapshot",
+    "SessionClient.stream",
+    "SessionClient.unarchive",
+    "SessionClient.updates",
+    "SessionClient.waitFor",
+    "SessionClientImpl.activities",
+    "SessionClientImpl.hydrate",
+    "SessionClientImpl.select",
+    "SessionSnapshot.toJSON",
+    "SessionSnapshot.toMarkdown"
+  ]
+}

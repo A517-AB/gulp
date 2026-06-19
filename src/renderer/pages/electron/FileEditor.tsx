@@ -13,10 +13,16 @@ type CompatEditor = BlockNoteEditor<BlockSchema, InlineContentSchema, StyleSchem
 // Minimal typed interface — avoids both eslint unsafe-call and tsc type errors
 interface BNEditorApi {
   tryParseMarkdownToBlocks: (md: string) => NotePartialBlock[]
+  tryParseHTMLToBlocks: (html: string) => NotePartialBlock[]
   replaceBlocks: (toRemove: NoteBlock[], newBlocks: NotePartialBlock[]) => void
   blocksToMarkdownLossy: (blocks: NoteBlock[]) => string
   onChange: (fn: () => void) => () => void
   document: NoteBlock[]
+}
+
+const IMAGE_EXTS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico', 'avif'])
+export function isImage(path: string): boolean {
+  return IMAGE_EXTS.has(path.split('.').pop()?.toLowerCase() ?? '')
 }
 
 const LANG_MAP: Record<string, string> = {
@@ -38,6 +44,10 @@ function isMd(path: string): boolean {
   return lower.endsWith('.md') || lower.endsWith('.txt')
 }
 
+function isHtml(path: string): boolean {
+  return path.toLowerCase().endsWith('.html') || path.toLowerCase().endsWith('.htm')
+}
+
 export interface FileEditorProps {
   path: string
   content: string
@@ -56,11 +66,11 @@ function MdFileEditor({ path, content, onChange }: FileEditorProps) {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const blocks = api.tryParseMarkdownToBlocks(content)
+    const blocks = isHtml(path)
+      ? api.tryParseHTMLToBlocks(content)
+      : api.tryParseMarkdownToBlocks(content)
     api.replaceBlocks(api.document, blocks)
-    queueMicrotask(() => {
-      setReady(true)
-    })
+    queueMicrotask(() => { setReady(true) })
   // only run when path changes (new file loaded)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path])
@@ -93,6 +103,18 @@ function MdFileEditor({ path, content, onChange }: FileEditorProps) {
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export function FileEditor({ path, content, mode = 'default', onMount, onChange }: FileEditorProps) {
+  if (isImage(path)) {
+    const src = 'file:///' + path.replace(/\\/g, '/')
+    return (
+      <div className="flex items-center justify-center h-full overflow-auto p-4">
+        <img src={src} alt={path.split(/[\\/]/).pop()} className="max-w-full max-h-full object-contain" />
+      </div>
+    )
+  }
+  if (isHtml(path) && mode === 'default') {
+    const src = 'file:///' + path.replace(/\\/g, '/')
+    return <iframe src={src} className="w-full h-full border-0" title={path.split(/[\\/]/).pop()} />
+  }
   if (isMd(path) && mode === 'default') {
     return <MdFileEditor path={path} content={content} {...(onChange !== undefined ? { onChange } : {})} />
   }

@@ -2,6 +2,17 @@
   "version": 1,
   "items": [
     {
+      "id": "9f3f9b50-8fee-4778-b795-2be595f792c2",
+      "title": "pure-pipe",
+      "languageId": "session",
+      "type": "snippet",
+      "file": "snippets/session/pure-pipe.md",
+      "preview": "**hello** --it's mee--",
+      "tags": [],
+      "createdAt": "2026-06-18T21:11:35.598Z",
+      "updatedAt": "2026-06-18T21:11:59.623Z"
+    },
+    {
       "id": "a97fe630-3ad1-4645-88e8-6bd60d589bae",
       "title": "lazy-parser",
       "languageId": "typescript",

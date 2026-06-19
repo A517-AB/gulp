@@ -7,7 +7,7 @@ function makeHandler(map: HotkeyMap): (e: KeyboardEvent) => void {
   return (e: KeyboardEvent): void => {
     for (const combo of Object.keys(map)) {
       if (matchesShortcut(e, combo)) {
-        map[combo](e);
+        map[combo]?.(e);
         return;
       }
     }

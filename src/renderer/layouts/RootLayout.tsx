@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router'
+import { KBarProvider } from 'kbar'
 import { TopBar } from '@renderer/shell/TopBar'
 import { ThemeProvider } from '@renderer/providers/theme'
 import { mainNavRoutes, secretNavRoutes } from '@renderer/router'
 import { useAppSync } from '@/hooks/use-app-sync'
 import { Popover, PopoverContent, PopoverTrigger } from '@renderer/ui/popover'
+import { CommandPalette, CommandPaletteActions } from '@renderer/library/command-palette'
 
 function SecretButton() {
     const [open, setOpen] = useState(false)
@@ -89,6 +91,9 @@ export default function RootLayout(): ReactNode {
 
     return (
         <ThemeProvider>
+            <KBarProvider options={{ toggleShortcut: "$mod+F24" }}>
+                <CommandPaletteActions />
+                <CommandPalette />
             <div className="flex flex-col h-screen w-screen overflow-hidden bg-base">
                 <div
                     style={{ height: topbarVisible ? 'var(--height-toolbar)' : '0px' }}
@@ -105,6 +110,7 @@ export default function RootLayout(): ReactNode {
                     <Outlet />
                 </main>
             </div>
+            </KBarProvider>
         </ThemeProvider>
     )
 }

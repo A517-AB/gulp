@@ -84,11 +84,11 @@ const OPS: Record<string, CompareFn> = {
     if (ia) { a = stripAccents(a); e = stripAccents(e) as FilterValue; }
     return ic ? toLower(a) === toLower(e) : a === e;
   },
-  notequal(a, e, ic, ia) { return !OPS.equal(a, e, ic, ia); },
+  notequal(a, e, ic, ia) { return !OPS['equal']!(a, e, ic, ia); },
 
-  lessthan(a, e, ic)           { return ic ? toLower(a) < toLower(e)  : (a ?? undefined) < (e as number); },
-  greaterthan(a, e, ic)        { return ic ? toLower(a) > toLower(e)  : (a ?? undefined) > (e as number); },
-  lessthanorequal(a, e, ic)    { return ic ? toLower(a) <= toLower(e) : (a ?? undefined) <= (e as number); },
+  lessthan(a, e, ic)           { return ic ? toLower(a) < toLower(e)  : (a as number) < (e as number); },
+  greaterthan(a, e, ic)        { return ic ? toLower(a) > toLower(e)  : (a as number) > (e as number); },
+  lessthanorequal(a, e, ic)    { return ic ? toLower(a) <= toLower(e) : (a as number) <= (e as number); },
   greaterthanorequal(a, e, ic) { return ic ? toLower(a) >= toLower(e) : (a as number) >= (e as number); },
 
   contains(a, e, ic, ia) {
@@ -99,7 +99,7 @@ const OPS: Record<string, CompareFn> = {
       ? toLower(a).includes(toLower(e))
       : String(a).includes(String(e));
   },
-  doesnotcontain(a, e, ic, ia) { return e !== '' && !OPS.contains(a, e, ic, ia); },
+  doesnotcontain(a, e, ic, ia) { return e !== '' && !OPS['contains']!(a, e, ic, ia); },
 
   startswith(a, e, ic, ia) {
     if (e === '') return true;
@@ -107,7 +107,7 @@ const OPS: Record<string, CompareFn> = {
     if (ia) { a = stripAccents(a); e = stripAccents(e) as FilterValue; }
     return ic ? sw(toLower(a), toLower(e)) : sw(String(a), String(e));
   },
-  doesnotstartwith(a, e, ic, ia) { return e !== '' && !OPS.startswith(a, e, ic, ia); },
+  doesnotstartwith(a, e, ic, ia) { return e !== '' && !OPS['startswith']!(a, e, ic, ia); },
 
   endswith(a, e, ic, ia) {
     if (e === '') return true;
@@ -115,7 +115,7 @@ const OPS: Record<string, CompareFn> = {
     if (ia) { a = stripAccents(a); e = stripAccents(e) as FilterValue; }
     return ic ? ew(toLower(a), toLower(e)) : ew(String(a), String(e));
   },
-  doesnotendwith(a, e, ic, ia) { return e !== '' && !OPS.endswith(a, e, ic, ia); },
+  doesnotendwith(a, e, ic, ia) { return e !== '' && !OPS['endswith']!(a, e, ic, ia); },
 
   isnull:     (a) => a === null || a === undefined,
   isnotnull:  (a) => a !== null && a !== undefined,
@@ -144,7 +144,7 @@ const OPS: Record<string, CompareFn> = {
     }
     return arr.includes(a as string | number | boolean);
   },
-  notin(a, e, ic, ia) { return !OPS.in(a, e, ic, ia); },
+  notin(a, e, ic, ia) { return !OPS['in']!(a, e, ic, ia); },
 };
 
 const SYMBOLS: Record<string, string> = {
@@ -156,7 +156,7 @@ const SYMBOLS: Record<string, string> = {
 
 /** Resolve an operator name or symbol to its compare function. */
 export function resolveOp(operator: string): CompareFn {
-  const fn = OPS[operator] ?? OPS[SYMBOLS[operator]];
+  const fn = OPS[operator] ?? OPS[SYMBOLS[operator] ?? ''];
   if (!fn) throw new Error(`Predicate: unknown operator "${operator}"`);
   return fn;
 }
@@ -175,8 +175,8 @@ export function getField(path: string, obj: Record<string, unknown>): unknown {
 
   if (!path.includes('.')) {
     if (path in obj) return obj[path];
-    const lc = path[0].toLowerCase() + path.slice(1);
-    const uc = path[0].toUpperCase() + path.slice(1);
+    const lc = (path[0] ?? '').toLowerCase() + path.slice(1);
+    const uc = (path[0] ?? '').toUpperCase() + path.slice(1);
     return obj[lc] ?? obj[uc] ?? null;
   }
 
@@ -187,8 +187,8 @@ export function getField(path: string, obj: Record<string, unknown>): unknown {
     if (seg in rec) {
       cur = rec[seg];
     } else {
-      const lc = seg[0].toLowerCase() + seg.slice(1);
-      const uc = seg[0].toUpperCase() + seg.slice(1);
+      const lc = (seg[0] ?? '').toLowerCase() + seg.slice(1);
+      const uc = (seg[0] ?? '').toUpperCase() + seg.slice(1);
       cur = rec[lc] ?? rec[uc] ?? null;
     }
   }
@@ -266,14 +266,14 @@ export class Predicate {
       this.value       = value as FilterValue;
       this.ignoreCase  = ignoreCase  ?? false;
       this.ignoreAccent = ignoreAccent ?? false;
-      this.matchCase   = matchCase;
+      if (matchCase !== undefined) this.matchCase = matchCase;
       this.comparer    = resolveOp(this.operator);
     } else {
       this.isComplex   = true;
       this.condition   = operator.toLowerCase();
       this.ignoreCase  = field.ignoreCase;
       this.ignoreAccent = field.ignoreAccent;
-      this.matchCase   = field.matchCase;
+      if (field.matchCase !== undefined) this.matchCase = field.matchCase;
       this.predicates  = [field];
       if (Array.isArray(value)) {
         this.predicates.push(...(value as Predicate[]));
@@ -288,22 +288,22 @@ export class Predicate {
   /** Accepts either spread args `Predicate.and(p1, p2)` or a single array `Predicate.and([p1, p2])`. */
   static and(first: Predicate | Predicate[], ...rest: Predicate[]): Predicate {
     const preds = Array.isArray(first) ? first : [first, ...rest];
-    return preds.length === 1 ? preds[0] : new Predicate(preds[0], 'and', preds.slice(1));
+    return preds.length === 1 ? preds[0]! : new Predicate(preds[0]!, 'and', preds.slice(1));
   }
 
   static or(first: Predicate | Predicate[], ...rest: Predicate[]): Predicate {
     const preds = Array.isArray(first) ? first : [first, ...rest];
-    return preds.length === 1 ? preds[0] : new Predicate(preds[0], 'or', preds.slice(1));
+    return preds.length === 1 ? preds[0]! : new Predicate(preds[0]!, 'or', preds.slice(1));
   }
 
   static andnot(first: Predicate | Predicate[], ...rest: Predicate[]): Predicate {
     const preds = Array.isArray(first) ? first : [first, ...rest];
-    return preds.length === 1 ? preds[0] : new Predicate(preds[0], 'and not', preds.slice(1));
+    return preds.length === 1 ? preds[0]! : new Predicate(preds[0]!, 'and not', preds.slice(1));
   }
 
   static ornot(first: Predicate | Predicate[], ...rest: Predicate[]): Predicate {
     const preds = Array.isArray(first) ? first : [first, ...rest];
-    return preds.length === 1 ? preds[0] : new Predicate(preds[0], 'or not', preds.slice(1));
+    return preds.length === 1 ? preds[0]! : new Predicate(preds[0]!, 'or not', preds.slice(1));
   }
 
   // ── Instance chainers ─────────────────────────────────────────────────────
@@ -367,7 +367,7 @@ export class Predicate {
     const isAnd  = hasNot ? cond.includes('and') : cond === 'and';
 
     for (let i = 0; i < preds.length; i++) {
-      const result    = preds[i].validate(record);
+      const result    = preds[i]!.validate(record);
       // EJ2 semantics: first predicate is not negated; subsequent ones are (for 'x not' conditions)
       const effective = hasNot && i > 0 ? !result : result;
 
@@ -382,14 +382,14 @@ export class Predicate {
   toJson(): PredicateJson {
     return {
       isComplex:    this.isComplex,
-      field:        this.field,
-      operator:     this.operator,
-      value:        this.value,
+      ...(this.field      !== undefined && { field:      this.field }),
+      ...(this.operator   !== undefined && { operator:   this.operator }),
+      ...(this.value      !== undefined && { value:      this.value }),
       ignoreCase:   this.ignoreCase,
       ignoreAccent: this.ignoreAccent,
-      matchCase:    this.matchCase,
-      condition:    this.condition,
-      predicates:   this.predicates?.map(p => p.toJson()),
+      ...(this.matchCase  !== undefined && { matchCase:  this.matchCase }),
+      ...(this.condition  !== undefined && { condition:  this.condition }),
+      ...(this.predicates !== undefined && { predicates: this.predicates.map(p => p.toJson()) }),
     };
   }
 
@@ -403,6 +403,6 @@ export class Predicate {
       return new Predicate(json.field!, json.operator!, json.value, json.ignoreCase, json.ignoreAccent);
     }
     const preds = (json.predicates ?? []).map(p => Predicate._fromData(p));
-    return new Predicate(preds[0], json.condition!, preds.slice(1));
+    return new Predicate(preds[0]!, json.condition!, preds.slice(1));
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { DynamicDropdown } from '@/components/shared/DynamicDropdown'
 import { TerminalConsole } from '@/components/workspace/activity/terminal-console'
 import { Folder, GitBranch, Zap } from 'lucide-react'
@@ -15,6 +15,10 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/ui/tooltip'
 import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '@/ui/context-menu'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/ui/accordion'
+import {
+  CommandDialog, CommandInput, CommandList,
+  CommandEmpty, CommandGroup, CommandItem, CommandSeparator,
+} from '@/ui/command'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -28,6 +32,18 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function KitPage() {
   const [selectVal, setSelectVal] = useState('')
   const [dropdownVal, setDropdownVal] = useState<string | null>(null)
+  const [cmdOpen, setCmdOpen] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === ' ') {
+        e.preventDefault()
+        setCmdOpen(o => !o)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   return (
     <TooltipProvider>
@@ -307,6 +323,30 @@ export default function KitPage() {
                 <ContextMenuItem className="text-destructive">Delete</ContextMenuItem>
               </ContextMenuContent>
             </ContextMenu>
+          </Section>
+
+          <Separator />
+
+          <Section title="Command palette — ctrl+space or button">
+            <Button variant="outline" size="sm" onClick={() => setCmdOpen(true)}>
+              Open palette
+            </Button>
+            <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>
+              <CommandInput placeholder="Type a command…" />
+              <CommandList>
+                <CommandEmpty>No results.</CommandEmpty>
+                <CommandGroup heading="Sessions">
+                  <CommandItem>Open new session</CommandItem>
+                  <CommandItem>Resume last session</CommandItem>
+                </CommandGroup>
+                <CommandSeparator />
+                <CommandGroup heading="Navigation">
+                  <CommandItem>Go to explorer</CommandItem>
+                  <CommandItem>Go to activity</CommandItem>
+                  <CommandItem>Go to settings</CommandItem>
+                </CommandGroup>
+              </CommandList>
+            </CommandDialog>
           </Section>
 
           <Separator />

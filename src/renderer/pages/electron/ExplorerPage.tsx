@@ -6,7 +6,7 @@ import {
   Star, StarOff
 } from 'lucide-react'
 import { FileTree } from '@/components/shared/FileTree'
-import { FileEditor } from './FileEditor'
+import { FileEditor, isImage } from './FileEditor'
 import { filesystem, git } from '@shared/bridge'
 import { cn } from '@/utils'
 import { useExplorerStore } from '@/store/explorer'
@@ -94,7 +94,7 @@ export function ExplorerPage() {
   }, [activePath, fileContents])
 
   useEffect(() => {
-    if (activePath && fileContents[activePath] === undefined && filesystem) {
+    if (activePath && fileContents[activePath] === undefined && filesystem && !isImage(activePath)) {
       filesystem.readFile(activePath).then(content => {
         setFileContents(prev => ({ ...prev, [activePath]: content }))
       }).catch(console.error)
@@ -156,6 +156,12 @@ export function ExplorerPage() {
   const handleSelectFile = useCallback(async (filePath: string) => {
     if (!filesystem) return
     if (openPaths.includes(filePath)) { setActivePath(filePath); return }
+    if (isImage(filePath)) {
+      setFileContents(prev => ({ ...prev, [filePath]: '' }))
+      setOpenPaths([...openPaths, filePath])
+      setActivePath(filePath)
+      return
+    }
     try {
       const content = await filesystem.readFile(filePath)
       setFileContents(prev => ({ ...prev, [filePath]: content }))
@@ -263,7 +269,7 @@ export function ExplorerPage() {
       if (!(e.ctrlKey || e.metaKey)) return
       if (e.key === 's') { e.preventDefault(); void handleSaveFile() }
       if (e.key === 'w') { e.preventDefault(); if (activePath) closeFile(activePath) }
-      if (e.key === 'e') {
+      if (e.key === 'e' && !e.shiftKey) {
         e.preventDefault()
         if (activePath) {
           const lower = activePath.toLowerCase()
@@ -273,6 +279,16 @@ export function ExplorerPage() {
               ? pendingContentRef.current
               : (editorRef.current?.getValue() ?? '')
             setFileContents(prev => ({ ...prev, [activePath]: currentText }))
+            setEditorMode(prev => prev === 'default' ? 'raw' : 'default')
+          }
+        }
+      }
+      if (e.key === 'e' && e.shiftKey) {
+        e.preventDefault()
+        if (activePath) {
+          const lower = activePath.toLowerCase()
+          const isHtmlFile = lower.endsWith('.html') || lower.endsWith('.htm')
+          if (isHtmlFile) {
             setEditorMode(prev => prev === 'default' ? 'raw' : 'default')
           }
         }

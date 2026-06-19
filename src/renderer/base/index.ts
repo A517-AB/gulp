@@ -23,7 +23,7 @@ export { EASING, cssEasing, applyTransition, clearTransition } from './easing.ts
 export type { EasingName } from './easing.ts';
 
 // ─── keyboard ────────────────────────────────────────────────────────────────
-export { KEY_CODES, parseShortcut, matchesShortcut, matchesAny } from './keyboard.ts';
+export { parseShortcut, matchesShortcut, matchesAny } from './keyboard.ts';
 export type { ParsedShortcut } from './keyboard.ts';
 
 // ─── hotkeys ─────────────────────────────────────────────────────────────────

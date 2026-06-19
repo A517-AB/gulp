@@ -16,17 +16,17 @@ export class Observer<Events extends EventMap = EventMap> {
     if (!handler) return;
 
     if (!this.events[event]) {
-      this.events[event] = [{ handler, context, id }];
+      this.events[event] = [{ handler, ...(context !== undefined && { context }), ...(id !== undefined && { id }) }];
       return;
     }
 
     if (id) {
       if (!this.ids.includes(id)) {
         this.ids.push(id);
-        this.events[event]!.push({ handler, context, id });
+        this.events[event]!.push({ handler, ...(context !== undefined && { context }), id });
       }
     } else if (!this.events[event]!.some(e => e.handler === handler)) {
-      this.events[event]!.push({ handler, context });
+      this.events[event]!.push({ handler, ...(context !== undefined && { context }) });
     }
   }
 

@@ -22,7 +22,7 @@ obs.notify('ping', 'after destroy');
 console.log('After destroy (should stay same length):', log.length === 5);
 
 // --- easing.ts ---
-import { EASING, cssEasing, applyTransition } from './easing.ts';
+import { EASING, cssEasing } from './easing.ts';
 
 console.log('\nEasing keys:', Object.keys(EASING));
 console.log('cssEasing("elasticOut"):', cssEasing('elasticOut'));
@@ -33,24 +33,23 @@ const result = cssEasing('easeInOut');
 console.log('easeInOut value correct:', result === EASING.easeInOut);
 
 // --- keyboard.ts ---
-import { parseShortcut, matchesShortcut, matchesAny, KEY_CODES } from './keyboard.ts';
+import { parseShortcut, matchesShortcut, matchesAny } from './keyboard.ts';
 
 const ctrlA = parseShortcut('ctrl+a');
 console.log('\nparseShortcut("ctrl+a"):', ctrlA);
 console.log('ctrl+shift+z:', parseShortcut('ctrl+shift+z'));
 console.log('f5:', parseShortcut('f5'));
-console.log('KEY_CODES.enter:', KEY_CODES['enter']);
 
 // mock KeyboardEvent
-const mockEvent = (which: number, ctrl = false, shift = false, alt = false, meta = false) =>
-  ({ which, ctrlKey: ctrl, shiftKey: shift, altKey: alt, metaKey: meta }) as KeyboardEvent;
+const mockEvent = (key: string, ctrl = false, shift = false, alt = false, meta = false) =>
+  ({ key, ctrlKey: ctrl, shiftKey: shift, altKey: alt, metaKey: meta }) as KeyboardEvent;
 
-console.log('\nmatchesShortcut ctrl+a:', matchesShortcut(mockEvent(65, true), 'ctrl+a'));
-console.log('matchesShortcut ctrl+a (wrong key):', matchesShortcut(mockEvent(66, true), 'ctrl+a'));
-console.log('matchesShortcut escape:', matchesShortcut(mockEvent(27), 'escape'));
-console.log('matchesShortcut f5:', matchesShortcut(mockEvent(116), 'f5'));
+console.log('\nmatchesShortcut ctrl+a:', matchesShortcut(mockEvent('a', true), 'ctrl+a'));
+console.log('matchesShortcut ctrl+a (wrong key):', matchesShortcut(mockEvent('b', true), 'ctrl+a'));
+console.log('matchesShortcut escape:', matchesShortcut(mockEvent('Escape'), 'escape'));
+console.log('matchesShortcut f5:', matchesShortcut(mockEvent('F5'), 'f5'));
 
-const hit = matchesAny(mockEvent(90, true, true), ['ctrl+z', 'ctrl+shift+z', 'ctrl+y']);
+const hit = matchesAny(mockEvent('z', true, true), ['ctrl+z', 'ctrl+shift+z', 'ctrl+y']);
 console.log('matchesAny ctrl+shift+z:', hit);
 
 // cache hit (same object returned)

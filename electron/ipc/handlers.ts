@@ -54,10 +54,10 @@ export function parseUnidiffWithContent(patch?: string | null): GeneratedFile[] 
             if (nextLine?.startsWith('+++ ')) {
                 const fromPath = line.substring(4);
                 const toPath = nextLine.substring(4);
-                
+
                 let changeType: 'created' | 'modified' | 'deleted';
                 let filePath: string;
-                
+
                 if (fromPath === '/dev/null') {
                     changeType = 'created';
                     filePath = toPath.startsWith('b/') ? toPath.substring(2) : toPath;

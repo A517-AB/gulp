@@ -75,6 +75,8 @@
     "ignore": "^7.0.5",
     "isomorphic-git": "^1.38.4",
     "jszip": "^3.10.1",
+    "kbar": "^0.1.0-beta.48",
+    "lowdb": "^7.0.1",
     "lucide-react": "^1.16.0",
     "mitt": "^3.0.1",
     "monaco-editor": "^0.55.1",

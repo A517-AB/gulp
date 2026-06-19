@@ -1,9 +1,8 @@
-import { ipcMain, app } from 'electron'
+import { ipcMain } from 'electron'
 import fs from 'fs-extra'
-import * as path from 'path'
 import type {HistoryEntry} from '@shared/history.ts'
 
-const HISTORY_PATH = path.join(app.getAppPath(), 'history.json')
+const HISTORY_PATH = 'D:/fuse/history.json'
 const MAX_ENTRIES = 200
 
 async function read(): Promise<HistoryEntry[]> {

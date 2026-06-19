@@ -1,4 +1,4 @@
-import { ipcMain, app } from 'electron'
+import { ipcMain } from 'electron'
 import type { WebContents } from 'electron'
 import fs from 'fs-extra'
 import * as path from 'path'
@@ -7,7 +7,7 @@ import { FuseManifest, FUSE_ROOT } from '../src/shared/fuse'
 import type { FuseManifest as FuseManifestType } from '../src/shared/fuse'
 import { store } from './store'
 
-const MANIFEST_PATH = path.join(app.getAppPath(), 'snippets.json')
+const MANIFEST_PATH = 'D:/fuse/snippets.json'
 const EMPTY_MANIFEST: FuseManifestType = { version: 1, items: [] }
 
 function getFuseRoot(): string {

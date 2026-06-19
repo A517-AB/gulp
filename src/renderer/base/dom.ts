@@ -35,7 +35,7 @@ export function createElement<T extends Element = HTMLElement>(
 
 export function setAttributes(element: Element, attrs: AttrMap): Element {
   for (const key of Object.keys(attrs)) {
-    element.setAttribute(key, attrs[key]);
+    element.setAttribute(key, attrs[key] ?? '');
   }
   return element;
 }
