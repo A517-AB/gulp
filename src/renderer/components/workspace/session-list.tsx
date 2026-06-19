@@ -1,4 +1,5 @@
-import {Search, CheckSquare} from "lucide-react";
+import {Search, CheckSquare, Plus} from "lucide-react";
+import {NewSessionDialog} from "./new-session-dialog.tsx";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {Input} from "@/ui/input.tsx";
 import {Badge} from "@/ui/badge.tsx";
@@ -70,6 +71,11 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
             <Search className="absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-fg-ghost" />
             <Input placeholder="Search sessions..." value={searchQuery} onChange={(e) => { setSearchQuery(e.target.value); }} className="h-7 bg-raised pl-7 text-[10px] border-hair placeholder:text-fg-ghost" />
           </div>
+          <NewSessionDialog trigger={
+            <button className="shrink-0 p-1.5 rounded-md text-fg-ghost hover:text-fg-secondary hover:bg-raised transition-colors" title="New session">
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          } />
           <button
             onClick={() => { if (selectMode) exitSelectMode(); else setSelectMode(true); }}
             className={`shrink-0 p-1.5 rounded-md transition-colors ${selectMode ? 'text-purple-400 bg-purple-500/10' : 'text-fg-ghost hover:text-fg-secondary hover:bg-raised'}`}

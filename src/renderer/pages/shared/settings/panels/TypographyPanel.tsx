@@ -64,22 +64,31 @@ function FontRow({
         onChange(v)
     }, [onChange])
 
+    const fontFamily = `'${value}', ${fallback}`
+
     return (
-        <div className="flex items-center justify-between text-3xs font-mono">
-            <span className="text-fg-dim uppercase tracking-wider shrink-0 mr-4">{label}</span>
-            <input
-                type="text"
-                list={listId}
-                value={value}
-                onChange={e => { handle(e.target.value) }}
-                placeholder={fallback}
-                className="bg-transparent border-none p-0 text-fg-primary font-mono text-3xs outline-none text-right w-40 placeholder-fg-ghost"
-                style={{ fontFamily: `'${value}', ${fallback}` }}
-                spellCheck={false}
-            />
-            <datalist id={listId}>
-                {suggestions.map(s => <option key={s} value={s} />)}
-            </datalist>
+        <div className="space-y-1">
+            <div className="flex items-center justify-between text-3xs font-mono">
+                <span className="text-fg-dim uppercase tracking-wider shrink-0 mr-4">{label}</span>
+                <input
+                    type="text"
+                    list={listId}
+                    value={value}
+                    onChange={e => { handle(e.target.value) }}
+                    placeholder={fallback}
+                    className="bg-transparent border-none p-0 text-fg-primary font-mono text-3xs outline-none text-right w-40 placeholder-fg-ghost"
+                    spellCheck={false}
+                />
+                <datalist id={listId}>
+                    {suggestions.map(s => <option key={s} value={s} />)}
+                </datalist>
+            </div>
+            <p
+                className="text-fg-ghost/50 text-[13px] leading-tight pl-0 truncate"
+                style={{ fontFamily }}
+            >
+                Aa &mdash; The quick brown fox
+            </p>
         </div>
     )
 }

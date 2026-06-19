@@ -27,6 +27,7 @@ export interface ShipState {
     fileStates: Record<string, ActionState>;
     snapshotStates: Record<string, ActionState>;
     viewMode: 'jules' | 'sync';
+    lastSessionId: string;
 
     setSourceId: (id: string) => void;
     setOpenPatchId: (id: string) => void;
@@ -36,7 +37,7 @@ export interface ShipState {
     handlePatchClick: (sessionId: string) => void;
     handleFileClick: (sessionId: string, file: ShipFile, patch: string) => void;
     handleGetFile: (sessionId: string, file: ShipFile) => Promise<void>;
-    handleSnapshot: (sessionId: string, effectiveSourceId?: string) => Promise<void>;
+    handleSnapshot: (sessionId: string, effectiveSourceId?: string) => Promise<{ success: boolean; branch?: string; error?: string } | null>;
 }
 
 function extractFilePatch(unidiff: string, filePath: string): string {
@@ -54,6 +55,7 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
     fileStates: {},
     snapshotStates: {},
     viewMode: 'jules',
+    lastSessionId: "",
 
     setSourceId: (sourceId) => {
         set({ sourceId, openPatchId: "", openFileKey: "" });
@@ -102,7 +104,7 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
         if (openPatchId === sessionId) {
             set({ openPatchId: "", openFileKey: "" });
         } else {
-            set({ openPatchId: sessionId, openFileKey: "" });
+            set({ openPatchId: sessionId, openFileKey: "", lastSessionId: sessionId });
             void get().loadPatch(sessionId);
         }
     },
@@ -171,7 +173,7 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
             : (get().sourceId !== "")
             ? get().sourceId
             : (useStore.getState().sources[0]?.id ?? "");
-        if (!resolvedSourceId || !sdkIpc) return;
+        if (!resolvedSourceId || !sdkIpc) return null;
 
         const toastId = `snap-${sessionId}`;
         toast.loading("Applying patch…", { id: toastId });
@@ -190,14 +192,18 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
                 setTimeout(() => {
                     set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "idle" } }));
                 }, 2500);
+                return { success: true as const, ...(result.branch ? { branch: result.branch } : {}) };
             } else {
                 toast.error(result.error ?? "Patch failed", { id: toastId });
                 set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "idle" } }));
+                return { success: false as const, ...(result.error ? { error: result.error } : {}) };
             }
         } catch (err) {
             console.error('[shipStore] applyPatch error:', err);
             toast.error("Snapshot failed", { id: toastId });
             set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "idle" } }));
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            return { success: false as const, error: msg };
         }
     }
 }), { name: 'ship-store', partialize: (s) => ({ patchData: s.patchData, parsedDiffs: s.parsedDiffs, openPatchId: s.openPatchId }) }));
