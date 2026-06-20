@@ -2,13 +2,13 @@ import type { IpcRendererEvent } from 'electron'
 import { ipcRenderer } from 'electron'
 import type { SdkIpc } from '@/jules'
 import { invoke, stream } from '../transport'
-import { CH, EV, sessionsStream } from '../channels'
+import { CH, EV, streams } from '../channels'
 
 export const clientApi: SdkIpc['client'] = {
   sessions: (options?) => invoke(CH.client.sessions, options),
 
   streamSessions: (onItem, onDone, options?) =>
-    stream(sessionsStream(), onItem as (item: unknown) => void, onDone, [options]),
+    stream(streams.sessions(), onItem as (item: unknown) => void, onDone, [options]),
 
   sync: (options?) => invoke(CH.client.sync, options),
 

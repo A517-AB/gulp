@@ -1,7 +1,7 @@
 import type { SelectOptions } from '@google/jules-sdk/types'
 import { jules } from '../sdk'
 import { serialize } from '../serialize'
-import { CH, activitiesHistory, activitiesUpdates, activitiesStream } from '../channels'
+import { CH, streams } from '../channels'
 import { handle, pump } from './util'
 
 interface ListOptions {
@@ -28,14 +28,14 @@ export function registerActivitiesHandlers(): void {
   )
 
   handle(CH.activities.historyStart, (event, id: string) =>
-    pump(event, jules.session(id).activities.history(), activitiesHistory(id)),
+    pump(event, jules.session(id).activities.history(), streams.activitiesHistory(id)),
   )
 
   handle(CH.activities.updatesStart, (event, id: string) =>
-    pump(event, jules.session(id).activities.updates(), activitiesUpdates(id)),
+    pump(event, jules.session(id).activities.updates(), streams.activitiesUpdates(id)),
   )
 
   handle(CH.activities.streamStart, (event, id: string) =>
-    pump(event, jules.session(id).activities.stream(), activitiesStream(id)),
+    pump(event, jules.session(id).activities.stream(), streams.activitiesStream(id)),
   )
 }

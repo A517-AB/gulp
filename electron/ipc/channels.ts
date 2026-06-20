@@ -79,44 +79,46 @@ export interface StreamChannels {
   done:  string
 }
 
-export const sessionsStream = (): StreamChannels => ({
-  start: CH.client.sessionsStreamStart,
-  item:  EV.sessionsItem,
-  done:  EV.sessionsDone,
-})
+export const streams = {
+  sessions: (): StreamChannels => ({
+    start: CH.client.sessionsStreamStart,
+    item:  EV.sessionsItem,
+    done:  EV.sessionsDone,
+  }),
 
-export const sessionStream = (id: string): StreamChannels => ({
-  start: CH.session.streamStart,
-  item:  `sdk:session.stream:${id}`,
-  done:  `sdk:session.stream.done:${id}`,
-})
+  session: (id: string): StreamChannels => ({
+    start: CH.session.streamStart,
+    item:  `sdk:session.stream:${id}`,
+    done:  `sdk:session.stream.done:${id}`,
+  }),
 
-export const sessionHistory = (id: string): StreamChannels => ({
-  start: CH.session.historyStart,
-  item:  `sdk:session.history:${id}`,
-  done:  `sdk:session.history.done:${id}`,
-})
+  sessionHistory: (id: string): StreamChannels => ({
+    start: CH.session.historyStart,
+    item:  `sdk:session.history:${id}`,
+    done:  `sdk:session.history.done:${id}`,
+  }),
 
-export const sessionUpdates = (id: string): StreamChannels => ({
-  start: CH.session.updatesStart,
-  item:  `sdk:session.updates:${id}`,
-  done:  `sdk:session.updates.done:${id}`,
-})
+  sessionUpdates: (id: string): StreamChannels => ({
+    start: CH.session.updatesStart,
+    item:  `sdk:session.updates:${id}`,
+    done:  `sdk:session.updates.done:${id}`,
+  }),
 
-export const activitiesHistory = (id: string): StreamChannels => ({
-  start: CH.activities.historyStart,
-  item:  `sdk:activities.history:${id}`,
-  done:  `sdk:activities.history.done:${id}`,
-})
+  activitiesHistory: (id: string): StreamChannels => ({
+    start: CH.activities.historyStart,
+    item:  `sdk:activities.history:${id}`,
+    done:  `sdk:activities.history.done:${id}`,
+  }),
 
-export const activitiesUpdates = (id: string): StreamChannels => ({
-  start: CH.activities.updatesStart,
-  item:  `sdk:activities.updates:${id}`,
-  done:  `sdk:activities.updates.done:${id}`,
-})
+  activitiesUpdates: (id: string): StreamChannels => ({
+    start: CH.activities.updatesStart,
+    item:  `sdk:activities.updates:${id}`,
+    done:  `sdk:activities.updates.done:${id}`,
+  }),
 
-export const activitiesStream = (id: string): StreamChannels => ({
-  start: CH.activities.streamStart,
-  item:  `sdk:activities.stream:${id}`,
-  done:  `sdk:activities.stream.done:${id}`,
-})
+  activitiesStream: (id: string): StreamChannels => ({
+    start: CH.activities.streamStart,
+    item:  `sdk:activities.stream:${id}`,
+    done:  `sdk:activities.stream.done:${id}`,
+  }),
+}

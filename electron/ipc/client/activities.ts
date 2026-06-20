@@ -1,6 +1,6 @@
 import type { SdkIpc } from '@/jules'
 import { invoke, stream } from '../transport'
-import { CH, activitiesHistory, activitiesUpdates, activitiesStream } from '../channels'
+import { CH, streams } from '../channels'
 
 export const activitiesApi: SdkIpc['activities'] = {
   hydrate: (id) => invoke(CH.activities.hydrate, id),
@@ -9,11 +9,11 @@ export const activitiesApi: SdkIpc['activities'] = {
   get: (id, activityId) => invoke(CH.activities.get, id, activityId),
 
   history: (id, onItem, onDone) =>
-    stream(activitiesHistory(id), onItem as (item: unknown) => void, onDone, [id]),
+    stream(streams.activitiesHistory(id), onItem as (item: unknown) => void, onDone, [id]),
 
   updates: (id, onItem, onDone) =>
-    stream(activitiesUpdates(id), onItem as (item: unknown) => void, onDone, [id]),
+    stream(streams.activitiesUpdates(id), onItem as (item: unknown) => void, onDone, [id]),
 
   stream: (id, onItem, onDone) =>
-    stream(activitiesStream(id), onItem as (item: unknown) => void, onDone, [id]),
+    stream(streams.activitiesStream(id), onItem as (item: unknown) => void, onDone, [id]),
 }

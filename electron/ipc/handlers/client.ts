@@ -8,7 +8,7 @@ import type {
 import type { SyncOptions } from '@google/jules-sdk/types'
 import { jules } from '../sdk'
 import { serialize, send } from '../serialize'
-import { CH, EV, sessionsStream } from '../channels'
+import { CH, EV, streams } from '../channels'
 import { handle, pump } from './util'
 
 export function registerClientHandlers(): void {
@@ -21,7 +21,7 @@ export function registerClientHandlers(): void {
 
   // Opt-in: drain the full cursor as a stream when the caller actually wants it.
   handle(CH.client.sessionsStreamStart, (event, options?: ListSessionsOptions) =>
-    pump(event, jules.sessions(options), sessionsStream()),
+    pump(event, jules.sessions(options), streams.sessions()),
   )
 
   handle(CH.client.sync, (event, options?: Omit<SyncOptions, 'onProgress' | 'signal'>) =>

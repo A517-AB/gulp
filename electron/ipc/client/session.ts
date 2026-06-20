@@ -1,6 +1,6 @@
 import type { SdkIpc } from '@/jules'
 import { invoke, stream } from '../transport'
-import { CH, sessionStream, sessionHistory, sessionUpdates } from '../channels'
+import { CH, streams } from '../channels'
 
 export const sessionApi: SdkIpc['session'] = {
   create: (config) => invoke(CH.session.create, config),
@@ -17,11 +17,11 @@ export const sessionApi: SdkIpc['session'] = {
   applyPatch: (id, options) => invoke(CH.session.applyPatch, id, options),
 
   stream: (id, onItem, onDone, options?) =>
-    stream(sessionStream(id), onItem as (item: unknown) => void, onDone, [id, options]),
+    stream(streams.session(id), onItem as (item: unknown) => void, onDone, [id, options]),
 
   history: (id, onItem, onDone) =>
-    stream(sessionHistory(id), onItem as (item: unknown) => void, onDone, [id]),
+    stream(streams.sessionHistory(id), onItem as (item: unknown) => void, onDone, [id]),
 
   updates: (id, onItem, onDone) =>
-    stream(sessionUpdates(id), onItem as (item: unknown) => void, onDone, [id]),
+    stream(streams.sessionUpdates(id), onItem as (item: unknown) => void, onDone, [id]),
 }

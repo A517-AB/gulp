@@ -5,7 +5,7 @@ import type { SessionConfig, SessionState } from '@google/jules-sdk'
 import type { SelectOptions, StreamActivitiesOptions } from '@google/jules-sdk/types'
 import { jules } from '../sdk'
 import { serialize } from '../serialize'
-import { CH, sessionStream, sessionHistory, sessionUpdates } from '../channels'
+import { CH, streams } from '../channels'
 import { handle, pump } from './util'
 
 interface ApplyResult {
@@ -101,14 +101,14 @@ export function registerSessionHandlers(): void {
   })
 
   handle(CH.session.streamStart, (event, id: string, options?: StreamActivitiesOptions) =>
-    pump(event, jules.session(id).stream(options), sessionStream(id)),
+    pump(event, jules.session(id).stream(options), streams.session(id)),
   )
 
   handle(CH.session.historyStart, (event, id: string) =>
-    pump(event, jules.session(id).history(), sessionHistory(id)),
+    pump(event, jules.session(id).history(), streams.sessionHistory(id)),
   )
 
   handle(CH.session.updatesStart, (event, id: string) =>
-    pump(event, jules.session(id).updates(), sessionUpdates(id)),
+    pump(event, jules.session(id).updates(), streams.sessionUpdates(id)),
   )
 }
