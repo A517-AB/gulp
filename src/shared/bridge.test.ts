@@ -11,7 +11,7 @@ async function importBridgeModule(windowValue?: Window): Promise<BridgeModule> {
   vi.resetModules();
 
   if (windowValue) {
-    Object.defineProperty(globalThis, "window", {
+    Object.defineProperty(globalThis, "electron", { value: windowValue?.electron, configurable: true, writable: true }); Object.defineProperty(globalThis, "window", {
       value: windowValue,
       configurable: true,
       writable: true,
