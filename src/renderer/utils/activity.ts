@@ -1,8 +1,5 @@
 import {formatDistanceToNow, isValid, parseISO} from "date-fns";
-import type {Activity} from '@google/jules-sdk/types'
-import type {ActivityGroup, ActivityType} from '@jules'
-
-
+import type {ActivityType} from '@jules'
 
 export function formatDate(dateString: string): string {
   if (!dateString) return "Unknown date";
@@ -26,29 +23,4 @@ export function getActivityTypeColor(type: ActivityType): string {
       sessionFailed: "bg-red-500",
   };
     return map[type];
-}
-
-export function groupActivities(activities: Activity[]): ActivityGroup[] {
-  const grouped: ActivityGroup[] = [];
-  let currentGroup: Activity[] | null = null;
-
-    activities.forEach((activity, index) => {
-        const shouldGroup = activity.type === "progressUpdated";
-        const prev = index > 0 ? activities[index - 1] : null;
-        const prevShouldGroup = prev?.type === "progressUpdated";
-
-    if (shouldGroup) {
-      if (prevShouldGroup && currentGroup) {
-        currentGroup.push(activity);
-      } else {
-        currentGroup = [activity];
-        grouped.push(currentGroup);
-      }
-    } else {
-      currentGroup = null;
-      grouped.push(activity);
-    }
-  });
-
-  return grouped;
 }

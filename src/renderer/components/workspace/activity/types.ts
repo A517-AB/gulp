@@ -1,4 +1,4 @@
-import type { Activity, SessionResource, BashArtifact, ChangeSetArtifact, MediaArtifact, ActivityGroup, ActivityRole, ActivityType } from "@jules";
+import type { Activity, SessionResource, BashArtifact, ChangeSetArtifact, MediaArtifact, ActivityRole, ActivityType } from "@jules";
 
 export interface ActivityFeedProps {
     session: SessionResource;
@@ -6,13 +6,6 @@ export interface ActivityFeedProps {
     onNewSession?: () => void;
     showCodeDiffs: boolean;
     onToggleCodeDiffs: (show: boolean) => void;
-}
-
-export interface ActivityItemProps {
-    item: ActivityGroup;
-    onApprovePlan: () => void;
-    approvingPlan: boolean;
-    planApproved: boolean;
 }
 
 export interface SingleActivityProps {
@@ -37,4 +30,4 @@ export interface MediaItemGroupedProps {
     index: number;
 }
 
-export type { Activity, SessionResource, BashArtifact, ChangeSetArtifact, MediaArtifact, ActivityGroup, ActivityRole, ActivityType };
+export type { Activity, SessionResource, BashArtifact, ChangeSetArtifact, MediaArtifact, ActivityRole, ActivityType };

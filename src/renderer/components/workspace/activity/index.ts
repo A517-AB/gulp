@@ -1,9 +1,8 @@
 export { ActivityFeed } from "./activity-feed.tsx";
-export { ActivityItem } from "./activity-item.tsx";
+export { SingleActivity } from "./single-activity.tsx";
 
 export type {
     ActivityFeedProps,
-    ActivityItemProps,
     SingleActivityProps,
     TerminalConsoleProps,
     ActivityArtifactsProps,
@@ -13,7 +12,6 @@ export type {
     BashArtifact,
     ChangeSetArtifact,
     MediaArtifact,
-    ActivityGroup,
     ActivityRole,
     ActivityType,
 } from "./types";

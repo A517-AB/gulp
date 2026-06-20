@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { ScrollArea } from "@/ui/scroll-area.tsx";
 import { Button } from "@/ui/button.tsx";
-import { useActivityGroups } from "@/hooks/use-activity-groups.ts";
 import { useStore } from "@/store/app.ts";
 import type { Activity, ActivityFeedProps } from "./types";
-import { ActivityItem } from "./activity-item.tsx";
+import { SingleActivity } from "./single-activity.tsx";
 import { ActivityFeedHeader } from "./activity-feed-header.tsx";
 import { ActivityFeedForm } from "./activity-feed-form.tsx";
 
@@ -29,8 +28,6 @@ export function ActivityFeed({
 
     const approvePlan = useStore((s) => s.approvePlan);
     const sendMessage = useStore((s) => s.sendMessage);
-
-    const { grouped } = useActivityGroups(activities);
 
     const planApproved = activities.some((a) => a.type === "planApproved");
 
@@ -165,10 +162,10 @@ export function ActivityFeed({
             <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
                     <div className="p-3 flex flex-col space-y-2.5">
-                        {grouped.map((item, i) => (
-                            <ActivityItem
-                                key={Array.isArray(item) ? `group-${String(i)}` : item.id}
-                                item={item}
+                        {activities.map((activity) => (
+                            <SingleActivity
+                                key={activity.id}
+                                activity={activity}
                                 onApprovePlan={handleApprovePlan}
                                 approvingPlan={approving}
                                 planApproved={planApproved}

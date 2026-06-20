@@ -146,8 +146,7 @@ export type { SdkIpc }
 
 // ── Activity ──────────────────────────────────────────────────────────────────
 
-export type { ActivityType, ActivityRole, ActivityGroup, StreamHandlers } from './activity'
-export { dispatchActivity } from './activity'
+export type { ActivityType, ActivityRole, MessageStream } from './activity'
 
 // ── Session ───────────────────────────────────────────────────────────────────
 
