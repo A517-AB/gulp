@@ -12,7 +12,6 @@ export interface SessionFormData {
 }
 
 const activeStreams = new Map<string, () => void>()
-const loadedSessions = new Set<string>()
 let syncInProgress = false
 let lastSyncAt = 0
 let firstSync = true
@@ -42,7 +41,6 @@ export interface AppStore {
     loadSessions: () => Promise<void>
     sync: () => Promise<void>
 
-    loadActivities: (sessionId: string) => Promise<void>
     streamActivities: (sessionId: string) => () => void
     sendMessage: (sessionId: string, content: string) => Promise<void>
     approvePlan: (sessionId: string) => Promise<void>
@@ -127,67 +125,14 @@ export const useStore = create<AppStore>((set, get) => ({
         }
     },
 
-    loadActivities: async (sessionId) => {
-        if (!sdkIpc || loadedSessions.has(sessionId)) return
-        loadedSessions.add(sessionId)
-        const ipc = sdkIpc
-        console.log(`[store] loadActivities start ${sessionId}`)
-        set(state => ({activitiesError: {...state.activitiesError, [sessionId]: null}}))
-        try {
-            await ipc.activities.hydrate(sessionId)
-            console.log(`[store] hydrate done ${sessionId}`)
-            const activities = await ipc.activities.select(sessionId)
-            console.log(`[store] select done ${sessionId} — ${activities.length} activities`)
-            set(state => {
-                const seen = new Set<string>()
-                const deduped = activities.filter(a => {
-                    if (seen.has(a.id)) return false;
-                    seen.add(a.id);
-                    return true
-                })
-                const streamed = state.activities[sessionId] ?? []
-                // streamed wins on conflict — stream() delivers live updates; select() is a point-in-time snapshot
-                const streamedById = new Map(streamed.map(a => [a.id, a]))
-                const merged = deduped.map(a => streamedById.get(a.id) ?? a)
-                for (const a of streamed) {
-                    if (!deduped.some(d => d.id === a.id)) merged.push(a)
-                }
-                console.log(`[store] merged ${merged.length} activities (${streamed.length} streamed, ${deduped.length} loaded)`)
-                return {activities: {...state.activities, [sessionId]: merged}}
-            })
-        } catch (err) {
-            const is404 = err instanceof Error && err.message.includes('404')
-            if (is404) {
-                console.warn(`[store] session not found ${sessionId} (404) — treating as empty`)
-                set(state => ({
-                    activities: {...state.activities, [sessionId]: []},
-                    activitiesError: {...state.activitiesError, [sessionId]: null},
-                }))
-                return
-            }
-            loadedSessions.delete(sessionId)
-            console.error(`[store] loadActivities failed ${sessionId}:`, err)
-            set(state => ({
-                activitiesError: {
-                    ...state.activitiesError,
-                    [sessionId]: err instanceof Error ? err.message : 'Failed to load activities'
-                },
-            }))
-        }
-    },
-
     streamActivities: (sessionId) => {
-        if (activeStreams.has(sessionId) || !sdkIpc) {
-            console.log(`[store] streamActivities skip ${sessionId} — already streaming or no IPC`)
-            return () => { /* no-op */
-            }
-        }
-        console.log(`[store] streamActivities start ${sessionId}`)
+        if (!sdkIpc) return () => { /* no ipc */ }
+        activeStreams.get(sessionId)?.()
+        activeStreams.delete(sessionId)
         const ipc = sdkIpc
-        // activities.stream() history phase reads local-cache only — cold cache = empty history.
-        // Use updates() so only future events come through the stream; loadActivities owns history.
-        const unsub = ipc.activities.updates(sessionId, (activity) => {
-            console.log(`[store] activity update ${sessionId} type=${activity.type} id=${activity.id}`)
+        set(state => ({activitiesError: {...state.activitiesError, [sessionId]: null}}))
+        let receivedTerminal = false
+        const unsub = ipc.activities.stream(sessionId, (activity) => {
             set(s => {
                 const existing = s.activities[sessionId] ?? []
                 const index = existing.findIndex(a => a.id === activity.id)
@@ -199,9 +144,9 @@ export const useStore = create<AppStore>((set, get) => ({
                 return {activities: {...s.activities, [sessionId]: [...existing, activity]}}
             })
             if (activity.type === 'sessionCompleted' || activity.type === 'sessionFailed') {
-                console.log(`[store] session terminal ${activity.type} ${sessionId}`)
+                receivedTerminal = true
                 const session = get().sessionList.find(s => s.id === sessionId)
-                const title   = session?.title ?? 'Session'
+                const title = session?.title ?? 'Session'
                 if (activity.type === 'sessionCompleted') {
                     uiNotification?.show({ title: 'Jules done', body: title, type: 'success', sound: 'chime', id: `jules-done-${sessionId}` })
                 } else {
@@ -210,13 +155,16 @@ export const useStore = create<AppStore>((set, get) => ({
                 void get().loadSessions()
             }
         }, () => {
-            console.log(`[store] stream closed ${sessionId}`)
             activeStreams.delete(sessionId)
+            if (!receivedTerminal) {
+                set(state => ({
+                    activitiesError: {...state.activitiesError, [sessionId]: 'Stream disconnected'}
+                }))
+            }
             void get().loadSessions()
         })
         activeStreams.set(sessionId, unsub)
         return () => {
-            console.log(`[store] streamActivities unsub ${sessionId}`)
             unsub()
             activeStreams.delete(sessionId)
         }

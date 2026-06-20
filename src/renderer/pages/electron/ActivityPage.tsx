@@ -140,7 +140,6 @@ const EMPTY: Activity[] = []
 export default function ActivityPage() {
   const { id } = useParams<{ id: string }>()
   const activities = useStore(s => s.activities[id ?? ''] ?? EMPTY)
-  const loadActivities = useStore(s => s.loadActivities)
   const streamActivities = useStore(s => s.streamActivities)
   const sendMessage = useStore(s => s.sendMessage)
   const approvePlan = useStore(s => s.approvePlan)
@@ -157,9 +156,8 @@ export default function ActivityPage() {
 
   useEffect(() => {
       if (!id) return
-      void loadActivities(id)
       return streamActivities(id)
-  }, [id, loadActivities, streamActivities])
+  }, [id, streamActivities])
 
   useEffect(() => {
       if (activities.length === 0) return

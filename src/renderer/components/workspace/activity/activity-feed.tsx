@@ -21,7 +21,6 @@ export function ActivityFeed({
 }: ActivityFeedProps) {
     const activities = useStore((s) => s.activities[session.id] ?? EMPTY_ACTIVITIES);
     const error = useStore((s) => s.activitiesError[session.id] ?? null);
-    const loadActivities = useStore((s) => s.loadActivities);
     const streamActivities = useStore((s) => s.streamActivities);
 
     const applyPatch = useStore((s) => s.applyPatch);
@@ -38,14 +37,12 @@ export function ActivityFeed({
     });
 
     const reloadActivities = useCallback(() => {
-        void loadActivities(session.id);
-    }, [session.id, loadActivities]);
+        streamActivities(session.id);
+    }, [session.id, streamActivities]);
 
     useEffect(() => {
-        void loadActivities(session.id);
         streamActivities(session.id);
-        // stream intentionally not cleaned up on session switch — activeStreams guards double-subscribe
-    }, [session.id, loadActivities, streamActivities]);
+    }, [session.id, streamActivities]);
 
     const handleApplyLocally = useCallback(async () => {
         setApplyState({ status: "applying" });
