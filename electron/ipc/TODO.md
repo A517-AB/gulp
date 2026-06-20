@@ -1,29 +1,37 @@
 # IPC Refactor TODO
 
-## 1. Collect handy utilities
-Gather debounce, onStream, serialize, send, and other shared helpers into one place.
-Don't let them live scattered across bridge/handlers.
+## ✅ Done (experimenting branch)
 
-## 2. Audit: IPC vs straight renderer import
-Go through every method in bridge.ts + handlers.ts and decide:
-- **IPC** — needs main process (fs, git, network via SDK)
-- **Straight import in renderer** — pure functions, no platform deps
-  - Known candidates: `parseUnidiff`, `toSummary`, `toSummaries`
-  - Probably more in query/util
+### 1. Shared utilities collected
+- `serialize.ts` — `serialize`, `send` (main). No more per-handler `JSON.parse(JSON.stringify())`.
+- `transport.ts` — `invoke`, `onStream`, `stream` (renderer). One logged seam to ipcRenderer.
+- `handlers/util.ts` — `handle` (error-enveloping registrar) + `pump` (stream drainer, always emits `done`).
 
-## 3. Expand `src/jules/` — the renderer-side SDK layer
-Instead of every component calling sdkIpc directly, jules/ becomes the
-single entry point in the renderer. Wraps IPC + direct imports. Research
-what shape this should take before touching code.
+### Single SDK runtime seam
+- `sdk.ts` — the only file importing `@google/jules-sdk` runtime. The 21 value
+  exports vs the one `export * from './errors'` wild card; everything else is a
+  type the renderer pulls straight from `@google/jules-sdk/types`.
 
-## 4. Switch IPC channels
-Once the new shape is agreed:
-- Rename/consolidate duplicate channels (session.* vs activities.* overlap)
-- Add try/catch + logging to all streaming handlers
-- Remove channels that are now straight imports
+### The error card
+- `wire.ts` (pure) + `errors.ts` (main) — SDK error classes encode to a sentinel
+  JSON envelope so the renderer recovers `name`/`status`/`url` as `IpcSdkError`
+  instead of a flattened `Error: ...`.
 
-## 5. Review `src/jules/` folder
-Clean up what's there after the new layer is in place.
-Remove dead re-exports, fix types, no more `unknown` casts in streams.
+### Channels deduped
+- `channels.ts` — single source of truth (`CH`, `EV`, per-id stream builders).
+  Main and renderer can no longer drift.
 
-## 6. Sleep.
+### Session list no longer drains
+- `client.sessions` awaits the thenable cursor (first page only). The full-drain
+  path is now opt-in via `client.sessions.stream.start`.
+
+### Routes split per domain
+- `handlers/{client,session,activities,sources,artifact,query}.ts`
+- `client/{client,session,activities,sources,artifact,query}.ts`
+
+## Next round — `src/jules/`
+- Decide which pure fns (`parseUnidiff`, `toSummary`, …) become straight renderer
+  imports vs staying IPC (blocked on whether the SDK's `.` entry is browser-safe).
+- Wrap IPC + direct imports behind a single renderer entry point.
+- Remove dead re-exports, kill the `unknown` casts in the stream signatures.
+- Then: separate the store, drop `loadSessions`, lean session-list + bash stream.

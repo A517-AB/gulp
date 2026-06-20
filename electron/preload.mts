@@ -1,7 +1,7 @@
 import type { IpcRendererEvent } from "electron";
 import { contextBridge, ipcRenderer } from "electron";
 import type { ShellType, PopupNotification, ElectronAPI, JulesWorkerEvent } from "../src/shared/electron";
-import { sdk } from "./ipc/bridge";
+import { sdk } from "./ipc";
 // ── terminal ───────────────────────────────────────────────────────────────────
 
 const terminal: ElectronAPI["terminal"] = {
