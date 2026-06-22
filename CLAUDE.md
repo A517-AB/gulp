@@ -98,6 +98,8 @@ Copy `.env.example` to `.env`:
 
 ## Working conventions
 
+**Notifications** — Sonner only. No native Windows notifications (`Electron.Notification`, `new Notification()`), no browser Notification API (`Notification.requestPermission()`). All notifications go through the custom BrowserWindow in `electron/notifications/dispatch.ts` → `src/notification/NotificationWindow.tsx`.
+
 **No loading states** — no spinners, no skeleton loaders, no loading screens. If data isn't ready, render nothing or render what you have.
 
 **Styling constraint** — Never use left border lines (e.g., `border-l`, `border-left`) anywhere. Do not use borderlines on one side.

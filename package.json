@@ -5,7 +5,8 @@
   "type": "module",
   "main": "dist-electron/main.mjs",
   "scripts": {
-    "dev": "concurrently -k \"vite\"",
+    "dev": "vite",
+    "dev:web": "cross-env VITE_TARGET=web vite",
     "build": "node build.mjs",
     "build:notif": "tsc -b && cross-env VITE_BUILD_TARGET=notif vite build",
     "build:all": "tsc -b && concurrently \"vite build\" \"cross-env VITE_BUILD_TARGET=notif vite build\"",
