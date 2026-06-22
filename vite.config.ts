@@ -4,6 +4,14 @@ import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
 import { isAbsolute, resolve } from 'node:path'
+import { existsSync, readFileSync } from 'node:fs'
+import { homedir } from 'node:os'
+
+function readJulesKey(): string {
+  const p = resolve(homedir(), '.jules')
+  if (existsSync(p)) return readFileSync(p, 'utf-8').trim()
+  return ''
+}
 
 
 const nodeExternal = (id: string) =>
@@ -11,14 +19,22 @@ const nodeExternal = (id: string) =>
 
 const isNotif     = process.env.VITE_BUILD_TARGET === 'notif'
 const keepVendors = process.env.VITE_KEEP_VENDORS  === 'true'
+const isWeb       = process.env.VITE_TARGET === 'web'
 
 // https://vite.dev/config/
+const julesApiKey = process.env['JULES_API_KEY'] ?? readJulesKey()
+
 export default defineConfig({
   clearScreen: false,
+  define: {
+    'import.meta.env.JULES_API_KEY': JSON.stringify(julesApiKey),
+  },
   resolve: {
     tsconfigPaths: true,
     alias: [
-      { find: 'react',       replacement: resolve(__dirname, 'node_modules/react') },
+      { find: 'modjules/browser', replacement: 'D:/jules rest/modjules-main/packages/core/dist/browser.mjs' },
+      { find: 'modjules',         replacement: 'D:/jules rest/modjules-main/packages/core/dist/index.mjs' },
+      { find: 'react',            replacement: resolve(__dirname, 'node_modules/react') },
       { find: 'react-dom',   replacement: resolve(__dirname, 'node_modules/react-dom') },
       { find: '@syncfusion/ej2-gantt',            replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist/es6/ej2-gantt.es5.js' },
       { find: '@syncfusion/ej2-react-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist/es6/ej2-react-gantt.es5.js' },
@@ -50,14 +66,12 @@ export default defineConfig({
         './src/renderer/components/shared/Clock.tsx',
       ],
     },
-    // In case web makes a comeback.
-    // proxy: {
-    //   '/api/jules': {
-    //     target: 'https://jules.googleapis.com/v1alpha',
-    //     changeOrigin: true,
-    //     rewrite: (path) => path.replace(/^\/api\/jules\?path=/, '/'),
-    //   },
-    // },
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:3939',
+        changeOrigin: false,
+      },
+    },
   },
   // can you not change it to rollup because this is vite 8, if you don't know you don't know
   build: {
@@ -88,7 +102,7 @@ export default defineConfig({
     react(),
 
     babel({ presets: [reactCompilerPreset()], exclude: [/node_modules/, /[\\/]synco[\\/]/] }),
-    ...(!isNotif ? [
+    ...(!isNotif && !isWeb ? [
       electron({
         main: {
           entry: 'electron/main.mts',

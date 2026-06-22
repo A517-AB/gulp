@@ -12,6 +12,7 @@ import SnapshotPage from '@renderer/pages/electron/SnapshotPage'
 import {ExplorerPage} from '@renderer/pages/electron/ExplorerPage'
 import ShipPage from '@renderer/pages/electron/ShipPage'
 import OverviewPage from '@renderer/pages/web/OverviewPage'
+import JulesWebPage from '@/pages/web/jules/JulesWebPage'
 
 // ── dev ───────────────────────────────────────────────────────────────────────
 
@@ -39,6 +40,7 @@ const sharedRoutes: AppRoute[] = [
     { index: true,   Component: HomePage,     handle: { title: 'Home',     inNav: true } },
     { path: 'session', Component: JulesPage,  handle: { title: 'Sessions', inNav: true } },
     { path: 'overview', Component: OverviewPage, handle: { title: 'Overview', inNav: true } },
+    { path: 'jules-web', Component: JulesWebPage, handle: { title: 'Jules Web', inNav: true } },
     { path: 'notes',  Component: NotesPage,   handle: { title: 'Notes',    inNav: true } },
     { path: 'settings', lazy: () => import('@renderer/pages/shared/settings/SettingsPage').then(m => ({ Component: m.default })), handle: { title: 'Settings', inSecretNav: true } },
     { path: 'gantt',    lazy: () => import('@renderer/pages/electron/GanttPage').then(m => ({ Component: m.default })),           handle: { title: 'Gantt',    inSecretNav: true } },

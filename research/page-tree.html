@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>page-tree</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #080d1a;
+    --surface:  #0f172a;
+    --raised:   #1a2236;
+    --border:   #1e293b;
+    --border2:  #2d3f5a;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --dim:      #334155;
+    --accent:   #6366f1;
+    --accent2:  #818cf8;
+    --green:    #22c55e;
+    --yellow:   #eab308;
+    --mono:     ui-monospace, "Cascadia Code", "Fira Code", monospace;
+  }
+
+  html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 12px; }
+
+  /* ── Layout ── */
+  #app { display: flex; height: 100vh; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 240px; min-width: 200px; max-width: 300px;
+    display: flex; flex-direction: column;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow: hidden; flex-shrink: 0;
+    resize: horizontal;
+  }
+
+  #sidebar-header {
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  #sidebar-header h1 { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text); }
+  #sidebar-header p  { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  #search-wrap { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  #search {
+    width: 100%; background: var(--raised); border: 1px solid var(--border2);
+    border-radius: 4px; padding: 5px 8px; color: var(--text); font-family: var(--mono);
+    font-size: 11px; outline: none; transition: border-color .15s;
+  }
+  #search::placeholder { color: var(--muted); }
+  #search:focus { border-color: var(--accent); }
+
+  #sidebar-body { flex: 1; overflow-y: auto; padding: 8px 0; }
+  #sidebar-body::-webkit-scrollbar { width: 4px; }
+  #sidebar-body::-webkit-scrollbar-track { background: transparent; }
+  #sidebar-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .section-label {
+    font-size: 9px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--muted);
+    padding: 8px 14px 4px;
+  }
+
+  .zone-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 5px 14px; cursor: pointer;
+    transition: background .1s; border-radius: 3px; margin: 0 4px;
+  }
+  .zone-row:hover { background: var(--raised); }
+  .zone-row.active { background: var(--raised); }
+  .zone-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .zone-name { flex: 1; font-size: 11px; color: var(--text); truncate: ellipsis; }
+  .zone-count { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+
+  .shared-row {
+    display: flex; align-items: flex-start; gap: 6px;
+    padding: 4px 14px; cursor: pointer;
+    transition: background .1s; border-radius: 3px; margin: 0 4px;
+  }
+  .shared-row:hover { background: var(--raised); }
+  .shared-diamond { color: var(--accent2); flex-shrink: 0; font-size: 10px; line-height: 1.5; }
+  .shared-info { min-width: 0; }
+  .shared-name { font-size: 11px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .shared-zones { font-size: 9px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── Main ── */
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+  #toolbar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+  .tb-label { font-size: 10px; color: var(--muted); letter-spacing: .08em; }
+  .tb-btn {
+    font-size: 10px; font-family: var(--mono); color: var(--muted);
+    background: var(--raised); border: 1px solid var(--border2);
+    border-radius: 3px; padding: 3px 8px; cursor: pointer; transition: all .15s;
+  }
+  .tb-btn:hover { color: var(--text); border-color: var(--accent); }
+  #match-count { font-size: 10px; color: var(--accent2); margin-left: auto; }
+
+  #legend {
+    display: flex; align-items: center; gap: 14px;
+    margin-left: auto; font-size: 10px; color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── Diagram ── */
+  #diagram-wrap { flex: 1; overflow: hidden; position: relative; }
+  #diagram-inner { width: 100%; height: 100%; }
+
+  .mermaid { width: 100%; height: 100%; }
+  .mermaid svg { width: 100% !important; height: 100% !important; }
+
+  /* ── Highlight / dim ── */
+  .node.dimmed > rect,
+  .node.dimmed > circle,
+  .node.dimmed > ellipse,
+  .node.dimmed > polygon { opacity: .12 !important; }
+  .node.dimmed .nodeLabel,
+  .node.dimmed text { opacity: .12 !important; }
+  .edgePath.dimmed { opacity: .05 !important; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 18px; right: 18px;
+    background: var(--raised); border: 1px solid var(--border2);
+    border-radius: 6px; padding: 8px 14px; font-size: 11px; color: var(--text);
+    opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 99;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Sidebar ── -->
+  <aside id="sidebar">
+    <div id="sidebar-header">
+      <h1>page-tree</h1>
+      <p id="meta-line">depth 2 &nbsp;·&nbsp; 6/22/2026, 8:57:54 AM</p>
+    </div>
+    <div id="search-wrap">
+      <input id="search" type="text" placeholder="search nodes…" autocomplete="off" spellcheck="false">
+    </div>
+    <div id="sidebar-body">
+      <div class="section-label">Zones</div>
+      <div id="zones-list"></div>
+      <div class="section-label" style="margin-top:10px">Shared <span id="shared-count" style="color:var(--accent2)"></span></div>
+      <div id="shared-list"></div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div id="main">
+    <div id="toolbar">
+      <span class="tb-label">scroll to zoom &nbsp;·&nbsp; drag to pan</span>
+      <button class="tb-btn" id="btn-reset">reset view</button>
+      <button class="tb-btn" id="btn-fit">fit</button>
+      <span id="match-count"></span>
+      <div id="legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#6366f1;border:1px solid #818cf8"></span>shared ◆</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#1e293b;border:1px solid #334155"></span>local</span>
+      </div>
+    </div>
+    <div id="diagram-wrap">
+      <div id="diagram-inner">
+        <div class="mermaid">graph TD
+
+  subgraph electron["electron"]
+    electron_filesystem_handlers["handlers"] --&gt; electron_filesystem_types["types"]
+    electron_filesystem_types["types"] --&gt; src_shared_filesystem["filesystem ◆"]
+    electron_history["history"] --&gt; src_shared_history["history ◆"]
+    electron_main["main"] --&gt; electron_Terminal["Terminal"]
+    electron_main["main"] --&gt; electron_queues["queues"]
+    electron_main["main"] --&gt; electron_filesystem_handlers["handlers"]
+    electron_main["main"] --&gt; electron_snippets["snippets"]
+    electron_main["main"] --&gt; electron_git["git"]
+    electron_main["main"] --&gt; electron_github["github"]
+    electron_main["main"] --&gt; electron_history["history"]
+    electron_main["main"] --&gt; electron_notes["notes"]
+    electron_main["main"] --&gt; electron_notifications_index["index"]
+    electron_main["main"] --&gt; electron_ipc_handlers["handlers"]
+    electron_main["main"] --&gt; electron_jules_events["jules-events"]
+    electron_main["main"] --&gt; electron_store["store"]
+    electron_snippets["snippets"] --&gt; src_shared_fuse["fuse ◆"]
+    electron_snippets["snippets"] --&gt; electron_store["store"]
+    electron_notes["notes"] --&gt; src_shared_local_data_index["index ◆"]
+    src_shared_local_data_index["index"] --&gt; src_shared_bridge["bridge ◆"]
+    src_shared_local_data_index["index"] --&gt; src_shared_local_data_types["types ◆"]
+    electron_preload["preload"] --&gt; electron_ipc_bridge["bridge"]
+  end
+
+  subgraph pages_electron["pages/electron"]
+      src_renderer_pages_electron_ActivityPage["ActivityPage"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_pages_electron_ActivityPage["ActivityPage"] --&gt; src_renderer_ui_input["input ◆"]
+      src_renderer_pages_electron_ActivityPage["ActivityPage"] --&gt; src_renderer_ui_button["button ◆"]
+      src_renderer_store_app["app"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_ui_input["input"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_utils_index["index"] --&gt; src_renderer_utils_activity["activity ◆"]
+      src_renderer_utils_index["index"] --&gt; src_renderer_utils_snippets["snippets ◆"]
+      src_renderer_utils_index["index"] --&gt; src_renderer_utils_types["types ◆"]
+      src_renderer_utils_index["index"] --&gt; src_renderer_utils_utils["utils ◆"]
+      src_renderer_ui_button["button"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_pages_electron_ExplorerPage["ExplorerPage"] --&gt; src_renderer_components_shared_FileTree_index["index"]
+      src_renderer_pages_electron_ExplorerPage["ExplorerPage"] --&gt; src_renderer_pages_electron_FileEditor["FileEditor"]
+      src_renderer_pages_electron_ExplorerPage["ExplorerPage"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_pages_electron_ExplorerPage["ExplorerPage"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_pages_electron_ExplorerPage["ExplorerPage"] --&gt; src_renderer_store_explorer["explorer"]
+      src_renderer_pages_electron_ExplorerPage["ExplorerPage"] --&gt; src_renderer_utils_git["git ◆"]
+      src_renderer_pages_electron_ExplorerPage["ExplorerPage"] --&gt; src_renderer_ui_dropdown_menu["dropdown-menu ◆"]
+      src_renderer_pages_electron_ExplorerPage["ExplorerPage"] --&gt; src_renderer_components_quickie_use_quickie["use-quickie"]
+      src_renderer_pages_electron_ExplorerPage["ExplorerPage"] --&gt; src_renderer_components_quickie_types["types ◆"]
+      src_renderer_components_shared_FileTree_index["index"] --&gt; src_renderer_components_shared_FileTree_FileTree["FileTree ◆"]
+      src_renderer_components_shared_FileTree_index["index"] --&gt; src_renderer_components_shared_FileTree_types["types ◆"]
+      src_renderer_components_shared_FileTree_FileTree["FileTree"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_shared_FileTree_FileTree["FileTree"] --&gt; src_renderer_hooks_use_file_tree["use-file-tree"]
+      src_renderer_components_shared_FileTree_FileTree["FileTree"] --&gt; src_renderer_components_shared_FileTree_types["types ◆"]
+      src_renderer_components_shared_FileTree_FileTree["FileTree"] --&gt; src_shared_filesystem["filesystem ◆"]
+      src_renderer_components_shared_FileTree_FileTree["FileTree"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_components_shared_FileTree_FileTree["FileTree"] --&gt; src_renderer_ui_context_menu["context-menu ◆"]
+      src_renderer_components_shared_FileTree_FileTree["FileTree"] --&gt; src_renderer_utils_git["git ◆"]
+      src_renderer_components_shared_FileTree_types["types"] --&gt; src_shared_filesystem["filesystem ◆"]
+      src_renderer_components_shared_FileTree_types["types"] --&gt; src_renderer_hooks_use_file_tree["use-file-tree"]
+      src_renderer_pages_electron_FileEditor["FileEditor"] --&gt; src_renderer_ui_code_editor["code-editor"]
+      src_renderer_pages_electron_FileEditor["FileEditor"] --&gt; src_renderer_providers_theme["theme ◆"]
+      src_renderer_pages_electron_FileEditor["FileEditor"] --&gt; src_renderer_components_markdown_types["types"]
+      src_renderer_ui_code_editor["code-editor"] --&gt; src_renderer_providers_theme["theme ◆"]
+      src_renderer_ui_code_editor["code-editor"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_utils_snippets["snippets"] --&gt; src_renderer_utils_types["types"]
+      src_renderer_utils_types["types"] --&gt; src_types_snippets["snippets ◆"]
+      src_renderer_store_explorer["explorer"] --&gt; src_renderer_utils_git["git ◆"]
+      src_renderer_ui_dropdown_menu["dropdown-menu"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_quickie_use_quickie["use-quickie"] --&gt; src_renderer_library_notification_index["index ◆"]
+      src_renderer_components_quickie_use_quickie["use-quickie"] --&gt; src_renderer_components_quickie_types["types ◆"]
+      src_renderer_components_quickie_use_quickie["use-quickie"] --&gt; src_renderer_store_quickie["quickie ◆"]
+      src_renderer_library_notification_index["index"] --&gt; src_renderer_library_notification_use_notification["use-notification ◆"]
+      src_renderer_library_notification_index["index"] --&gt; src_renderer_library_notification_defaults["defaults ◆"]
+      src_renderer_library_notification_index["index"] --&gt; src_renderer_library_notification_types["types ◆"]
+      src_renderer_store_quickie["quickie"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_store_quickie["quickie"] --&gt; src_renderer_components_quickie_types["types ◆"]
+      src_renderer_pages_electron_GanttPage["GanttPage"] --&gt; src_shared_local_data_index["index ◆"]
+      src_renderer_pages_electron_GanttPage["GanttPage"] --&gt; src_renderer_components_markdown_NoteEditor["NoteEditor ◆"]
+      src_renderer_pages_electron_GanttPage["GanttPage"] --&gt; src_renderer_providers_theme["theme ◆"]
+      src_renderer_pages_electron_GanttPage["GanttPage"] --&gt; src_renderer_components_markdown_types["types"]
+      src_renderer_components_markdown_NoteEditor["NoteEditor"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_components_markdown_NoteEditor["NoteEditor"] --&gt; src_renderer_components_markdown_Editor["Editor ◆"]
+      src_renderer_components_markdown_NoteEditor["NoteEditor"] --&gt; src_renderer_components_markdown_types["types ◆"]
+      src_renderer_components_markdown_Editor["Editor"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_markdown_Editor["Editor"] --&gt; src_renderer_providers_theme["theme ◆"]
+      src_renderer_components_markdown_Editor["Editor"] --&gt; src_renderer_components_markdown_types["types ◆"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_components_shared_DynamicDropdown["DynamicDropdown"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_components_workspace_activity_terminal_console["terminal-console"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_button["button ◆"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_badge["badge ◆"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_avatar["avatar ◆"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_tabs["tabs"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_select["select"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_separator["separator"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_label["label"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_scroll_area["scroll-area ◆"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_sheet["sheet"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_dialog["dialog"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_tooltip["tooltip ◆"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_context_menu["context-menu ◆"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_accordion["accordion"]
+      src_renderer_pages_electron_KitPage["KitPage"] --&gt; src_renderer_ui_command["command"]
+      src_renderer_components_shared_DynamicDropdown["DynamicDropdown"] --&gt; src_renderer_ui_popover["popover ◆"]
+      src_renderer_components_shared_DynamicDropdown["DynamicDropdown"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_popover["popover"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_workspace_activity_terminal_console["terminal-console"] --&gt; src_renderer_components_workspace_activity_types["types ◆"]
+      src_renderer_ui_badge["badge"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_avatar["avatar"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_tabs["tabs"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_select["select"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_separator["separator"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_label["label"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_scroll_area["scroll-area"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_sheet["sheet"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_dialog["dialog"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_tooltip["tooltip"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_context_menu["context-menu"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_accordion["accordion"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_command["command"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_command["command"] --&gt; src_renderer_ui_dialog["dialog"]
+      src_renderer_pages_electron_QueuesPage["QueuesPage"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_pages_electron_QueuesPage["QueuesPage"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_pages_electron_QueuesPage["QueuesPage"] --&gt; src_renderer_ui_inline_edit["inline-edit"]
+      src_renderer_ui_inline_edit["inline-edit"] --&gt; src_renderer_utils_utils["utils"]
+      src_renderer_pages_electron_ReadingPage["ReadingPage"] --&gt; src_renderer_providers_theme["theme ◆"]
+      src_renderer_pages_electron_RemindersPage["RemindersPage"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_pages_electron_RemindersPage["RemindersPage"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_pages_electron_ShipPage["ShipPage"] --&gt; src_renderer_ui_scroll_area["scroll-area ◆"]
+      src_renderer_pages_electron_ShipPage["ShipPage"] --&gt; src_renderer_components_ship_RepoCommandPalette["RepoCommandPalette"]
+      src_renderer_pages_electron_ShipPage["ShipPage"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_pages_electron_ShipPage["ShipPage"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_pages_electron_ShipPage["ShipPage"] --&gt; src_renderer_components_ship_SyncManager["SyncManager"]
+      src_renderer_pages_electron_ShipPage["ShipPage"] --&gt; src_renderer_store_sync["sync ◆"]
+      src_renderer_pages_electron_ShipPage["ShipPage"] --&gt; src_renderer_store_ship["ship"]
+      src_renderer_pages_electron_ShipPage["ShipPage"] --&gt; src_renderer_library_notification_use_notification["use-notification"]
+      src_renderer_components_ship_RepoCommandPalette["RepoCommandPalette"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_ship_SyncManager["SyncManager"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_ship_SyncManager["SyncManager"] --&gt; src_renderer_store_sync["sync ◆"]
+      src_renderer_store_sync["sync"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_store_ship["ship"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_store_ship["ship"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_library_notification_use_notification["use-notification"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_library_notification_use_notification["use-notification"] --&gt; src_renderer_library_notification_types["types ◆"]
+      src_renderer_library_notification_use_notification["use-notification"] --&gt; src_renderer_library_notification_defaults["defaults ◆"]
+      src_renderer_library_notification_defaults["defaults"] --&gt; src_renderer_library_notification_types["types ◆"]
+      src_renderer_pages_electron_SnippetsPage["SnippetsPage"] --&gt; src_renderer_hooks_use_snippets["use-snippets"]
+      src_renderer_pages_electron_SnippetsPage["SnippetsPage"] --&gt; src_renderer_ui_inline_edit["inline-edit"]
+      src_renderer_pages_electron_SnippetsPage["SnippetsPage"] --&gt; src_renderer_ui_code_editor["code-editor"]
+      src_renderer_pages_electron_SnippetsPage["SnippetsPage"] --&gt; src_renderer_components_shared_DynamicDropdown["DynamicDropdown"]
+      src_renderer_pages_electron_SnippetsPage["SnippetsPage"] --&gt; src_renderer_ui_dialog["dialog"]
+      src_renderer_pages_electron_SnippetsPage["SnippetsPage"] --&gt; src_renderer_lib_languages["languages"]
+      src_renderer_pages_electron_SnippetsPage["SnippetsPage"] --&gt; src_shared_fuse["fuse ◆"]
+      src_renderer_pages_electron_SnippetsPage["SnippetsPage"] --&gt; src_renderer_components_git_GitSyncButton["GitSyncButton"]
+      src_renderer_hooks_use_snippets["use-snippets"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_hooks_use_snippets["use-snippets"] --&gt; src_shared_fuse["fuse ◆"]
+      src_renderer_lib_languages["languages"] --&gt; src_types_snippets["snippets ◆"]
+      src_renderer_components_git_GitSyncButton["GitSyncButton"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_components_git_GitSyncButton["GitSyncButton"] --&gt; src_renderer_library_notification_index["index ◆"]
+      src_renderer_pages_electron_TardisPage["TardisPage"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_pages_electron_TardisPage["TardisPage"] --&gt; src_renderer_components_shared_ScheduleForm["ScheduleForm"]
+      src_renderer_pages_electron_TardisPage["TardisPage"] --&gt; src_renderer_library_notification_index["index ◆"]
+      src_renderer_pages_electron_TimePage["TimePage"] --&gt; src_renderer_library_notification_index["index ◆"]
+      src_renderer_pages_electron_TimePage["TimePage"] --&gt; src_shared_bridge["bridge ◆"]
+  end
+
+  subgraph pages_web["pages/web"]
+    subgraph pages_web_jules["jules/"]
+    end
+    subgraph pages_web_overview["overview/"]
+      src_renderer_pages_web_overview_OverviewPage["OverviewPage"] --&gt; src_renderer_components_overview_index["index"]
+      src_renderer_components_overview_index["index"] --&gt; src_renderer_components_overview_OverviewPage["OverviewPage ◆"]
+      src_renderer_components_overview_index["index"] --&gt; src_renderer_components_overview_CommandInput["CommandInput ◆"]
+      src_renderer_components_overview_index["index"] --&gt; src_renderer_components_overview_BlockDisplay["BlockDisplay ◆"]
+      src_renderer_components_overview_OverviewPage["OverviewPage"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_components_overview_OverviewPage["OverviewPage"] --&gt; src_renderer_store_commands["commands"]
+      src_renderer_components_overview_OverviewPage["OverviewPage"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_components_overview_OverviewPage["OverviewPage"] --&gt; src_shared_commands_index["index ◆"]
+      src_renderer_components_overview_OverviewPage["OverviewPage"] --&gt; src_renderer_components_overview_CommandInput["CommandInput ◆"]
+      src_renderer_components_overview_OverviewPage["OverviewPage"] --&gt; src_renderer_components_overview_BlockDisplay["BlockDisplay ◆"]
+      src_renderer_components_overview_OverviewPage["OverviewPage"] --&gt; src_renderer_components_overview_TerminalPane["TerminalPane"]
+      src_renderer_components_overview_OverviewPage["OverviewPage"] --&gt; src_renderer_ui_diff_viewer["diff-viewer ◆"]
+      src_renderer_components_overview_CommandInput["CommandInput"] --&gt; src_shared_commands_index["index ◆"]
+      src_renderer_components_overview_CommandInput["CommandInput"] --&gt; src_renderer_hooks_use_history["use-history"]
+      src_renderer_components_overview_CommandInput["CommandInput"] --&gt; src_renderer_components_overview_GhostInput["GhostInput"]
+      src_renderer_components_overview_CommandInput["CommandInput"] --&gt; src_renderer_components_overview_CommandMenu["CommandMenu"]
+      src_renderer_components_overview_CommandInput["CommandInput"] --&gt; src_renderer_components_overview_HistoryPanel["HistoryPanel"]
+      src_renderer_components_overview_CommandInput["CommandInput"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_overview_BlockDisplay["BlockDisplay"] --&gt; src_renderer_providers_theme["theme ◆"]
+      src_renderer_components_overview_BlockDisplay["BlockDisplay"] --&gt; src_renderer_utils_index["index ◆"]
+    end
+      src_renderer_pages_web_OverviewPage["OverviewPage"] --&gt; src_renderer_pages_web_overview_OverviewPage["OverviewPage"]
+  end
+
+  subgraph pages_shared["pages/shared"]
+      src_renderer_pages_shared_HomePage["HomePage"] --&gt; src_renderer_components_shared_Clock["Clock"]
+      src_renderer_pages_shared_JulesPage["JulesPage"] --&gt; src_renderer_components_workspace_activity_index["index"]
+      src_renderer_pages_shared_JulesPage["JulesPage"] --&gt; src_renderer_components_workspace_session_list["session-list"]
+      src_renderer_pages_shared_JulesPage["JulesPage"] --&gt; src_renderer_components_workspace_code_diff_sidebar["code-diff-sidebar"]
+      src_renderer_pages_shared_JulesPage["JulesPage"] --&gt; src_renderer_hooks_use_resizable["use-resizable"]
+      src_renderer_pages_shared_JulesPage["JulesPage"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_pages_shared_JulesPage["JulesPage"] --&gt; src_renderer_components_workspace_flying_jules["flying-jules ◆"]
+      src_renderer_components_workspace_activity_index["index"] --&gt; src_renderer_components_workspace_activity_activity_feed["activity-feed ◆"]
+      src_renderer_components_workspace_activity_index["index"] --&gt; src_renderer_components_workspace_activity_activity_item["activity-item ◆"]
+      src_renderer_components_workspace_activity_index["index"] --&gt; src_renderer_components_workspace_activity_types["types ◆"]
+      src_renderer_components_workspace_activity_activity_feed["activity-feed"] --&gt; src_renderer_ui_scroll_area["scroll-area ◆"]
+      src_renderer_components_workspace_activity_activity_feed["activity-feed"] --&gt; src_renderer_ui_button["button ◆"]
+      src_renderer_components_workspace_activity_activity_feed["activity-feed"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_components_workspace_activity_activity_feed["activity-feed"] --&gt; src_renderer_components_workspace_activity_types["types ◆"]
+      src_renderer_components_workspace_activity_activity_feed["activity-feed"] --&gt; src_renderer_components_workspace_activity_activity_item["activity-item ◆"]
+      src_renderer_components_workspace_activity_activity_feed["activity-feed"] --&gt; src_renderer_components_workspace_activity_activity_feed_header["activity-feed-header"]
+      src_renderer_components_workspace_activity_activity_feed["activity-feed"] --&gt; src_renderer_components_workspace_activity_activity_feed_form["activity-feed-form"]
+      src_renderer_components_workspace_activity_activity_item["activity-item"] --&gt; src_renderer_components_workspace_activity_types["types ◆"]
+      src_renderer_components_workspace_activity_activity_item["activity-item"] --&gt; src_renderer_components_workspace_activity_single_activity["single-activity"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_ui_scroll_area["scroll-area ◆"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_ui_input["input ◆"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_ui_badge["badge ◆"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_ui_tooltip["tooltip ◆"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_ui_card_spotlight["card-spotlight ◆"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_utils_activity["activity ◆"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_hooks_use_session_list["use-session-list ◆"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_components_workspace_session_status["session-status ◆"]
+      src_renderer_components_workspace_session_list["session-list"] --&gt; src_renderer_components_workspace_SessionContextMenu["SessionContextMenu ◆"]
+      src_renderer_ui_card_spotlight["card-spotlight"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_card_spotlight["card-spotlight"] --&gt; src_renderer_providers_theme["theme ◆"]
+      src_renderer_hooks_use_session_list["use-session-list"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_components_workspace_SessionContextMenu["SessionContextMenu"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_components_workspace_code_diff_sidebar["code-diff-sidebar"] --&gt; src_renderer_ui_scroll_area["scroll-area ◆"]
+      src_renderer_components_workspace_code_diff_sidebar["code-diff-sidebar"] --&gt; src_renderer_ui_diff_viewer["diff-viewer ◆"]
+      src_renderer_components_workspace_code_diff_sidebar["code-diff-sidebar"] --&gt; src_renderer_components_workspace_activity_activity_artifacts["activity-artifacts ◆"]
+      src_renderer_components_workspace_code_diff_sidebar["code-diff-sidebar"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_components_workspace_code_diff_sidebar["code-diff-sidebar"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_ui_diff_viewer["diff-viewer"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_workspace_activity_activity_artifacts["activity-artifacts"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_components_workspace_activity_activity_artifacts["activity-artifacts"] --&gt; src_renderer_components_workspace_changeset_summary["changeset-summary"]
+      src_renderer_components_workspace_activity_activity_artifacts["activity-artifacts"] --&gt; src_renderer_components_workspace_activity_terminal_console["terminal-console"]
+      src_renderer_pages_shared_NotesPage["NotesPage"] --&gt; src_renderer_components_markdown_NoteEditor["NoteEditor ◆"]
+    subgraph pages_shared_settings["settings/"]
+      src_renderer_pages_shared_settings_panels_ColorPalettePanel["ColorPalettePanel"] --&gt; src_renderer_providers_theme["theme ◆"]
+      src_renderer_pages_shared_settings_panels_ColorPalettePanel["ColorPalettePanel"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_pages_shared_settings_panels_connection_tests["connection-tests"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_pages_shared_settings_panels_connection_tests["connection-tests"] --&gt; src_renderer_pages_shared_settings_types["types"]
+      src_renderer_pages_shared_settings_panels_NotificationPanel["NotificationPanel"] --&gt; src_renderer_library_notification_index["index ◆"]
+      src_renderer_pages_shared_settings_panels_SessionPicker["SessionPicker"] --&gt; src_renderer_hooks_use_session_list["use-session-list ◆"]
+      src_renderer_pages_shared_settings_panels_TestingPanel["TestingPanel"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_pages_shared_settings_panels_TestingPanel["TestingPanel"] --&gt; src_renderer_pages_shared_settings_panels_connection_tests["connection-tests"]
+      src_renderer_pages_shared_settings_panels_TestingPanel["TestingPanel"] --&gt; src_renderer_pages_shared_settings_panels_TestRow["TestRow"]
+      src_renderer_pages_shared_settings_panels_TestingPanel["TestingPanel"] --&gt; src_renderer_pages_shared_settings_types["types"]
+      src_renderer_pages_shared_settings_panels_TestRow["TestRow"] --&gt; src_renderer_pages_shared_settings_types["types"]
+      src_renderer_pages_shared_settings_panels_TypographyPanel["TypographyPanel"] --&gt; src_renderer_providers_theme["theme ◆"]
+      src_renderer_pages_shared_settings_SettingsPage["SettingsPage"] --&gt; src_renderer_pages_shared_settings_Section["Section"]
+      src_renderer_pages_shared_settings_SettingsPage["SettingsPage"] --&gt; src_renderer_pages_shared_settings_panels_TestingPanel["TestingPanel"]
+      src_renderer_pages_shared_settings_SettingsPage["SettingsPage"] --&gt; src_renderer_pages_shared_settings_panels_NotificationPanel["NotificationPanel"]
+      src_renderer_pages_shared_settings_SettingsPage["SettingsPage"] --&gt; src_renderer_pages_shared_settings_panels_TypographyPanel["TypographyPanel"]
+      src_renderer_pages_shared_settings_SettingsPage["SettingsPage"] --&gt; src_renderer_pages_shared_settings_panels_ColorPalettePanel["ColorPalettePanel"]
+    end
+  end
+
+  subgraph components["components"]
+    subgraph components_git["git/"]
+    end
+    subgraph components_markdown["markdown/"]
+    end
+    subgraph components_overview["overview/"]
+      src_shared_commands_index["index"] --&gt; src_shared_commands_types["types"]
+      src_shared_commands_index["index"] --&gt; src_shared_commands_triggers["triggers"]
+      src_shared_commands_index["index"] --&gt; src_shared_commands_parse["parse"]
+      src_shared_commands_index["index"] --&gt; src_shared_commands_execute["execute"]
+      src_renderer_hooks_use_history["use-history"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_hooks_use_history["use-history"] --&gt; src_shared_history["history ◆"]
+      src_renderer_components_overview_CommandMenu["CommandMenu"] --&gt; src_shared_commands_index["index ◆"]
+      src_renderer_components_overview_HistoryPanel["HistoryPanel"] --&gt; src_shared_history["history ◆"]
+      src_renderer_store_commands["commands"] --&gt; src_shared_commands_index["index ◆"]
+      src_renderer_store_commands["commands"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_components_overview_TerminalPane["TerminalPane"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_components_overview_TerminalPane["TerminalPane"] --&gt; src_renderer_providers_theme["theme ◆"]
+    end
+    subgraph components_quickie["quickie/"]
+      src_renderer_components_quickie_presets["presets"] --&gt; src_renderer_components_quickie_types["types ◆"]
+    end
+    subgraph components_shared["shared/"]
+      src_renderer_hooks_use_file_tree["use-file-tree"] --&gt; src_shared_bridge["bridge ◆"]
+      src_renderer_hooks_use_file_tree["use-file-tree"] --&gt; src_shared_filesystem["filesystem ◆"]
+      src_renderer_components_shared_SnippetPicker["SnippetPicker"] --&gt; src_renderer_ui_popover["popover ◆"]
+      src_renderer_components_shared_SnippetPicker["SnippetPicker"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_shared_SnippetPicker["SnippetPicker"] --&gt; src_types_snippets["snippets ◆"]
+    end
+    subgraph components_ship["ship/"]
+      src_renderer_components_ship_Dropdown["Dropdown"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_ship_SyncManager_SyncManager["SyncManager"] --&gt; src_renderer_store_sync["sync ◆"]
+      src_renderer_components_ship_SyncManager_SyncManager["SyncManager"] --&gt; src_renderer_components_ship_SyncManager_types["types"]
+      src_renderer_components_ship_SyncManager_SyncManager["SyncManager"] --&gt; src_renderer_utils_index["index ◆"]
+    end
+    subgraph components_workspace["workspace/"]
+      src_renderer_components_workspace_changeset_summary["changeset-summary"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_components_workspace_changeset_summary["changeset-summary"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_workspace_activity_activity_feed_form["activity-feed-form"] --&gt; src_renderer_ui_textarea["textarea"]
+      src_renderer_components_workspace_activity_activity_feed_form["activity-feed-form"] --&gt; src_renderer_ui_button["button ◆"]
+      src_renderer_components_workspace_activity_activity_feed_form["activity-feed-form"] --&gt; src_renderer_hooks_use_snippets["use-snippets"]
+      src_renderer_components_workspace_activity_activity_feed_form["activity-feed-form"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_ui_textarea["textarea"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_workspace_activity_activity_feed_header["activity-feed-header"] --&gt; src_renderer_components_workspace_activity_types["types ◆"]
+      src_renderer_components_workspace_activity_activity_feed_header["activity-feed-header"] --&gt; src_renderer_ui_button["button ◆"]
+      src_renderer_components_workspace_activity_activity_feed_header["activity-feed-header"] --&gt; src_renderer_ui_dropdown_menu["dropdown-menu ◆"]
+      src_renderer_components_workspace_activity_activity_feed_header["activity-feed-header"] --&gt; src_renderer_components_workspace_flying_jules["flying-jules ◆"]
+      src_renderer_components_workspace_activity_activity_feed_header["activity-feed-header"] --&gt; src_renderer_components_workspace_session_status["session-status ◆"]
+      src_renderer_components_workspace_activity_activity_feed_header["activity-feed-header"] --&gt; src_renderer_store_app["app ◆"]
+      src_renderer_components_workspace_activity_single_activity["single-activity"] --&gt; src_renderer_components_workspace_activity_types["types ◆"]
+      src_renderer_components_workspace_activity_single_activity["single-activity"] --&gt; src_renderer_ui_card["card"]
+      src_renderer_components_workspace_activity_single_activity["single-activity"] --&gt; src_renderer_ui_badge["badge ◆"]
+      src_renderer_components_workspace_activity_single_activity["single-activity"] --&gt; src_renderer_ui_avatar["avatar ◆"]
+      src_renderer_components_workspace_activity_single_activity["single-activity"] --&gt; src_renderer_ui_button["button ◆"]
+      src_renderer_components_workspace_activity_single_activity["single-activity"] --&gt; src_renderer_components_workspace_flying_jules["flying-jules ◆"]
+      src_renderer_components_workspace_activity_single_activity["single-activity"] --&gt; src_renderer_components_workspace_plan_content["plan-content"]
+      src_renderer_components_workspace_activity_single_activity["single-activity"] --&gt; src_renderer_components_workspace_activity_markdown["markdown"]
+      src_renderer_components_workspace_activity_single_activity["single-activity"] --&gt; src_renderer_components_workspace_activity_activity_artifacts["activity-artifacts"]
+      src_renderer_ui_card["card"] --&gt; src_renderer_utils_index["index ◆"]
+      src_renderer_components_workspace_plan_content["plan-content"] --&gt; src_renderer_ui_button["button ◆"]
+    end
+  end
+
+  subgraph hooks["hooks"]
+    src_renderer_hooks_use_app_sync["use-app-sync"] --&gt; src_renderer_store_app["app ◆"]
+    src_renderer_hooks_use_presets["use-presets"] --&gt; src_renderer_lib_presets["presets"]
+    src_renderer_hooks_use_todos["use-todos"] --&gt; src_renderer_lib_todos["todos"]
+  end
+
+  subgraph store["store"]
+  end
+
+  subgraph shared["shared"]
+    src_shared_bridge_test["bridge.test"] --&gt; src_shared_bridge["bridge"]
+    src_shared_commands_execute["execute"] --&gt; src_shared_commands_types["types"]
+    src_shared_commands_execute["execute"] --&gt; src_shared_commands_triggers["triggers"]
+    src_shared_commands_triggers["triggers"] --&gt; src_shared_commands_types["types"]
+    src_shared_commands_parse["parse"] --&gt; src_shared_commands_types["types"]
+    src_shared_electron_d["electron.d"] --&gt; src_shared_filesystem["filesystem ◆"]
+    src_shared_electron_d["electron.d"] --&gt; src_shared_fuse["fuse ◆"]
+    src_shared_electron_d["electron.d"] --&gt; src_shared_history["history"]
+    src_shared_electron_d["electron.d"] --&gt; src_shared_local_data_index["index ◆"]
+    src_shared_electron_d["electron.d"] --&gt; src_jules_sdk_ipc["sdk-ipc"]
+    src_shared_web_sdk["web-sdk"] --&gt; src_jules_index["index"]
+    src_jules_index["index"] --&gt; src_jules_sdk_ipc["sdk-ipc"]
+    src_jules_index["index"] --&gt; src_jules_activity["activity"]
+    src_jules_index["index"] --&gt; src_jules_session["session"]
+    src_jules_index["index"] --&gt; src_jules_stream["stream"]
+    src_jules_index["index"] --&gt; src_jules_types["types"]
+  end
+
+  %% ◆ = referenced from multiple zones
+  style src_shared_filesystem fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_shared_history fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_shared_fuse fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_shared_local_data_index fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_shared_bridge fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_shared_local_data_types fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_store_app fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_input fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_utils_index fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_button fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_shared_FileTree_FileTree fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_shared_FileTree_types fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_providers_theme fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_utils_activity fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_utils_snippets fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_utils_types fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_utils_utils fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_utils_git fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_dropdown_menu fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_library_notification_index fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_quickie_types fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_store_quickie fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_quickie_types fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_markdown_NoteEditor fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_markdown_Editor fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_markdown_types fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_popover fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_workspace_activity_types fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_badge fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_avatar fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_scroll_area fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_tooltip fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_context_menu fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_store_sync fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_store_app fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_library_notification_types fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_library_notification_defaults fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_shared_fuse fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_types_snippets fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_library_notification_use_notification fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_overview_OverviewPage fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_overview_CommandInput fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_overview_BlockDisplay fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_workspace_activity_activity_feed fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_workspace_activity_activity_item fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_card_spotlight fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_utils_activity fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_hooks_use_session_list fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_workspace_session_status fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_workspace_SessionContextMenu fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_ui_diff_viewer fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_workspace_activity_activity_artifacts fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_renderer_components_workspace_flying_jules fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_shared_commands_index fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px
+  style src_shared_filesystem fill:#1e293b,stroke:#6366f1,color:#e2e8f0,stroke-width:2px</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+const STATS = {"zones":[{"name":"electron","files":["electron/filesystem/handlers.ts","electron/filesystem/types.ts","electron/git.ts","electron/github.ts","electron/history.ts","electron/ipc/bridge.ts","electron/ipc/handlers-v2.ts","electron/ipc/handlers.ts","electron/jules-events.ts","electron/jules-worker.ts","electron/main-notif.mts","electron/main.mts","electron/notes.ts","electron/notifications/dispatch.ts","electron/notifications/log.ts","electron/notifications/preload.ts","electron/notifications/scheduler.ts","electron/popup.ts","electron/preload.mts","electron/queues.ts","electron/snippets.ts","electron/store.ts","electron/Terminal.ts"]},{"name":"pages/electron","files":["src/renderer/pages/electron/ActivityPage.tsx","src/renderer/pages/electron/ExplorerPage.tsx","src/renderer/pages/electron/FileEditor.tsx","src/renderer/pages/electron/GanttPage.tsx","src/renderer/pages/electron/KitPage.tsx","src/renderer/pages/electron/QueuesPage.tsx","src/renderer/pages/electron/ReadingPage.tsx","src/renderer/pages/electron/RemindersPage.tsx","src/renderer/pages/electron/ShipPage.tsx","src/renderer/pages/electron/SnapshotPage.tsx","src/renderer/pages/electron/SnippetsPage.tsx","src/renderer/pages/electron/TardisPage.tsx","src/renderer/pages/electron/TimePage.tsx"]},{"name":"pages/web","files":["src/renderer/pages/web/jules/JulesWebPage.tsx","src/renderer/pages/web/jules/types.ts","src/renderer/pages/web/overview/OverviewPage.tsx","src/renderer/pages/web/OverviewPage.tsx"]},{"name":"pages/shared","files":["src/renderer/pages/shared/HomePage.tsx","src/renderer/pages/shared/JulesPage.tsx","src/renderer/pages/shared/NotesPage.tsx","src/renderer/pages/shared/settings/panels/ColorPalettePanel.tsx","src/renderer/pages/shared/settings/panels/connection-tests.ts","src/renderer/pages/shared/settings/panels/NotificationPanel.tsx","src/renderer/pages/shared/settings/panels/SessionPicker.tsx","src/renderer/pages/shared/settings/panels/TestingPanel.tsx","src/renderer/pages/shared/settings/panels/TestRow.tsx","src/renderer/pages/shared/settings/panels/TypographyPanel.tsx","src/renderer/pages/shared/settings/Section.tsx","src/renderer/pages/shared/settings/SettingsPage.tsx","src/renderer/pages/shared/settings/types.ts"]},{"name":"components","files":["src/renderer/components/git/GitSyncButton.tsx","src/renderer/components/markdown/Editor.tsx","src/renderer/components/markdown/NoteEditor.tsx","src/renderer/components/markdown/types.ts","src/renderer/components/overview/BlockDisplay.tsx","src/renderer/components/overview/CommandInput.tsx","src/renderer/components/overview/CommandMenu.tsx","src/renderer/components/overview/GhostInput.tsx","src/renderer/components/overview/HistoryPanel.tsx","src/renderer/components/overview/OverviewPage.tsx","src/renderer/components/overview/TerminalPane.tsx","src/renderer/components/quickie/presets.ts","src/renderer/components/quickie/types.ts","src/renderer/components/quickie/use-quickie.ts","src/renderer/components/shared/Clock.tsx","src/renderer/components/shared/DynamicDropdown.tsx","src/renderer/components/shared/FileTree/FileTree.tsx","src/renderer/components/shared/FileTree/types.ts","src/renderer/components/shared/ScheduleForm.tsx","src/renderer/components/shared/SnippetPicker.tsx","src/renderer/components/ship/Dropdown.tsx","src/renderer/components/ship/Header.tsx","src/renderer/components/ship/RepoCommandPalette.tsx","src/renderer/components/ship/SyncManager/SyncManager.tsx","src/renderer/components/ship/SyncManager/types.ts","src/renderer/components/ship/SyncManager.tsx","src/renderer/components/workspace/activity/activity-artifacts.tsx","src/renderer/components/workspace/activity/activity-feed-form.tsx","src/renderer/components/workspace/activity/activity-feed-header.tsx","src/renderer/components/workspace/activity/activity-feed.tsx","src/renderer/components/workspace/activity/activity-item.tsx","src/renderer/components/workspace/activity/markdown.tsx","src/renderer/components/workspace/activity/single-activity.tsx","src/renderer/components/workspace/activity/terminal-console.tsx","src/renderer/components/workspace/activity/types.ts","src/renderer/components/workspace/changeset-summary.tsx","src/renderer/components/workspace/code-diff-sidebar.tsx","src/renderer/components/workspace/flying-jules.tsx","src/renderer/components/workspace/plan-content.tsx","src/renderer/components/workspace/session-list.tsx","src/renderer/components/workspace/session-status.ts","src/renderer/components/workspace/SessionContextMenu.tsx"]},{"name":"hooks","files":["src/renderer/hooks/use-app-sync.ts","src/renderer/hooks/use-file-tree.ts","src/renderer/hooks/use-history.ts","src/renderer/hooks/use-presets.ts","src/renderer/hooks/use-resizable.ts","src/renderer/hooks/use-session-list.ts","src/renderer/hooks/use-snippets.ts","src/renderer/hooks/use-todos.ts"]},{"name":"store","files":["src/renderer/store/app.ts","src/renderer/store/commands.ts","src/renderer/store/explorer.ts","src/renderer/store/quickie.ts","src/renderer/store/reminders.ts","src/renderer/store/ship.ts","src/renderer/store/sync.ts"]},{"name":"shared","files":["src/shared/bridge.test.ts","src/shared/bridge.ts","src/shared/commands/execute.ts","src/shared/commands/parse.ts","src/shared/commands/triggers.ts","src/shared/commands/types.ts","src/shared/electron.d.ts","src/shared/filesystem.ts","src/shared/fuse.ts","src/shared/history.ts","src/shared/local-data/types.ts","src/shared/web-sdk.ts"]}],"sharedFiles":[{"path":"src/shared/filesystem.ts","zones":["electron","shared"]},{"path":"src/shared/history.ts","zones":["electron","components","hooks"]},{"path":"src/shared/fuse.ts","zones":["electron","shared"]},{"path":"src/shared/local-data/index.ts","zones":["electron","pages/electron","shared"]},{"path":"src/shared/bridge.ts","zones":["electron","pages/electron","pages/shared","components","hooks","store"]},{"path":"src/shared/local-data/types.ts","zones":["electron","pages/electron","shared"]},{"path":"src/renderer/store/app.ts","zones":["pages/electron","pages/shared","components","hooks"]},{"path":"src/renderer/ui/input.tsx","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/utils/index.ts","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/ui/button.tsx","zones":["pages/electron","components"]},{"path":"src/renderer/components/shared/FileTree/FileTree.tsx","zones":["pages/electron","components"]},{"path":"src/renderer/components/shared/FileTree/types.ts","zones":["pages/electron","components"]},{"path":"src/renderer/providers/theme.tsx","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/utils/activity.ts","zones":["pages/electron","pages/shared"]},{"path":"src/renderer/utils/snippets.ts","zones":["pages/electron","pages/shared"]},{"path":"src/renderer/utils/types.ts","zones":["pages/electron","pages/shared"]},{"path":"src/renderer/utils/utils.ts","zones":["pages/electron","pages/shared"]},{"path":"src/renderer/utils/git.ts","zones":["pages/electron","components","store"]},{"path":"src/renderer/ui/dropdown-menu.tsx","zones":["pages/electron","components"]},{"path":"src/renderer/library/notification/index.ts","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/components/quickie/types.ts","zones":["pages/electron","components"]},{"path":"src/renderer/store/quickie.ts","zones":["pages/electron","components"]},{"path":"src/renderer/components/quickie/types.ts","zones":["pages/electron","store"]},{"path":"src/renderer/components/markdown/NoteEditor.tsx","zones":["pages/electron","pages/shared"]},{"path":"src/renderer/components/markdown/Editor.tsx","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/components/markdown/types.ts","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/ui/popover.tsx","zones":["pages/electron","components"]},{"path":"src/renderer/components/workspace/activity/types.ts","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/ui/badge.tsx","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/ui/avatar.tsx","zones":["pages/electron","components"]},{"path":"src/renderer/ui/scroll-area.tsx","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/ui/tooltip.tsx","zones":["pages/electron","pages/shared","components"]},{"path":"src/renderer/ui/context-menu.tsx","zones":["pages/electron","components"]},{"path":"src/renderer/store/sync.ts","zones":["pages/electron","components"]},{"path":"src/renderer/store/app.ts","zones":["pages/electron","store"]},{"path":"src/renderer/library/notification/types.ts","zones":["pages/electron","pages/shared"]},{"path":"src/renderer/library/notification/defaults.ts","zones":["pages/electron","pages/shared"]},{"path":"src/shared/fuse.ts","zones":["pages/electron","hooks"]},{"path":"src/types/snippets.ts","zones":["pages/electron","components"]},{"path":"src/renderer/library/notification/use-notification.ts","zones":["pages/electron","pages/shared"]},{"path":"src/renderer/components/overview/OverviewPage.tsx","zones":["pages/web","components"]},{"path":"src/renderer/components/overview/CommandInput.tsx","zones":["pages/web","components"]},{"path":"src/renderer/components/overview/BlockDisplay.tsx","zones":["pages/web","components"]},{"path":"src/renderer/components/workspace/activity/activity-feed.tsx","zones":["pages/shared","components"]},{"path":"src/renderer/components/workspace/activity/activity-item.tsx","zones":["pages/shared","components"]},{"path":"src/renderer/ui/card-spotlight.tsx","zones":["pages/shared","components"]},{"path":"src/renderer/utils/activity.ts","zones":["pages/shared","components"]},{"path":"src/renderer/hooks/use-session-list.ts","zones":["pages/shared","components"]},{"path":"src/renderer/components/workspace/session-status.ts","zones":["pages/shared","components"]},{"path":"src/renderer/components/workspace/SessionContextMenu.tsx","zones":["pages/shared","components"]},{"path":"src/renderer/ui/diff-viewer.tsx","zones":["pages/shared","components"]},{"path":"src/renderer/components/workspace/activity/activity-artifacts.tsx","zones":["pages/shared","components"]},{"path":"src/renderer/components/workspace/flying-jules.tsx","zones":["pages/shared","components"]},{"path":"src/shared/commands/index.ts","zones":["components","store"]},{"path":"src/shared/filesystem.ts","zones":["components","hooks"]}],"generated":"2026-06-22T06:57:54.930Z","depth":2};
+
+// ── Zone colours (cycle) ──────────────────────────────────────────────────────
+const ZONE_COLORS = [
+  '#6366f1','#22c55e','#f59e0b','#06b6d4','#ec4899','#8b5cf6','#14b8a6','#f97316'
+];
+
+// ── Build sidebar ─────────────────────────────────────────────────────────────
+const zonesList   = document.getElementById('zones-list');
+const sharedList  = document.getElementById('shared-list');
+document.getElementById('shared-count').textContent = `(${STATS.sharedFiles.length})`;
+
+STATS.zones.forEach((z, i) => {
+  const color = ZONE_COLORS[i % ZONE_COLORS.length];
+  const row = document.createElement('div');
+  row.className = 'zone-row';
+  row.innerHTML = `
+    <span class="zone-dot" style="background:${color}"></span>
+    <span class="zone-name">${z.name}</span>
+    <span class="zone-count">${z.files.length}</span>
+  `;
+  row.addEventListener('click', () => highlightZone(z.name));
+  zonesList.appendChild(row);
+});
+
+STATS.sharedFiles.slice(0, 60).forEach(f => {
+  const name  = f.path.split('/').pop() ?? f.path;
+  const row   = document.createElement('div');
+  row.className = 'shared-row';
+  row.title = f.path + '\n' + f.zones.join(', ');
+  row.innerHTML = `
+    <span class="shared-diamond">◆</span>
+    <div class="shared-info">
+      <div class="shared-name">${name}</div>
+      <div class="shared-zones">${f.zones.join(' · ')}</div>
+    </div>
+  `;
+  row.addEventListener('click', () => {
+    document.getElementById('search').value = name.replace(/\.tsx?$/, '');
+    triggerSearch();
+  });
+  sharedList.appendChild(row);
+});
+
+// ── Mermaid init ──────────────────────────────────────────────────────────────
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  themeVariables: {
+    darkMode:            true,
+    background:          '#080d1a',
+    primaryColor:        '#1e293b',
+    primaryTextColor:    '#cbd5e1',
+    primaryBorderColor:  '#2d3f5a',
+    secondaryColor:      '#0f172a',
+    tertiaryColor:       '#080d1a',
+    edgeLabelBackground: '#080d1a',
+    lineColor:           '#334155',
+    fontFamily:          'ui-monospace, monospace',
+    fontSize:            '11px',
+    clusterBkg:          '#0d1525',
+    clusterBorder:       '#1e3a5f',
+    titleColor:          '#94a3b8',
+  },
+  flowchart: { curve: 'basis', padding: 20, nodeSpacing: 40, rankSpacing: 60 },
+});
+
+let panZoom = null;
+
+mermaid.run({ querySelector: '.mermaid' }).then(() => {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  svg.style.maxWidth = 'none';
+  svg.style.maxHeight = 'none';
+
+  panZoom = svgPanZoom(svg, {
+    zoomEnabled:    true,
+    controlIconsEnabled: false,
+    fit:            true,
+    center:         true,
+    minZoom:        0.05,
+    maxZoom:        8,
+    zoomScaleSensitivity: 0.3,
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    panZoom.resetZoom(); panZoom.resetPan();
+  });
+  document.getElementById('btn-fit').addEventListener('click', () => {
+    panZoom.fit(); panZoom.center();
+  });
+
+  // click node → highlight
+  svg.querySelectorAll('.node').forEach(node => {
+    node.style.cursor = 'pointer';
+    node.addEventListener('click', () => {
+      const label = node.querySelector('text, .nodeLabel')?.textContent?.trim() ?? '';
+      document.getElementById('search').value = label.replace(' ◆', '');
+      triggerSearch();
+    });
+  });
+}).catch(console.error);
+
+// ── Search / highlight ────────────────────────────────────────────────────────
+let searchTimer = null;
+
+document.getElementById('search').addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(triggerSearch, 150);
+});
+
+function triggerSearch() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+
+  const nodes = [...svg.querySelectorAll('.node')];
+  const edges = [...svg.querySelectorAll('.edgePath')];
+
+  if (!q) {
+    nodes.forEach(n => n.classList.remove('dimmed'));
+    edges.forEach(e => e.classList.remove('dimmed'));
+    document.getElementById('match-count').textContent = '';
+    return;
+  }
+
+  const matched = new Set();
+  nodes.forEach(n => {
+    const label = (n.querySelector('text, .nodeLabel')?.textContent ?? '').toLowerCase();
+    if (label.includes(q)) matched.add(n);
+  });
+
+  nodes.forEach(n => {
+    if (matched.has(n)) n.classList.remove('dimmed');
+    else n.classList.add('dimmed');
+  });
+  edges.forEach(e => e.classList.add('dimmed'));
+
+  const count = matched.size;
+  document.getElementById('match-count').textContent = count
+    ? `${count} match${count === 1 ? '' : 'es'}`
+    : 'no matches';
+}
+
+// ── Zone highlight ────────────────────────────────────────────────────────────
+function highlightZone(zoneName) {
+  const svg = document.querySelector('.mermaid svg');
+  if (!svg) return;
+  // subgraph label contains the zone name
+  const clusters = [...svg.querySelectorAll('.cluster')];
+  const match = clusters.find(c =>
+    (c.querySelector('.cluster-label text, title')?.textContent ?? '').includes(zoneName.split('/').pop())
+  );
+  if (match) {
+    match.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    match.style.outline = '2px solid #6366f1';
+    setTimeout(() => { match.style.outline = ''; }, 1500);
+  }
+  toast(`zone: ${zoneName}`);
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+let toastTimer = null;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ── Keyboard ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('search').focus();
+    document.getElementById('search').select();
+  }
+  if (e.key === 'Escape') {
+    document.getElementById('search').value = '';
+    triggerSearch();
+  }
+});
+</script>
+</body>
+</html>
