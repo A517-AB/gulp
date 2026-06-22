@@ -7,35 +7,45 @@ import { FuseManifest, FUSE_ROOT } from '../src/shared/fuse'
 import type { FuseManifest as FuseManifestType } from '../src/shared/fuse'
 import { store } from './store'
 
-const MANIFEST_PATH = 'D:/fuse/snippets.json'
 const EMPTY_MANIFEST: FuseManifestType = { version: 1, items: [] }
 
 function getFuseRoot(): string {
   return (store.get('fuse.root') as string | undefined) ?? FUSE_ROOT
 }
 
+function getManifestPath(): string {
+  return path.join(getFuseRoot(), 'snippets.json')
+}
+
 let manifestCache: FuseManifestType | null = null
 
 async function readManifest(): Promise<FuseManifestType> {
   if (manifestCache) return manifestCache
+  const manifestPath = getManifestPath()
+  const t = Date.now()
   try {
-    const raw: unknown = await fs.readJson(MANIFEST_PATH)
+    const exists = await fs.pathExists(manifestPath)
+    if (!exists) {
+      console.log(`[fuse] manifest not found at ${manifestPath} — starting empty`)
+      return EMPTY_MANIFEST
+    }
+    const raw: unknown = await fs.readJson(manifestPath)
     const result = FuseManifest.safeParse(raw)
     if (!result.success) {
-      console.warn('[snippets] manifest invalid, returning empty:', result.error.issues)
+      console.warn('[fuse] manifest invalid, returning empty:', result.error.issues)
       return EMPTY_MANIFEST
     }
     manifestCache = result.data
+    console.log(`[fuse] manifest loaded — ${result.data.items.length} snippets (${Date.now() - t}ms)`)
     return result.data
-  } catch {
+  } catch (err) {
+    console.error(`[fuse] manifest read failed (${Date.now() - t}ms):`, err)
     return EMPTY_MANIFEST
   }
 }
 
 export function registerSnippetsHandlers(getWebContents: () => WebContents | null): void {
   // ── manifest ──────────────────────────────────────────────────────────────
-
-  ipcMain.handle('snippets.get', (): Promise<FuseManifestType> => readManifest())
 
   ipcMain.handle('snippets.save', async (_e, data: FuseManifestType) => {
     try {
@@ -44,7 +54,7 @@ export function registerSnippetsHandlers(getWebContents: () => WebContents | nul
         console.error('[snippets] save → invalid manifest:', result.error.issues)
         return false
       }
-      await fs.outputJson(MANIFEST_PATH, result.data, { spaces: 2 })
+      await fs.outputJson(getManifestPath(), result.data, { spaces: 2 })
       manifestCache = result.data
       return true
     } catch (err) {
@@ -76,28 +86,39 @@ export function registerSnippetsHandlers(getWebContents: () => WebContents | nul
     manifestCache = null
   })
 
-  // ── watcher ───────────────────────────────────────────────────────────────
+  // ── watcher (lazy — starts on first snippets.get) ────────────────────────
 
-  const snippetsDir = path.join(getFuseRoot(), 'snippets')
-  const watcher = chokidar.watch(snippetsDir, {
-    ignoreInitial: true,
-    depth: 3,
-    ignored: [/(^|[/\\])\./, '**/node_modules/**', '**/dist/**'],
-    awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
-  })
-
+  let watcherStarted = false
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
-  watcher.on('all', (event, filePath) => {
-    console.log(`[snippets] ${event}: ${filePath}`)
-    if (debounceTimer) clearTimeout(debounceTimer)
-    debounceTimer = setTimeout(() => {
-      manifestCache = null
-      getWebContents()?.send('snippets.changed', { event, path: filePath })
-    }, 300)
-  })
+  function startWatcher() {
+    if (watcherStarted) return
+    watcherStarted = true
+    const snippetsDir = path.join(getFuseRoot(), 'snippets')
+    if (!fs.pathExistsSync(snippetsDir)) {
+      console.log(`[fuse] snippets dir not found, skipping watcher (${snippetsDir})`)
+      return
+    }
+    console.log(`[fuse] watching ${snippetsDir}`)
+    const watcher = chokidar.watch(snippetsDir, {
+      ignoreInitial: true,
+      depth: 3,
+      ignored: [/(^|[/\\])\./, '**/node_modules/**', '**/dist/**'],
+      awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 },
+    })
+    watcher.on('all', (event, filePath) => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        manifestCache = null
+        console.log(`[fuse] change detected (${event}) — invalidating cache`)
+        getWebContents()?.send('snippets.changed', { event, path: filePath })
+      }, 300)
+    })
+    watcher.on('error', (err) => { console.error('[fuse] watcher error:', err) })
+  }
 
-  watcher.on('error', (err) => {
-    console.error('[snippets] watcher error:', err)
+  ipcMain.handle('snippets.get', async (): Promise<FuseManifestType> => {
+    startWatcher()
+    return readManifest()
   })
 }
