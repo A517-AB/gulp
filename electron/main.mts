@@ -57,7 +57,7 @@ function buildTrayIcon(): ReturnType<typeof nativeImage.createFromBuffer> {
 // ── window ────────────────────────────────────────────────────────────────────
 function createWindow() {
   const preloadPath = path.join(__dirname, "preload.mjs");
-  console.log("[main] preload path:", preloadPath, "exists:", fs.existsSync(preloadPath));
+  if (!fs.existsSync(preloadPath)) console.error("[main] preload missing:", preloadPath);
 
   mainWindow = new BrowserWindow({
     width: 1440,
@@ -79,16 +79,13 @@ function createWindow() {
   });
 
   if (isDev) {
-    console.log("[main] loading dev URL:", DEV_URL);
     void mainWindow.loadURL(DEV_URL);
   } else {
-    const prodFile = path.join(__dirname, "../dist/index.html");
-    console.log("[main] loading prod file:", prodFile);
-    void mainWindow.loadFile(prodFile);
+    void mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
   }
 
   mainWindow.webContents.on("did-finish-load", () => {
-    console.log("[main] renderer loaded ok");
+    console.log(`[main] renderer ready (${isDev ? DEV_URL : "prod"})`);
   });
 
   mainWindow.webContents.on("did-fail-load", (_e, code, desc, url) => {
