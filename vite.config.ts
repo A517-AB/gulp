@@ -22,7 +22,7 @@ const keepVendors = process.env.VITE_KEEP_VENDORS  === 'true'
 const isWeb       = process.env.VITE_TARGET === 'web'
 
 // https://vite.dev/config/
-const julesApiKey = process.env['JULES_API_KEY'] ?? readJulesKey()
+const julesApiKey = process.env.JULES_API_KEY ?? readJulesKey()
 
 export default defineConfig({
   clearScreen: false,

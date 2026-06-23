@@ -39,7 +39,7 @@ function spawnRipple(host: HTMLElement, clientX: number, clientY: number, opts: 
   el.style.transform = 'scale(1)';
   el.style.opacity   = '0';
 
-  setTimeout(() => el.remove(), opts.duration);
+  setTimeout(() => { el.remove(); }, opts.duration);
 }
 
 /** Attaches a material ripple to an element. Returns cleanup that removes the listener. */
@@ -55,7 +55,7 @@ export function ripple(element: HTMLElement, options: RippleOptions = {}): () =>
   function onPointerDown(e: PointerEvent): void {
     const target = e.target as Element;
     const host: HTMLElement | null = opts.selector
-      ? (target.closest(opts.selector) as HTMLElement | null)
+      ? (target.closest(opts.selector))
       : element;
     if (!host) return;
     if (opts.ignore && target.closest(opts.ignore)) return;
@@ -63,7 +63,7 @@ export function ripple(element: HTMLElement, options: RippleOptions = {}): () =>
   }
 
   element.addEventListener('pointerdown', onPointerDown);
-  return () => element.removeEventListener('pointerdown', onPointerDown);
+  return () => { element.removeEventListener('pointerdown', onPointerDown); };
 }
 
 /** Drop into useEffect: `useEffect(() => useRippleEffect(ref), [])` */

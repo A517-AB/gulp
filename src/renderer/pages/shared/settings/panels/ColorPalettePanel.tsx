@@ -91,13 +91,13 @@ function Swatch({ stored, currentHex, onSet }: {
             <div className="flex items-center">
                 {stored && (
                     <button
-                        onClick={() => onSet('')}
+                        onClick={() => { onSet(''); }}
                         className="mr-2 w-4 h-4 rounded-full flex items-center justify-center text-[10px] text-fg-ghost hover:text-red-400 transition-colors"
                         title="Reset"
                     >×</button>
                 )}
                 <button
-                    onClick={() => setIsOpen(!isOpen)}
+                    onClick={() => { setIsOpen(!isOpen); }}
                     className="w-5 h-5 rounded-md border border-hair flex-shrink-0 transition-transform hover:scale-105 shadow-sm"
                     style={{ background: display }}
                 />
@@ -189,7 +189,7 @@ export function ColorPalettePanel() {
             {/* Cleaner Toggle */}
             <div className="flex items-center gap-1 bg-surface-raised p-1 rounded-md w-fit border border-hair">
                 <button
-                    onClick={() => setEditTheme('light')}
+                    onClick={() => { setEditTheme('light'); }}
                     className={cn(
                         "px-3 py-1 rounded text-3xs uppercase tracking-wider transition-colors",
                         editTheme === 'light' ? "bg-hover text-fg-primary shadow-sm" : "text-fg-ghost hover:text-fg-dim"
@@ -198,7 +198,7 @@ export function ColorPalettePanel() {
                     Light
                 </button>
                 <button
-                    onClick={() => setEditTheme('dark')}
+                    onClick={() => { setEditTheme('dark'); }}
                     className={cn(
                         "px-3 py-1 rounded text-3xs uppercase tracking-wider transition-colors",
                         editTheme === 'dark' ? "bg-hover text-fg-primary shadow-sm" : "text-fg-ghost hover:text-fg-dim"
@@ -221,7 +221,7 @@ export function ColorPalettePanel() {
                             <Swatch
                                 stored={current[key]}
                                 currentHex={computedHex[key] ?? '#000000'}
-                                onSet={hex => set(key, hex)}
+                                onSet={hex => { set(key, hex); }}
                             />
                         </div>
                     </div>

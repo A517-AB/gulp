@@ -41,11 +41,11 @@ function stripAccents(val: unknown): unknown {
 }
 
 function sw(s: string, prefix: string): boolean {
-  return s.slice(0, prefix.length) === prefix;
+  return s.startsWith(prefix);
 }
 
 function ew(s: string, suffix: string): boolean {
-  return suffix.length === 0 || s.slice(-suffix.length) === suffix;
+  return suffix.length === 0 || s.endsWith(suffix);
 }
 
 function wildcardTest(input: string, pattern: string): boolean {
@@ -72,8 +72,8 @@ function likeTest(input: string, pattern: string): boolean {
   if (!pattern.includes('%')) return false;
   const fi = pattern.indexOf('%');
   const li = pattern.lastIndexOf('%');
-  if (pattern[0] === '%' && li < 2)              return sw(toLower(input), toLower(pattern.slice(1)));
-  if (pattern[pattern.length - 1] === '%' && fi > pattern.length - 3) return ew(toLower(input), toLower(pattern.slice(0, -1)));
+  if (pattern.startsWith('%') && li < 2)              return sw(toLower(input), toLower(pattern.slice(1)));
+  if (pattern.endsWith('%') && fi > pattern.length - 3) return ew(toLower(input), toLower(pattern.slice(0, -1)));
   return input.includes(pattern.slice(fi + 1, li));
 }
 
@@ -137,7 +137,7 @@ const OPS: Record<string, CompareFn> = {
     const arr = e as (string | number | boolean | Date)[];
     if (!arr?.length) return false;
     if (ia) a = stripAccents(a);
-    if (a instanceof Date) return arr.some(i => i instanceof Date && i.getTime() === (a as Date).getTime());
+    if (a instanceof Date) return arr.some(i => i instanceof Date && i.getTime() === (a).getTime());
     if (ic) {
       const lc = toLower(ia ? stripAccents(a) : a);
       return arr.some(i => toLower(ia ? stripAccents(i) : i) === lc);
@@ -243,10 +243,10 @@ export class Predicate {
   field?:       string;
   operator?:    string;
   value?:       FilterValue;
-  ignoreCase:   boolean   = false;
-  ignoreAccent: boolean   = false;
+  ignoreCase   = false;
+  ignoreAccent   = false;
   matchCase?:   boolean;
-  isComplex:    boolean   = false;
+  isComplex   = false;
   condition?:   string;
   predicates?:  Predicate[];
 
@@ -354,7 +354,7 @@ export class Predicate {
     if (!this.isComplex) {
       return this.comparer!(
         getField(this.field!, record),
-        this.value!,
+        this.value,
         this.ignoreCase,
         this.ignoreAccent,
       );

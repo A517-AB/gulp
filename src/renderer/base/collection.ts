@@ -77,7 +77,7 @@ export function sort<T extends Record<string, unknown>>(
       if (a == null && b == null) return 0;
       if (b == null) return desc ? 1 : -1;
       if (a == null) return desc ? -1 : 1;
-      if (typeof a === 'string') return desc ? (a as string).localeCompare(b as string) * -1 : (a as string).localeCompare(b as string);
+      if (typeof a === 'string') return desc ? (a).localeCompare(b as string) * -1 : (a).localeCompare(b as string);
       return desc ? (b as number) - (a as number) : (a as number) - (b as number);
     };
   }
@@ -228,7 +228,7 @@ export function groupBy<T extends Record<string, unknown>>(
     for (const entry of map.values()) {
       for (const agg of aggregates) {
         const k = `${agg.field} - ${agg.type}`;
-        entry.aggregates[k] = aggregate(entry.items as Record<string, unknown>[], agg.field, agg.type);
+        entry.aggregates[k] = aggregate(entry.items, agg.field, agg.type);
       }
     }
   }
@@ -274,11 +274,11 @@ export function applyQuery<T extends Record<string, unknown>>(
 
   for (const op of query.queries) {
     switch (op.fn) {
-      case 'onWhere':        filterOps.push(op as WhereOp);   break;
-      case 'onSearch':       filterOps.push(op as SearchOp);  break;
-      case 'onSortBy':       sortOps.push(op as SortOp);      break;
-      case 'onAggregates':   aggOps.push(op as AggregateOp);  break;
-      case 'onSelect':       selectOp = op as SelectOp;       break;
+      case 'onWhere':        filterOps.push(op);   break;
+      case 'onSearch':       filterOps.push(op);  break;
+      case 'onSortBy':       sortOps.push(op);      break;
+      case 'onAggregates':   aggOps.push(op);  break;
+      case 'onSelect':       selectOp = op;       break;
       case 'onSkip':
       case 'onTake':
       case 'onPage':
@@ -292,15 +292,15 @@ export function applyQuery<T extends Record<string, unknown>>(
 
   for (const op of filterOps) {
     if (op.fn === 'onWhere') {
-      result = result.filter(r => (op as WhereOp).e.validate(r as Record<string, unknown>));
+      result = result.filter(r => (op).e.validate(r as Record<string, unknown>));
     } else {
-      const s = (op as SearchOp).e;
+      const s = (op).e;
       result = result.filter(r => {
-        const fields = s.fieldNames ?? (Object.keys(r) as string[]);
+        const fields = s.fieldNames ?? (Object.keys(r));
         return fields.some(f =>
           s.comparer(
-            getField(f, r as Record<string, unknown>),
-            s.searchKey as FilterValue,
+            getField(f, r),
+            s.searchKey,
             s.ignoreCase,
             s.ignoreAccent,
           )
@@ -318,8 +318,8 @@ export function applyQuery<T extends Record<string, unknown>>(
         const fields = typeof fieldName === 'string' ? [fieldName] : fieldName;
         for (const f of fields) {
           const n = comparer(
-            getField(f, a as Record<string, unknown>),
-            getField(f, b as Record<string, unknown>),
+            getField(f, a),
+            getField(f, b),
             a,
             b,
           );
@@ -338,9 +338,9 @@ export function applyQuery<T extends Record<string, unknown>>(
   for (const agg of aggOps) {
     const { field, type } = agg.e;
     aggregates[`${field} - ${type}`] = aggregate(
-      result as Record<string, unknown>[],
+      result,
       field,
-      type as AggregateType,
+      type,
     );
   }
 
@@ -348,19 +348,19 @@ export function applyQuery<T extends Record<string, unknown>>(
   for (const op of pageOps) {
     switch (op.fn) {
       case 'onSkip':
-        result = result.slice((op as SkipOp).e.nos);
+        result = result.slice((op).e.nos);
         break;
       case 'onTake':
-        result = result.slice(0, (op as TakeOp).e.nos);
+        result = result.slice(0, (op).e.nos);
         break;
       case 'onPage': {
-        const { pageIndex, pageSize } = (op as PageOp).e;
+        const { pageIndex, pageSize } = (op).e;
         const start = (pageIndex - 1) * pageSize;
         result = result.slice(start, start + pageSize);
         break;
       }
       case 'onRange': {
-        const { start, end } = (op as RangeOp).e;
+        const { start, end } = (op).e;
         result = result.slice(start, end);
         break;
       }
@@ -371,8 +371,8 @@ export function applyQuery<T extends Record<string, unknown>>(
   if (selectOp) {
     result = result.map(r => {
       const out: Record<string, unknown> = {};
-      for (const f of (selectOp as SelectOp).e.fieldNames) {
-        setField(f, getField(f, r as Record<string, unknown>), out);
+      for (const f of (selectOp).e.fieldNames) {
+        setField(f, getField(f, r), out);
       }
       return out as T;
     });

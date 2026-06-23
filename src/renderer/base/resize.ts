@@ -21,5 +21,5 @@ export function onResize(
     }
   });
   observer.observe(element);
-  return () => observer.disconnect();
+  return () => { observer.disconnect(); };
 }

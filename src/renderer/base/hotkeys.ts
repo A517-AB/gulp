@@ -22,6 +22,6 @@ export const hotkeys = {
   ): () => void {
     const handler = makeHandler(map);
     target.addEventListener(event, handler as EventListener);
-    return () => target.removeEventListener(event, handler as EventListener);
+    return () => { target.removeEventListener(event, handler as EventListener); };
   },
 };

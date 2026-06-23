@@ -229,7 +229,7 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
 export function defer(handler: () => void): () => void {
   if (typeof MessageChannel === 'undefined') {
     const id = setTimeout(handler, 0);
-    return () => clearTimeout(id);
+    return () => { clearTimeout(id); };
   }
 
   const channel = new MessageChannel();

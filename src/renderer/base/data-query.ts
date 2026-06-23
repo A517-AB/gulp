@@ -10,12 +10,12 @@ export type SortComparer = (a: unknown, b: unknown, aRec?: unknown, bRec?: unkno
 
 // ─── Internal operation shapes (consumed by applyQuery) ───────────────────────
 
-export type WhereOp = {
+export interface WhereOp {
   fn: 'onWhere';
   e:  Predicate;
-};
+}
 
-export type SearchOp = {
+export interface SearchOp {
   fn: 'onSearch';
   e:  {
     fieldNames?:   string[];
@@ -25,9 +25,9 @@ export type SearchOp = {
     ignoreAccent?: boolean;
     comparer:      (actual: unknown, expected: FilterValue, ic?: boolean, ia?: boolean) => boolean;
   };
-};
+}
 
-export type SortOp = {
+export interface SortOp {
   fn: 'onSortBy';
   e:  {
     fieldName:        string | string[];
@@ -35,23 +35,23 @@ export type SortOp = {
     direction:        string;
     foreignKeyValue?: string;
   };
-};
+}
 
-export type GroupOp = {
+export interface GroupOp {
   fn: 'onGroup';
   e:  {
     fieldName: string;
     comparer?: ((a: unknown, b: unknown) => number) | null;
     format?:   ((val: unknown, field: string) => unknown) | null;
   };
-};
+}
 
-export type PageOp       = { fn: 'onPage';       e: { pageIndex: number; pageSize: number } };
-export type RangeOp      = { fn: 'onRange';       e: { start: number; end: number } };
-export type TakeOp       = { fn: 'onTake';        e: { nos: number } };
-export type SkipOp       = { fn: 'onSkip';        e: { nos: number } };
-export type SelectOp     = { fn: 'onSelect';      e: { fieldNames: string[] } };
-export type AggregateOp  = { fn: 'onAggregates';  e: { field: string; type: string } };
+export interface PageOp { fn: 'onPage';       e: { pageIndex: number; pageSize: number } }
+export interface RangeOp { fn: 'onRange';       e: { start: number; end: number } }
+export interface TakeOp { fn: 'onTake';        e: { nos: number } }
+export interface SkipOp { fn: 'onSkip';        e: { nos: number } }
+export interface SelectOp { fn: 'onSelect';      e: { fieldNames: string[] } }
+export interface AggregateOp { fn: 'onAggregates';  e: { field: string; type: string } }
 
 export type QueryOp =
   | WhereOp | SearchOp | SortOp | GroupOp
@@ -70,7 +70,7 @@ function ascend(x: unknown, y: unknown): number {
   if (x == null && y == null) return 0;
   if (y == null) return -1;
   if (x == null) return 1;
-  if (typeof x === 'string') return (x as string).localeCompare(y as string);
+  if (typeof x === 'string') return (x).localeCompare(y as string);
   return (x as number) - (y as number);
 }
 
@@ -78,7 +78,7 @@ function descend(x: unknown, y: unknown): number {
   if (x == null && y == null) return 0;
   if (y == null) return 1;
   if (x == null) return -1;
-  if (typeof x === 'string') return (x as string).localeCompare(y as string) * -1;
+  if (typeof x === 'string') return (x).localeCompare(y as string) * -1;
   return (y as number) - (x as number);
 }
 
@@ -132,9 +132,9 @@ export class DataQuery {
   distincts:       string[]       = [];
 
   fromTable?:      string;
-  key:             string  = '';
-  fKey:            string  = '';
-  isCountRequired: boolean = false;
+  key  = '';
+  fKey  = '';
+  isCountRequired = false;
   subQuery?:       DataQuery;
 
   constructor(from?: string | string[]) {
@@ -271,7 +271,7 @@ export class DataQuery {
     }
 
     if (!comparer || typeof comparer === 'string') {
-      order = comparer ? (comparer as string).toLowerCase() : 'ascending';
+      order = comparer ? (comparer).toLowerCase() : 'ascending';
       cmp   = sortComparer(order);
     } else {
       cmp = comparer;

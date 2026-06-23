@@ -23,10 +23,10 @@ export class Observer<Events extends EventMap = EventMap> {
     if (id) {
       if (!this.ids.includes(id)) {
         this.ids.push(id);
-        this.events[event]!.push({ handler, ...(context !== undefined && { context }), id });
+        this.events[event].push({ handler, ...(context !== undefined && { context }), id });
       }
-    } else if (!this.events[event]!.some(e => e.handler === handler)) {
-      this.events[event]!.push({ handler, ...(context !== undefined && { context }) });
+    } else if (!this.events[event].some(e => e.handler === handler)) {
+      this.events[event].push({ handler, ...(context !== undefined && { context }) });
     }
   }
 
@@ -68,7 +68,7 @@ export class Observer<Events extends EventMap = EventMap> {
   }
 
   destroy(): void {
-    this.events = {} as { [K in keyof Events]?: BoundEntry<Events[K]>[] };
+    this.events = {};
     this.ids = [];
   }
 }

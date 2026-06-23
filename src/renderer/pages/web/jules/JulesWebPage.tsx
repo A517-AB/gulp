@@ -105,7 +105,7 @@ export default function JulesWebPage(): ReactNode {
     useEffect(() => {
         void fetchSessions()
         const t = setInterval(() => { void fetchSessions() }, 5000)
-        return () => clearInterval(t)
+        return () => { clearInterval(t); }
     }, [fetchSessions])
 
     // ── stream ────────────────────────────────────────────────────────────────
@@ -217,7 +217,7 @@ export default function JulesWebPage(): ReactNode {
                         <button onClick={() => { void fetchSessions() }} className="p-1 rounded hover:bg-hover text-fg-dim transition-colors cursor-pointer">
                             <RefreshCw className="h-3 w-3" />
                         </button>
-                        <button onClick={() => setShowNewForm(p => !p)} className="p-1 rounded hover:bg-hover text-fg-dim transition-colors cursor-pointer">
+                        <button onClick={() => { setShowNewForm(p => !p); }} className="p-1 rounded hover:bg-hover text-fg-dim transition-colors cursor-pointer">
                             <Plus className="h-3 w-3" />
                         </button>
                     </div>
@@ -227,13 +227,13 @@ export default function JulesWebPage(): ReactNode {
                     <div className="mx-2 mb-2 p-3 bg-raised rounded border border-hair flex flex-col gap-2 shrink-0">
                         <div className="flex items-center justify-between">
                             <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-fg-dim">New session</span>
-                            <button onClick={() => setShowNewForm(false)} className="text-fg-ghost hover:text-fg-dim cursor-pointer">
+                            <button onClick={() => { setShowNewForm(false); }} className="text-fg-ghost hover:text-fg-dim cursor-pointer">
                                 <X className="h-3 w-3" />
                             </button>
                         </div>
                         <textarea
                             value={newPrompt}
-                            onChange={e => setNewPrompt(e.target.value)}
+                            onChange={e => { setNewPrompt(e.target.value); }}
                             placeholder="What should Jules build?"
                             rows={3}
                             className="w-full p-2 text-xs bg-base text-fg-primary placeholder-fg-ghost rounded border border-hair focus:outline-none resize-none"
@@ -253,7 +253,7 @@ export default function JulesWebPage(): ReactNode {
                         <Search className="h-3 w-3 text-fg-ghost shrink-0" />
                         <input
                             value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
+                            onChange={e => { setSearchQuery(e.target.value); }}
                             placeholder="Search…"
                             className="flex-1 bg-transparent text-xs text-fg-primary placeholder-fg-ghost focus:outline-none"
                         />
@@ -264,7 +264,7 @@ export default function JulesWebPage(): ReactNode {
                     {filteredSessions.map(s => (
                         <button
                             key={s.id}
-                            onClick={() => setSelectedId(s.id)}
+                            onClick={() => { setSelectedId(s.id); }}
                             className={`w-full text-left px-3 py-2.5 rounded transition-colors flex flex-col gap-1 cursor-pointer ${selectedId === s.id ? 'bg-selected' : 'hover:bg-hover'}`}
                         >
                             <div className="flex items-start gap-2">
@@ -315,7 +315,7 @@ export default function JulesWebPage(): ReactNode {
                             >
                                 <textarea
                                     value={messageText}
-                                    onChange={e => setMessageText(e.target.value)}
+                                    onChange={e => { setMessageText(e.target.value); }}
                                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void handleSend() } }}
                                     placeholder="Message Jules…"
                                     rows={1}
