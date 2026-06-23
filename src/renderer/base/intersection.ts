@@ -28,7 +28,7 @@ export function onIntersect(
     }
   }, options);
   observer.observe(element);
-  return () => observer.disconnect();
+  return () => { observer.disconnect(); };
 }
 
 /** Fires once when element becomes visible, then cleans itself up. */

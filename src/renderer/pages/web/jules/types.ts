@@ -22,9 +22,7 @@ export interface paths {
             responses: {
                 /** @description ok */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             ok: boolean;
@@ -69,90 +67,70 @@ export interface paths {
             responses: {
                 /** @description connected */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Ok"];
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -185,9 +163,7 @@ export interface paths {
             responses: {
                 /** @description disconnected */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Ok"];
                     };
@@ -218,9 +194,7 @@ export interface paths {
             responses: {
                 /** @description status */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             connected: boolean;
@@ -255,9 +229,7 @@ export interface paths {
             responses: {
                 /** @description list */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             sources: components["schemas"]["Source"][];
@@ -266,81 +238,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -376,90 +330,70 @@ export interface paths {
             responses: {
                 /** @description source */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Source"] & unknown;
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -498,9 +432,7 @@ export interface paths {
             responses: {
                 /** @description list */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             sessions: components["schemas"]["Session"][];
@@ -509,81 +441,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -606,9 +520,7 @@ export interface paths {
             responses: {
                 /** @description created */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             id: string;
@@ -620,81 +532,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -727,90 +621,70 @@ export interface paths {
             responses: {
                 /** @description info */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Session"];
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -853,90 +727,70 @@ export interface paths {
             responses: {
                 /** @description sent */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Ok"];
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -977,90 +831,70 @@ export interface paths {
             responses: {
                 /** @description reply */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Activity"];
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -1095,90 +929,70 @@ export interface paths {
             responses: {
                 /** @description approved */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Ok"];
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -1221,90 +1035,70 @@ export interface paths {
             responses: {
                 /** @description reached */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Ok"];
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -1337,90 +1131,70 @@ export interface paths {
             responses: {
                 /** @description outcome */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": unknown;
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -1457,90 +1231,70 @@ export interface paths {
             responses: {
                 /** @description archived */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Ok"];
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -1575,90 +1329,70 @@ export interface paths {
             responses: {
                 /** @description unarchived */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Ok"];
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -1694,90 +1428,70 @@ export interface paths {
             responses: {
                 /** @description snapshot */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": unknown;
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -1815,9 +1529,7 @@ export interface paths {
             responses: {
                 /** @description history */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             activities: components["schemas"]["Activity"][];
@@ -1826,81 +1538,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -1941,9 +1635,7 @@ export interface paths {
             responses: {
                 /** @description filtered */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             activities: components["schemas"]["Activity"][];
@@ -1952,81 +1644,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -2059,9 +1733,7 @@ export interface paths {
             responses: {
                 /** @description artifacts */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             artifacts: unknown[];
@@ -2070,81 +1742,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -2180,90 +1834,70 @@ export interface paths {
             responses: {
                 /** @description media binary */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/octet-stream": unknown;
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -2300,90 +1934,70 @@ export interface paths {
             responses: {
                 /** @description diff */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": unknown;
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -2418,9 +2032,7 @@ export interface paths {
             responses: {
                 /** @description files */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             files: unknown[];
@@ -2429,81 +2041,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -2539,90 +2133,70 @@ export interface paths {
             responses: {
                 /** @description file content */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "text/plain": string;
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -2661,9 +2235,7 @@ export interface paths {
             responses: {
                 /** @description started */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             id: string;
@@ -2672,81 +2244,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -2788,9 +2342,7 @@ export interface paths {
             responses: {
                 /** @description started */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             sessions: {
@@ -2801,81 +2353,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -2912,9 +2446,7 @@ export interface paths {
             responses: {
                 /** @description results */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             results: unknown[];
@@ -2923,81 +2455,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -3034,9 +2548,7 @@ export interface paths {
             responses: {
                 /** @description validation result */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             valid: boolean;
@@ -3048,81 +2560,63 @@ export interface paths {
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -3159,90 +2653,70 @@ export interface paths {
             responses: {
                 /** @description stats */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": unknown;
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
@@ -3273,9 +2747,7 @@ export interface paths {
             responses: {
                 /** @description list */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             streams: string[];
@@ -3315,9 +2787,7 @@ export interface paths {
             responses: {
                 /** @description cancelled */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": {
                             cancelled: boolean;
@@ -3359,90 +2829,70 @@ export interface paths {
             responses: {
                 /** @description parsed diff */
                 200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": unknown[];
                     };
                 };
                 /** @description Bad request */
                 400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Auth failed */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Timeout */
                 408: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Conflict */
                 409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Session failed */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Too many requests */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Server error */
                 500: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };
                 };
                 /** @description Network error */
                 503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
+                    headers: Record<string, unknown>;
                     content: {
                         "application/json": components["schemas"]["Error"];
                     };

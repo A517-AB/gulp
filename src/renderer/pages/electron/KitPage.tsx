@@ -42,7 +42,7 @@ export default function KitPage() {
       }
     }
     window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    return () => { window.removeEventListener('keydown', handler); }
   }, [])
 
   return (
@@ -328,7 +328,7 @@ export default function KitPage() {
           <Separator />
 
           <Section title="Command palette — ctrl+space or button">
-            <Button variant="outline" size="sm" onClick={() => setCmdOpen(true)}>
+            <Button variant="outline" size="sm" onClick={() => { setCmdOpen(true); }}>
               Open palette
             </Button>
             <CommandDialog open={cmdOpen} onOpenChange={setCmdOpen}>

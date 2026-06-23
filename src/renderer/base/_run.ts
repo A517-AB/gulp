@@ -1,7 +1,7 @@
 // --- observer.ts ---
 import { Observer } from './observer.ts';
 
-type TestEvents = { ping: string; count: number };
+interface TestEvents { ping: string; count: number }
 const obs = new Observer<TestEvents>();
 const log: string[] = [];
 

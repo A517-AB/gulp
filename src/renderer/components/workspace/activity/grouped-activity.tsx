@@ -21,7 +21,7 @@ function buildUnifiedLines(items: Activity[]): UnifiedLine[] {
         }
         for (const art of a.artifacts) {
             if (art.type === "bashOutput") {
-                const b = art as BashArtifact
+                const b = art
                 lines.push({ kind: "bash", command: b.command ?? "", stdout: b.stdout ?? "", exitCode: b.exitCode ?? null })
             }
         }

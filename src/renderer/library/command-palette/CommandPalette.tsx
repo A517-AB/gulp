@@ -126,5 +126,5 @@ export function CommandPaletteActions() {
 
 export function useCommandPalette() {
   const { query } = useKBar();
-  return { open: () => query.toggle() };
+  return { open: () => { query.toggle(); } };
 }

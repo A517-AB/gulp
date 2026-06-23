@@ -14,6 +14,7 @@ export default defineConfig([
     'primitives/**',
     'check.ts',
     'scratch/**',
+    'public/**',
     // excluded from tsconfig — Jules example files not part of this project
     'src/electron/ipc/advanced-workspace.ts',
     'src/electron/ipc/agent.ts',

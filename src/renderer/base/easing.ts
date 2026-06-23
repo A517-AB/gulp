@@ -37,7 +37,7 @@ export function applyTransition(
 ): () => void {
   const delay = delayMs ? ` ${delayMs}ms` : '';
   mergeTransition(element, `${property} ${durationMs}ms ${cssEasing(easing)}${delay}`);
-  return () => clearTransition(element, property);
+  return () => { clearTransition(element, property); };
 }
 
 export function clearTransition(element: HTMLElement, property?: string): void {

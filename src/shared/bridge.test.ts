@@ -16,8 +16,18 @@ async function importBridgeModule(windowValue?: Window): Promise<BridgeModule> {
       configurable: true,
       writable: true,
     });
+
+    // Polyfill the electron API directly on globalThis so that the test bridge.ts file picks it up
+    if ('electron' in windowValue) {
+      Object.defineProperty(globalThis, "electron", {
+        value: (windowValue as any).electron,
+        configurable: true,
+        writable: true,
+      });
+    }
   } else {
     clearWindow();
+    Reflect.deleteProperty(globalThis, "electron");
   }
 
   return import("./bridge");
