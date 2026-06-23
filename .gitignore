@@ -27,3 +27,5 @@ typecheck.log
 *.sw?
 
 /coverage/
+/jules/
+/dist-jules/

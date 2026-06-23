@@ -1,7 +1,6 @@
 import type { IpcRendererEvent } from "electron";
 import { contextBridge, ipcRenderer } from "electron";
-import type { ShellType, PopupNotification, ElectronAPI, JulesWorkerEvent } from "../src/shared/electron";
-import { sdk } from "./ipc/bridge";
+import type { ShellType, PopupNotification, ElectronAPI } from "../src/shared/electron";
 // ── terminal ───────────────────────────────────────────────────────────────────
 
 const terminal: ElectronAPI["terminal"] = {
@@ -227,22 +226,6 @@ const git: ElectronAPI["git"] = {
     init: (cwd) => ipcRenderer.invoke("git.init", cwd),
 }
 
-// ── jules events ───────────────────────────────────────────────────────────────
-
-const julesEvents: ElectronAPI["julesEvents"] = {
-  subscribe: () => {
-    ipcRenderer.send("jules:subscribe")
-  },
-  unsubscribe: () => {
-    ipcRenderer.send("jules:unsubscribe")
-  },
-  on: (cb: (event: JulesWorkerEvent) => void) => {
-    const handler = (_event: IpcRendererEvent, data: JulesWorkerEvent) => { cb(data) }
-    ipcRenderer.on("jules:event", handler)
-    return () => { ipcRenderer.off("jules:event", handler) }
-  },
-}
-
 // ── notifLog ───────────────────────────────────────────────────────────────────
 
 const notifLog: ElectronAPI["notifLog"] = {
@@ -260,9 +243,21 @@ const store: ElectronAPI["store"] = {
   delete: (key)        => ipcRenderer.invoke("store:delete", key),
 }
 
+// Date: 2026-06-23
+// Why: Requires node-level filesystem access ('fs') and shell execution ('git' commands).
+// For: Saving base64 patches to files and executing git apply/commit tasks.
+const ipc = {
+  artifact: {
+    save: (base64Patch: string, savePath: string) => ipcRenderer.invoke("ipc.artifact.save", base64Patch, savePath),
+  },
+  session: {
+    applyPatch: (sessionId: string, options: { cwd: string; patch: string }) => ipcRenderer.invoke("ipc.session.applyPatch", sessionId, options),
+  }
+};
+
 // ── expose ─────────────────────────────────────────────────────────────────────
 
-const api: Omit<ElectronAPI, 'sdk'> = {
+const api: ElectronAPI = {
   terminal,
   queues,
   window:  window_,
@@ -277,8 +272,8 @@ const api: Omit<ElectronAPI, 'sdk'> = {
   scheduler,
   notifLog,
   git,
-  julesEvents,
   store,
+  ipc,
 };
 
-contextBridge.exposeInMainWorld("electron", { ...api, sdk });
+contextBridge.exposeInMainWorld("electron", api);
