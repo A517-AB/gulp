@@ -254,7 +254,7 @@ export default function QueuesView() {
 
   const getBranches = (repo: string): string[] => {
     const source = storeSources.find(s => s.id === repo);
-    return source?.githubRepo?.branches ?? [];
+    return source?.githubRepo.branches ?? [];
   };
 
   const handleSendTask = async (group: FleetTaskGroup, task: FleetTask, gIdx: number, tIdx: number, e: React.MouseEvent) => {
@@ -267,7 +267,7 @@ export default function QueuesView() {
       await runSession({
         prompt: task.task,
         title: `${task.topic} (${task.folder})`,
-        ...(github ? { source: { github, baseBranch: group.baseBranch || "main" } } : {}),
+        ...(github ? { source: { github, baseBranch: group.baseBranch ?? "main" } } : {}),
       });
       updateTask(gIdx, tIdx, { sent: true });
     } catch (err) {
@@ -292,7 +292,7 @@ export default function QueuesView() {
             runSession({
               prompt: task.task,
               title: `${task.topic} (${task.folder})`,
-              ...(github ? { source: { github, baseBranch: group.baseBranch || "main" } } : {}),
+              ...(github ? { source: { github, baseBranch: group.baseBranch ?? "main" } } : {}),
             }).then(() => { updateTask(gIdx, i + bIdx, { sent: true }); })
           )
         );
