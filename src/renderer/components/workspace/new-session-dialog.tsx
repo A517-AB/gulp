@@ -38,10 +38,10 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
                 </DialogHeader>
                 {open && (
                     <SessionForm
-                        initialValues={initialValues}
+                        {...(initialValues !== undefined ? { initialValues } : {})}
+                        {...(onSessionCreated !== undefined ? { onSessionCreated } : {})}
                         portalContainer={portalContainer}
                         onClose={() => { setOpen(false); }}
-                        onSessionCreated={onSessionCreated}
                     />
                 )}
             </DialogContent>
@@ -79,7 +79,7 @@ function SessionForm({ initialValues, portalContainer, onClose, onSessionCreated
             ...(form.title ? { title: form.title } : {}),
             ...(form.autoCreatePr ? { autoPr: true } : {}),
             ...(form.interactive ? { requireApproval: true } : {}),
-            ...(ownerRepo ? { source: { github: ownerRepo, branch: form.startingBranch || 'main' } } : {}),
+            ...(ownerRepo ? { source: { github: ownerRepo, baseBranch: form.startingBranch || 'main' } } : {}),
         });
     }
 
