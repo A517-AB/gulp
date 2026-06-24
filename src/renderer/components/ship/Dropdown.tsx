@@ -1,25 +1,27 @@
 import {useEffect, useRef, useState} from "react";
 import {AnimatePresence, motion} from "framer-motion";
-import {ChevronDown} from "lucide-react";
+import {ChevronDown, Star} from "lucide-react";
 import {cn} from "@/utils";
 
 export interface DropdownItem {
     id: string;
     label: string;
     meta?: string;
+    starred?: boolean;
 }
 
 interface DropdownProps {
     items: DropdownItem[];
     value?: string;
     onChange: (id: string) => void;
+    onToggleStar?: (id: string) => void;
     placeholder?: string;
     className?: string;
     emptyMessage?: string;
     footer?: React.ReactNode;
 }
 
-export function Dropdown({items, value, onChange, placeholder = "select", className, emptyMessage = "Nothing found", footer}: DropdownProps) {
+export function Dropdown({items, value, onChange, onToggleStar, placeholder = "select", className, emptyMessage = "Nothing found", footer}: DropdownProps) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const selected = items.find(i => i.id === value);
@@ -56,17 +58,34 @@ export function Dropdown({items, value, onChange, placeholder = "select", classN
                             <p className="px-3 py-2 text-2xs text-fg-ghost font-mono">{emptyMessage}</p>
                         )}
                         {items.map(item => (
-                            <button
+                            <div
                                 key={item.id}
-                                onClick={() => { onChange(item.id); setOpen(false); }}
                                 className={cn(
-                                    "w-full text-left px-3 py-1.5 text-2xs font-mono hover:bg-hover transition-colors flex items-center justify-between gap-3",
+                                    "group flex items-center text-2xs font-mono hover:bg-hover transition-colors",
                                     item.id === value ? "text-fg-primary" : "text-fg-muted"
                                 )}
                             >
-                                <span className="truncate">{item.label}</span>
-                                {item.meta && <span className="text-fg-ghost shrink-0">{item.meta}</span>}
-                            </button>
+                                <button
+                                    onClick={() => { onChange(item.id); setOpen(false); }}
+                                    className="flex-1 text-left px-3 py-1.5 flex items-center justify-between gap-3 min-w-0"
+                                >
+                                    <span className="truncate">{item.label}</span>
+                                    {item.meta && <span className="text-fg-ghost shrink-0">{item.meta}</span>}
+                                </button>
+                                {onToggleStar && (
+                                    <button
+                                        onClick={e => { e.stopPropagation(); onToggleStar(item.id); }}
+                                        className={cn(
+                                            "pr-2.5 py-1.5 shrink-0 transition-colors",
+                                            item.starred
+                                                ? "text-yellow-400"
+                                                : "text-fg-ghost/0 group-hover:text-fg-ghost/40 hover:!text-yellow-400",
+                                        )}
+                                    >
+                                        <Star className="h-2.5 w-2.5" fill={item.starred ? "currentColor" : "none"}/>
+                                    </button>
+                                )}
+                            </div>
                         ))}
                         {footer && (
                             <div className="border-t border-hair mt-1 pt-1">

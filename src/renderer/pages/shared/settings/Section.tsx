@@ -23,11 +23,10 @@ export function Section({ title, children, defaultOpen = false }: SectionProps) 
       <AnimatePresence initial={false}>
         {open && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            initial={{ height: 0, opacity: 0, overflow: 'hidden' }}
+            animate={{ height: 'auto', opacity: 1, overflow: 'visible' }}
+            exit={{ height: 0, opacity: 0, overflow: 'hidden' }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="overflow-hidden"
           >
             <div className="pb-8">{children}</div>
           </motion.div>

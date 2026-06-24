@@ -155,4 +155,4 @@ export type { SessionStatus, SessionStatusInfo, SessionInitialValues } from './s
 
 // ── Fleet ─────────────────────────────────────────────────────────────────────
 
-export type { FleetTask, FleetTaskGroup } from './types'
+export type { FleetTask, FleetTaskGroup, TaskAction } from './types'

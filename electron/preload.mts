@@ -260,6 +260,23 @@ const store: ElectronAPI["store"] = {
   delete: (key)        => ipcRenderer.invoke("store:delete", key),
 }
 
+// ── github ─────────────────────────────────────────────────────────────────────
+
+const github: ElectronAPI["github"] = {
+    createIssue:     (owner, repo, data)           => ipcRenderer.invoke("github.createIssue",     owner, repo, data),
+    listIssues:      (owner, repo, state)           => ipcRenderer.invoke("github.listIssues",      owner, repo, state),
+    updateIssue:     (owner, repo, number, data)    => ipcRenderer.invoke("github.updateIssue",     owner, repo, number, data),
+    addIssueComment: (owner, repo, number, body)    => ipcRenderer.invoke("github.addIssueComment", owner, repo, number, body),
+    listPRs:         (owner, repo, state)           => ipcRenderer.invoke("github.listPRs",         owner, repo, state),
+    getPR:           (owner, repo, number)          => ipcRenderer.invoke("github.getPR",           owner, repo, number),
+    createPR:        (owner, repo, data)            => ipcRenderer.invoke("github.createPR",        owner, repo, data),
+    updatePR:        (owner, repo, number, data)    => ipcRenderer.invoke("github.updatePR",        owner, repo, number, data),
+    mergePR:         (owner, repo, number, method)  => ipcRenderer.invoke("github.mergePR",         owner, repo, number, method),
+    getPRChecks:     (owner, repo, ref)             => ipcRenderer.invoke("github.getPRChecks",     owner, repo, ref),
+    listBranches:    (owner, repo)                  => ipcRenderer.invoke("github.listBranches",    owner, repo),
+    deleteBranch:    (owner, repo, branch)          => ipcRenderer.invoke("github.deleteBranch",    owner, repo, branch),
+};
+
 // ── expose ─────────────────────────────────────────────────────────────────────
 
 const api: Omit<ElectronAPI, 'sdk'> = {
@@ -279,6 +296,7 @@ const api: Omit<ElectronAPI, 'sdk'> = {
   git,
   julesEvents,
   store,
+  github,
 };
 
 contextBridge.exposeInMainWorld("electron", { ...api, sdk });

@@ -27,11 +27,13 @@ export interface ShipState {
     fileStates: Record<string, ActionState>;
     snapshotStates: Record<string, ActionState>;
     viewMode: 'jules' | 'sync';
+    favoriteSourceIds: string[];
 
     setSourceId: (id: string) => void;
     setOpenPatchId: (id: string) => void;
     setOpenFileKey: (key: string) => void;
     setViewMode: (mode: 'jules' | 'sync') => void;
+    toggleFavoriteSource: (id: string) => void;
     loadPatch: (sessionId: string) => Promise<void>;
     handlePatchClick: (sessionId: string) => void;
     handleFileClick: (sessionId: string, file: ShipFile, patch: string) => void;
@@ -54,6 +56,7 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
     fileStates: {},
     snapshotStates: {},
     viewMode: 'jules',
+    favoriteSourceIds: [],
 
     setSourceId: (sourceId) => {
         set({ sourceId, openPatchId: "", openFileKey: "" });
@@ -61,6 +64,13 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
     setOpenPatchId: (openPatchId) => { set({ openPatchId }); },
     setOpenFileKey: (openFileKey) => { set({ openFileKey }); },
     setViewMode: (viewMode) => { set({ viewMode }); },
+    toggleFavoriteSource: (id) => {
+        set(state => ({
+            favoriteSourceIds: state.favoriteSourceIds.includes(id)
+                ? state.favoriteSourceIds.filter(f => f !== id)
+                : [...state.favoriteSourceIds, id],
+        }));
+    },
 
     loadPatch: async (sessionId) => {
         const { patchData, patchLoading } = get();
@@ -200,4 +210,4 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
             set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "idle" } }));
         }
     }
-}), { name: 'ship-store', partialize: (s) => ({ patchData: s.patchData, parsedDiffs: s.parsedDiffs, openPatchId: s.openPatchId }) }));
+}), { name: 'ship-store', partialize: (s) => ({ patchData: s.patchData, parsedDiffs: s.parsedDiffs, openPatchId: s.openPatchId, sourceId: s.sourceId, viewMode: s.viewMode, favoriteSourceIds: s.favoriteSourceIds }) }));

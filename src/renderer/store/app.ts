@@ -2,29 +2,11 @@ import {create} from 'zustand'
 import type {Activity, SessionResource, SerializedSnapshot, SessionConfig, Source, ParsedFile} from '@jules'
 import {sdkIpc, filesystem, store, uiNotification} from '@shared/bridge'
 
-export interface SessionFormData {
-    sourceId: string
-    title: string
-    prompt: string
-    startingBranch: string
-    autoCreatePr: boolean
-    interactive: boolean
-}
-
 const activeStreams = new Map<string, () => void>()
 const loadedSessions = new Set<string>()
 let syncInProgress = false
 let lastSyncAt = 0
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000
-
-const DEFAULT_FORM: SessionFormData = {
-    sourceId: '',
-    title: '',
-    prompt: '',
-    startingBranch: '',
-    autoCreatePr: false,
-    interactive: false,
-}
 
 export interface AppStore {
     sessionList: SessionResource[]
@@ -34,9 +16,6 @@ export interface AppStore {
 
     sources: Source[]
     sourcesLoaded: boolean
-    newSessionForm: SessionFormData
-    setNewSessionForm: (patch: Partial<SessionFormData>) => void
-    resetNewSessionForm: () => void
     loadSources: () => Promise<void>
 
     loadSessions: () => Promise<void>
@@ -67,26 +46,12 @@ export const useStore = create<AppStore>((set, get) => ({
 
     sources: [],
     sourcesLoaded: false,
-    newSessionForm: DEFAULT_FORM,
-    setNewSessionForm: (patch) => {
-        set(s => ({newSessionForm: {...s.newSessionForm, ...patch}}))
-    },
-    resetNewSessionForm: () => {
-        set({newSessionForm: DEFAULT_FORM})
-    },
 
     loadSources: async () => {
         if (!sdkIpc || get().sourcesLoaded) return
         try {
             const data = await sdkIpc.sources.list()
-            set(s => ({
-                sources: data,
-                sourcesLoaded: true,
-                newSessionForm: {
-                    ...s.newSessionForm,
-                    sourceId: s.newSessionForm.sourceId !== '' ? s.newSessionForm.sourceId : (data.at(0)?.id ?? ''),
-                },
-            }))
+            set({ sources: data, sourcesLoaded: true })
         } catch {
             // leave sources empty, caller can retry
         }

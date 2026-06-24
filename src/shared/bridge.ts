@@ -24,3 +24,4 @@ export const git            = el?.git            ?? null;
 export const julesEvents    = el?.julesEvents    ?? null;
 export const sdkIpc: SdkIpc | null = (el as unknown as { sdk?: SdkIpc } | undefined)?.sdk ?? null;
 export const store         = el?.store         ?? null;
+export const github        = el?.github        ?? null;
