@@ -1,0 +1,121 @@
+{
+  "repo": "A517-AB/gulp",
+  "analyzed_at": "2026-06-20T00:00:00.000Z",
+  "root_causes": [
+    {
+      "id": "rc-croner-ui",
+      "title": "Croner Snooze and Schedule UI Gaps",
+      "severity": "medium",
+      "issues": [21],
+      "files": ["src/renderer/pages/electron/RemindersPage.tsx", "src/renderer/components/shared/ScheduleForm.tsx"],
+      "description": "Backend scheduler supports snooze and weekly/monthly options, but UI lacks buttons and form inputs to use them.",
+      "solution_summary": "Add an onSnooze action to ReminderRow and implement toggle snooze method. Expand ScheduleForm with weekly and monthly options."
+    },
+    {
+      "id": "rc-activity-scroll",
+      "title": "Missing viewport ref for Auto-scroll",
+      "severity": "low",
+      "issues": [20],
+      "files": ["src/renderer/components/workspace/activity/activity-feed.tsx", "src/renderer/ui/scroll-area.tsx"],
+      "description": "ActivityFeed does not auto-scroll on new messages because the ScrollArea lacks a ref that can be manipulated.",
+      "solution_summary": "Expose a ref in ScrollArea component and use it in a useEffect within ActivityFeed to scrollTo bottom when activities update."
+    },
+    {
+      "id": "rc-media-mime",
+      "title": "Robust MIME-type handling in MediaArtifact",
+      "severity": "low",
+      "issues": [19],
+      "files": ["src/renderer/components/workspace/activity/activity-artifacts.tsx"],
+      "description": "MediaItemDownloader renders all non-video/audio formats as <img> tags.",
+      "solution_summary": "Explicitly check `format.startsWith('image/')` for images and provide a fallback UI rendering for unsupported formats."
+    },
+    {
+      "id": "rc-hardcoded-paths",
+      "title": "Hardcoded Windows file paths for Snippets",
+      "severity": "high",
+      "issues": [18],
+      "files": ["electron/snippets.ts", "src/shared/fuse.ts"],
+      "description": "Snippets feature breaks due to hardcoded 'D:/fuse' paths.",
+      "solution_summary": "Update MANIFEST_PATH and FUSE_ROOT defaults to use the app's userData directory."
+    },
+    {
+      "id": "rc-missing-ipc",
+      "title": "Missing SDK IPC Exposure",
+      "severity": "low",
+      "issues": [17],
+      "files": ["electron/ipc/handlers.ts", "electron/ipc/bridge.ts", "src/jules/sdk-ipc.ts"],
+      "description": "Cache inspection functions defined in Jules SDK are missing from the IPC bridge.",
+      "solution_summary": "Expose getCacheInfo, getSessionCacheInfo, getActivityCount, getLatestActivities, and getSessionCount."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-add-missing-sdk-ipc",
+      "title": "Add missing SDK cache methods to IPC",
+      "root_cause": "rc-missing-ipc",
+      "issues": [17],
+      "files": ["electron/ipc/handlers.ts", "electron/ipc/bridge.ts", "src/jules/sdk-ipc.ts"],
+      "new_files": [],
+      "test_files": [],
+      "risk": "low",
+      "prompt": "The `jules-sdk` has several cache-related functions that are not currently exposed through the IPC bridge, making them inaccessible to the frontend renderer. \n\nPlease expose the following SDK functions in the IPC bridge:\n- `jules.getCacheInfo(rootDirOverride?)`\n- `jules.getSessionCacheInfo(sessionId, rootDirOverride?)`\n- `jules.getActivityCount(sessionId, rootDirOverride?)`\n- `jules.getLatestActivities(sessionId, n, rootDirOverride?)`\n- `jules.getSessionCount(rootDirOverride?)`\n\n1. Modify `electron/ipc/handlers.ts` to add `ipcMain.handle` endpoints (e.g. `sdk:cache.getCacheInfo`, `sdk:cache.getSessionCacheInfo`, etc.) that call the underlying `jules` instance functions. You may need to import the functions from `@google/jules-sdk` if they are standalone rather than methods on the client, or invoke them from `jules.xxx` if they exist there.\n2. Update `src/jules/sdk-ipc.ts` to define the `cache` object under `SdkIpc` with the appropriate TypeScript types for these 5 functions.\n3. Update `electron/ipc/bridge.ts` to implement the `sdk.cache` property mapping the functions to their respective `invoke('sdk:cache.xxx')` calls.\n\nAcceptance criteria:\n- The 5 cache functions are accurately typed and exposed in the renderer via `sdkIpc.cache`.\n- You may ONLY modify the files listed above. Do NOT rename, move, or delete any files outside your boundary."
+    },
+    {
+      "id": "task-robust-media-mime",
+      "title": "Robust MIME-type handling in MediaArtifact",
+      "root_cause": "rc-media-mime",
+      "issues": [19],
+      "files": ["src/renderer/components/workspace/activity/activity-artifacts.tsx"],
+      "new_files": [],
+      "test_files": [],
+      "risk": "low",
+      "prompt": "Currently in `src/renderer/components/workspace/activity/activity-artifacts.tsx`, the `MediaItemDownloader` explicitly checks if `media.format.startsWith('video/')` or `audio/`. If it doesn't match either, it blindly assumes it is an image and renders an `<img>` tag.\n\n```tsx\n// Current behavior:\n{media.format.startsWith('video/') ? (\n    <video src={...} />\n) : media.format.startsWith('audio/') ? (\n    <audio src={...} />\n) : (\n    <img src={...} />\n)}\n```\n\nThis will break UI visually if a PDF, binary file, or unsupported application type is received. Please update the logic to:\n1. Explicitly check `media.format.startsWith('image/')` before rendering the `<img>` tag.\n2. Fall back to a user-friendly UI for unsupported file types (e.g., rendering a div with text like 'Unsupported media type: {media.format}. Please use the Save button above to download it.')\n\nAcceptance criteria:\n- Explicit `image/` check.\n- Fallback div for unsupported MIME types.\n- You may ONLY modify the files listed above. Do NOT rename, move, or delete any files outside your boundary."
+    },
+    {
+      "id": "task-activity-feed-scroll",
+      "title": "Auto-scroll Activity Feed",
+      "root_cause": "rc-activity-scroll",
+      "issues": [20],
+      "files": ["src/renderer/components/workspace/activity/activity-feed.tsx", "src/renderer/ui/scroll-area.tsx"],
+      "new_files": [],
+      "test_files": [],
+      "risk": "low",
+      "prompt": "In `src/renderer/components/workspace/activity/activity-feed.tsx`, the `ScrollArea` does not automatically scroll to the bottom when new activities stream in, unlike `ActivityPage.tsx` which manually controls `el.scrollTo`.\n\n1. Modify `src/renderer/ui/scroll-area.tsx` to forward a `viewportRef` to the `ScrollAreaPrimitive.Viewport` component so the parent can access the raw DOM element.\n   ```tsx\n   export const ScrollArea = React.forwardRef<HTMLDivElement, ...>(({ className, children, viewportRef, ...props }, ref) => {\n       return <ScrollAreaPrimitive.Root ref={ref}>\n           <ScrollAreaPrimitive.Viewport ref={viewportRef}>\n           ...\n   ```\n2. Update `ActivityFeed.tsx` to pass a `viewportRef` to the `ScrollArea` component.\n3. Add a `useEffect` inside `ActivityFeed.tsx` that triggers auto-scrolling to the bottom (`el.scrollTo({top: el.scrollHeight, behavior: 'smooth'})`) whenever the `activities` array changes.\n\nAcceptance criteria:\n- The `ScrollArea` viewport can be referenced from `ActivityFeed`.\n- `ActivityFeed` smooth scrolls to the bottom on new messages.\n- You may ONLY modify the files listed above. Do NOT rename, move, or delete any files outside your boundary."
+    },
+    {
+      "id": "task-croner-ui-gaps",
+      "title": "Add Snooze to Reminders UI",
+      "root_cause": "rc-croner-ui",
+      "issues": [21],
+      "files": ["src/renderer/pages/electron/RemindersPage.tsx", "src/renderer/components/shared/ScheduleForm.tsx"],
+      "new_files": [],
+      "test_files": [],
+      "risk": "medium",
+      "prompt": "The backend `scheduler` in Electron supports `snooze(id, minutes)` and robust scheduling kinds like `weekly` and `monthly`, but the frontend UI does not expose these features.\n\n1. In `src/renderer/pages/electron/RemindersPage.tsx`:\n   - In `ReminderRow`, add a snooze button (e.g. an alarm clock icon or Zzz) next to the toggle/remove buttons, triggered by an `onSnooze` property.\n   - In `RemindersPage`, implement a `snooze(id: string)` method that calls `scheduler.snooze(id, 15)` and adds the returned item to the `items` state, then pass this into `onSnooze`.\n2. In `src/renderer/components/shared/ScheduleForm.tsx`:\n   - Expand the `Kind` type to include `weekly` and `monthly`.\n   - Add UI inputs for `weekly` (e.g., a select for Day of Week `0-6`) and `monthly` (e.g., an input for Day of Month `1-31`).\n   - Update the `buildSchedule` logic to map these to the `ScheduleInput` type expected by the bridge.\n\nAcceptance criteria:\n- Reminders can be snoozed from the UI.\n- Users can create weekly and monthly schedules from the form.\n- You may ONLY modify the files listed above. Do NOT rename, move, or delete any files outside your boundary."
+    },
+    {
+      "id": "task-fix-hardcoded-snippet-paths",
+      "title": "Fix hardcoded snippet paths",
+      "root_cause": "rc-hardcoded-paths",
+      "issues": [18],
+      "files": ["electron/snippets.ts", "src/shared/fuse.ts"],
+      "new_files": [],
+      "test_files": [],
+      "risk": "medium",
+      "prompt": "Snippets fail to save properly because the paths are hardcoded to `D:/fuse`, which breaks on most environments.\n\n1. In `src/shared/fuse.ts`, modify `FUSE_ROOT`. Since this is shared between Node and Browser, you could change it to an empty string `''` or a generic string, but the primary fix is in the backend.\n2. In `electron/snippets.ts`, replace the hardcoded `const MANIFEST_PATH = 'D:/fuse/snippets.json'` and the default fallback of `getFuseRoot()` to dynamically resolve inside the Electron user data directory (`app.getPath('userData')`). \n   - For example: `const getFuseRoot = () => store.get('fuse.root') || path.join(app.getPath('userData'), 'fuse')`.\n   - Ensure `MANIFEST_PATH` dynamically uses `path.join(getFuseRoot(), 'snippets.json')` so that files are correctly saved to the user's OS-specific app data folder instead of the hardcoded D drive.\n\nAcceptance criteria:\n- Snippets storage path dynamically uses the user data directory instead of a hardcoded D drive path.\n- You may ONLY modify the files listed above. Do NOT rename, move, or delete any files outside your boundary."
+    }
+  ],
+  "unaddressable": [],
+  "file_ownership": {
+    "electron/ipc/handlers.ts": "task-add-missing-sdk-ipc",
+    "electron/ipc/bridge.ts": "task-add-missing-sdk-ipc",
+    "src/jules/sdk-ipc.ts": "task-add-missing-sdk-ipc",
+    "src/renderer/components/workspace/activity/activity-artifacts.tsx": "task-robust-media-mime",
+    "src/renderer/components/workspace/activity/activity-feed.tsx": "task-activity-feed-scroll",
+    "src/renderer/ui/scroll-area.tsx": "task-activity-feed-scroll",
+    "src/renderer/pages/electron/RemindersPage.tsx": "task-croner-ui-gaps",
+    "src/renderer/components/shared/ScheduleForm.tsx": "task-croner-ui-gaps",
+    "electron/snippets.ts": "task-fix-hardcoded-snippet-paths",
+    "src/shared/fuse.ts": "task-fix-hardcoded-snippet-paths"
+  }
+}
