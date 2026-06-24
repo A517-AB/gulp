@@ -29,6 +29,9 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
 }
 
+// Fix 60-second startup delay on Windows caused by WPAD (Web Proxy Auto-Discovery) timing out
+app.commandLine.appendSwitch("no-proxy-server");
+
 void app.whenReady().then(() => {
   console.log('[notif-main] notification daemon starting')
 
