@@ -2,7 +2,7 @@ export const GIT_COLORS: Record<string, string> = {
   M: 'text-yellow-400', A: 'text-green-400',
   D: 'text-red-400', '?': 'text-cyan-400/80', U: 'text-red-500',
 }
-
+// this shit is meant to be used not to be remade inside fucking ship
 export const normalizePath = (p: string) => p.replace(/\\/g, '/')
 
 export interface GitChange {

@@ -1,0 +1,14 @@
+[
+  {
+    "group": "New Group",
+    "repo": "github/A517-AB/dotenv",
+    "baseBranch": "",
+    "tasks": [
+      {
+        "folder": "new/folder",
+        "topic": "New Task",
+        "task": "Description..."
+      }
+    ]
+  }
+]

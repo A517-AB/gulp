@@ -2,21 +2,22 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useStore } from './app';
-import { sdkIpc, filesystem, store } from '@shared/bridge';
-import type { ParsedFile } from '@jules';
+import {ipc, filesystem, store} from '@shared/bridge'
+import type {JulesParsedFile} from '@shared/jules-ipc'
+import {extractPatchFromActivities} from '@/utils'
+import {jules} from '@jules'
 import { parse as parseDiff } from 'diff2html';
 import type { DiffFile } from 'diff2html/lib-esm/types';
 import { toast } from 'sonner';
 
 export type ActionState = "idle" | "busy" | "done";
 
-export type ShipFile = ParsedFile;
+export type ShipFile = JulesParsedFile;
 
 export interface PatchEntry {
     files: ShipFile[];
     patch: string;
 }
-
 export interface ShipState {
     sourceId: string;
     openPatchId: string;
@@ -65,32 +66,23 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
     setViewMode: (viewMode) => { set({ viewMode }); },
 
     loadPatch: async (sessionId) => {
-        const { patchData, patchLoading } = get();
-        if (patchData[sessionId] !== undefined || patchLoading[sessionId]) return;
+        const {patchLoading} = get();
+        if (patchLoading[sessionId]) return;
 
         set(state => ({ patchLoading: { ...state.patchLoading, [sessionId]: true } }));
 
         try {
-            if (!sdkIpc) {
-                set(state => ({ patchData: { ...state.patchData, [sessionId]: null } }));
-                return;
+            const sessionClient = jules.session(sessionId);
+            const acts: unknown[] = [];
+            for await (const act of sessionClient.activities.history()) {
+                acts.push(act);
             }
-            await sdkIpc.activities.hydrate(sessionId);
-            const activities = await sdkIpc.activities.select(sessionId);
-            let patch: string | null = null;
-            outer: for (const act of [...activities].reverse()) {
-                for (const art of [...act.artifacts].reverse()) {
-                    if (art.type === 'changeSet' && art.gitPatch.unidiffPatch) {
-                        patch = art.gitPatch.unidiffPatch;
-                        break outer;
-                    }
-                }
-            }
+            const patch = extractPatchFromActivities(acts);
             if (!patch) {
                 set(state => ({ patchData: { ...state.patchData, [sessionId]: null } }));
                 return;
             }
-            const files = await sdkIpc.artifact.parseUnidiff(patch);
+            const files = (await window.jules?.git.parseUnidiff(patch)) ?? [];
             set(state => ({ patchData: { ...state.patchData, [sessionId]: { files, patch } } }));
         } catch {
             set(state => ({ patchData: { ...state.patchData, [sessionId]: null } }));
@@ -129,7 +121,7 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
     handleGetFile: async (sessionId, file) => {
         const key = `${sessionId}/${file.path}`;
         const data = get().patchData[sessionId];
-        if (!data || !sdkIpc || !filesystem) return;
+        if (!data || !ipc || !filesystem) return;
 
         set(state => ({ fileStates: { ...state.fileStates, [key]: "busy" } }));
         const toastId = `get-${key}`;
@@ -154,7 +146,7 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
             }
             const base64Patch = btoa(binary);
 
-            await sdkIpc.artifact.save(base64Patch, savePath);
+            await ipc.artifact.save(base64Patch, savePath);
             toast.success("Saved", { id: toastId });
             set(state => ({ fileStates: { ...state.fileStates, [key]: "done" } }));
             setTimeout(() => {
@@ -173,7 +165,7 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
             : (get().sourceId !== "")
             ? get().sourceId
             : (useStore.getState().sources[0]?.id ?? "");
-        if (!resolvedSourceId || !sdkIpc) return null;
+        if (!resolvedSourceId) return null;
 
         const toastId = `snap-${sessionId}`;
         toast.loading("Applying patch…", { id: toastId });
@@ -185,8 +177,28 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
                 const stored = await store.get(`ship.repoPaths.${resolvedSourceId}`);
                 if (typeof stored === 'string' && stored) cwd = stored;
             }
-            const result = await sdkIpc.session.applyPatch(sessionId, { cwd });
-            if (result.success) {
+            if (!cwd) {
+                const picked = await filesystem?.showOpenDialog();
+                if (!picked) {
+                    toast.dismiss(toastId);
+                    set(state => ({snapshotStates: {...state.snapshotStates, [sessionId]: 'idle'}}));
+                    return null;
+                }
+                cwd = picked;
+                if (resolvedSourceId && store) await store.set(`ship.repoPaths.${resolvedSourceId}`, cwd);
+            }
+            const patch = get().patchData[sessionId]?.patch ?? '';
+            const result = await window.jules?.git.applyPatch(cwd, patch) as {
+                ok: boolean;
+                branch?: string;
+                error?: string
+            } | undefined;
+            if (!result) {
+                toast.error("Jules not available", {id: toastId});
+                set(state => ({snapshotStates: {...state.snapshotStates, [sessionId]: "idle"}}));
+                return {success: false as const, error: "Jules not available"};
+            }
+            if (result.ok) {
                 toast.success(result.branch ? `Applied → ${result.branch}` : "Patch applied", { id: toastId });
                 set(state => ({ snapshotStates: { ...state.snapshotStates, [sessionId]: "done" } }));
                 setTimeout(() => {

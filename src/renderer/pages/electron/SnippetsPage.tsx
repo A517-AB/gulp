@@ -5,7 +5,7 @@ import { useSnippets } from '@renderer/hooks/use-snippets'
 import type { SnippetItem } from '@renderer/hooks/use-snippets'
 import { InlineEdit } from '@renderer/ui/inline-edit'
 import { CodeEditor } from '@renderer/ui/code-editor'
-import { DynamicDropdown } from '@renderer/components/shared/DynamicDropdown'
+import {DynamicDropdown} from '@/ui/dynamic-dropdown'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@renderer/ui/dialog'

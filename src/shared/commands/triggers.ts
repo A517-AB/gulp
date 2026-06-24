@@ -1,10 +1,9 @@
-import type { SdkIpc } from '@jules'
+import type {Activity, SessionClient, JulesClient as Jules} from '@jules'
 import type {AtCommand, AtResult, DisplayCommand, DisplayResult, TerminalCommand, TerminalResult, PreviewCommand, PreviewResult} from './types'
 
 // ── @: fire-forget ────────────────────────────────────────────────────────────
-// Injects only session.send — reusable across any session via command.sessionId.
 
-type SendFn = SdkIpc['session']['send']
+type SendFn = (sessionId: string, prompt: string) => Promise<void>
 
 export type AtExecutor = (send: SendFn, command: AtCommand, prompt: string) => Promise<AtResult>
 
@@ -15,11 +14,9 @@ export const AT_META = {
 }
 
 // ── /: pull latest MD ─────────────────────────────────────────────────────────
-// Refresher pattern: hydrate syncs from network, select finds last agentMessaged.
-// message field on agentMessaged activity is the markdown content.
 
-type HydrateFn = SdkIpc['activities']['hydrate']
-type SelectFn  = SdkIpc['session']['select']
+type HydrateFn = (sessionId: string) => Promise<number>
+type SelectFn = (sessionId: string, options?: Parameters<SessionClient['select']>[0]) => Promise<Activity[]>
 
 export interface DisplaySession {
   hydrate: HydrateFn
@@ -66,3 +63,5 @@ export const PREVIEW_META = {
   label:       'preview',
   description: 'Watch previews (diffs) of a Jules session',
 }
+
+export type {Jules}

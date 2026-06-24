@@ -113,7 +113,8 @@ export type CommandResult = AtResult  | DisplayResult  | HashResult
 
 ### Step 2 — `src/shared/commands/triggers.ts`
 
-Define the executor type contract. The executor receives only what it needs — no `sdkIpc`, no bridge, no globals. Inject dependencies as arguments.
+Define the executor type contract. The executor receives only what it needs — no `jules` client, no bridge, no globals.
+Inject dependencies as arguments.
 
 ```ts
 import type { HashCommand, HashResult } from './types'
@@ -130,7 +131,7 @@ export const HASH_META = {
 
 **Rules:**
 - Executor receives injected deps first, command second, optional prompt last
-- Use exact SDK types for deps (`SdkIpc['session']['send']` not `Function`)
+- Use exact types for deps (`Jules['session']['send']` not `Function`)
 - META object must have `trigger as const`, `label`, `description`
 
 ### Step 3 — `src/shared/commands/parse.ts`
@@ -191,7 +192,7 @@ export const executeHash: HashExecutor = async (dep, command) => {
 **Rules:**
 - Always catch and return `status: 'error'` — never let the executor throw
 - Use `satisfies HashResult` on each return so TS catches shape mismatches
-- Do not import `sdkIpc` or `bridge` here — accept deps as arguments
+- Do not import `jules` or `bridge` here — accept deps as arguments
 
 ### Step 5 — `src/shared/commands/index.ts`
 
@@ -250,9 +251,9 @@ Add a handler that calls the executor with injected deps.
 
 ```ts
 const handleHash = useCallback(async (command: HashCommand) => {
-  if (!sdkIpc) { setStatus('no connection'); return }
+  if (!jules) { setStatus('no connection'); return }
   setStatus('working...')
-  const result = await executeHash(sdkIpc.someMethod, command)
+  const result = await executeHash(jules.someMethod, command)
   if (result.status === 'ok') {
     setStatus(null)
   } else {

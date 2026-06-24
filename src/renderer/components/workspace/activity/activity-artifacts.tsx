@@ -1,10 +1,12 @@
-import { memo, useState } from "react";
-import { Check, Download } from "lucide-react";
-import { filesystem } from "@shared/bridge";
-import { useStore } from "@/store/app";
-import type { Activity, BashArtifact, ChangeSetArtifact, MediaArtifact } from "@jules";
-import { ChangeSetSummary } from "@/components/workspace/changeset-summary.tsx";
-import { TerminalConsole } from "./terminal-console.tsx";
+import {memo, useState} from "react";
+import {Check, Download} from "lucide-react";
+import {filesystem} from "@shared/bridge";
+import {useStore} from "@/store/app";
+import type {Activity, Artifact, BashArtifact, MediaArtifact} from "@jules";
+import {ChangeSetSummary} from "@/components/workspace/changeset-summary.tsx";
+import {TerminalConsole} from "./terminal-console.tsx";
+
+type ChangeSetArtifact = Extract<Artifact, { type: 'changeSet' }>;
 
 interface MediaItemProps {
     media: MediaArtifact;
@@ -20,7 +22,7 @@ export const MediaItemDownloader = memo(function MediaItemDownloader({ media, ac
             setDownloadState("saving");
             const ext = media.format.split("/").pop() ?? "bin";
             const defaultName = `jules_media_${activityId}_${index}.${ext}`;
-            
+
             let success = false;
             if (filesystem) {
                 const savePath = await filesystem.showSaveDialog(defaultName);

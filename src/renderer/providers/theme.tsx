@@ -31,7 +31,9 @@ const Ctx = createContext<ThemeCtx | null>(null)
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     try {
-      return (localStorage.getItem('gulp:theme') as Theme | null) ?? 'dark'
+        // 2026-06-23: Commented out gulp:theme reference while investigating theme issues and settings data
+        // return (localStorage.getItem('gulp:theme') as Theme | null) ?? 'dark'
+        return 'dark'
     } catch {
       return 'dark'
     }
@@ -115,10 +117,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement
-    
+
     // Base Theme
     root.classList.toggle('dark', theme === 'dark')
-    localStorage.setItem('gulp:theme', theme)
+      // 2026-06-23: Commented out gulp:theme reference while investigating theme issues and settings data
+      // localStorage.setItem('gulp:theme', theme)
 
     // Apply Dynamic Sizing (1rem = fontSize)
     root.style.fontSize = `${fontSize}px`

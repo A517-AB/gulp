@@ -1,7 +1,8 @@
 import * as ContextMenu from '@radix-ui/react-context-menu'
 import type { ReactNode } from 'react'
 import { Archive, Play } from 'lucide-react'
-import type { SessionResource } from '@google/jules-sdk/types'
+import type {SessionResource} from '@jules'
+import {jules} from '@jules'
 import { useStore } from '@/store/app'
 
 const QUICK_REVIEW_PROMPT =
@@ -15,7 +16,6 @@ interface Props {
 const itemCls = "flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[11px] font-mono text-fg-secondary outline-none cursor-pointer select-none data-[highlighted]:bg-hover data-[highlighted]:text-fg-primary transition-colors"
 
 export function SessionContextMenu({ session, children }: Props) {
-    const sendMessage = useStore(s => s.sendMessage)
     const archiveSessions = useStore(s => s.archiveSessions)
 
     const isActive = session.state === 'inProgress' || session.state === 'planning'
@@ -30,7 +30,9 @@ export function SessionContextMenu({ session, children }: Props) {
                     {isActive && (
                         <ContextMenu.Item
                             className={itemCls}
-                            onSelect={() => { void sendMessage(session.id, QUICK_REVIEW_PROMPT) }}
+                            onSelect={() => {
+                                void jules.session(session.id).send(QUICK_REVIEW_PROMPT)
+                            }}
                         >
                             <Play className="h-3 w-3 shrink-0" />
                             Code review
@@ -41,7 +43,9 @@ export function SessionContextMenu({ session, children }: Props) {
 
                     <ContextMenu.Item
                         className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[11px] font-mono text-red-400 outline-none cursor-pointer select-none data-[highlighted]:bg-red-500/10 data-[highlighted]:text-red-300 transition-colors"
-                        onSelect={() => { void archiveSessions([session.id]) }}
+                        onSelect={() => {
+                            archiveSessions(session.id)
+                        }}
                     >
                         <Archive className="h-3 w-3 shrink-0" />
                         Archive

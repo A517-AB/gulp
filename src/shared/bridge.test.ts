@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import {afterEach, describe, expect, it, vi} from "vitest";
 import type * as BridgeModuleNS from "./bridge";
 
 type BridgeModule = typeof BridgeModuleNS;
@@ -46,14 +46,12 @@ describe("bridge", () => {
     const notes = { get: vi.fn() };
     const snippets = { get: vi.fn() };
     const terminal = { start: vi.fn() };
-    const queues = { getTasks: vi.fn() };
     const power = { onSuspend: vi.fn() };
     const popup = { show: vi.fn() };
 
     const bridge = await importBridgeModule({
       electron: {
         terminal,
-        queues,
         window: windowControls,
         power,
         popup,
@@ -73,7 +71,6 @@ describe("bridge", () => {
     expect(bridge.notes).toBe(notes);
     expect(bridge.snippets).toBe(snippets);
     expect(bridge.terminal).toBe(terminal);
-    expect(bridge.queues).toBe(queues);
     expect(bridge.power).toBe(power);
     expect(bridge.popup).toBe(popup);
   });

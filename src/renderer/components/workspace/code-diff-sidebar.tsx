@@ -1,22 +1,48 @@
-import {useMemo} from "react";
+import {useMemo, useState, useEffect} from "react";
 import {FileCode} from "lucide-react";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {DiffViewer} from "@/ui/diff-viewer.tsx";
-import {MediaItemDownloader} from "@/components/workspace/activity/activity-artifacts.tsx";
-import type {ChangeSetArtifact, MediaArtifact} from "@jules";
-import {useStore} from "@/store/app.ts";
+import {MediaItemDownloader} from "@/components/workspace/activity";
+import type {Artifact, MediaArtifact, Activity} from "@jules";
+import {jules} from "@jules";
 import {filesystem} from "@shared/bridge";
+
+type ChangeSetArtifact = Extract<Artifact, { type: 'changeSet' }>;
 
 interface CodeDiffSidebarProps {
     sessionId: string;
     repoUrl?: string;
 }
 
-const EMPTY_ACTIVITIES: never[] = [];
+type GeneratedFile = { path: string; content: string };
 
 export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
-    const activities = useStore(s => s.activities[sessionId] ?? EMPTY_ACTIVITIES);
-    const sessionSnapshot = useStore(s => s.sessionSnapshot);
+    const [activities, setActivities] = useState<Activity[]>([]);
+
+    useEffect(() => {
+        const controller = new AbortController();
+        const {signal} = controller;
+
+        void (async () => {
+            try {
+                const sessionClient = jules.session(sessionId);
+                const cached = await sessionClient.activities.select();
+                if (signal.aborted) return;
+                setActivities(cached);
+
+                for await (const act of sessionClient.activities.updates()) {
+                    if (signal.aborted) return;
+                    setActivities(prev => prev.some(a => a.id === act.id) ? prev : [...prev, act]);
+                }
+            } catch {
+                // sidebar — swallow errors silently
+            }
+        })();
+
+        return () => {
+            controller.abort();
+        };
+    }, [sessionId]);
     const finalDiff = useMemo(() => activities
         .flatMap(a => {
             const cs = (a as {artifacts?: unknown[]}).artifacts?.find((art): art is ChangeSetArtifact => (art as {type?: string}).type === 'changeSet');
@@ -30,10 +56,13 @@ export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
             .map((media, i) => ({ media, activityId: a.id, index: i }))
     ), [activities]);
 
+    const sessionSnapshot = async (_sessionId: string): Promise<{ generatedFiles: GeneratedFile[] }> =>
+        ({generatedFiles: []});
+
     const handleDownloadFile = async (filename: string) => {
         try {
             const snapshot = await sessionSnapshot(sessionId);
-            const matchedFile = snapshot.generatedFiles.find(f => f.path === filename);
+            const matchedFile = snapshot.generatedFiles.find((f: GeneratedFile) => f.path === filename);
 
             if (!matchedFile) {
                 throw new Error(`Full content for ${filename} was not found in the session snapshot`);

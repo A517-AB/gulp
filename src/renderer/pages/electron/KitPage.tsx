@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { DynamicDropdown } from '@/components/shared/DynamicDropdown'
-import { TerminalConsole } from '@/components/workspace/activity/terminal-console'
+import {DynamicDropdown} from '@/ui/dynamic-dropdown'
+import {TerminalConsole} from '@/components/workspace/activity'
 import { Folder, GitBranch, Zap } from 'lucide-react'
 import { Button } from '@/ui/button'
 import { Badge } from '@/ui/badge'

@@ -16,10 +16,11 @@ export const TerminalConsole = memo(
         const handleCopy = async () => {
             const cleanText = bashOutputs
                 .map((bash) => {
-                    return [`$ ${bash.command}`, bash.stdout, bash.stderr]
-                        .filter(Boolean)
-                        .join("\n")
-                        .trim();
+                    const output = [bash.stdout, bash.stderr].filter(Boolean).join('');
+                    const commandLine = `$ ${bash.command}`;
+                    const outputLine = output ? `${output}\n` : '';
+                    const exitLine = `[exit code: ${bash.exitCode ?? 'N/A'}]`;
+                    return `${commandLine}\n${outputLine}${exitLine}`;
                 })
                 .join("\n\n");
             await navigator.clipboard.writeText(cleanText);

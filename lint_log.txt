@@ -2,3 +2,141 @@
 > last@1.0 lint
 > eslint .
 
+
+D:\LAST\electron\github.ts
+  9:23  error  Use the `RegExp#exec()` method instead  @typescript-eslint/prefer-regexp-exec
+
+D:\LAST\electron\ipc\jules-git.ts
+   53:36  error  ["BASE_BRANCH"] is better written in dot notation   @typescript-eslint/dot-notation
+   54:33  error  ["GITHUB_REPO"] is better written in dot notation   @typescript-eslint/dot-notation
+   70:31  error  ["GITHUB_TOKEN"] is better written in dot notation  @typescript-eslint/dot-notation
+  102:82  error  Async arrow function has no 'await' expression      @typescript-eslint/require-await
+
+D:\LAST\electron\main.mts
+  254:113  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+D:\LAST\maybe\jules-api.ts
+  0:0  error  Parsing error: D:\LAST\maybe\jules-api.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\server.ts
+  0:0  error  Parsing error: D:\LAST\server.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\src\notification\Welcome.tsx
+  20:11  error  Unnecessary conditional, value is always truthy  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\overview\OverviewPage.tsx
+  20:68  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+D:\LAST\src\renderer\components\ship\JulesSection.tsx
+  155:31  error  Unsafe assignment of an error typed value                    @typescript-eslint/no-unsafe-assignment
+  155:47  error  Unsafe call of a type that could not be resolved             @typescript-eslint/no-unsafe-call
+  155:61  error  Unsafe member access .has on a type that cannot be resolved  @typescript-eslint/no-unsafe-member-access
+
+D:\LAST\src\renderer\components\ship\RepoCommandPalette.tsx
+  48:8  warning  React Hook useEffect has a missing dependency: 'setOpen'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  58:8  warning  React Hook useEffect has a missing dependency: 'setOpen'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\LAST\src\renderer\components\ship\SourceRow.tsx
+  29:22  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  29:39  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  43:21  error  Unnecessary conditional, value is always truthy                                                     @typescript-eslint/no-unnecessary-condition
+  46:17  error  Unnecessary conditional, value is always truthy                                                     @typescript-eslint/no-unnecessary-condition
+  56:32  error  Unnecessary conditional, value is always falsy                                                      @typescript-eslint/no-unnecessary-condition
+  58:28  error  Unnecessary conditional, value is always falsy                                                      @typescript-eslint/no-unnecessary-condition
+  60:21  error  Unnecessary conditional, value is always truthy                                                     @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\activity\activity-feed.tsx
+  32:21  error  Unnecessary conditional, value is always falsy  @typescript-eslint/no-unnecessary-condition
+  35:25  error  Unnecessary conditional, value is always falsy  @typescript-eslint/no-unnecessary-condition
+  42:21  error  Unnecessary conditional, value is always falsy  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\activity\grouped-activity.tsx
+  25:53  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  25:78  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\activity\single-activity.tsx
+   74:26  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   79:26  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  111:28  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  112:27  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  137:72  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\code-diff-sidebar.tsx
+  18:6    error  Use an `interface` instead of a `type`                            @typescript-eslint/consistent-type-definitions
+  35:102  error  Async arrow function 'sessionSnapshot' has no 'await' expression  @typescript-eslint/require-await
+
+D:\LAST\src\renderer\components\workspace\new-session-dialog.tsx
+   88:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\components\workspace\new-session-dialog.tsx:88:9
+  86 |     useEffect(() => {
+  87 |         if (!open) return;
+> 88 |         setGithub(initialValues?.source?.github ?? "");
+     |         ^^^^^^^^^ Avoid calling setState() directly within an effect
+  89 |         setBranch(initialValues?.source?.branch ?? "");
+  90 |         setTitle(initialValues?.title ?? "");
+  91 |         setPrompt(initialValues?.prompt ?? "");  react-hooks/set-state-in-effect
+  112:54  error  `FormEvent` is deprecated. FormEvent doesn't actually exist.
+You probably meant to use {@link ChangeEvent}, {@link InputEvent}, {@link SubmitEvent}, or just {@link SyntheticEvent} instead
+depending on the event type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-deprecated
+  125:32  error  Unnecessary optional chain on a non-nullish value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\session-list.tsx
+  29:26   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  29:34   error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  31:29   error  Unnecessary conditional, value is always truthy                                                     @typescript-eslint/no-unnecessary-condition
+  32:21   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  77:58   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  81:57   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  90:66   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  90:74   error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  92:57   error  Unnecessary conditional, value is always falsy                                                      @typescript-eslint/no-unnecessary-condition
+  96:167  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  96:203  error  ["unspecified"] is better written in dot notation                                                   @typescript-eslint/dot-notation
+
+D:\LAST\src\renderer\components\workspace\session-status.ts
+  60:39  error  "queued" | "planning" | "inProgress" | "awaitingPlanApproval" | "awaitingUserFeedback" | "paused" | "unspecified" | "failed" | "completed" is overridden by string in this union type  @typescript-eslint/no-redundant-type-constituents
+
+D:\LAST\src\renderer\hooks\jules-git\context.tsx
+  11:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\LAST\src\renderer\library\command-palette\CommandPalette.tsx
+   65:13  error  Forbidden non-null assertion                                                                                                    @typescript-eslint/no-non-null-assertion
+  127:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  129:24  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\src\renderer\pages\electron\FileEditor.tsx
+  24:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\LAST\src\renderer\pages\electron\KitPage.tsx
+   45:18  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  331:64  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\src\renderer\pages\electron\QueuesPage.tsx
+  299:15  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  367:28  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\pages\shared\JulesPage.tsx
+  91:61  error  Unnecessary conditional, value is always truthy    @typescript-eslint/no-unnecessary-condition
+  91:87  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\utils\git-patch.ts
+   52:40  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+   92:40  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  100:27  error  Forbidden non-null assertion                       @typescript-eslint/no-non-null-assertion
+
+D:\LAST\untitled.ts
+  0:0  error  Parsing error: D:\LAST\untitled.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\vite.config.ts
+  25:33  error  ["JULES_API_KEY"] is better written in dot notation  @typescript-eslint/dot-notation
+
+✖ 65 problems (63 errors, 2 warnings)
+  10 errors and 0 warnings potentially fixable with the `--fix` option.
+

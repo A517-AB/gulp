@@ -1,19 +1,17 @@
-export { ActivityFeed } from "./activity-feed.tsx";
-export { ActivityItem } from "./activity-item.tsx";
+export {ActivityFeed} from './activity-feed.tsx';
+export {TerminalConsole} from './terminal-console.tsx';
+export {MediaItemDownloader} from './activity-artifacts.tsx';
 
 export type {
     ActivityFeedProps,
-    ActivityItemProps,
     SingleActivityProps,
     TerminalConsoleProps,
     ActivityArtifactsProps,
     MediaItemGroupedProps,
+    ActivityType,
     Activity,
     SessionResource,
     BashArtifact,
-    ChangeSetArtifact,
+    Artifact,
     MediaArtifact,
-    ActivityGroup,
-    ActivityRole,
-    ActivityType,
-} from "./types";
+} from './types';

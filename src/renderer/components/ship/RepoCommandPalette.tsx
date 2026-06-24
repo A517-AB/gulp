@@ -12,10 +12,18 @@ interface RepoCommandPaletteProps {
     items: RepoPaletteItem[];
     value: string;
     onChange: (id: string) => void;
+    open?: boolean;
+    onClose?: () => void;
 }
 
-export function RepoCommandPalette({items, value, onChange}: RepoCommandPaletteProps) {
-    const [open, setOpen] = useState(false);
+export function RepoCommandPalette({items, value, onChange, open: controlledOpen, onClose}: RepoCommandPaletteProps) {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const open = controlledOpen ?? internalOpen;
+    const setOpen = (v: boolean | ((prev: boolean) => boolean)) => {
+        const next = typeof v === 'function' ? v(controlledOpen ?? internalOpen) : v;
+        setInternalOpen(next);
+        if (!next) onClose?.();
+    };
     const [query, setQuery] = useState("");
     const [cursor, setCursor] = useState(0);
     const inputRef   = useRef<HTMLInputElement>(null);

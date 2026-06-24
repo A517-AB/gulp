@@ -1,8 +1,7 @@
 import { create } from 'zustand';
-import { sdkIpc } from '@shared/bridge';
+import {jules} from '@jules';
 import type { SessionConfig } from '@jules';
 import type { QuickieContextType, QuickiePreset, QuickieData } from '@/components/quickie/types';
-import { useStore } from './app';
 
 export interface QuickieJob {
   id: string;
@@ -24,11 +23,6 @@ export const useQuickieStore = create<QuickieState>((set) => ({
   jobs: {},
 
   executeQuickie: async (preset, data) => {
-    if (!sdkIpc) {
-      throw new Error('[Quickie] sdkIpc not available');
-    }
-
-    const ipc = sdkIpc;
     const prompt = preset.generatePrompt(data);
     const title = `Quickie: ${preset.label}`;
 
@@ -39,7 +33,8 @@ export const useQuickieStore = create<QuickieState>((set) => ({
       (config as unknown as Record<string, unknown>)['source'] = { github: repoData.repo, baseBranch: repoData.branch };
     }
 
-    const { id } = await ipc.client.run(config);
+      const run = await jules.run(config);
+      const id = run.id;
 
     set((s) => ({
       jobs: {
@@ -48,40 +43,24 @@ export const useQuickieStore = create<QuickieState>((set) => ({
       }
     }));
 
-    await useStore.getState().loadSessions();
-
-    const resultPromise = new Promise<string>((resolve, reject) => {
-      ipc.session.waitFor(id, 'completed')
-        .then(async () => {
-          let summary = `${preset.label} finished successfully.`;
-          try {
-            const res = await ipc.session.result(id) as Record<string, unknown>;
-            if (typeof res['summary'] === 'string') summary = res['summary'];
-          } catch (e) {
-            console.warn('[Quickie] Failed to get session result summary', e);
-          }
-
-          set((s) => {
-            const job = s.jobs[id];
-            if (!job) return s;
-            return {
-              jobs: { ...s.jobs, [id]: { ...job, status: 'completed', resultSummary: summary } }
-            };
+      const resultPromise = run.result()
+          .then(() => {
+              const summary = `${preset.label} finished successfully.`;
+              set((s) => {
+                  const job = s.jobs[id];
+                  if (!job) return s;
+                  return {jobs: {...s.jobs, [id]: {...job, status: 'completed', resultSummary: summary}}};
+              });
+              return summary;
+          })
+          .catch((err: unknown) => {
+              set((s) => {
+                  const job = s.jobs[id];
+                  if (!job) return s;
+                  return {jobs: {...s.jobs, [id]: {...job, status: 'failed'}}};
+              });
+              throw err instanceof Error ? err : new Error(String(err));
           });
-
-          resolve(summary);
-        })
-        .catch((err: unknown) => {
-          set((s) => {
-            const job = s.jobs[id];
-            if (!job) return s;
-            return {
-              jobs: { ...s.jobs, [id]: { ...job, status: 'failed' } }
-            };
-          });
-          reject(err instanceof Error ? err : new Error(String(err)));
-        });
-    });
 
     return { id, resultPromise };
   }

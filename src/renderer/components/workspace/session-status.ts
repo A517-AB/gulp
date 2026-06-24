@@ -1,6 +1,13 @@
-import type {SessionStatus, SessionStatusInfo} from '@jules'
+import type {SessionState} from '@jules'
 
-export const STATE_COLOR: Record<SessionStatus, string> = {
+export interface SessionStateInfo {
+    color: string;
+    bgColor: string;
+    label: string;
+    icon: string;
+}
+
+export const STATE_COLOR: Partial<Record<string, string>> = {
     unspecified: "bg-zinc-500/15 text-zinc-400",
     queued: "bg-zinc-500/15 text-zinc-400",
     planning: "bg-blue-500/15 text-blue-400",
@@ -12,7 +19,7 @@ export const STATE_COLOR: Record<SessionStatus, string> = {
     failed: "bg-red-500/15 text-red-400",
 }
 
-export const STATE_DOT: Record<SessionStatus, string> = {
+export const STATE_DOT: Partial<Record<string, string>> = {
     unspecified: "bg-zinc-400",
     queued: "bg-zinc-400",
     planning: "bg-blue-400 animate-pulse",
@@ -24,7 +31,7 @@ export const STATE_DOT: Record<SessionStatus, string> = {
     failed: "bg-red-500",
 }
 
-export const STATE_BADGE: Record<SessionStatus, string> = {
+export const STATE_BADGE: Record<SessionState, string> = {
     unspecified: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
     queued: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
     planning: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -36,19 +43,22 @@ export const STATE_BADGE: Record<SessionStatus, string> = {
     failed: "bg-red-500/10 text-red-400 border-red-500/20",
 }
 
-export function getStatusInfo(status: SessionStatus): SessionStatusInfo {
-  const map: Record<SessionStatus, SessionStatusInfo> = {
-      unspecified: {color: "text-zinc-400", bgColor: "bg-zinc-500/15", label: "Unknown", icon: "○"},
-      queued: {color: "text-zinc-400", bgColor: "bg-zinc-500/15", label: "Queued", icon: "○"},
-      planning: {color: "text-blue-400", bgColor: "bg-blue-500/15", label: "Planning", icon: "◎"},
-      awaitingPlanApproval: {color: "text-yellow-400", bgColor: "bg-yellow-500/15", label: "Approval", icon: "?"},
-      awaitingUserFeedback: {color: "text-orange-400", bgColor: "bg-orange-500/15", label: "Feedback", icon: "…"},
-      inProgress: {color: "text-cyan-400", bgColor: "bg-cyan-500/15", label: "Active", icon: "●"},
-      paused: {color: "text-zinc-400", bgColor: "bg-zinc-500/15", label: "Paused", icon: "⏸"},
-      completed: {color: "text-emerald-400", bgColor: "bg-emerald-500/15", label: "Completed", icon: "✓"},
-      failed: {color: "text-red-400", bgColor: "bg-red-500/15", label: "Failed", icon: "✕"},
-  }
-  return map[status]
+const STATUS_INFO: Partial<Record<string, SessionStateInfo>> = {
+    unspecified: {color: "text-zinc-400", bgColor: "bg-zinc-500/15", label: "Unknown", icon: "○"},
+    queued: {color: "text-zinc-400", bgColor: "bg-zinc-500/15", label: "Queued", icon: "○"},
+    planning: {color: "text-blue-400", bgColor: "bg-blue-500/15", label: "Planning", icon: "◎"},
+    awaitingPlanApproval: {color: "text-yellow-400", bgColor: "bg-yellow-500/15", label: "Approval", icon: "?"},
+    awaitingUserFeedback: {color: "text-orange-400", bgColor: "bg-orange-500/15", label: "Feedback", icon: "…"},
+    inProgress: {color: "text-cyan-400", bgColor: "bg-cyan-500/15", label: "Active", icon: "●"},
+    paused: {color: "text-zinc-400", bgColor: "bg-zinc-500/15", label: "Paused", icon: "⏸"},
+    completed: {color: "text-emerald-400", bgColor: "bg-emerald-500/15", label: "Completed", icon: "✓"},
+    failed: {color: "text-red-400", bgColor: "bg-red-500/15", label: "Failed", icon: "✕"},
+}
+
+const FALLBACK: SessionStateInfo = {color: "text-zinc-400", bgColor: "bg-zinc-500/15", label: "Unknown", icon: "○"}
+
+export function getStatusInfo(status: SessionState | string): SessionStateInfo {
+    return STATUS_INFO[status] ?? FALLBACK
 }
 
 export function getSessionDuration(createdAt: string): number {

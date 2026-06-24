@@ -1,22 +1,34 @@
-import {useState} from "react";
-import {ActivityFeed} from "@/components/workspace/activity";
-import {SessionList} from "@/components/workspace/session-list.tsx";
-import {CodeDiffSidebar} from "@/components/workspace/code-diff-sidebar.tsx";
-import {NewSessionDialog} from "@/components/workspace/new-session-dialog.tsx";
+import {useState, useEffect} from "react";
+import {ActivityFeed, SessionList, CodeDiffSidebar, NewSessionDialog, FlyingJules} from "@/components/workspace";
 import {useResizable} from "@renderer/hooks/use-resizable";
-import {useStore} from "@/store/app.ts";
-import {FlyingJules} from "@/components/workspace/flying-jules.tsx";
-import type {SessionResource as Session} from "@google/jules-sdk/types";
+import {jules} from "@jules";
+import type {SessionResource} from "@jules";
+
 
 export default function JulesPage() {
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+    const [selectedSession, setSelectedSession] = useState<SessionResource | null>(null);
+    const [sessionList, setSessionList] = useState<SessionResource[]>([]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showCodeDiffs, setShowCodeDiffs] = useState(false);
   const [codeDiffCollapsed, setCodeDiffCollapsed] = useState(false);
   const [newSessionOpen, setNewSessionOpen] = useState(false);
 
   const { width: diffWidth, isResizing, handleProps: resizeHandleProps } = useResizable({ defaultWidth: 600 });
-  const sessionList = useStore(s => s.sessionList);
+
+    useEffect(() => {
+        void (async () => {
+            try {
+                const sessions: SessionResource[] = [];
+                for await (const s of jules.sessions({pageSize: 20})) {
+                    sessions.push(s);
+                }
+                setSessionList(sessions);
+            } catch {
+                // leave empty
+            }
+        })();
+    }, []);
+
   const liveSelectedSession = selectedSession
     ? (sessionList.find(s => s.id === selectedSession.id) ?? selectedSession)
     : null;
@@ -30,7 +42,8 @@ export default function JulesPage() {
           </button>
         </div>
         {!sidebarCollapsed && (
-          <SessionList onSelectSession={setSelectedSession} {...(selectedSession ? { selectedSessionId: selectedSession.id } : {})} />
+            <SessionList sessions={sessionList}
+                         onSelectSession={setSelectedSession} {...(selectedSession ? {selectedSessionId: selectedSession.id} : {})} />
         )}
       </aside>
 
@@ -83,7 +96,7 @@ export default function JulesPage() {
         </>
       )}
 
-      <NewSessionDialog open={newSessionOpen} onOpenChange={setNewSessionOpen} />
+        <NewSessionDialog open={newSessionOpen} onOpenChange={setNewSessionOpen}/>
     </div>
   );
 }

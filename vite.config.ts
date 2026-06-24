@@ -28,18 +28,23 @@ export default defineConfig({
   clearScreen: false,
   define: {
     'import.meta.env.JULES_API_KEY': JSON.stringify(julesApiKey),
+      'process.env.JULES_API_KEY': JSON.stringify(julesApiKey),
   },
   resolve: {
     tsconfigPaths: true,
     alias: [
-      { find: 'modjules/browser', replacement: 'D:/jules rest/modjules-main/packages/core/dist/browser.mjs' },
-      { find: 'modjules',         replacement: 'D:/jules rest/modjules-main/packages/core/dist/index.mjs' },
-      { find: 'react',            replacement: resolve(__dirname, 'node_modules/react') },
+        // DO NOT. TOUCH. unless......
+        // modjules aliases — compiled dist from D:/jules rest/modjules-main/packages/core/dist/ do not touch this.
+        // browser.mjs = browser entry (BrowserPlatform + IndexedDB), index.mjs = Node entry
+        // 2026-06-22: crossed out — switching to second port bun; restore when that's ready
+        {find: '@jules', replacement: 'D:/jules rest/modjules-main/packages/core/dist/browser.mjs'},
+        {find: 'react', replacement: resolve(__dirname, 'node_modules/react')},
       { find: 'react-dom',   replacement: resolve(__dirname, 'node_modules/react-dom') },
-      { find: '@syncfusion/ej2-gantt',            replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist/es6/ej2-gantt.es5.js' },
-      { find: '@syncfusion/ej2-react-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist/es6/ej2-react-gantt.es5.js' },
-      { find: '@syncfusion/ej2-pdfviewer',         replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/dist/es6/ej2-pdfviewer.es5.js' },
-      { find: /^@syncfusion\/(.+)$/, replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/$1' },
+        // 2026-06-22: For later, not for dev
+        // { find: '@syncfusion/ej2-gantt',            replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist/es6/ej2-gantt.es5.js' },
+        // { find: '@syncfusion/ej2-react-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist/es6/ej2-react-gantt.es5.js' },
+        // { find: '@syncfusion/ej2-pdfviewer',         replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/dist/es6/ej2-pdfviewer.es5.js' },
+        // { find: /^@syncfusion\/(.+)$/, replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/$1' },
     ],
   },
   server: {
@@ -86,7 +91,8 @@ export default defineConfig({
           if (id.includes('node_modules/react')) return 'vendor-react'
           if (id.includes('monaco-editor') || id.includes('@monaco-editor')) return 'vendor-monaco'
           if (id.includes('@blocknote')) return 'vendor-blocknote'
-          if (id.includes('@syncfusion') || id.includes('ej2-gantt') || id.includes('ej2-pdfviewer')) return 'vendor-ej2'
+            // 2026-06-22: For later, not for dev
+            // if (id.includes('@syncfusion') || id.includes('ej2-gantt') || id.includes('ej2-pdfviewer')) return 'vendor-ej2'
           return undefined
         },
       },
@@ -113,7 +119,7 @@ export default defineConfig({
                 input: {
                   main:           'electron/main.mts',
                   'notif-main':   'electron/main-notif.mts',
-                  'jules-worker': 'electron/jules-worker.ts',
+                    // 'jules-worker': 'electron/jules-worker.ts', // Jules worker removed — renderer handles SDK directly
                 },
                 output: {
                   entryFileNames: '[name].mjs',

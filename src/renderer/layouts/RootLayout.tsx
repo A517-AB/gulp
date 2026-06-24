@@ -5,7 +5,6 @@ import { KBarProvider } from 'kbar'
 import { TopBar } from '@renderer/shell/TopBar'
 import { ThemeProvider } from '@renderer/providers/theme'
 import { mainNavRoutes, secretNavRoutes } from '@renderer/router'
-import { useAppSync } from '@/hooks/use-app-sync'
 import { Popover, PopoverContent, PopoverTrigger } from '@renderer/ui/popover'
 import { CommandPalette, CommandPaletteActions } from '@renderer/library/command-palette'
 
@@ -42,7 +41,6 @@ function SecretButton() {
 }
 
 export default function RootLayout(): ReactNode {
-    useAppSync()
     const navigate = useNavigate()
     const [topbarVisible, setTopbarVisible] = useState(() => localStorage.getItem('topbar-visible') !== 'false')
 

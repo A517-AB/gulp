@@ -22,6 +22,7 @@ import { registerUINotificationHandlers, prewarmNotificationWindow, registerSche
 // Jules events w@jorker removed — moving to renderer-side SDK
 // import { startJulesWorker, registerJulesEventsHandlers } from "./jules-events";
 import { registerStoreHandlers } from "./store";
+import {registerJulesGitHandlers} from "./ipc/jules-git";
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -191,6 +192,9 @@ void app.whenReady().then(() => {
   registerStoreHandlers();
   t("registerStoreHandlers done");
 
+    registerJulesGitHandlers();
+    t("registerJulesGitHandlers done");
+
   createWindow();
   t("createWindow done");
 
@@ -247,7 +251,7 @@ ipcMain.handle("ipc.artifact.save", async (_, base64Patch: string, savePath: str
   return { success: true };
 });
 
-ipcMain.handle("ipc.session.applyPatch", async (_, sessionId: string, options: { cwd: string; patch: string }) => {
+ipcMain.handle("ipc.session.applyPatch", async (_, _sessionId: string, options: { cwd: string; patch: string }) => {
   const branchName = `jules-patch-${String(Date.now())}`;
   let patchPath: string | null = null;
   try {

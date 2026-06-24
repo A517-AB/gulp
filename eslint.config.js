@@ -9,11 +9,17 @@ export default defineConfig([
   globalIgnores([
     'dist',
     'dist-electron',
+      'dist-jules/**',
+      'dist-server/**',
     'references/**',
     'scripts/**',
     'primitives/**',
     'check.ts',
     'scratch/**',
+      'research/**',
+      'reports/**',
+      'public/**',
+      'src/jules/**',
     // excluded from tsconfig — Jules example files not part of this project
     'src/electron/ipc/advanced-workspace.ts',
     'src/electron/ipc/agent.ts',
@@ -74,7 +80,12 @@ export default defineConfig([
           {
             name: '@google/jules-sdk',
             message: 'Do not import from @google/jules-sdk in the renderer. It is Node-only and will crash. Use types from @google/jules-sdk/types or the Zustand store.',
-          }
+          },
+            {
+                name: '@/lib/jules',
+                importNames: ['julesHttp'],
+                message: 'julesHttp is exposed via the root route loader — remove this import.  Run scripts/lookup-type.ts if you need a type. ifg you are here becauise you placed this then ask me cause you fucked up',
+            },
         ],
       }],
     },
@@ -106,6 +117,7 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/only-throw-error': 'off',
       'react-refresh/only-export-components': 'off',
+        'no-restricted-imports': 'off',
     },
   },
   {

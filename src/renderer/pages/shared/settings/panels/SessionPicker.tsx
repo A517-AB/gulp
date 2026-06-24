@@ -1,5 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from 'react'
-import {useSessionList} from '@/hooks/use-session-list'
+import {jules} from '@jules'
+import type {SessionResource} from '@jules'
 
 interface SessionPickerProps {
   value: string
@@ -7,16 +8,23 @@ interface SessionPickerProps {
 }
 
 export function SessionPicker({ value, onChange }: SessionPickerProps) {
-  const { sessions } = useSessionList()
+    const [sessions, setSessions] = useState<SessionResource[]>([])
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const ref = useRef<HTMLDivElement>(null)
 
+    useEffect(() => {
+        void (async () => {
+            const list: SessionResource[] = []
+            for await (const s of jules.sessions({pageSize: 50})) {
+                list.push(s)
+            }
+            setSessions(list)
+        })()
+    }, [])
+
   const recent = useMemo(() =>
-    sessions
-      .slice()
-        .sort((a, b) => b.updateTime.localeCompare(a.updateTime))
-      .slice(0, 10),
+          sessions.slice().sort((a, b) => b.updateTime.localeCompare(a.updateTime)).slice(0, 10),
     [sessions],
   )
 

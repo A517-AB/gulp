@@ -226,6 +226,14 @@ const git: ElectronAPI["git"] = {
     init: (cwd) => ipcRenderer.invoke("git.init", cwd),
 }
 
+// ── github ─────────────────────────────────────────────────────────────────────
+
+const github: ElectronAPI["github"] = {
+    listBranches: (owner, repo) => ipcRenderer.invoke("github.listBranches", owner, repo),
+    listRepos: (sort, per_page) => ipcRenderer.invoke("github.listRepos", sort, per_page),
+    getUser: () => ipcRenderer.invoke("github.getUser"),
+}
+
 // ── notifLog ───────────────────────────────────────────────────────────────────
 
 const notifLog: ElectronAPI["notifLog"] = {
@@ -243,17 +251,41 @@ const store: ElectronAPI["store"] = {
   delete: (key)        => ipcRenderer.invoke("store:delete", key),
 }
 
-// Date: 2026-06-23
-// Why: Requires node-level filesystem access ('fs') and shell execution ('git' commands).
-// For: Saving base64 patches to files and executing git apply/commit tasks.
 const ipc = {
-  artifact: {
-    save: (base64Patch: string, savePath: string) => ipcRenderer.invoke("ipc.artifact.save", base64Patch, savePath),
-  },
-  session: {
-    applyPatch: (sessionId: string, options: { cwd: string; patch: string }) => ipcRenderer.invoke("ipc.session.applyPatch", sessionId, options),
-  }
+    artifact: {
+        save: (data: string, filepath: string) => ipcRenderer.invoke('jules.artifact.save', data, filepath),
+    },
+    session: {
+        applyPatch: (_sessionId: string, options: { cwd: string; patch: string }) =>
+            ipcRenderer.invoke('jules.git.applyPatch', options.cwd, options.patch)
+                .then((r: { ok: boolean; branch?: string; error?: string }) => ({
+                    success: r.ok,
+                    ...(r.branch !== undefined ? {branch: r.branch} : {}),
+                    ...(r.error !== undefined ? {error: r.error} : {}),
+                })),
+    },
 };
+
+// ── jules ──────────────────────────────────────────────────────────────────────
+
+const jules = {
+    git: {
+        resolveSource: (cwd: string) => ipcRenderer.invoke('jules.git.resolveSource', cwd),
+        applyPatch: (cwd: string, patch: string) => ipcRenderer.invoke('jules.git.applyPatch', cwd, patch),
+        parseUnidiff: (patch: string) => ipcRenderer.invoke('jules.git.parseUnidiff', patch),
+    },
+    github: {
+        getPr: (owner: string, repo: string, number: number) => ipcRenderer.invoke('jules.github.getPr', owner, repo, number),
+        getChecks: (owner: string, repo: string, ref: string) => ipcRenderer.invoke('jules.github.getChecks', owner, repo, ref),
+        mergePr: (owner: string, repo: string, number: number, method?: 'merge' | 'squash' | 'rebase') => ipcRenderer.invoke('jules.github.mergePr', owner, repo, number, method),
+        parsePrUrl: (url: string) => ipcRenderer.invoke('jules.github.parsePrUrl', url),
+    },
+    artifact: {
+        save: (data: string, filepath: string) => ipcRenderer.invoke('jules.artifact.save', data, filepath),
+    },
+}
+
+contextBridge.exposeInMainWorld('jules', jules)
 
 // ── expose ─────────────────────────────────────────────────────────────────────
 
@@ -272,8 +304,10 @@ const api: ElectronAPI = {
   scheduler,
   notifLog,
   git,
+    github,
   store,
   ipc,
 };
 
 contextBridge.exposeInMainWorld("electron", api);
+

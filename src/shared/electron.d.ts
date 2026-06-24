@@ -2,7 +2,6 @@ import type {FileFilter, FsEntry, FsStat, ReaddirOptions} from './filesystem'
 import type {FuseChangeEvent, FuseManifest} from './fuse'
 import type {HistoryEntry} from './history'
 import type {NoteMeta} from './local-data'
-import type {SdkIpc} from '../jules/sdk-ipc'
 
 
 // ── event bus ─────────────────────────────────────────────────────────────────
@@ -66,12 +65,6 @@ export interface TerminalAPI {
   kill:     () => void;
   onOutput: (callback: (data: string) => void) => () => void;
   onExit:   (callback: (exitCode: number, signal?: number) => void) => () => void;
-}
-
-export interface QueuesAPI {
-  getTasks:  (jsonPath?: string) => Promise<unknown[]>;
-  getQueue:  (jsonPath?: string) => Promise<unknown[]>;
-  saveTasks: (data: unknown[], jsonPath?: string) => Promise<boolean>;
 }
 
 export interface WindowAPI {
@@ -271,7 +264,24 @@ export interface StoreAPI {
     delete: (key: string) => Promise<void>
 }
 
+export interface GitHubBranch {
+    name: string;
+    protected: boolean;
+}
+
+export interface GitHubAPI {
+    listBranches: (owner: string, repo: string) => Promise<GitHubBranch[]>;
+    listRepos: (sort?: string, per_page?: number) => Promise<unknown[]>;
+    getUser: () => Promise<unknown>;
+}
+
 // ── root ───────────────────────────────────────────────────────────────────────
+
+export interface QueuesAPI {
+    getTasks: (jsonPath?: string) => Promise<unknown>;
+    getQueue: (jsonPath?: string) => Promise<unknown>;
+    saveTasks: (data: unknown[], jsonPath?: string) => Promise<unknown>;
+}
 
 export interface ElectronAPI {
   terminal:        TerminalAPI;
@@ -288,15 +298,30 @@ export interface ElectronAPI {
   scheduler:       SchedulerAPI;
   notifLog:        NotifLogAPI;
   git:             GitAPI;
-  julesEvents:     JulesEventsAPI;
+    github: GitHubAPI;
   store:           StoreAPI;
-  client:          SdkIpc['client'];
-  session:         SdkIpc['session'];
-  activities:      SdkIpc['activities'];
-  sources:         SdkIpc['sources'];
-  artifact:        SdkIpc['artifact'];
-  util:            SdkIpc['util'];
-  query:           SdkIpc['query'];
+    ipc: {
+        artifact: {
+            save: (base64Patch: string, savePath: string) => Promise<{ success: boolean }>;
+        };
+        session: {
+            applyPatch: (sessionId: string, options: { cwd: string; patch: string }) => Promise<{
+                success: boolean;
+                branch?: string;
+                error?: string
+            }>;
+        };
+    };
+
+    // Removed on 2026-06-22: Jules is its own service, not an Electron tool.
+    // Kept here as a reminder that we MUST NOT bring raw SdkIpc back to the bridge.
+    // client:          SdkIpc['client'];
+    // session:         SdkIpc['session'];
+    // activities:      SdkIpc['activities'];
+    // sources:         SdkIpc['sources'];
+    // artifact:        SdkIpc['artifact'];
+    // util:            SdkIpc['util'];
+    // query:           SdkIpc['query'];
 }
 
 // ── global augments ────────────────────────────────────────────────────────────

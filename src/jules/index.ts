@@ -1,158 +1,115 @@
-// ── SDK types — explicitly re-exported from @google/jules-sdk/types ──────────
+// src/index.ts
+import {JulesClientImpl} from './client.js';
+import {NodeFileStorage, NodeSessionStorage} from './storage/node-fs.js';
+import {NodePlatform} from './platform/node.js';
+import {JulesClient, JulesOptions, StorageFactory} from './types.js';
+import {getRootDir} from './storage/root.js';
 
-import type {
-  // Session
-  SessionState,
-  SessionResource,
-  SessionOutcome,
-  SessionClient,
-  SessionConfig,
-  SessionOutput,
-  SessionSnapshot,
-  SessionInsights,
-  SerializedSnapshot,
-  SnapshotField,
-  ToJSONOptions,
-  TimelineEntry,
-  AutomatedSession,
-  // Activity
-  Activity,
-  ActivityAgentMessaged,
-  ActivityUserMessaged,
-  ActivityPlanGenerated,
-  ActivityPlanApproved,
-  ActivityProgressUpdated,
-  ActivitySessionCompleted,
-  ActivitySessionFailed,
-  ActivitySummary,
-  LightweightActivity,
-  LightweightArtifact,
-  SelectOptions,
-  StreamActivitiesOptions,
-  // Artifacts
-  Artifact,
-  ChangeSetArtifact,
-  BashArtifact,
-  MediaArtifact,
-  StrippedMediaArtifact,
-  ChangeSet,
-  GitPatch,
-  ParsedChangeSet,
-  ParsedFile,
-  GeneratedFile,
-  GeneratedFiles,
-  // Sources
-  Source,
-  SourceContext,
-  SourceInput,
-  SourceManager,
-  ListSourcesOptions,
-  GitHubRepo,
-  // Plan
-  Plan,
-  PlanStep,
-  PullRequest,
-  // Client
-  JulesClient,
-  JulesOptions,
-  AutomationMode,
-  // Query
-  JulesQuery,
-  JulesDomain,
-  QueryResult,
-  // Sync
-  SyncDepth,
-  SyncOptions,
-  SyncProgress,
-  SyncStats,
-} from '@google/jules-sdk/types'
-
-
-
-
-
-
-
-// ── App-level types ───────────────────────────────────────────────────────────
-
-export type {
-  SessionState,
-  SessionResource,
-  SessionOutcome,
-  SessionClient,
-  SessionConfig,
-  SessionOutput,
-  SessionSnapshot,
-  SessionInsights,
-  SerializedSnapshot,
-  SnapshotField,
-  ToJSONOptions,
-  TimelineEntry,
-  AutomatedSession,
-  Activity,
-  ActivityAgentMessaged,
-  ActivityUserMessaged,
-  ActivityPlanGenerated,
-  ActivityPlanApproved,
-  ActivityProgressUpdated,
-  ActivitySessionCompleted,
-  ActivitySessionFailed,
-  ActivitySummary,
-  LightweightActivity,
-  LightweightArtifact,
-  SelectOptions,
-  StreamActivitiesOptions,
-  Artifact,
-  ChangeSetArtifact,
-  BashArtifact,
-  MediaArtifact,
-  StrippedMediaArtifact,
-  ChangeSet,
-  GitPatch,
-  ParsedChangeSet,
-  ParsedFile,
-  GeneratedFile,
-  GeneratedFiles,
-  Source,
-  SourceContext,
-  SourceInput,
-  SourceManager,
-  ListSourcesOptions,
-  GitHubRepo,
-  Plan,
-  PlanStep,
-  PullRequest,
-  JulesClient,
-  JulesOptions,
-  AutomationMode,
-  JulesQuery,
-  JulesDomain,
-  QueryResult,
-  SyncDepth,
-  SyncOptions,
-  SyncProgress,
-  SyncStats,
+// Define defaults for the Node.js environment
+const defaultPlatform = new NodePlatform();
+const defaultStorageFactory: StorageFactory = {
+    activity: (sessionId: string) => new NodeFileStorage(sessionId, getRootDir()),
+    session: () => new NodeSessionStorage(getRootDir()),
 };
 
-// These live in the main entry, not /types
-import type {ListSessionsOptions, ListSessionsResponse, DomainSchema, ValidationResult} from '@google/jules-sdk'
-export type {ListSessionsOptions, ListSessionsResponse, DomainSchema, ValidationResult}
+/**
+ * Connects to the Jules service using Node.js defaults (File System, Native Crypto).
+ * Acts as a factory method for creating a new client instance.
+ *
+ * @param options Configuration options for the client.
+ * @returns A new JulesClient instance.
+ */
+export function connect(options: JulesOptions = {}): JulesClient {
+    return new JulesClientImpl(options, defaultStorageFactory, defaultPlatform);
+}
 
-// ── SdkIpc Interface ──────────────────────────────────────────────────────────
+/**
+ * The main entry point for the Jules SDK.
+ * This is a pre-initialized client that can be used immediately with default settings
+ * (e.g., reading API keys from environment variables).
+ *
+ * @example
+ * import { jules } from 'modjules';
+ * const session = await jules.session({ ... });
+ */
+export const jules: JulesClient = connect();
 
-import type { SdkIpc } from './sdk-ipc'
-export type { SdkIpc }
+// Re-export all the types for convenience
+export * from './errors.js';
+export type {
+  Activity,
+  ActivityAgentMessaged,
+    ActivityPlanApproved,
+  ActivityPlanGenerated,
+  ActivityProgressUpdated,
+    ActivitySummary,
+  ActivitySessionCompleted,
+  ActivitySessionFailed,
+    ActivityUserMessaged,
+    Artifact,
+    AutomatedSession,
+    ChangeSet,
+    GitHubRepo,
+    GitPatch,
+    JulesClient,
+    JulesOptions,
+  LightweightActivity,
+  LightweightArtifact,
+  MediaArtifact,
+    Outcome,
+  ParsedChangeSet,
+  ParsedFile,
+  Plan,
+  PlanStep,
+  PullRequest,
+  SessionClient,
+  SessionConfig,
+  SessionOutput,
+    SessionResource,
+    SessionState,
+  Source,
+  SourceContext,
+  SourceInput,
+  SourceManager,
+    StrippedMediaArtifact,
+  JulesQuery,
+  JulesDomain,
+  SyncDepth,
+} from './types.js';
 
+// Re-export schema and validation for MCP and other consumers
+export {
+    SESSION_SCHEMA,
+    ACTIVITY_SCHEMA,
+    FILTER_OP_SCHEMA,
+    PROJECTION_SCHEMA,
+    getSchema,
+    getAllSchemas,
+    generateTypeDefinition,
+    generateMarkdownDocs,
+} from './query/schema.js';
+export type {FieldMeta, DomainSchema, QueryExample} from './query/schema.js';
+export {validateQuery, formatValidationResult} from './query/validate.js';
+export type {
+    ValidationError,
+    ValidationWarning,
+    ValidationResult,
+    ValidationErrorCode,
+} from './query/validate.js';
 
-// ── Activity ──────────────────────────────────────────────────────────────────
+export {SessionCursor} from './sessions.js';
+export type {ListSessionsOptions, ListSessionsResponse} from './sessions.js';
 
-export type { ActivityType, ActivityRole, ActivityGroup, StreamHandlers } from './activity'
-export { dispatchActivity } from './activity'
+// Activity utilities
+export {toSummary} from './activity/summary.js';
 
-// ── Session ───────────────────────────────────────────────────────────────────
+// Internal exports for @modjules/server package
+export {JulesClientImpl} from './client.js';
+export {MemoryStorage, MemorySessionStorage} from './storage/memory.js';
+export {WebPlatform} from './platform/web.js';
+export {NodePlatform} from './platform/node.js';
+export type {Platform} from './platform/types.js';
+export type {StorageFactory} from './types.js';
 
-export type { SessionStatus, SessionStatusInfo, SessionInitialValues } from './session'
-
-// ── Fleet ─────────────────────────────────────────────────────────────────────
-
-export type { FleetTask, FleetTaskGroup } from './types'
+// Artifact classes with helper methods
+export {ChangeSetArtifact, BashArtifact, parseUnidiff} from './artifacts.js';

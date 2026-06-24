@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import {terminal, filesystem, store} from '@shared/bridge'
 import { useCommands } from '@/store/commands'
-import { useStore } from '@/store/app'
+import {jules} from '@jules'
+import type {Activity, SessionClient} from '@jules'
 import {executeAt, executeDisplay, executeTerminal, executePreview} from '@shared/commands'
 import { CommandInput } from './CommandInput'
 import { BlockDisplay } from './BlockDisplay'
@@ -15,11 +16,28 @@ type PanelMode = 'markdown' | 'terminal' | 'preview'
 export function OverviewPage() {
     const commands = useCommands(s => s.commands)
     const load = useCommands(s => s.load)
-    const sessionSnapshot = useStore(s => s.sessionSnapshot)
-    const hydrateSession = useStore(s => s.hydrateSession)
-    const selectSessionActivities = useStore(s => s.selectSessionActivities)
-    const sendMessage = useStore(s => s.sendMessage)
-    const subscribeActivity = useStore(s => s.subscribeActivity)
+
+    const sessionSnapshot = useCallback(async (_sessionId: string) => ({
+        generatedFiles: [] as {
+            path: string;
+            content: string
+        }[]
+    }), [])
+    const hydrateSession = useCallback((sessionId: string) => jules.session(sessionId).activities.hydrate(), [])
+    const selectSessionActivities = useCallback((sessionId: string, options?: Parameters<SessionClient['select']>[0]) => jules.session(sessionId).activities.select(options), [])
+    const sendMessage = useCallback((sessionId: string, msg: string) => jules.session(sessionId).send(msg), [])
+    const subscribeActivity = useCallback((sessionId: string, cb: (a: Activity) => void) => {
+        const ac = new AbortController()
+        void (async () => {
+            for await (const a of jules.session(sessionId).activities.updates()) {
+                if (ac.signal.aborted) break
+                cb(a)
+            }
+        })()
+        return () => {
+            ac.abort()
+        }
+    }, [])
 
     useEffect(() => {
         void load()

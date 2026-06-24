@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { cn } from "@/utils";
-import type { Activity, BashArtifact, ChangeSetArtifact, MediaArtifact } from "./types";
+import type {Activity, BashArtifact, Artifact, MediaArtifact} from "./types";
 import { TerminalConsole } from "./terminal-console.tsx";
 import { MediaItemDownloader } from "./activity-artifacts.tsx";
 import { ChangeSetSummary } from "@/components/workspace/changeset-summary.tsx";
@@ -21,7 +21,7 @@ function buildUnifiedLines(items: Activity[]): UnifiedLine[] {
         }
         for (const art of a.artifacts) {
             if (art.type === "bashOutput") {
-                const b = art as BashArtifact
+                const b = art
                 lines.push({ kind: "bash", command: b.command ?? "", stdout: b.stdout ?? "", exitCode: b.exitCode ?? null })
             }
         }
@@ -154,11 +154,11 @@ export const GroupedActivity = memo(
             | { type: "text"; list: { title: string; desc: string; time: string }[] }
             | { type: "collapsible"; title: string; desc: string; time: string }
             | { type: "bash"; bashOutputs: BashArtifact[] }
-            | { type: "changeset"; artifact: ChangeSetArtifact }
+            | { type: "changeset"; artifact: Extract<Artifact, { type: 'changeSet' }> }
             | { type: "media"; artifact: MediaArtifact; activityId: string; index: number }
         )[] = [];
 
-        let lastChangeSet: ChangeSetArtifact | null = null;
+        let lastChangeSet: Extract<Artifact, { type: 'changeSet' }> | null = null;
 
         for (const a of item) {
             let title = "";
@@ -190,7 +190,9 @@ export const GroupedActivity = memo(
                 segments.push({ type: "media", artifact: med, activityId: a.id, index: segments.length });
             }
 
-            const cs = [...a.artifacts].reverse().find((art): art is ChangeSetArtifact => art.type === "changeSet");
+            const cs = [...a.artifacts].reverse().find((art): art is Extract<Artifact, {
+                type: 'changeSet'
+            }> => art.type === "changeSet");
             if (cs) lastChangeSet = cs;
         }
 

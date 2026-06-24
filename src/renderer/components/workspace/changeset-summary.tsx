@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react";
-import type { ChangeSetArtifact, ParsedFile } from "@jules";
-import { useStore } from "@/store/app";
-import { cn } from "@/utils";
+import {useEffect, useState} from "react";
+import type {Artifact} from "@jules";
+import type {JulesParsedFile} from "@shared/jules-ipc";
+import {useStore} from "@/store/app";
+import {cn} from "@/utils";
+
+type ChangeSetArtifact = Extract<Artifact, { type: 'changeSet' }>;
+type ParsedFile = JulesParsedFile;
 
 interface ChangeSetSummaryProps {
     artifact: ChangeSetArtifact;

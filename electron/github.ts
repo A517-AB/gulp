@@ -1,6 +1,17 @@
 import { ipcMain } from 'electron'
+import {execSync} from 'node:child_process'
 
 const GITHUB_API = 'https://api.github.com'
+
+function detectGitRemote(): string | null {
+    try {
+        const url = execSync('git remote get-url origin', {encoding: 'utf-8'}).trim()
+        const match = url.match(/github\.com[:/](.+?)(?:\.git)?$/)
+        return match?.[1] ?? null
+    } catch {
+        return null
+    }
+}
 
 function getToken(): string {
   const token = process.env.GITHUB_TOKEN
@@ -30,6 +41,14 @@ async function gh<T>(endpoint: string, options: { method?: string; body?: unknow
 }
 
 export function registerGitHubHandlers(): void {
+    // ── source detection ──────────────────────────────────────────────────────────
+
+    ipcMain.handle('github.resolveSource', () => {
+        const github = process.env.GITHUB_REPO ?? detectGitRemote() ?? null
+        const branch = process.env.BASE_BRANCH ?? 'main'
+        return {github, branch}
+    })
+
   // ── user ──────────────────────────────────────────────────────────────────────
 
   ipcMain.handle('github.getUser', () =>

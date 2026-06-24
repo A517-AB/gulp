@@ -1,5 +1,4 @@
-# IPC Refactor TODO
-
+# IPC Refactor TOD OLD FUCKING SHIT. DON'T USE
 ## 1. Collect handy utilities
 Gather debounce, onStream, serialize, send, and other shared helpers into one place.
 Don't let them live scattered across bridge/handlers.

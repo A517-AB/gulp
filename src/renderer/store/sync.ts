@@ -55,11 +55,11 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     setSearchQuery: (searchQuery) => { set({ searchQuery }); },
 
     loadLocalRepoPath: async (sourceId) => {
-        if (!store || !sourceId) {
+        if (!store) {
             set({ localRepoPath: null });
             return;
         }
-        const storeKey = `${STORE_KEY}.${sourceId}`;
+        const storeKey = sourceId ? `${STORE_KEY}.${sourceId}` : STORE_KEY;
         try {
             const path = await store.get(storeKey);
             if (typeof path === 'string' && path) {
@@ -73,11 +73,11 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     },
 
     selectLocalFolder: async (sourceId) => {
-        if (!filesystem || !store || !sourceId) return;
+        if (!filesystem || !store) return;
         try {
             const path = await filesystem.showOpenDialog();
             if (path) {
-                const storeKey = `${STORE_KEY}.${sourceId}`;
+                const storeKey = sourceId ? `${STORE_KEY}.${sourceId}` : STORE_KEY;
                 await store.set(storeKey, path);
                 set({ localRepoPath: path });
             }

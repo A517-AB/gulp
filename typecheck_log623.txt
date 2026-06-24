@@ -1,0 +1,455 @@
+
+> last@1.0 typecheck
+> tsc -b --pretty false
+
+src/renderer/components/overview/OverviewPage.tsx(18,38): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/overview/OverviewPage.tsx(18,38): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/overview/OverviewPage.tsx(19,37): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/overview/OverviewPage.tsx(19,37): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/overview/OverviewPage.tsx(20,46): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/overview/OverviewPage.tsx(20,46): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/overview/OverviewPage.tsx(21,34): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/overview/OverviewPage.tsx(21,34): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/overview/OverviewPage.tsx(22,40): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/overview/OverviewPage.tsx(22,40): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/overview/OverviewPage.tsx(47,36): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/overview/OverviewPage.tsx(48,62): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/renderer/components/overview/OverviewPage.tsx(113,27): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/overview/OverviewPage.tsx(113,65): error TS7006: Parameter 'activity' implicitly has an 'any' type.
+src/renderer/components/overview/OverviewPage.tsx(142,14): error TS7006: Parameter 'sessionId' implicitly has an 'any' type.
+src/renderer/components/overview/OverviewPage.tsx(142,25): error TS7006: Parameter 'msg' implicitly has an 'any' type.
+src/renderer/components/overview/OverviewPage.tsx(142,33): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/activity/activity-artifacts.tsx(28,36): error TS2339: Property 'getState' does not exist on type '() => {}'.
+src/renderer/components/workspace/activity/activity-feed-header.tsx(53,42): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/activity/activity-feed-header.tsx(53,43): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/activity/activity-feed-header.tsx(58,28): error TS2339: Property 'workingBranch' does not exist on type 'SourceContext'.
+src/renderer/components/workspace/activity/activity-feed-header.tsx(151,46): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/activity/activity-feed.tsx(23,33): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/activity/activity-feed.tsx(23,34): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/activity/activity-feed.tsx(24,28): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/activity/activity-feed.tsx(24,29): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/activity/activity-feed.tsx(25,37): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/activity/activity-feed.tsx(25,38): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/activity/activity-feed.tsx(26,39): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/activity/activity-feed.tsx(26,40): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/activity/activity-feed.tsx(28,33): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/activity/activity-feed.tsx(28,34): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/activity/activity-feed.tsx(30,34): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/activity/activity-feed.tsx(30,35): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/activity/activity-feed.tsx(31,34): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/activity/activity-feed.tsx(31,35): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/activity/activity-feed.tsx(33,43): error TS2345: Argument of type '{}' is not assignable to parameter of type 'Activity[]'.
+  Type '{}' is missing the following properties from type 'Activity[]': length, pop, push, concat, and 29 more.
+src/renderer/components/workspace/activity/activity-feed.tsx(35,37): error TS2339: Property 'some' does not exist on type '{}'.
+src/renderer/components/workspace/activity/activity-feed.tsx(35,43): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/renderer/components/workspace/activity/activity-feed.tsx(45,14): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/activity/activity-feed.tsx(53,14): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/activity/activity-feed.tsx(54,9): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/activity/activity-feed.tsx(65,30): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/activity/activity-feed.tsx(76,18): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/activity/activity-feed.tsx(92,22): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/activity/activity-feed.tsx(108,18): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/activity/activity-feed.tsx(137,81): error TS2322: Type '{}' is not assignable to type 'ReactNode'.
+src/renderer/components/workspace/activity/single-activity.tsx(36,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/renderer/components/workspace/activity/types.ts(1,90): error TS2305: Module '"@jules"' has no exported member 'ActivityGroup'.
+src/renderer/components/workspace/activity/types.ts(1,105): error TS2724: '"@jules"' has no exported member named 'ActivityRole'. Did you mean 'Activity'?
+src/renderer/components/workspace/activity/types.ts(1,119): error TS2724: '"@jules"' has no exported member named 'ActivityType'. Did you mean 'Activity'?
+src/renderer/components/workspace/changeset-summary.tsx(14,35): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/changeset-summary.tsx(14,36): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/changeset-summary.tsx(18,9): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/code-diff-sidebar.tsx(18,33): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(18,33): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/code-diff-sidebar.tsx(19,38): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(19,38): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/code-diff-sidebar.tsx(21,10): error TS2339: Property 'flatMap' does not exist on type '{}'.
+src/renderer/components/workspace/code-diff-sidebar.tsx(21,18): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(27,49): error TS2339: Property 'flatMap' does not exist on type '{}'.
+src/renderer/components/workspace/code-diff-sidebar.tsx(27,57): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(35,36): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/code-diff-sidebar.tsx(36,62): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(83,27): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(92,30): error TS7031: Binding element 'media' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(92,37): error TS7031: Binding element 'activityId' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(92,49): error TS7031: Binding element 'index' implicitly has an 'any' type.
+src/renderer/components/workspace/new-session-dialog.tsx(11,14): error TS2305: Module '"@jules"' has no exported member 'SessionInitialValues'.
+src/renderer/components/workspace/new-session-dialog.tsx(64,83): error TS2339: Property 'autoCreatePr' does not exist on type 'SessionFormData'.
+src/renderer/components/workspace/new-session-dialog.tsx(74,97): error TS2339: Property 'startingBranch' does not exist on type 'SessionFormData'.
+src/renderer/components/workspace/new-session-dialog.tsx(87,41): error TS2339: Property 'interactive' does not exist on type 'SessionFormData'.
+src/renderer/components/workspace/new-session-dialog.tsx(95,43): error TS2339: Property 'autoCreatePr' does not exist on type 'SessionFormData'.
+src/renderer/components/workspace/session-list.tsx(30,28): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/session-list.tsx(30,28): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/session-list.tsx(31,36): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/session-list.tsx(31,36): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/session-list.tsx(54,11): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/session-list.tsx(158,44): error TS2339: Property 'find' does not exist on type '{}'.
+src/renderer/components/workspace/session-list.tsx(158,49): error TS7006: Parameter 'src' implicitly has an 'any' type.
+src/renderer/components/workspace/session-status.ts(1,14): error TS2724: '"@jules"' has no exported member named 'SessionStatus'. Did you mean 'SessionState'?
+src/renderer/components/workspace/session-status.ts(1,29): error TS2305: Module '"@jules"' has no exported member 'SessionStatusInfo'.
+src/renderer/components/workspace/SessionContextMenu.tsx(18,34): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/SessionContextMenu.tsx(18,34): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/SessionContextMenu.tsx(19,38): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/components/workspace/SessionContextMenu.tsx(19,38): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/components/workspace/SessionContextMenu.tsx(33,52): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/components/workspace/SessionContextMenu.tsx(44,48): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/hooks/use-activity-groups.ts(2,25): error TS2305: Module '"@jules"' has no exported member 'ActivityGroup'.
+src/renderer/hooks/use-new-session-form.ts(4,14): error TS2305: Module '"@jules"' has no exported member 'SessionInitialValues'.
+src/renderer/hooks/use-new-session-form.ts(29,30): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-new-session-form.ts(29,30): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/hooks/use-new-session-form.ts(30,31): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-new-session-form.ts(30,31): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/hooks/use-new-session-form.ts(31,34): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-new-session-form.ts(31,34): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/hooks/use-new-session-form.ts(32,32): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-new-session-form.ts(32,32): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/hooks/use-new-session-form.ts(33,34): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-new-session-form.ts(33,34): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/hooks/use-new-session-form.ts(34,36): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-new-session-form.ts(34,36): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/hooks/use-new-session-form.ts(38,12): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/hooks/use-new-session-form.ts(39,24): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/hooks/use-new-session-form.ts(43,5): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/hooks/use-new-session-form.ts(44,16): error TS2339: Property 'sourceId' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(47,30): error TS2339: Property 'find' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(47,35): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-new-session-form.ts(47,58): error TS2339: Property 'sourceId' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(49,25): error TS2339: Property 'sourceId' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(53,23): error TS2339: Property 'prompt' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(55,36): error TS2339: Property 'sourceId' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(57,30): error TS2339: Property 'prompt' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(58,26): error TS2339: Property 'title' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(58,52): error TS2339: Property 'title' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(59,26): error TS2339: Property 'autoCreatePr' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(60,26): error TS2339: Property 'interactive' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(62,81): error TS2339: Property 'startingBranch' does not exist on type '{}'.
+src/renderer/hooks/use-new-session-form.ts(64,15): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/hooks/use-new-session-form.ts(65,7): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/hooks/use-new-session-form.ts(74,5): error TS2740: Type '{}' is missing the following properties from type 'Source[]': length, pop, push, concat, and 29 more.
+src/renderer/hooks/use-new-session-form.ts(76,5): error TS2741: Property 'prompt' is missing in type '{}' but required in type 'SessionFormData'.
+src/renderer/hooks/use-new-session-form.ts(77,31): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/hooks/use-new-session-form.ts(77,79): error TS2345: Argument of type '{}' is not assignable to parameter of type 'SessionFormData'.
+  Property 'prompt' is missing in type '{}' but required in type 'SessionFormData'.
+src/renderer/hooks/use-session-list.ts(15,29): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-session-list.ts(15,29): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/hooks/use-session-list.ts(16,30): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-session-list.ts(16,30): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/hooks/use-session-list.ts(17,33): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-session-list.ts(17,33): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/hooks/use-session-list.ts(22,10): error TS2339: Property 'filter' does not exist on type '{}'.
+src/renderer/hooks/use-session-list.ts(22,17): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-session-list.ts(23,15): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/hooks/use-session-list.ts(30,26): error TS2339: Property 'find' does not exist on type '{}'.
+src/renderer/hooks/use-session-list.ts(30,31): error TS7006: Parameter 'src' implicitly has an 'any' type.
+src/renderer/hooks/use-session-list.ts(39,5): error TS2740: Type '{}' is missing the following properties from type 'SessionResource[]': length, pop, push, concat, and 29 more.
+src/renderer/hooks/use-session-list.ts(43,7): error TS2322: Type '{}' is not assignable to type '() => Promise<void>'.
+  Type '{}' provides no match for the signature '(): Promise<void>'.
+src/renderer/pages/electron/QueuesPage.tsx(18,15): error TS2305: Module '"@jules"' has no exported member 'FleetTask'.
+src/renderer/pages/electron/QueuesPage.tsx(18,26): error TS2305: Module '"@jules"' has no exported member 'FleetTaskGroup'.
+src/renderer/pages/electron/QueuesPage.tsx(188,33): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(188,33): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/pages/electron/QueuesPage.tsx(189,32): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(189,32): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/pages/electron/QueuesPage.tsx(190,31): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(190,31): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/pages/electron/QueuesPage.tsx(208,10): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/pages/electron/QueuesPage.tsx(226,48): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(226,51): error TS7006: Parameter 'j' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(244,51): error TS7006: Parameter '_' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(244,54): error TS7006: Parameter 'j' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(256,33): error TS2339: Property 'find' does not exist on type '{}'.
+src/renderer/pages/electron/QueuesPage.tsx(256,38): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(267,13): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/pages/electron/QueuesPage.tsx(291,22): error TS7006: Parameter 'task' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(291,28): error TS7006: Parameter 'bIdx' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(292,13): error TS2349: This expression is not callable.
+  Type '{}' has no call signatures.
+src/renderer/pages/electron/QueuesPage.tsx(358,21): error TS2740: Type '{}' is missing the following properties from type 'Source[]': length, pop, push, concat, and 29 more.
+src/renderer/pages/electron/QueuesPage.tsx(405,41): error TS7006: Parameter 'task' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(405,47): error TS7006: Parameter 'tIdx' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(473,54): error TS7006: Parameter 'fu' implicitly has an 'any' type.
+src/renderer/pages/electron/QueuesPage.tsx(473,58): error TS7006: Parameter 'fIdx' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(132,34): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(132,34): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/pages/electron/ShipPage.tsx(133,34): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(133,34): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/pages/electron/ShipPage.tsx(186,61): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type '{}'.
+  Property '0' does not exist on type '{}'.
+src/renderer/pages/electron/ShipPage.tsx(209,23): error TS2339: Property 'find' does not exist on type '{}'.
+src/renderer/pages/electron/ShipPage.tsx(209,28): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(216,14): error TS2339: Property 'filter' does not exist on type '{}'.
+src/renderer/pages/electron/ShipPage.tsx(216,21): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(222,20): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(222,23): error TS7006: Parameter 'b' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(234,41): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(236,57): error TS2339: Property 'map' does not exist on type '{}'.
+src/renderer/pages/electron/ShipPage.tsx(236,61): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(341,52): error TS7006: Parameter 'session' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(341,61): error TS7006: Parameter 'si' implicitly has an 'any' type.
+src/renderer/pages/electron/ShipPage.tsx(350,79): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/renderer/pages/shared/JulesPage.tsx(19,32): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/shared/JulesPage.tsx(19,32): error TS2554: Expected 0 arguments, but got 1.
+src/renderer/pages/shared/JulesPage.tsx(21,20): error TS2339: Property 'find' does not exist on type '{}'.
+src/renderer/pages/shared/JulesPage.tsx(21,25): error TS7006: Parameter 's' implicitly has an 'any' type.
+src/renderer/pages/shared/SessionsPage.tsx(23,75): error TS2322: Type 'Plan | undefined' is not assignable to type 'Plan'.
+  Type 'undefined' is not assignable to type 'Plan'.
+src/renderer/pages/shared/settings/panels/connection-tests.ts(2,15): error TS2724: '"@jules"' has no exported member named 'Jules'. Did you mean 'jules'?
+src/renderer/store/quickie.ts(51,20): error TS2339: Property 'getState' does not exist on type '() => {}'.
+src/renderer/store/ship.ts(230,25): error TS2339: Property 'getState' does not exist on type '() => {}'.
+src/renderer/utils/activity.ts(3,14): error TS2305: Module '"@jules"' has no exported member 'ActivityGroup'.
+src/renderer/utils/activity.ts(3,29): error TS2724: '"@jules"' has no exported member named 'ActivityType'. Did you mean 'Activity'?
+src/renderer/utils/activity.ts(28,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/renderer/utils/types.ts(2,15): error TS2305: Module '"@jules"' has no exported member 'ActivityGroup'.
+src/renderer/utils/types.ts(2,30): error TS2724: '"@jules"' has no exported member named 'ActivityType'. Did you mean 'Activity'?
+src/shared/bridge.test.ts(77,19): error TS2339: Property 'power' does not exist on type 'typeof import("D:/LAST/src/shared/bridge")'.
+src/shared/bridge.test.ts(78,19): error TS2339: Property 'popup' does not exist on type 'typeof import("D:/LAST/src/shared/bridge")'.
+src/shared/commands/triggers.ts(1,15): error TS2724: '"@jules"' has no exported member named 'Jules'. Did you mean 'jules'?
+electron/preload.mts(248,7): error TS2739: Type '{ terminal: TerminalAPI; queues: QueuesAPI; window: WindowAPI; power: PowerAPI; popup: PopupAPI; filesystem: FilesystemAPI; ... 8 more ...; store: StoreAPI; }' is missing the following properties from type 'ElectronAPI': julesEvents, ipc
+src/jules/activities/client.ts(6,10): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/activities/client.ts(6,20): error TS1484: 'Artifact' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/activities/client.ts(7,10): error TS1484: 'ActivityStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/activities/client.ts(8,10): error TS1484: 'ActivityClient' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/activities/client.ts(8,26): error TS1484: 'ListOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/activities/client.ts(8,39): error TS1484: 'SelectOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/activities/client.ts(42,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/jules/activities/client.ts(43,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/jules/activities/client.ts(164,58): error TS2379: Argument of type '{ filter: string | undefined; pageToken: string | undefined; }' is not assignable to parameter of type 'ListOptions' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'pageToken' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/jules/activities/types.ts(1,10): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/api.ts(3,10): error TS1484: 'ProxyConfig' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/api.ts(57,5): error TS2412: Type 'ProxyConfig | undefined' is not assignable to type 'ProxyConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'ProxyConfig'.
+src/jules/artifacts.ts(8,10): error TS1484: 'Platform' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/artifacts.ts(108,5): error TS2412: Type 'string | undefined' is not assignable to type 'string' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'string'.
+src/jules/caching.ts(1,1): error TS6133: 'SessionResource' is declared but its value is never read.
+src/jules/caching.ts(1,10): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/caching.ts(2,10): error TS1484: 'CachedSession' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(7,3): error TS1484: 'JulesClient' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(8,3): error TS1484: 'JulesOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(9,3): error TS1484: 'SessionConfig' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(10,3): error TS1484: 'SourceManager' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(11,3): error TS1484: 'AutomatedSession' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(12,3): error TS1484: 'SessionClient' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(13,3): error TS1484: 'Outcome' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(13,3): error TS6133: 'Outcome' is declared but its value is never read.
+src/jules/client.ts(14,3): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(15,3): error TS1484: 'StorageFactory' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(23,25): error TS1484: 'ListSessionsOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(24,10): error TS1484: 'Platform' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(25,10): error TS1484: 'SessionStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(30,3): error TS1484: 'JulesQuery' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(31,3): error TS1484: 'JulesDomain' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(32,3): error TS1484: 'QueryResult' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(33,3): error TS1484: 'SyncCheckpoint' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(34,3): error TS1484: 'SyncOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(35,3): error TS1484: 'SyncStats' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/client.ts(98,7): error TS2375: Type '{ url: string; auth: (() => string) | undefined; }' is not assignable to type 'ProxyConfig' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'auth' are incompatible.
+    Type '(() => string) | undefined' is not assignable to type '() => string | Promise<string>'.
+      Type 'undefined' is not assignable to type '() => string | Promise<string>'.
+src/jules/client.ts(116,36): error TS2379: Argument of type '{ apiKey: string | undefined; baseUrl: string; requestTimeoutMs: number; proxy: ProxyConfig | undefined; rateLimitRetry: { maxRetryTimeMs?: number; baseDelayMs?: number; maxDelayMs?: number; } | undefined; }' is not assignable to parameter of type 'ApiClientOptions' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'proxy' are incompatible.
+    Type 'ProxyConfig | undefined' is not assignable to type 'ProxyConfig'.
+      Type 'undefined' is not assignable to type 'ProxyConfig'.
+src/jules/errors.ts(9,19): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'Error'.
+src/jules/errors.ts(14,5): error TS2412: Type 'Error | undefined' is not assignable to type 'Error' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'Error'.
+src/jules/index.ts(5,10): error TS1484: 'JulesClient' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/index.ts(5,23): error TS1484: 'JulesOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/index.ts(5,37): error TS1484: 'StorageFactory' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/mappers.ts(5,3): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/mappers.ts(6,3): error TS1484: 'Artifact' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/mappers.ts(7,3): error TS1484: 'Outcome' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/mappers.ts(8,3): error TS1484: 'PullRequest' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/mappers.ts(9,3): error TS1484: 'RestArtifact' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/mappers.ts(10,3): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/mappers.ts(157,3): error TS2375: Type '{ sessionId: string; title: string; state: "completed"; pullRequest: PullRequest | undefined; outputs: SessionOutput[]; }' is not assignable to type 'Outcome' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'pullRequest' are incompatible.
+    Type 'PullRequest | undefined' is not assignable to type 'PullRequest'.
+      Type 'undefined' is not assignable to type 'PullRequest'.
+src/jules/network/adapter.ts(2,10): error TS1484: 'NetworkClient' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/network/adapter.ts(3,10): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/network/adapter.ts(4,10): error TS1484: 'ListOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/network/adapter.ts(8,10): error TS1484: 'Platform' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/network/adapter.ts(22,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/jules/network/adapter.ts(23,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/jules/network/adapter.ts(24,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/jules/network/adapter.ts(25,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/jules/network/adapter.ts(88,7): error TS2375: Type '{ activities: Activity[]; nextPageToken: string | undefined; }' is not assignable to type '{ activities: Activity[]; nextPageToken?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'nextPageToken' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/jules/network/adapter.ts(91,5): error TS2375: Type '{ activities: Activity[]; nextPageToken: string | undefined; }' is not assignable to type '{ activities: Activity[]; nextPageToken?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'nextPageToken' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/jules/network/adapter.ts(103,52): error TS2379: Argument of type '{ pageToken: string | undefined; }' is not assignable to parameter of type 'ListOptions' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'pageToken' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/jules/platform/node.ts(5,10): error TS1484: 'Platform' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/platform/node.ts(5,20): error TS1484: 'PlatformResponse' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/platform/node.ts(22,5): error TS6133: 'activityId' is declared but its value is never read.
+src/jules/platform/node.ts(41,19): error TS2322: Type 'Promise<unknown>' is not assignable to type 'Promise<T>'.
+  Type 'unknown' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
+src/jules/platform/web.ts(1,10): error TS1484: 'Platform' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/platform/web.ts(1,20): error TS1484: 'PlatformResponse' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/platform/web.ts(16,5): error TS6133: 'filepath' is declared but its value is never read.
+src/jules/platform/web.ts(17,5): error TS6133: 'data' is declared but its value is never read.
+src/jules/platform/web.ts(18,5): error TS6133: 'encoding' is declared but its value is never read.
+src/jules/platform/web.ts(19,5): error TS6133: 'activityId' is declared but its value is never read.
+src/jules/platform/web.ts(39,19): error TS2322: Type 'Promise<unknown>' is not assignable to type 'Promise<T>'.
+  Type 'unknown' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
+src/jules/platform/web.ts(79,39): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+src/jules/platform/web.ts(95,39): error TS2345: Argument of type 'number | undefined' is not assignable to parameter of type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+src/jules/polling.ts(3,10): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/computed.ts(8,10): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/projection.ts(68,52): error TS2538: Type 'undefined' cannot be used as an index type.
+src/jules/query/projection.ts(90,9): error TS2538: Type 'undefined' cannot be used as an index type.
+src/jules/query/projection.ts(94,9): error TS18048: 'head' is possibly 'undefined'.
+src/jules/query/projection.ts(95,9): error TS2538: Type 'undefined' cannot be used as an index type.
+src/jules/query/projection.ts(98,20): error TS2538: Type 'undefined' cannot be used as an index type.
+src/jules/query/projection.ts(123,19): error TS2538: Type 'undefined' cannot be used as an index type.
+src/jules/query/projection.ts(127,7): error TS18048: 'head' is possibly 'undefined'.
+src/jules/query/projection.ts(128,23): error TS2538: Type 'undefined' cannot be used as an index type.
+src/jules/query/projection.ts(219,27): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/jules/query/projection.ts(220,24): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/jules/query/projection.ts(222,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/jules/query/select.ts(2,3): error TS1484: 'JulesClient' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/select.ts(3,3): error TS1484: 'JulesQuery' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/select.ts(4,3): error TS1484: 'JulesDomain' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/select.ts(5,3): error TS1484: 'QueryResult' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/select.ts(6,3): error TS1484: 'FilterOp' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/select.ts(7,3): error TS1484: 'WhereClause' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/select.ts(8,3): error TS1484: 'SelectOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/select.ts(9,3): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/select.ts(248,9): error TS2375: Type '{ limit: number | undefined; after?: string; before?: string; type?: string; order?: "asc" | "desc"; }' is not assignable to type 'SelectOptions & { limit?: number; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ limit: number | undefined; after?: string; before?: string; type?: string; order?: "asc" | "desc"; }' is not assignable to type 'SelectOptions' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'limit' are incompatible.
+      Type 'number | undefined' is not assignable to type 'number'.
+        Type 'undefined' is not assignable to type 'number'.
+src/jules/query/validate.ts(12,3): error TS1484: 'FieldMeta' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/query/validate.ts(232,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/jules/query/validate.ts(233,11): error TS2532: Object is possibly 'undefined'.
+src/jules/query/validate.ts(233,44): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/jules/query/validate.ts(241,9): error TS2532: Object is possibly 'undefined'.
+src/jules/query/validate.ts(290,13): error TS6133: 'validPaths' is declared but its value is never read.
+src/jules/session.ts(3,10): error TS1484: 'ActivityClient' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(3,26): error TS1484: 'SelectOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(4,21): error TS1484: 'ApiRequestOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(5,10): error TS1484: 'InternalConfig' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(10,10): error TS1484: 'ActivityStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(10,27): error TS1484: 'SessionStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(11,10): error TS1484: 'StreamActivitiesOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(13,3): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(14,3): error TS1484: 'ActivityAgentMessaged' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(15,3): error TS1484: 'Outcome' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(16,3): error TS1484: 'SessionClient' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(17,3): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(18,3): error TS1484: 'SessionState' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/session.ts(22,10): error TS1484: 'SessionSnapshot' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/sessions.ts(2,10): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/sessions.ts(3,10): error TS1484: 'SessionStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/sessions.ts(46,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/jules/sessions.ts(47,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/jules/sessions.ts(48,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/jules/sessions.ts(133,5): error TS2375: Type '{ sessions: SessionResource[]; nextPageToken: string | undefined; }' is not assignable to type 'ListSessionsResponse' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'nextPageToken' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/jules/snapshot.ts(3,3): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(4,3): error TS1484: 'PullRequest' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(5,3): error TS1484: 'SessionInsights' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(6,3): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(7,3): error TS1484: 'SessionSnapshot' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(8,3): error TS1484: 'SessionState' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(9,3): error TS1484: 'SerializedSnapshot' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(10,3): error TS1484: 'TimelineEntry' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(11,3): error TS1484: 'ActivityPlanGenerated' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(12,3): error TS1484: 'ActivitySessionFailed' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(13,3): error TS1484: 'ActivityUserMessaged' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(14,3): error TS1484: 'ActivityAgentMessaged' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(15,3): error TS1484: 'ActivityProgressUpdated' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/snapshot.ts(42,5): error TS2412: Type 'PullRequest | undefined' is not assignable to type 'PullRequest' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'PullRequest'.
+src/jules/snapshot.ts(120,5): error TS2375: Type '{ id: string; state: SessionState; url: string; createdAt: string; updatedAt: string; durationMs: number; prompt: string; title: string; activities: Activity[]; activityCounts: Readonly<...>; timeline: TimelineEntry[]; insights: { ...; }; pr: PullRequest | undefined; }' is not assignable to type 'SerializedSnapshot' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'pr' are incompatible.
+    Type 'PullRequest | undefined' is not assignable to type '{ url: string; title: string; description: string; }'.
+      Type 'undefined' is not assignable to type '{ url: string; title: string; description: string; }'.
+src/jules/sources.ts(4,10): error TS1484: 'Source' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/sources.ts(4,18): error TS1484: 'SourceManager' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/sources.ts(4,33): error TS1484: 'GitHubRepo' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/sources.ts(26,5): error TS2375: Type '{ name: string; id: string; type: "githubRepo"; githubRepo: GitHubRepo; environmentVariablesEnabled: boolean | undefined; }' is not assignable to type 'Source' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type '{ name: string; id: string; type: "githubRepo"; githubRepo: GitHubRepo; environmentVariablesEnabled: boolean | undefined; }' is not assignable to type '{ name: string; id: string; environmentVariablesEnabled?: boolean; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'environmentVariablesEnabled' are incompatible.
+      Type 'boolean | undefined' is not assignable to type 'boolean'.
+        Type 'undefined' is not assignable to type 'boolean'.
+src/jules/storage/cache-info.ts(3,10): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/cache-info.ts(5,10): error TS1484: 'GlobalCacheMetadata' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/cache-info.ts(5,31): error TS1484: 'SessionMetadata' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/cache-info.ts(221,25): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/jules/storage/memory.ts(1,10): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/memory.ts(1,20): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/memory.ts(3,3): error TS1484: 'ActivityStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/memory.ts(4,3): error TS1484: 'SessionStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/memory.ts(5,3): error TS1484: 'CachedSession' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/memory.ts(6,3): error TS1484: 'SessionIndexEntry' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/node-fs.ts(5,10): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/node-fs.ts(5,20): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/node-fs.ts(7,3): error TS1484: 'ActivityStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/node-fs.ts(8,3): error TS1484: 'SessionStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/node-fs.ts(9,3): error TS1484: 'CachedSession' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/node-fs.ts(10,3): error TS1484: 'SessionIndexEntry' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/node-fs.ts(11,3): error TS1484: 'SessionMetadata' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/node-fs.ts(331,24): error TS2532: Object is possibly 'undefined'.
+src/jules/storage/types.ts(1,10): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/storage/types.ts(1,20): error TS1484: 'SessionResource' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/streaming.ts(5,10): error TS1484: 'Activity' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/streaming.ts(5,20): error TS1484: 'Origin' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/streaming.ts(43,10): error TS1484: 'Platform' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/types.ts(13,10): error TS1484: 'ActivityClient' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/types.ts(13,26): error TS1484: 'SelectOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/types.ts(14,10): error TS1484: 'ActivityStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/types.ts(14,27): error TS1484: 'SessionStorage' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/types.ts(15,10): error TS1484: 'ListSessionsOptions' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/jules/types.ts(17,10): error TS1205: Re-exporting a type when 'verbatimModuleSyntax' is enabled requires using 'export type'.
+src/jules/utils.ts(37,39): error TS2345: Argument of type 'T | undefined' is not assignable to parameter of type 'T'.
+  'T' could be instantiated with an arbitrary type which could be unrelated to 'T | undefined'.
+src/jules/utils/page-token.ts(43,30): error TS2532: Object is possibly 'undefined'.

@@ -120,7 +120,7 @@ export function TestingPanel() {
           </>
         )}
         <span className="text-[10px] font-mono text-fg-ghost">
-          {isElectron ? 'electron — all tests available' : 'web — sdkIpc tests skipped'}
+          {isElectron ? 'electron — all tests available' : 'web — jules tests skipped'}
         </span>
       </div>
       <div className="divide-y divide-hair">

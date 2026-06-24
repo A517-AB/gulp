@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -11,11 +9,26 @@ import {
     Send,
     Trash2,
 } from "lucide-react";
-import { queues as electronQueues } from "@shared/bridge";
+import {queues as electronQueues, github} from "@shared/bridge";
 import { useStore } from "@/store/app";
 import { InlineEdit } from "@renderer/ui/inline-edit";
-import type { Source } from "@google/jules-sdk/types";
-import type { FleetTask, FleetTaskGroup } from "@jules";
+import type {Source} from "@jules";
+
+export interface FleetTask {
+    folder?: string;
+    topic: string;
+    task: string;
+    sent?: boolean;
+    followUps?: { topic: string; task: string }[];
+}
+
+export interface FleetTaskGroup {
+    group: string;
+    repo: string;
+    baseBranch: string;
+    concurrency?: number;
+    tasks: FleetTask[];
+}
 
 const TASKS_STORAGE_KEY = "workspace:fleet-tasks";
 
@@ -62,7 +75,7 @@ function SourcePicker({ value, sources, onChange }: {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const selected = sources.find((s) => s.id === value);
-  const label = selected?.name ?? (value ? value.replace(/^(?:sources\/)?github\//, "") : "pick repo");
+    const label = selected?.type === 'githubRepo' ? selected.githubRepo.repo : (value ? value.replace(/^.*\//, "") : "pick repo");
 
   useEffect(() => {
     if (!open) return;
@@ -120,13 +133,26 @@ function SourcePicker({ value, sources, onChange }: {
 
 // ── Branch picker ──────────────────────────────────────────────────────────────
 
-function BranchPicker({ value, branches, onChange }: {
+function BranchPicker({value, owner, repo, onChange}: {
   value: string;
-  branches: string[];
+    owner: string;
+    repo: string;
   onChange: (branch: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+    const [branches, setBranches] = useState<string[]>([]);
   const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!open || !owner || !repo) return;
+        github?.listBranches(owner, repo)
+            .then((bs) => {
+                setBranches(bs.map(b => b.name));
+            })
+            .catch(() => {
+                setBranches([]);
+            });
+    }, [open, owner, repo]);
 
   useEffect(() => {
     if (!open) return;
@@ -136,17 +162,6 @@ function BranchPicker({ value, branches, onChange }: {
     document.addEventListener("mousedown", handler);
     return () => { document.removeEventListener("mousedown", handler); };
   }, [open]);
-
-  if (branches.length === 0) {
-    return (
-      <InlineEdit
-        value={value}
-        onSave={onChange}
-        className="text-2xs font-mono text-fg-dim"
-        placeholder="branch"
-      />
-    );
-  }
 
   return (
     <div ref={ref} className="relative" onClick={(e) => { e.stopPropagation(); }}>
@@ -166,6 +181,9 @@ function BranchPicker({ value, branches, onChange }: {
             transition={{ duration: 0.13, ease: "easeOut" }}
             className="absolute top-full left-0 mt-1 z-50 min-w-[160px] max-w-[240px] rounded-md border border-subtle bg-overlay shadow-xl py-1 max-h-48 overflow-y-auto"
           >
+              {branches.length === 0 && (
+                  <p className="px-3 py-2 text-2xs text-fg-ghost font-mono">{owner && repo ? "Loading…" : "Pick a repo first"}</p>
+              )}
             {branches.map((b) => (
               <button
                 key={b}
@@ -186,8 +204,7 @@ function BranchPicker({ value, branches, onChange }: {
 
 export default function QueuesView() {
   const storeSources = useStore(s => s.sources);
-  const loadSources = useStore(s => s.loadSources);
-  const runSession = useStore(s => s.runSession);
+    const startSession = useStore(s => s.startSession);
   const [tasks, setTasks] = useState<FleetTaskGroup[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState<Set<string>>(new Set());
@@ -203,10 +220,6 @@ export default function QueuesView() {
     }
     void load();
   }, []);
-
-  useEffect(() => {
-    void loadSources();
-  }, [loadSources]);
 
   const save = useCallback(async (updated: FleetTaskGroup[]) => {
     setTasks(updated);
@@ -252,11 +265,6 @@ export default function QueuesView() {
     });
   };
 
-  const getBranches = (repo: string): string[] => {
-    const source = storeSources.find(s => s.id === repo);
-    return source?.githubRepo?.branches ?? [];
-  };
-
   const handleSendTask = async (group: FleetTaskGroup, task: FleetTask, gIdx: number, tIdx: number, e: React.MouseEvent) => {
     e.stopPropagation();
     const key = `${gIdx.toString()}-${tIdx.toString()}`;
@@ -264,10 +272,10 @@ export default function QueuesView() {
     setSending(p => new Set(p).add(key));
     const github = group.repo.replace(/^(?:sources\/)?github\//, "");
     try {
-      await runSession({
+        await startSession?.({
         prompt: task.task,
-        title: `${task.topic} (${task.folder})`,
-        ...(github ? { source: { github, baseBranch: group.baseBranch || "main" } } : {}),
+            title: `${task.topic} (${task.folder ?? ''})`,
+            ...(github ? {source: {github, branch: group.baseBranch || 'main'}} : {}),
       });
       updateTask(gIdx, tIdx, { sent: true });
     } catch (err) {
@@ -289,11 +297,13 @@ export default function QueuesView() {
         const batch = group.tasks.slice(i, i + batchSize);
         await Promise.all(
           batch.map((task, bIdx) =>
-            runSession({
+              startSession?.({
               prompt: task.task,
-              title: `${task.topic} (${task.folder})`,
-              ...(github ? { source: { github, baseBranch: group.baseBranch || "main" } } : {}),
-            }).then(() => { updateTask(gIdx, i + bIdx, { sent: true }); })
+                  title: `${task.topic} (${task.folder ?? ''})`,
+                  ...(github ? {source: {github, branch: group.baseBranch || 'main'}} : {}),
+              })?.then(() => {
+                  updateTask(gIdx, i + bIdx, {sent: true});
+              }) ?? Promise.resolve()
           )
         );
       }
@@ -327,7 +337,9 @@ export default function QueuesView() {
         {tasks.map((group, gIdx) => {
           const isExpanded = expandedGroups.has(group.group);
           const groupSending = sending.has(`group-${gIdx.toString()}`);
-          const branches = getBranches(group.repo);
+            const selectedSource = storeSources.find(s => s.id === group.repo);
+            const ghOwner = selectedSource?.type === 'githubRepo' ? selectedSource.githubRepo.owner : "";
+            const ghRepo = selectedSource?.type === 'githubRepo' ? selectedSource.githubRepo.repo : "";
 
           return (
             <div key={`${group.group}-${gIdx.toString()}`} className="border-b border-hair last:border-0">
@@ -360,7 +372,8 @@ export default function QueuesView() {
                   />
                   <BranchPicker
                     value={group.baseBranch ?? ""}
-                    branches={branches}
+                    owner={ghOwner}
+                    repo={ghRepo}
                     onChange={(v) => { updateGroup(gIdx, { baseBranch: v }); }}
                   />
                   <div className="flex items-center gap-1" onClick={(e) => { e.stopPropagation(); }}>
@@ -424,7 +437,7 @@ export default function QueuesView() {
                                   <div className="flex items-center gap-1.5">
                                     <Folder className="h-3 w-3 text-fg-ghost shrink-0" />
                                     <InlineEdit
-                                      value={task.folder}
+                                        value={task.folder ?? ""}
                                       onSave={(v) => { updateTask(gIdx, tIdx, { folder: v }); }}
                                       className="text-2xs font-mono text-fg-dim"
                                       placeholder="folder/path"
@@ -469,7 +482,7 @@ export default function QueuesView() {
                             </div>
 
                             {task.followUps && task.followUps.length > 0 && (
-                              <div className="ml-6 mt-2 pl-3 border-l border-hair space-y-1.5">
+                                <div className="ml-6 mt-2 pl-3 space-y-1.5">
                                 {task.followUps.map((fu, fIdx) => (
                                   <div key={fIdx} className="flex items-start gap-2">
                                     <ListTree className="h-3 w-3 text-fg-ghost mt-0.5 shrink-0" />

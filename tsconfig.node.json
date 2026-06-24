@@ -9,7 +9,15 @@
       "@/*": ["./src/*"],
       "@shared": ["./src/shared/index.ts"],
       "@shared/*": ["./src/shared/*"],
-      "@electron/*": ["./electron/*"]
+      "@electron/*": [
+        "./electron/*"
+      ],
+      "@jules": [
+        "./src/jules/index.ts"
+      ],
+      "@jules/*": [
+        "./src/jules/*"
+      ]
     },
 
     /* Bundler mode */
