@@ -29,3 +29,7 @@ typecheck.log
 /coverage/
 /jules/
 /dist-jules/
+
+# act artifacts
+act_output.log
+.secrets
