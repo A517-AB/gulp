@@ -1,3 +1,41 @@
+// ── Task dispatch feedback (TODO) ──────────────────────────────────────────────
+//
+// Goal: real status on TaskRow (green/red dot) with zero loading states.
+// Source of truth: julesEvents.on() from the notif daemon (second renderer),
+// fires session.stateChanged { sessionId, state } when Jules finishes.
+//
+// Plan:
+//   1. Add to FleetTask: lastSessionId?: string, lastState?: 'completed' | 'failed'
+//      usedCount only increments on confirmed 'completed', not on dispatch.
+//
+//   2. Fix app store: runSession() currently returns void.
+//      Change to return { id: string } (handlers.ts already returns it).
+//      quickie.ts already does this correctly — copy that pattern.
+//
+//   3. In QueuesPage handleDispatchTask: after await dispatch():
+//        const { id } = await runSession(...)   ← needs runSession to return id
+//        updateTask(gIdx, tIdx, { lastSessionId: id, lastState: undefined })
+//
+//   4. In queues store: add listenToEvents() action.
+//      Call julesEvents.subscribe() + julesEvents.on(cb) once on store init.
+//      In cb: on session.stateChanged where state === 'completed' | 'failed':
+//        find the task with lastSessionId === sessionId across all groups,
+//        updateTask with { lastState: state, usedCount: usedCount + 1 (if completed) }
+//      Returns unsub fn — call on store teardown (not critical, app lives forever).
+//
+//   5. TaskRow reads task.lastState:
+//      undefined  → no dot
+//      'completed' → small green dot (like SnippetPicker blue dot, bg-emerald-500)
+//      'failed'    → small red dot (bg-red-500)
+//      usedCount shows only if > 0, increments only on completed.
+//
+// julesEvents shape (electron.d.ts):
+//   julesEvents.subscribe()  → tells main to start pushing events
+//   julesEvents.on(cb)       → cb: (event: JulesWorkerEvent) => void, returns unsub
+//   JulesWorkerEvent: { type: 'session.stateChanged'; sessionId: string; state: string }
+//
+// ──────────────────────────────────────────────────────────────────────────────
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { queues as electronQueues } from '@shared/bridge';
