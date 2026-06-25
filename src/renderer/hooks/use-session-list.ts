@@ -8,13 +8,11 @@ interface UseSessionListReturn {
     error: string | null;
     searchQuery: string;
     setSearchQuery: (q: string) => void;
-    loadSessions: () => Promise<void>;
 }
 
 export function useSessionList(): UseSessionListReturn {
-  const sessions = useStore(s => s.sessionList)
+    const sessions = useStore(s => s.sessions)
     const sources = useStore(s => s.sources)
-  const loadSessions = useStore(s => s.loadSessions)
   const [searchQuery, setSearchQuery] = useState("")
 
   const visibleSessions = useMemo(() =>
@@ -40,6 +38,5 @@ export function useSessionList(): UseSessionListReturn {
     error: null,
     searchQuery,
     setSearchQuery,
-      loadSessions,
   }
 }

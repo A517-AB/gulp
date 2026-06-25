@@ -10,7 +10,9 @@ function onStream(
     onItem: (item: unknown) => void,
     onDone?: () => void,
 ): Unsubscribe {
-    const onItemEv = (_: IpcRendererEvent, item: unknown) => { onItem(item) }
+    const onItemEv = (_: IpcRendererEvent, item: unknown) => {
+        onItem(item)
+    }
     const onDoneEv = () => {
         ipcRenderer.removeListener(itemCh, onItemEv)
         onDone?.()
@@ -111,15 +113,24 @@ export const sdk: SdkIpc = {
         list: (id, options?) => invoke('sdk:activities.list', id, options),
         get: (id, activityId) => invoke('sdk:activities.get', id, activityId),
         history: (id, onItem, onDone?) => {
-            invoke('sdk:activities.history.start', id).catch((err: unknown) => { console.error(err); onDone?.() })
+            invoke('sdk:activities.history.start', id).catch((err: unknown) => {
+                console.error(err);
+                onDone?.()
+            })
             return onStreamLogged(`sdk:activities.history:${id}`, `sdk:activities.history.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
         updates: (id, onItem, onDone?) => {
-            invoke('sdk:activities.updates.start', id).catch((err: unknown) => { console.error(err); onDone?.() })
+            invoke('sdk:activities.updates.start', id).catch((err: unknown) => {
+                console.error(err);
+                onDone?.()
+            })
             return onStreamLogged(`sdk:activities.updates:${id}`, `sdk:activities.updates.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
         stream: (id, onItem, onDone?) => {
-            invoke('sdk:activities.stream.start', id).catch((err: unknown) => { console.error(err); onDone?.() })
+            invoke('sdk:activities.stream.start', id).catch((err: unknown) => {
+                console.error(err);
+                onDone?.()
+            })
             return onStreamLogged(`sdk:activities.stream:${id}`, `sdk:activities.stream.done:${id}`, onItem as (item: unknown) => void, onDone)
         },
     },

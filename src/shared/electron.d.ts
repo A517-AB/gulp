@@ -316,6 +316,7 @@ export interface ElectronAPI {
   git:             GitAPI;
   julesEvents:     JulesEventsAPI;
   store:           StoreAPI;
+    github: GitHubAPI;
 }
 
 // ── global augments ────────────────────────────────────────────────────────────

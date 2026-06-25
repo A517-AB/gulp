@@ -5,170 +5,173 @@ import {sdk} from "./ipc/bridge";
 // ── terminal ───────────────────────────────────────────────────────────────────
 
 const terminal: ElectronAPI["terminal"] = {
-  start: (cwd: string, shellType?: ShellType) => {
-    ipcRenderer.send("terminal.start", { cwd, shellType });
-  },
+    start: (cwd: string, shellType?: ShellType) => {
+        ipcRenderer.send("terminal.start", {cwd, shellType});
+    },
 
-  input: (data: string) => {
-    ipcRenderer.send("terminal.input", data);
-  },
+    input: (data: string) => {
+        ipcRenderer.send("terminal.input", data);
+    },
 
-  resize: (cols: number, rows: number) => {
-    ipcRenderer.send("terminal.resize", { cols, rows });
-  },
+    resize: (cols: number, rows: number) => {
+        ipcRenderer.send("terminal.resize", {cols, rows});
+    },
 
-  kill: () => {
-    ipcRenderer.send("terminal.kill");
-  },
+    kill: () => {
+        ipcRenderer.send("terminal.kill");
+    },
 
-  onOutput: (callback: (data: string) => void) => {
-    const handler = (_event: IpcRendererEvent, data: string) => {
-      callback(data);
-    };
-    ipcRenderer.on("terminal.output", handler);
-    return () => {
-      ipcRenderer.off("terminal.output", handler);
-    };
-  },
+    onOutput: (callback: (data: string) => void) => {
+        const handler = (_event: IpcRendererEvent, data: string) => {
+            callback(data);
+        };
+        ipcRenderer.on("terminal.output", handler);
+        return () => {
+            ipcRenderer.off("terminal.output", handler);
+        };
+    },
 
-  onExit: (callback: (exitCode: number, signal?: number) => void) => {
-    const handler = (_event: IpcRendererEvent, { exitCode, signal }: { exitCode: number; signal?: number }) => {
-      callback(exitCode, signal);
-    };
-    ipcRenderer.on("terminal.exit", handler);
-    return () => {
-      ipcRenderer.off("terminal.exit", handler);
-    };
-  },
+    onExit: (callback: (exitCode: number, signal?: number) => void) => {
+        const handler = (_event: IpcRendererEvent, {exitCode, signal}: { exitCode: number; signal?: number }) => {
+            callback(exitCode, signal);
+        };
+        ipcRenderer.on("terminal.exit", handler);
+        return () => {
+            ipcRenderer.off("terminal.exit", handler);
+        };
+    },
 };
 
 // ── queues ─────────────────────────────────────────────────────────────────────
 
 const queues: ElectronAPI["queues"] = {
-  getTasks:  (jsonPath?: string) => ipcRenderer.invoke("queues.getTasks",  jsonPath),
-  getQueue:  (jsonPath?: string) => ipcRenderer.invoke("queues.getQueue",  jsonPath),
-  saveTasks: (data: unknown[], jsonPath?: string) => ipcRenderer.invoke("queues.saveTasks", data, jsonPath),
+    getTasks: (jsonPath?: string) => ipcRenderer.invoke("queues.getTasks", jsonPath),
+    getQueue: (jsonPath?: string) => ipcRenderer.invoke("queues.getQueue", jsonPath),
+    saveTasks: (data: unknown[], jsonPath?: string) => ipcRenderer.invoke("queues.saveTasks", data, jsonPath),
 };
 
 // ── window controls ────────────────────────────────────────────────────────────
 
 const window_: ElectronAPI["window"] = {
-  minimize: () => {
-    ipcRenderer.send("window.minimize");
-  },
-  maximize: () => {
-    ipcRenderer.send("window.maximize");
-  },
-  close:    () => {
-    ipcRenderer.send("window.close");
-  },
-  quit: () => {
-    ipcRenderer.send("window.quit");
-  },
+    minimize: () => {
+        ipcRenderer.send("window.minimize");
+    },
+    maximize: () => {
+        ipcRenderer.send("window.maximize");
+    },
+    close: () => {
+        ipcRenderer.send("window.close");
+    },
+    quit: () => {
+        ipcRenderer.send("window.quit");
+    },
 };
 
 // ── power ──────────────────────────────────────────────────────────────────────
 
 const power: ElectronAPI["power"] = {
-  onSuspend: (cb: () => void) => {
-    const handler = () => {
-      cb();
-    };
-    ipcRenderer.on("power.suspend", handler);
-    return () => {
-      ipcRenderer.off("power.suspend", handler);
-    };
-  },
-  onResume: (cb: () => void) => {
-    const handler = () => {
-      cb();
-    };
-    ipcRenderer.on("power.resume", handler);
-    return () => {
-      ipcRenderer.off("power.resume", handler);
-    };
-  },
+    onSuspend: (cb: () => void) => {
+        const handler = () => {
+            cb();
+        };
+        ipcRenderer.on("power.suspend", handler);
+        return () => {
+            ipcRenderer.off("power.suspend", handler);
+        };
+    },
+    onResume: (cb: () => void) => {
+        const handler = () => {
+            cb();
+        };
+        ipcRenderer.on("power.resume", handler);
+        return () => {
+            ipcRenderer.off("power.resume", handler);
+        };
+    },
 };
 
 // ── popup ──────────────────────────────────────────────────────────────────────
 
 const popup: ElectronAPI["popup"] = {
-  show:  () => {
-    ipcRenderer.send("popup.show");
-  },
-  hide:  () => {
-    ipcRenderer.send("popup.hide");
-  },
-  close: () => {
-    ipcRenderer.send("popup.hide");
-  },
+    show: () => {
+        ipcRenderer.send("popup.show");
+    },
+    hide: () => {
+        ipcRenderer.send("popup.hide");
+    },
+    close: () => {
+        ipcRenderer.send("popup.hide");
+    },
 
-  notify: (payload: PopupNotification) => {
-    ipcRenderer.send("popup.notify", payload);
-  },
+    notify: (payload: PopupNotification) => {
+        ipcRenderer.send("popup.notify", payload);
+    },
 
-  onNotification: (cb: (payload: PopupNotification) => void) => {
-    const handler = (_event: IpcRendererEvent, data: PopupNotification) => {
-      cb(data);
-    };
-    ipcRenderer.on("popup.notification", handler);
-    return () => {
-      ipcRenderer.off("popup.notification", handler);
-    };
-  },
+    onNotification: (cb: (payload: PopupNotification) => void) => {
+        const handler = (_event: IpcRendererEvent, data: PopupNotification) => {
+            cb(data);
+        };
+        ipcRenderer.on("popup.notification", handler);
+        return () => {
+            ipcRenderer.off("popup.notification", handler);
+        };
+    },
 };
 
 // ── filesystem ─────────────────────────────────────────────────────────────────
 
 const filesystem: ElectronAPI["filesystem"] = {
-  readdir:             (dir, opts)  => ipcRenderer.invoke("fs.readdir", dir, opts),
-  readFile:            (p)          => ipcRenderer.invoke("fs.readFile", p),
-  exists:              (p)          => ipcRenderer.invoke("fs.exists", p),
-  stat:                (p)          => ipcRenderer.invoke("fs.stat", p),
-  writeFile:           (p, c)       => ipcRenderer.invoke("fs.writeFile", p, c),
-  appendFile:          (p, c)       => ipcRenderer.invoke("fs.appendFile", p, c),
-  mkdir:               (p)          => ipcRenderer.invoke("fs.mkdir", p),
-  deleteFile:          (p)          => ipcRenderer.invoke("fs.deleteFile", p),
-  deleteDir:           (p)          => ipcRenderer.invoke("fs.deleteDir", p),
-  rename:              (o, n)       => ipcRenderer.invoke("fs.rename", o, n),
-  move:                (s, d)       => ipcRenderer.invoke("fs.move", s, d),
-  copy:                (s, d)       => ipcRenderer.invoke("fs.copy", s, d),
-  copyDir:             (s, d)       => ipcRenderer.invoke("fs.copyDir", s, d),
-  openPath:            (p)          => ipcRenderer.invoke("fs.openPath", p),
-  revealInFileManager: (p)          => ipcRenderer.invoke("fs.revealInFolder", p),
-  showOpenDialog:      ()           => ipcRenderer.invoke("fs.showOpenDialog"),
-  showOpenFileDialog:  (f)          => ipcRenderer.invoke("fs.showOpenFileDialog", f),
-  showSaveDialog:      (n)          => ipcRenderer.invoke("fs.showSaveDialog", n),
+    readdir: (dir, opts) => ipcRenderer.invoke("fs.readdir", dir, opts),
+    readFile: (p) => ipcRenderer.invoke("fs.readFile", p),
+    exists: (p) => ipcRenderer.invoke("fs.exists", p),
+    stat: (p) => ipcRenderer.invoke("fs.stat", p),
+    writeFile: (p, c) => ipcRenderer.invoke("fs.writeFile", p, c),
+    appendFile: (p, c) => ipcRenderer.invoke("fs.appendFile", p, c),
+    mkdir: (p) => ipcRenderer.invoke("fs.mkdir", p),
+    deleteFile: (p) => ipcRenderer.invoke("fs.deleteFile", p),
+    deleteDir: (p) => ipcRenderer.invoke("fs.deleteDir", p),
+    rename: (o, n) => ipcRenderer.invoke("fs.rename", o, n),
+    move: (s, d) => ipcRenderer.invoke("fs.move", s, d),
+    copy: (s, d) => ipcRenderer.invoke("fs.copy", s, d),
+    copyDir: (s, d) => ipcRenderer.invoke("fs.copyDir", s, d),
+    openPath: (p) => ipcRenderer.invoke("fs.openPath", p),
+    revealInFileManager: (p) => ipcRenderer.invoke("fs.revealInFolder", p),
+    showOpenDialog: () => ipcRenderer.invoke("fs.showOpenDialog"),
+    showOpenFileDialog: (f) => ipcRenderer.invoke("fs.showOpenFileDialog", f),
+    showSaveDialog: (n) => ipcRenderer.invoke("fs.showSaveDialog", n),
 };
 
 // ── env ────────────────────────────────────────────────────────────────────────
 
 const env: ElectronAPI["env"] = {
-  getApiKey: () => ipcRenderer.invoke("env.getApiKey"),
+    getApiKey: () => ipcRenderer.invoke("env.getApiKey"),
 };
 
 // ── history ────────────────────────────────────────────────────────────────────
 
 const history: ElectronAPI["history"] = {
-  get:    () => ipcRenderer.invoke("history.get"),
-  push:   (text) => ipcRenderer.invoke("history.push", text),
-  remove: (id) => ipcRenderer.invoke("history.remove", id),
+    get: () => ipcRenderer.invoke("history.get"),
+    push: (text) => ipcRenderer.invoke("history.push", text),
+    remove: (id) => ipcRenderer.invoke("history.remove", id),
 }
 
 // ── notes ──────────────────────────────────────────────────────────────────────
 
 const notes: ElectronAPI["notes"] = {
-  list:   () => ipcRenderer.invoke("notes.list"),
-  get:    (id) => ipcRenderer.invoke("notes.get", id),
-  save:   (id, title, blocks) => ipcRenderer.invoke("notes.save", id, title, blocks),
-  delete: (id) => ipcRenderer.invoke("notes.delete", id),
-  onChanged: (cb) => {
-    const handler = () => { cb(); }
-    ipcRenderer.on("notes.changed", handler)
-    return () => { ipcRenderer.off("notes.changed", handler) }
-  },
+    list: () => ipcRenderer.invoke("notes.list"),
+    get: (id) => ipcRenderer.invoke("notes.get", id),
+    save: (id, title, blocks) => ipcRenderer.invoke("notes.save", id, title, blocks),
+    delete: (id) => ipcRenderer.invoke("notes.delete", id),
+    onChanged: (cb) => {
+        const handler = () => {
+            cb();
+        }
+        ipcRenderer.on("notes.changed", handler)
+        return () => {
+            ipcRenderer.off("notes.changed", handler)
+        }
+    },
 }
-
 
 
 // ── snippets ───────────────────────────────────────────────────────────────────
@@ -177,10 +180,14 @@ const snippets: ElectronAPI["snippets"] = {
     get: () => ipcRenderer.invoke("snippets.get"),
     save: (data) => ipcRenderer.invoke("snippets.save", data),
     onChanged: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: { event: string; path: string }) => { cb(data); }
-    ipcRenderer.on("snippets.changed", handler)
-    return () => { ipcRenderer.off("snippets.changed", handler) }
-  },
+        const handler = (_event: IpcRendererEvent, data: { event: string; path: string }) => {
+            cb(data);
+        }
+        ipcRenderer.on("snippets.changed", handler)
+        return () => {
+            ipcRenderer.off("snippets.changed", handler)
+        }
+    },
     readCode: (relPath) => ipcRenderer.invoke("snippets.readCode", relPath),
     writeCode: (relPath, content) => ipcRenderer.invoke("snippets.writeCode", relPath, content),
     deleteCode: (relPath) => ipcRenderer.invoke("snippets.deleteCode", relPath),
@@ -189,30 +196,40 @@ const snippets: ElectronAPI["snippets"] = {
 // ── uiNotification ─────────────────────────────────────────────────────────────
 
 const uiNotification: ElectronAPI["uiNotification"] = {
-  show:    (payload) => { ipcRenderer.send("notif.dispatch", payload); },
-  destroy: ()        => { ipcRenderer.send("notif.dispatch", null); },
-  onAction: (cb) => {
-    const handler = (_event: IpcRendererEvent, data: { actionId: string; extraData: unknown }) => {
-      cb(data.actionId, data.extraData)
-    }
-    ipcRenderer.on("notif.clicked", handler)
-    return () => { ipcRenderer.off("notif.clicked", handler) }
-  },
+    show: (payload) => {
+        ipcRenderer.send("notif.dispatch", payload);
+    },
+    destroy: () => {
+        ipcRenderer.send("notif.dispatch", null);
+    },
+    onAction: (cb) => {
+        const handler = (_event: IpcRendererEvent, data: { actionId: string; extraData: unknown }) => {
+            cb(data.actionId, data.extraData)
+        }
+        ipcRenderer.on("notif.clicked", handler)
+        return () => {
+            ipcRenderer.off("notif.clicked", handler)
+        }
+    },
 };
 
 // ── scheduler ─────────────────────────────────────────────────────────────────
 
 const scheduler: ElectronAPI["scheduler"] = {
-  list:   ()                   => ipcRenderer.invoke("notif.scheduler.list"),
-  add:    (item)               => ipcRenderer.invoke("notif.scheduler.add", item),
-  remove: (id)                 => ipcRenderer.invoke("notif.scheduler.remove", id),
-  toggle: (id, enabled)        => ipcRenderer.invoke("notif.scheduler.toggle", id, enabled),
-  snooze: (id, minutes)        => ipcRenderer.invoke("notif.scheduler.snooze", id, minutes),
-  onFired: (cb) => {
-    const handler = (_event: IpcRendererEvent, item: Parameters<typeof cb>[0]) => { cb(item) }
-    ipcRenderer.on("notif.scheduler.fired", handler)
-    return () => { ipcRenderer.off("notif.scheduler.fired", handler) }
-  },
+    list: () => ipcRenderer.invoke("notif.scheduler.list"),
+    add: (item) => ipcRenderer.invoke("notif.scheduler.add", item),
+    remove: (id) => ipcRenderer.invoke("notif.scheduler.remove", id),
+    toggle: (id, enabled) => ipcRenderer.invoke("notif.scheduler.toggle", id, enabled),
+    snooze: (id, minutes) => ipcRenderer.invoke("notif.scheduler.snooze", id, minutes),
+    onFired: (cb) => {
+        const handler = (_event: IpcRendererEvent, item: Parameters<typeof cb>[0]) => {
+            cb(item)
+        }
+        ipcRenderer.on("notif.scheduler.fired", handler)
+        return () => {
+            ipcRenderer.off("notif.scheduler.fired", handler)
+        }
+    },
 }
 
 // ── git ────────────────────────────────────────────────────────────────────────
@@ -230,34 +247,38 @@ const git: ElectronAPI["git"] = {
 // ── jules events ───────────────────────────────────────────────────────────────
 
 const julesEvents: ElectronAPI["julesEvents"] = {
-  subscribe: () => {
-    ipcRenderer.send("jules:subscribe")
-  },
-  unsubscribe: () => {
-    ipcRenderer.send("jules:unsubscribe")
-  },
-  on: (cb: (event: JulesWorkerEvent) => void) => {
-    const handler = (_event: IpcRendererEvent, data: JulesWorkerEvent) => { cb(data) }
-    ipcRenderer.on("jules:event", handler)
-    return () => { ipcRenderer.off("jules:event", handler) }
-  },
+    subscribe: () => {
+        ipcRenderer.send("jules:subscribe")
+    },
+    unsubscribe: () => {
+        ipcRenderer.send("jules:unsubscribe")
+    },
+    on: (cb: (event: JulesWorkerEvent) => void) => {
+        const handler = (_event: IpcRendererEvent, data: JulesWorkerEvent) => {
+            cb(data)
+        }
+        ipcRenderer.on("jules:event", handler)
+        return () => {
+            ipcRenderer.off("jules:event", handler)
+        }
+    },
 }
 
 // ── notifLog ───────────────────────────────────────────────────────────────────
 
 const notifLog: ElectronAPI["notifLog"] = {
-  get:         () => ipcRenderer.invoke("notif.log.get"),
-  clear:       () => ipcRenderer.invoke("notif.log.clear"),
-  markSeen:    (id) => ipcRenderer.invoke("notif.log.markSeen", id),
-  markAllSeen: () => ipcRenderer.invoke("notif.log.markAllSeen"),
+    get: () => ipcRenderer.invoke("notif.log.get"),
+    clear: () => ipcRenderer.invoke("notif.log.clear"),
+    markSeen: (id) => ipcRenderer.invoke("notif.log.markSeen", id),
+    markAllSeen: () => ipcRenderer.invoke("notif.log.markAllSeen"),
 }
 
 // ── store ──────────────────────────────────────────────────────────────────────
 
 const store: ElectronAPI["store"] = {
-  get:    (key)        => ipcRenderer.invoke("store:get", key),
-  set:    (key, value) => ipcRenderer.invoke("store:set", key, value),
-  delete: (key)        => ipcRenderer.invoke("store:delete", key),
+    get: (key) => ipcRenderer.invoke("store:get", key),
+    set: (key, value) => ipcRenderer.invoke("store:set", key, value),
+    delete: (key) => ipcRenderer.invoke("store:delete", key),
 }
 
 // ── github ─────────────────────────────────────────────────────────────────────
@@ -280,22 +301,23 @@ const github: ElectronAPI["github"] = {
 // ── expose ─────────────────────────────────────────────────────────────────────
 
 const api: Omit<ElectronAPI, 'sdk'> = {
-  terminal,
-  queues,
-  window:  window_,
-  power,
-  popup,
-  filesystem,
-  env,
-  history,
-  notes,
-  snippets,
-  uiNotification,
-  scheduler,
-  notifLog,
-  git,
-  julesEvents,
-  store,
+    terminal,
+    queues,
+    window: window_,
+    power,
+    popup,
+    filesystem,
+    env,
+    history,
+    notes,
+    snippets,
+    uiNotification,
+    scheduler,
+    notifLog,
+    git,
+    julesEvents,
+    store,
+    github,
 };
 
-contextBridge.exposeInMainWorld("electron", { ...api, sdk });
+contextBridge.exposeInMainWorld("electron", {...api, sdk});

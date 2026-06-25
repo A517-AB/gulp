@@ -1,10 +1,10 @@
-import { jules } from '@google/jules-sdk'
+import {jules} from '@google/jules-sdk'
 
 type JulesWorkerEvent =
-  | { type: 'ready' }
-  | { type: 'session.new';          sessionId: string; state: string }
-  | { type: 'session.stateChanged'; sessionId: string; state: string; prevState: string }
-  | { type: 'error';                message: string }
+    | { type: 'ready' }
+    | { type: 'session.new'; sessionId: string; state: string }
+    | { type: 'session.stateChanged'; sessionId: string; state: string; prevState: string }
+    | { type: 'error'; message: string }
 
 const port = (process as NodeJS.Process & { parentPort: { postMessage: (msg: unknown) => void } }).parentPort
 
@@ -24,17 +24,19 @@ async function poll() {
             const prev = tracked.get(id)
             if (prev === undefined) {
                 tracked.set(id, state)
-                post({ type: 'session.new', sessionId: id, state })
+                post({type: 'session.new', sessionId: id, state})
             } else if (prev !== state) {
                 tracked.set(id, state)
-                post({ type: 'session.stateChanged', sessionId: id, state, prevState: prev })
+                post({type: 'session.stateChanged', sessionId: id, state, prevState: prev})
             }
         }
     } catch (err) {
-        post({ type: 'error', message: err instanceof Error ? err.message : String(err) })
+        post({type: 'error', message: err instanceof Error ? err.message : String(err)})
     }
 }
 
-post({ type: 'ready' })
+post({type: 'ready'})
 void poll()
-setInterval(() => { void poll() }, 30_000)
+setInterval(() => {
+    void poll()
+}, 30_000)

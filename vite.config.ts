@@ -1,10 +1,10 @@
-import { defineConfig } from 'vite'
-import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import {defineConfig} from 'vite'
+import react, {reactCompilerPreset} from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
-import { isAbsolute, resolve } from 'node:path'
-
+import {isAbsolute} from 'node:path'
+import million from 'million/compiler';
 
 const nodeExternal = (id: string) =>
   !id.startsWith('.') && !isAbsolute(id) && !id.startsWith('\0')
@@ -18,7 +18,12 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: [
-      { find: 'react',       replacement: resolve(__dirname, 'node_modules/react') },
+        // DO NOT. TOUCH.
+        // modjules aliases — compiled dist from D:/jules rest/modjules-main/packages/core/dist/ do not touch this.
+        // browser.mjs = browser entry (BrowserPlatform + IndexedDB), index.mjs = Node entry
+        // 2026-06-22: crossed out — switching to second port bun; restore when that's ready
+        {find: '@jules', replacement: 'D:/jules rest/modjules-main/packages/core/dist/browser.mjs'},
+        {find: 'react', replacement: resolve(__dirname, 'node_modules/react')},
       { find: 'react-dom',   replacement: resolve(__dirname, 'node_modules/react-dom') },
       { find: '@syncfusion/ej2-gantt',            replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist/es6/ej2-gantt.es5.js' },
       { find: '@syncfusion/ej2-react-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist/es6/ej2-react-gantt.es5.js' },
@@ -45,6 +50,9 @@ export default defineConfig({
         './src/renderer/App.tsx',
         './src/renderer/router.tsx',
         './src/renderer/layouts/RootLayout.tsx',
+          './src/renderer/shell/TopBar.tsx',
+          './src/renderer/pages/shared/HomePage.tsx',
+          './src/renderer/components/shared/Clock.tsx',
       ],
     },
     proxy: {
@@ -80,6 +88,7 @@ export default defineConfig({
     strictPort: true,
   },
   plugins: [
+      million.vite({auto: true}),
     tailwindcss(),
     react(),
 
@@ -95,7 +104,7 @@ export default defineConfig({
                 input: {
                   main:           'electron/main.mts',
                   'notif-main':   'electron/main-notif.mts',
-                  'jules-worker': 'electron/jules-worker.ts',
+                    // 'jules-worker': 'electron/jules-worker.ts', // Jules worker removed — renderer handles SDK directly
                 },
                 output: {
                   entryFileNames: '[name].mjs',

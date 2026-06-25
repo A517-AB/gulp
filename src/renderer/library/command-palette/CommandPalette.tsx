@@ -60,15 +60,17 @@ function NavActions() {
 
     const actions = allRoutes
         .filter((r) => r.handle?.title)
-        .map((r) => ({
-            id: `nav-${r.path ?? "home"}`,
-            name: r.handle.title,
-            section: "Navigation" as const,
-            perform: () => {
-                const path = r.index ? "/" : `/${r.path ?? ""}`;
-                void navigate(path);
-            },
-        }));
+        .map((r) => {
+            return ({
+                id: `nav-${r.path ?? "home"}`,
+                name: r.handle!.title,
+                section: "Navigation" as const,
+                perform: () => {
+                    const path = r.index ? "/" : `/${r.path ?? ""}`;
+                    void navigate(path);
+                },
+            });
+        });
 
     useRegisterActions(actions, [navigate]);
     return null;
@@ -126,4 +128,3 @@ export function CommandPaletteActions() {
         </>
     );
 }
-

@@ -55,10 +55,10 @@ export function NewSessionDialog({ onSessionCreated, initialValues, trigger, ope
 const EMPTY = {sourceId: '', title: '', prompt: '', startingBranch: '', interactive: false, autoCreatePr: false};
 
 function SessionForm({initialValues, portalContainer, onClose, onSessionCreated}: {
-    initialValues?: SessionInitialValues;
+    initialValues?: SessionInitialValues | undefined;
     portalContainer: HTMLDivElement | null;
     onClose: () => void;
-    onSessionCreated?: () => void;
+    onSessionCreated?: (() => void) | undefined;
 }) {
     const [sources, setSources] = useState<Source[]>([]);
     const [form, setForm] = useState({...EMPTY, ...(initialValues ?? {})});
@@ -86,7 +86,7 @@ function SessionForm({initialValues, portalContainer, onClose, onSessionCreated}
             ...(form.title ? {title: form.title} : {}),
             ...(form.autoCreatePr ? {autoPr: true} : {}),
             ...(form.interactive ? {requireApproval: true} : {}),
-            ...(ownerRepo ? {source: {github: ownerRepo, branch: form.startingBranch || 'main'}} : {}),
+            ...(ownerRepo ? {source: {github: ownerRepo, baseBranch: form.startingBranch || 'main'}} : {}),
         });
     }
 

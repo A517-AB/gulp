@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { sdkIpc } from '@shared/bridge';
-import type { SessionConfig } from '@jules';
-import type { QuickieContextType, QuickiePreset, QuickieData } from '@/components/quickie/types';
-import { useStore } from './app';
+import {create} from 'zustand';
+import {sdkIpc} from '@shared/bridge';
+import type {SessionConfig} from '@jules';
+import type {QuickieContextType, QuickieData, QuickiePreset} from '@/components/quickie/types';
+import {useStore} from './app';
 
 export interface QuickieJob {
   id: string;
@@ -48,7 +48,7 @@ export const useQuickieStore = create<QuickieState>((set) => ({
       }
     }));
 
-    await useStore.getState().loadSessions();
+      await useStore.getState().sync();
 
     const resultPromise = new Promise<string>((resolve, reject) => {
       ipc.session.waitFor(id, 'completed')

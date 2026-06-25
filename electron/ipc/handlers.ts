@@ -125,13 +125,13 @@ export function parseUnidiffWithContent(patch?: string | null): GeneratedFile[] 
 function resolveGitSource(cwd?: string): { github: string | null; baseBranch: string } {
     const baseBranch = process.env.BASE_BRANCH ?? 'main'
     const fromEnv = process.env.GITHUB_REPO
-    if (fromEnv) return { github: fromEnv, baseBranch }
+    if (fromEnv) return {github: fromEnv, baseBranch}
     try {
-        const url = execFileSync('git', ['remote', 'get-url', 'origin'], { cwd, encoding: 'utf-8' }).trim()
+        const url = execFileSync('git', ['remote', 'get-url', 'origin'], {cwd, encoding: 'utf-8'}).trim()
         const match = /github\.com[:/](.+?)(?:\.git)?$/.exec(url)
-        return { github: match?.[1] ?? null, baseBranch }
+        return {github: match?.[1] ?? null, baseBranch}
     } catch {
-        return { github: null, baseBranch }
+        return {github: null, baseBranch}
     }
 }
 
@@ -184,7 +184,9 @@ export function registerSdkHandlers() {
     ipcMain.handle('sdk:client.sync', async (event, options?: Omit<SyncOptions, 'onProgress' | 'signal'>) =>
         serialize(await jules.sync({
             ...options,
-            onProgress: (p) => { send(event.sender, 'sdk:client.sync.progress', p); },
+            onProgress: (p) => {
+                send(event.sender, 'sdk:client.sync.progress', p);
+            },
         }))
     )
 
@@ -198,7 +200,7 @@ export function registerSdkHandlers() {
 
     ipcMain.handle('sdk:client.run', async (_, config: SessionConfig) => {
         const session = await jules.run(config)
-        return { id: session.id }
+        return {id: session.id}
     })
 
     ipcMain.handle('sdk:client.with', (_, options: JulesOptions) => {
@@ -219,7 +221,7 @@ export function registerSdkHandlers() {
     // ── session ──────────────────────────────────────────────────────────────────
 
     ipcMain.handle('sdk:session.create', async (_, config: SessionConfig) =>
-        serialize({ id: (await jules.session(config)).id })
+        serialize({id: (await jules.session(config)).id})
     )
 
     ipcMain.handle('sdk:session.send', async (_, id: string, prompt: string) =>
@@ -240,7 +242,7 @@ export function registerSdkHandlers() {
 
     ipcMain.handle('sdk:session.result', async (_, id: string) => {
         const o = await jules.session(id).result()
-        return { sessionId: o.sessionId, title: o.title, state: o.state, pullRequest: o.pullRequest, outputs: o.outputs }
+        return {sessionId: o.sessionId, title: o.title, state: o.state, pullRequest: o.pullRequest, outputs: o.outputs}
     })
 
     ipcMain.handle('sdk:session.waitFor', async (_, id: string, state: SessionState) =>
@@ -249,7 +251,7 @@ export function registerSdkHandlers() {
 
     ipcMain.handle('sdk:session.snapshot', async (_, id: string, options?: { activities?: boolean }) => {
         const snap = await jules.session(id).snapshot(options)
-        return snap.toJSON({ exclude: [] })
+        return snap.toJSON({exclude: []})
     })
 
     ipcMain.handle('sdk:session.archive', async (_, id: string) =>
@@ -271,32 +273,35 @@ export function registerSdkHandlers() {
             const snapshot = await jules.session(id).snapshot();
             const gitPatch = snapshot.changeSet()?.gitPatch;
             if (!gitPatch?.unidiffPatch) {
-                return { success: false, error: 'No ChangeSet artifact with gitPatch data found in this session.' };
+                return {success: false, error: 'No ChangeSet artifact with gitPatch data found in this session.'};
             }
 
             const commitMessage = gitPatch.suggestedCommitMessage || 'Applied changes from Jules';
 
             // Checkout a new branch to apply the changes
-            execFileSync('git', ['checkout', '-b', branchName], { cwd: options.cwd, stdio: 'pipe' });
+            execFileSync('git', ['checkout', '-b', branchName], {cwd: options.cwd, stdio: 'pipe'});
 
             // Save the patch to disk
             patchPath = path.join(options.cwd, 'jules_changes.patch');
             fs.writeFileSync(patchPath, gitPatch.unidiffPatch);
 
             // Apply the patch
-            execFileSync('git', ['apply', patchPath], { cwd: options.cwd, stdio: 'pipe' });
+            execFileSync('git', ['apply', patchPath], {cwd: options.cwd, stdio: 'pipe'});
 
             // Commit the applied changes
-            execFileSync('git', ['add', '.'], { cwd: options.cwd, stdio: 'pipe' });
-            execFileSync('git', ['commit', '-m', commitMessage], { cwd: options.cwd, stdio: 'pipe' });
+            execFileSync('git', ['add', '.'], {cwd: options.cwd, stdio: 'pipe'});
+            execFileSync('git', ['commit', '-m', commitMessage], {cwd: options.cwd, stdio: 'pipe'});
 
-            return { success: true, branch: branchName };
+            return {success: true, branch: branchName};
         } catch (error) {
             console.error('[sdk:session.applyPatch] error:', error);
-            return { success: false, error: error instanceof Error ? error.message : String(error) };
+            return {success: false, error: error instanceof Error ? error.message : String(error)};
         } finally {
             if (patchPath) {
-                try { fs.unlinkSync(patchPath); } catch { /* ignore */ }
+                try {
+                    fs.unlinkSync(patchPath);
+                } catch { /* ignore */
+                }
             }
         }
     })
@@ -381,7 +386,7 @@ export function registerSdkHandlers() {
         serialize(await jules.sources.get(filter))
     )
 
-    ipcMain.handle('sdk:sources.resolve', (_,  cwd?: string) =>
+    ipcMain.handle('sdk:sources.resolve', (_, cwd?: string) =>
         resolveGitSource(cwd)
     )
 
@@ -390,7 +395,7 @@ export function registerSdkHandlers() {
 
     ipcMain.handle('sdk:artifact.save', async (_, data: string, filepath: string) => {
         const resolved = path.resolve(filepath)
-        await fs.promises.mkdir(path.dirname(resolved), { recursive: true })
+        await fs.promises.mkdir(path.dirname(resolved), {recursive: true})
         await fs.promises.writeFile(resolved, Buffer.from(data, 'base64'))
         return resolved
     })
