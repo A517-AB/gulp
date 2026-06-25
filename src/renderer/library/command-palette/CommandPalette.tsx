@@ -62,7 +62,7 @@ function NavActions() {
         .filter((r) => r.handle?.title)
         .map((r) => ({
             id: `nav-${r.path ?? "home"}`,
-            name: r.handle!.title,
+            name: r.handle.title,
             section: "Navigation" as const,
             perform: () => {
                 const path = r.index ? "/" : `/${r.path ?? ""}`;
@@ -127,7 +127,3 @@ export function CommandPaletteActions() {
     );
 }
 
-export function useCommandPalette() {
-    const {query} = useKBar();
-    return {open: () => query.toggle()};
-}

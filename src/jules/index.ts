@@ -1,76 +1,118 @@
 // ── SDK types — explicitly re-exported from @google/jules-sdk/types ──────────
 
 import type {
-  // Session
-  SessionState,
-  SessionResource,
-  SessionOutcome,
-  SessionClient,
-  SessionConfig,
-  SessionOutput,
-  SessionSnapshot,
-  SessionInsights,
-  SerializedSnapshot,
-  SnapshotField,
-  ToJSONOptions,
-  TimelineEntry,
-  AutomatedSession,
-  // Activity
-  Activity,
-  ActivityAgentMessaged,
-  ActivityUserMessaged,
-  ActivityPlanGenerated,
-  ActivityPlanApproved,
-  ActivityProgressUpdated,
-  ActivitySessionCompleted,
-  ActivitySessionFailed,
-  ActivitySummary,
-  LightweightActivity,
-  LightweightArtifact,
-  SelectOptions,
-  StreamActivitiesOptions,
-  // Artifacts
-  Artifact,
-  ChangeSetArtifact,
-  BashArtifact,
-  MediaArtifact,
-  StrippedMediaArtifact,
-  ChangeSet,
-  GitPatch,
-  ParsedChangeSet,
-  ParsedFile,
-  GeneratedFile,
-  GeneratedFiles,
-  // Sources
-  Source,
-  SourceContext,
-  SourceInput,
-  SourceManager,
-  ListSourcesOptions,
-  GitHubRepo,
-  // Plan
-  Plan,
-  PlanStep,
-  PullRequest,
-  // Client
-  JulesClient,
-  JulesOptions,
-  AutomationMode,
-  // Query
-  JulesQuery,
-  JulesDomain,
-  QueryResult,
-  // Sync
-  SyncDepth,
-  SyncOptions,
-  SyncProgress,
-  SyncStats,
+    Activity,
+    ActivityAgentMessaged,
+    ActivityPlanApproved,
+    ActivityPlanGenerated,
+    ActivityProgressUpdated,
+    ActivitySessionCompleted,
+    ActivitySessionFailed,
+    ActivitySummary,
+    ActivityUserMessaged,
+    Artifact,
+    AutomatedSession,
+    AutomationMode,
+    BashArtifact,
+    ChangeSet,
+    ChangeSetArtifact,
+    FilterOp,
+    GeneratedFile,
+    GeneratedFiles,
+    GitHubRepo,
+    GitPatch,
+    IncludeClause,
+    JulesClient,
+    JulesDomain,
+    JulesOptions,
+    JulesQuery,
+    LightweightActivity,
+    LightweightArtifact,
+    ListSourcesOptions,
+    MediaArtifact,
+    Origin,
+    ParsedChangeSet,
+    ParsedFile,
+    Plan,
+    PlanStep,
+    PullRequest,
+    QueryResult,
+    SelectOptions,
+    SerializedSnapshot,
+    SessionClient,
+    SessionConfig,
+    SessionInsights,
+    SessionOutcome,
+    SessionOutput,
+    SessionResource,
+    SessionSnapshot,
+    SessionState,
+    SnapshotField,
+    Source,
+    SourceContext,
+    SourceInput,
+    SourceManager,
+    StorageFactory,
+    StreamActivitiesOptions,
+    StrippedMediaArtifact,
+    SyncCheckpoint,
+    SyncDepth,
+    SyncOptions,
+    SyncProgress,
+    SyncStats,
+    TimelineEntry,
+    ToJSONOptions,
+    WhereClause,
 } from '@google/jules-sdk/types'
-
-
-
-
-
+// These live in the main entry, not /types
+import type {
+    DomainSchema,
+    FieldMeta,
+    JulesOptions,
+    ListSessionsOptions,
+    ListSessionsResponse,
+    Platform,
+    QueryExample,
+    ValidationError,
+    ValidationErrorCode,
+    ValidationResult,
+    ValidationWarning,
+} from '@google/jules-sdk'
+import {
+    ACTIVITY_SCHEMA,
+    AutomatedSessionFailedError,
+    BashArtifact,
+    ChangeSetArtifact,
+    connect,
+    FILTER_OP_SCHEMA,
+    formatValidationResult,
+    generateMarkdownDocs,
+    generateTypeDefinition,
+    getAllSchemas,
+    getSchema,
+    InvalidStateError,
+    jules,
+    JulesApiError,
+    JulesAuthenticationError,
+    JulesClientImpl,
+    JulesError,
+    JulesNetworkError,
+    JulesRateLimitError,
+    MemorySessionStorage,
+    MemoryStorage,
+    MissingApiKeyError,
+    NodePlatform,
+    parseUnidiff,
+    PROJECTION_SCHEMA,
+    SESSION_SCHEMA,
+    SessionCursor,
+    SourceNotFoundError,
+    SyncInProgressError,
+    TimeoutError,
+    toSummary,
+    validateQuery,
+} from '@google/jules-sdk'
+import type {SdkIpc} from './sdk-ipc'
 
 
 // ── App-level types ───────────────────────────────────────────────────────────
@@ -132,15 +174,65 @@ export type {
   SyncOptions,
   SyncProgress,
   SyncStats,
+    SyncCheckpoint,
+    StorageFactory,
+    Origin,
+    WhereClause,
+    IncludeClause,
+    FilterOp,
 };
 
-// These live in the main entry, not /types
-import type {ListSessionsOptions, ListSessionsResponse, DomainSchema, ValidationResult} from '@google/jules-sdk'
-export type {ListSessionsOptions, ListSessionsResponse, DomainSchema, ValidationResult}
+export type {
+    ListSessionsOptions,
+    ListSessionsResponse,
+    DomainSchema,
+    ValidationResult,
+    ValidationError,
+    ValidationWarning,
+    ValidationErrorCode,
+    FieldMeta,
+    QueryExample,
+    Platform,
+}
+
+// ── SDK values, constants, helper functions, and error classes ───────────────
+
+export {
+    connect,
+    jules,
+    SESSION_SCHEMA,
+    ACTIVITY_SCHEMA,
+    FILTER_OP_SCHEMA,
+    PROJECTION_SCHEMA,
+    getSchema,
+    getAllSchemas,
+    generateTypeDefinition,
+    generateMarkdownDocs,
+    validateQuery,
+    formatValidationResult,
+    SessionCursor,
+    toSummary,
+    JulesClientImpl,
+    MemoryStorage,
+    MemorySessionStorage,
+    NodePlatform,
+    ChangeSetArtifact,
+    BashArtifact,
+    parseUnidiff,
+    JulesError,
+    JulesNetworkError,
+    JulesApiError,
+    JulesAuthenticationError,
+    JulesRateLimitError,
+    MissingApiKeyError,
+    SourceNotFoundError,
+    AutomatedSessionFailedError,
+    TimeoutError,
+    SyncInProgressError,
+    InvalidStateError,
+}
 
 // ── SdkIpc Interface ──────────────────────────────────────────────────────────
-
-import type { SdkIpc } from './sdk-ipc'
 export type { SdkIpc }
 
 
@@ -155,4 +247,4 @@ export type { SessionStatus, SessionStatusInfo, SessionInitialValues } from './s
 
 // ── Fleet ─────────────────────────────────────────────────────────────────────
 
-export type { FleetTask, FleetTaskGroup } from './types'
+export type {FleetTask, FleetTaskGroup, TaskAction} from './types'

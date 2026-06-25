@@ -3,16 +3,21 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import {defineConfig, globalIgnores} from 'eslint/config'
 
 export default defineConfig([
   globalIgnores([
     'dist',
     'dist-electron',
+      'public/**',
+      'dist-jules/**',
     'references/**',
     'scripts/**',
     'primitives/**',
+      'research/**',
+      'maybe/**',
     'check.ts',
+      'untitled.ts',
     'scratch/**',
     // excluded from tsconfig — Jules example files not part of this project
     'src/electron/ipc/advanced-workspace.ts',

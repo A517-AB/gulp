@@ -1,12 +1,13 @@
 import {ipcMain} from 'electron'
 import type {
+    Activity,
     JulesDomain,
     JulesOptions,
     JulesQuery,
     ListSessionsOptions,
     SessionConfig,
+    SessionResource,
     SessionState,
-    Activity,
 } from '@google/jules-sdk'
 import {
     formatValidationResult,
@@ -19,7 +20,7 @@ import {
     toSummary,
     validateQuery
 } from '@google/jules-sdk'
-import type {SelectOptions, StreamActivitiesOptions, SyncOptions, GeneratedFile} from '@google/jules-sdk/types'
+import type {GeneratedFile, SelectOptions, StreamActivitiesOptions, SyncOptions} from '@google/jules-sdk/types'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import {Buffer} from 'node:buffer'
@@ -54,10 +55,10 @@ export function parseUnidiffWithContent(patch?: string | null): GeneratedFile[] 
             if (nextLine?.startsWith('+++ ')) {
                 const fromPath = line.substring(4);
                 const toPath = nextLine.substring(4);
-                
+
                 let changeType: 'created' | 'modified' | 'deleted';
                 let filePath: string;
-                
+
                 if (fromPath === '/dev/null') {
                     changeType = 'created';
                     filePath = toPath.startsWith('b/') ? toPath.substring(2) : toPath;
@@ -150,16 +151,32 @@ function send(sender: Sender, ch: string, payload?: unknown) {
 export function registerSdkHandlers() {
 
     // ── client ──────────────────────────────────────────────────────────────────
-
-    ipcMain.handle('sdk:client.sessions', async (_, options?: ListSessionsOptions) => {
-        const sessions = await jules.sessions(options).all()
+    // ── changed 2026-06-25: scanIndex → sort by _updatedAt desc → storage.get() for full resource
+    // ── local disk only, no network, no iceberg validation — 50 most recent sessions
+    ipcMain.handle('sdk:client.sessions', async (_event, _options?: ListSessionsOptions) => {
+        const all: { id: string; createTime: string }[] = []
+        for await (const e of jules.storage.scanIndex()) {
+            all.push(e)
+        }
+        all.sort((a, b) => b.createTime.localeCompare(a.createTime))
+        const sessions: SessionResource[] = []
+        for (const e of all.slice(0, 50)) {
+            const cached = await jules.storage.get(e.id)
+            if (cached) sessions.push(cached.resource)
+        }
         return serialize(sessions)
     })
 
-    ipcMain.handle('sdk:client.sessions.stream.start', async (event, options?: ListSessionsOptions) => {
-        for await (const item of jules.sessions(options)) {
-            if (event.sender.isDestroyed()) break
-            send(event.sender, 'sdk:client.sessions.item', item)
+    ipcMain.handle('sdk:client.sessions.stream.start', async (event, _options?: ListSessionsOptions) => {
+        const all: { id: string; createTime: string }[] = []
+        for await (const e of jules.storage.scanIndex()) {
+            all.push(e)
+        }
+        all.sort((a, b) => b.createTime.localeCompare(a.createTime))
+        for (const e of all.slice(0, 50)) {
+            if (event.sender.isDestroyed()) return
+            const cached = await jules.storage.get(e.id)
+            if (cached) send(event.sender, 'sdk:client.sessions.item', cached.resource)
         }
         send(event.sender, 'sdk:client.sessions.done')
     })

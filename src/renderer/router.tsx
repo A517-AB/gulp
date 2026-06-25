@@ -8,7 +8,6 @@ import HomePage from '@renderer/pages/shared/HomePage'
 import JulesPage from '@renderer/pages/shared/JulesPage'
 import NotesPage from '@renderer/pages/shared/NotesPage'
 import ActivityPage from '@renderer/pages/electron/ActivityPage'
-import SnapshotPage from '@renderer/pages/electron/SnapshotPage'
 import {ExplorerPage} from '@renderer/pages/electron/ExplorerPage'
 import ShipPage from '@renderer/pages/electron/ShipPage'
 import OverviewPage from '@renderer/pages/web/OverviewPage'
@@ -57,7 +56,6 @@ const electronRoutes: AppRoute[] = [
     { path: 'reading',   lazy: () => import('@renderer/pages/electron/ReadingPage').then(m => ({ Component: m.default })),   handle: { title: 'Reading',   inSecretNav: true } },
     { path: 'kit',       lazy: () => import('@renderer/pages/electron/KitPage').then(m => ({ Component: m.default })),       handle: { title: 'Kit',       inSecretNav: true } },
     { path: 'activity/:id', Component: ActivityPage },
-    { path: 'snapshot/:id', Component: SnapshotPage },
 ]
 
 // ── web ───────────────────────────────────────────────────────────────────────

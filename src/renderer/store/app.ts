@@ -1,6 +1,6 @@
 import {create} from 'zustand'
-import type {Activity, SessionResource, SerializedSnapshot, SessionConfig, Source, ParsedFile} from '@jules'
-import {sdkIpc, filesystem, store, uiNotification} from '@shared/bridge'
+import type {Activity, ParsedFile, SerializedSnapshot, SessionConfig, SessionResource, Source} from '@jules'
+import {filesystem, sdkIpc, store, uiNotification} from '@shared/bridge'
 
 export interface SessionFormData {
     sourceId: string
@@ -13,6 +13,7 @@ export interface SessionFormData {
 
 const activeStreams = new Map<string, () => void>()
 const loadedSessions = new Set<string>()
+let sessionsStreaming = false
 let syncInProgress = false
 let lastSyncAt = 0
 const SYNC_COOLDOWN_MS = 5 * 60 * 1000
@@ -27,7 +28,10 @@ const DEFAULT_FORM: SessionFormData = {
 }
 
 export interface AppStore {
-    sessionList: SessionResource[]
+    sessions: SessionResource[]
+    initSessions: () => void
+    removeSession: (id: string) => void
+
     activities: Record<string, Activity[]>
     activitySummaries: Record<string, Record<string, string>>
     activitiesError: Record<string, string | null>
@@ -39,7 +43,6 @@ export interface AppStore {
     resetNewSessionForm: () => void
     loadSources: () => Promise<void>
 
-    loadSessions: () => Promise<void>
     sync: () => Promise<void>
 
     loadActivities: (sessionId: string) => Promise<void>
@@ -60,7 +63,24 @@ export interface AppStore {
 }
 
 export const useStore = create<AppStore>((set, get) => ({
-    sessionList: [],
+    sessions: [],
+    initSessions: () => {
+        if (sessionsStreaming || !sdkIpc) return
+        sessionsStreaming = true
+        sdkIpc.client.streamSessions((item) => {
+            set(s => {
+                const idx = s.sessions.findIndex(x => x.id === item.id)
+                if (idx >= 0) {
+                    const next = [...s.sessions];
+                    next[idx] = item;
+                    return {sessions: next}
+                }
+                return {sessions: [...s.sessions, item]}
+            })
+        })
+    },
+    removeSession: (id) => set(s => ({sessions: s.sessions.filter(x => x.id !== id)})),
+
     activities: {},
     activitySummaries: {},
     activitiesError: {},
@@ -92,23 +112,6 @@ export const useStore = create<AppStore>((set, get) => ({
         }
     },
 
-    loadSessions: async () => {
-        if (!sdkIpc) return
-        const data = await sdkIpc.client.sessions({limit: 20})
-        set(state => {
-            const prev = state.sessionList
-            if (
-                prev.length === data.length &&
-                prev.every((s, i) => {
-                    const d = data[i]
-                    if (d === undefined) return false
-                    return s.id === d.id && s.state === d.state && s.updateTime === d.updateTime
-                })
-            ) return state
-            return {sessionList: data}
-        })
-    },
-
     sync: async () => {
         const now = Date.now()
         if (!sdkIpc || syncInProgress || now - lastSyncAt < SYNC_COOLDOWN_MS) return
@@ -116,7 +119,6 @@ export const useStore = create<AppStore>((set, get) => ({
         lastSyncAt = now
         try {
             await sdkIpc.client.sync()
-            await get().loadSessions()
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err)
             if (msg.includes('SyncInProgress')) return
@@ -133,9 +135,11 @@ export const useStore = create<AppStore>((set, get) => ({
         console.log(`[store] loadActivities start ${sessionId}`)
         set(state => ({activitiesError: {...state.activitiesError, [sessionId]: null}}))
         try {
-            await ipc.activities.hydrate(sessionId)
-            console.log(`[store] hydrate done ${sessionId}`)
-            const activities = await ipc.activities.select(sessionId)
+            let activities = await ipc.activities.select(sessionId)
+            if (activities.length === 0) {
+                await ipc.activities.hydrate(sessionId)
+                activities = await ipc.activities.select(sessionId)
+            }
             console.log(`[store] select done ${sessionId} — ${activities.length} activities`)
             set(state => {
                 const seen = new Set<string>()
@@ -144,15 +148,7 @@ export const useStore = create<AppStore>((set, get) => ({
                     seen.add(a.id);
                     return true
                 })
-                const streamed = state.activities[sessionId] ?? []
-                // streamed wins on conflict — stream() delivers live updates; select() is a point-in-time snapshot
-                const streamedById = new Map(streamed.map(a => [a.id, a]))
-                const merged = deduped.map(a => streamedById.get(a.id) ?? a)
-                for (const a of streamed) {
-                    if (!deduped.some(d => d.id === a.id)) merged.push(a)
-                }
-                console.log(`[store] merged ${merged.length} activities (${streamed.length} streamed, ${deduped.length} loaded)`)
-                return {activities: {...state.activities, [sessionId]: merged}}
+                return {activities: {...state.activities, [sessionId]: deduped}}
             })
         } catch (err) {
             const is404 = err instanceof Error && err.message.includes('404')
@@ -183,7 +179,7 @@ export const useStore = create<AppStore>((set, get) => ({
         }
         console.log(`[store] streamActivities start ${sessionId}`)
         const ipc = sdkIpc
-        const unsub = ipc.activities.stream(sessionId, (activity) => {
+        const unsub = ipc.activities.updates(sessionId, (activity) => {
             console.log(`[store] activity update ${sessionId} type=${activity.type} id=${activity.id}`)
             set(s => {
                 const existing = s.activities[sessionId] ?? []
@@ -197,19 +193,27 @@ export const useStore = create<AppStore>((set, get) => ({
             })
             if (activity.type === 'sessionCompleted' || activity.type === 'sessionFailed') {
                 console.log(`[store] session terminal ${activity.type} ${sessionId}`)
-                const session = get().sessionList.find(s => s.id === sessionId)
-                const title   = session?.title ?? 'Session'
                 if (activity.type === 'sessionCompleted') {
-                    uiNotification?.show({ title: 'Jules done', body: title, type: 'success', sound: 'chime', id: `jules-done-${sessionId}` })
+                    uiNotification?.show({
+                        title: 'Jules done',
+                        body: 'Session',
+                        type: 'success',
+                        sound: 'chime',
+                        id: `jules-done-${sessionId}`
+                    })
                 } else {
-                    uiNotification?.show({ title: 'Jules failed', body: title, type: 'error', sound: 'pulse', id: `jules-failed-${sessionId}` })
+                    uiNotification?.show({
+                        title: 'Jules failed',
+                        body: 'Session',
+                        type: 'error',
+                        sound: 'pulse',
+                        id: `jules-failed-${sessionId}`
+                    })
                 }
-                void get().loadSessions()
             }
         }, () => {
             console.log(`[store] stream closed ${sessionId}`)
             activeStreams.delete(sessionId)
-            void get().loadSessions()
         })
         activeStreams.set(sessionId, unsub)
         return () => {
@@ -243,19 +247,16 @@ export const useStore = create<AppStore>((set, get) => ({
         const ipc = sdkIpc
         if (!ipc) return
         await Promise.all(ids.map(id => ipc.session.archive(id)))
-        await get().loadSessions()
     },
 
     runSession: async (config) => {
         if (!sdkIpc) return
         await sdkIpc.client.run(config)
-        await get().loadSessions()
     },
 
     createSession: async (config) => {
         if (!sdkIpc) return
         await sdkIpc.session.create(config)
-        await get().loadSessions()
     },
 
 
@@ -308,9 +309,6 @@ export const useStore = create<AppStore>((set, get) => ({
     },
 }))
 
-// self-initialize on import
-void useStore.getState().loadSessions()
-void useStore.getState().loadSources()
 
 // migrate localStorage-archived sessions to SDK, once
 if (typeof window !== 'undefined' && sdkIpc) {
@@ -329,9 +327,4 @@ if (typeof window !== 'undefined' && sdkIpc) {
     }
 }
 
-if (typeof window !== 'undefined') {
-    window.addEventListener('focus', () => {
-        void useStore.getState().sync()
-    })
-}
 

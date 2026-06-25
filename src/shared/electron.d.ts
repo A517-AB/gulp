@@ -228,6 +228,75 @@ export interface StoreAPI {
     delete: (key: string) => Promise<void>
 }
 
+export interface GitHubIssue {
+    number: number;
+    html_url: string;
+    title: string;
+    state: string;
+    body?: string;
+}
+
+export interface GitHubPR {
+    number: number;
+    html_url: string;
+    title: string;
+    state: string;
+    head: { ref: string; sha: string };
+    base: { ref: string };
+    draft?: boolean;
+}
+
+export interface GitHubBranch {
+    name: string;
+    commit: { sha: string };
+}
+
+export interface GitHubCheckRun {
+    name: string;
+    status: string;
+    conclusion: string | null;
+    html_url: string;
+}
+
+export interface GitHubAPI {
+    // issues
+    createIssue: (owner: string, repo: string, data: {
+        title: string;
+        body?: string;
+        labels?: string[];
+        assignees?: string[]
+    }) => Promise<GitHubIssue>
+    listIssues: (owner: string, repo: string, state?: 'open' | 'closed' | 'all') => Promise<GitHubIssue[]>
+    updateIssue: (owner: string, repo: string, number: number, data: {
+        title?: string;
+        body?: string;
+        state?: 'open' | 'closed';
+        labels?: string[]
+    }) => Promise<GitHubIssue>
+    addIssueComment: (owner: string, repo: string, number: number, body: string) => Promise<unknown>
+    // pull requests
+    listPRs: (owner: string, repo: string, state?: 'open' | 'closed' | 'all') => Promise<GitHubPR[]>
+    getPR: (owner: string, repo: string, number: number) => Promise<GitHubPR>
+    createPR: (owner: string, repo: string, data: {
+        title: string;
+        body?: string;
+        head: string;
+        base: string;
+        draft?: boolean
+    }) => Promise<GitHubPR>
+    updatePR: (owner: string, repo: string, number: number, data: {
+        title?: string;
+        body?: string;
+        state?: 'open' | 'closed';
+        base?: string
+    }) => Promise<GitHubPR>
+    mergePR: (owner: string, repo: string, number: number, method?: 'merge' | 'squash' | 'rebase') => Promise<unknown>
+    getPRChecks: (owner: string, repo: string, ref: string) => Promise<{ check_runs: GitHubCheckRun[] }>
+    // branches
+    listBranches: (owner: string, repo: string) => Promise<GitHubBranch[]>
+    deleteBranch: (owner: string, repo: string, branch: string) => Promise<void>
+}
+
 // ── root ───────────────────────────────────────────────────────────────────────
 
 export interface ElectronAPI {

@@ -4,7 +4,6 @@ import {SessionList} from "@/components/workspace/session-list.tsx";
 import {CodeDiffSidebar} from "@/components/workspace/code-diff-sidebar.tsx";
 import {NewSessionDialog} from "@/components/workspace/new-session-dialog.tsx";
 import {useResizable} from "@renderer/hooks/use-resizable";
-import {useStore} from "@/store/app.ts";
 import {FlyingJules} from "@/components/workspace/flying-jules.tsx";
 import type {SessionResource as Session} from "@google/jules-sdk/types";
 import type {SessionInitialValues} from '@jules';
@@ -18,10 +17,7 @@ export default function JulesPage() {
   const [newSessionValues, setNewSessionValues] = useState<SessionInitialValues | undefined>();
 
   const { width: diffWidth, isResizing, handleProps: resizeHandleProps } = useResizable({ defaultWidth: 600 });
-  const sessionList = useStore(s => s.sessionList);
-  const liveSelectedSession = selectedSession
-    ? (sessionList.find(s => s.id === selectedSession.id) ?? selectedSession)
-    : null;
+
 
   const handleSessionCreated = () => {
     setNewSessionOpen(false);
@@ -51,9 +47,9 @@ export default function JulesPage() {
       </aside>
 
       <main className="flex-1 overflow-hidden flex flex-col min-w-0">
-        {liveSelectedSession ? (
+          {selectedSession ? (
           <ActivityFeed
-            session={liveSelectedSession}
+              session={selectedSession}
             onArchive={handleArchive}
             onNewSession={() => { openNewSession(); }}
             showCodeDiffs={showCodeDiffs}
@@ -74,7 +70,7 @@ export default function JulesPage() {
         )}
       </main>
 
-      {liveSelectedSession && showCodeDiffs && (
+        {selectedSession && showCodeDiffs && (
         <>
           {!codeDiffCollapsed && (
             <div className="w-1 cursor-col-resize bg-transparent hover:bg-blue-500/50 transition-colors" {...resizeHandleProps} />
@@ -93,7 +89,7 @@ export default function JulesPage() {
             </div>
             {!codeDiffCollapsed && (
                 <CodeDiffSidebar
-                    sessionId={liveSelectedSession.id} {...(liveSelectedSession.source?.githubRepo ? {repoUrl: `https://github.com/${liveSelectedSession.source.githubRepo.owner}/${liveSelectedSession.source.githubRepo.repo}`} : {})} />
+                    sessionId={selectedSession.id} {...(selectedSession.source?.githubRepo ? {repoUrl: `https://github.com/${selectedSession.source.githubRepo.owner}/${selectedSession.source.githubRepo.repo}`} : {})} />
             )}
           </aside>
         </>

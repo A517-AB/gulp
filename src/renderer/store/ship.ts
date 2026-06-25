@@ -1,12 +1,12 @@
 // Ship page store — Jules session patch viewer (diff, apply, snapshot). NOT for Explorer or Sync.
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { useStore } from './app';
-import { sdkIpc, filesystem, store } from '@shared/bridge';
-import type { ParsedFile } from '@jules';
-import { parse as parseDiff } from 'diff2html';
-import type { DiffFile } from 'diff2html/lib-esm/types';
-import { toast } from 'sonner';
+import {create} from 'zustand';
+import {persist} from 'zustand/middleware';
+import {useStore} from './app';
+import {filesystem, sdkIpc, store} from '@shared/bridge';
+import type {ParsedFile} from '@jules';
+import {parse as parseDiff} from 'diff2html';
+import type {DiffFile} from 'diff2html/lib-esm/types';
+import {toast} from 'sonner';
 
 export type ActionState = "idle" | "busy" | "done";
 
@@ -27,11 +27,13 @@ export interface ShipState {
     fileStates: Record<string, ActionState>;
     snapshotStates: Record<string, ActionState>;
     viewMode: 'jules' | 'sync';
+    favoriteSourceIds: string[];
 
     setSourceId: (id: string) => void;
     setOpenPatchId: (id: string) => void;
     setOpenFileKey: (key: string) => void;
     setViewMode: (mode: 'jules' | 'sync') => void;
+    toggleFavoriteSource: (id: string) => void;
     loadPatch: (sessionId: string) => Promise<void>;
     handlePatchClick: (sessionId: string) => void;
     handleFileClick: (sessionId: string, file: ShipFile, patch: string) => void;
@@ -54,6 +56,7 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
     fileStates: {},
     snapshotStates: {},
     viewMode: 'jules',
+    favoriteSourceIds: [],
 
     setSourceId: (sourceId) => {
         set({ sourceId, openPatchId: "", openFileKey: "" });
@@ -61,6 +64,13 @@ export const useShipStore = create<ShipState>()(persist((set, get) => ({
     setOpenPatchId: (openPatchId) => { set({ openPatchId }); },
     setOpenFileKey: (openFileKey) => { set({ openFileKey }); },
     setViewMode: (viewMode) => { set({ viewMode }); },
+    toggleFavoriteSource: (id) => {
+        set(state => ({
+            favoriteSourceIds: state.favoriteSourceIds.includes(id)
+                ? state.favoriteSourceIds.filter(f => f !== id)
+                : [...state.favoriteSourceIds, id],
+        }));
+    },
 
     loadPatch: async (sessionId) => {
         const { patchData, patchLoading } = get();

@@ -1,8 +1,8 @@
-import { ipcMain } from "electron";
+import {ipcMain} from "electron";
 import * as fs from "fs";
 import * as path from "path";
 
-const BASE_DIR = "D:\\tired";
+const BASE_DIR = "D:\\fuse";
 
 function ensureFile(filePath: string, defaultContent = "[]"): void {
   if (!fs.existsSync(filePath)) {
