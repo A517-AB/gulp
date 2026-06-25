@@ -136,9 +136,26 @@ function SchedulerSection() {
     if (!scheduler || loaded.current) return
     loaded.current = true
     void scheduler.list().then(setItems)
+    let batch: ScheduledItem[] = []
+    let timeout: ReturnType<typeof setTimeout> | null = null
+
     return scheduler.onFired((item) => {
-      setFired(p => [`${item.label} @ ${format(new Date(), 'HH:mm:ss')}`, ...p].slice(0, 5))
-      setItems(p => p.filter(i => i.id !== item.id))
+      batch.push(item)
+
+      timeout ??= setTimeout(() => {
+          const firedItems = [...batch]
+          batch = []
+          timeout = null
+
+          const timeStr = format(new Date(), 'HH:mm:ss')
+          const label = firedItems.length > 1
+            ? `${firedItems.length} items (${firedItems.map(i => i.label).join(', ')}) @ ${timeStr}`
+            : `${firedItems[0]?.label} @ ${timeStr}`
+
+          setFired(p => [label, ...p].slice(0, 5))
+
+          void scheduler.list().then(setItems)
+        }, 100) // 100ms debounce window
     })
   }, [])
 
@@ -170,6 +187,48 @@ function SchedulerSection() {
     setItems(p => [...p, saved])
   }
 
+  async function addWeekly() {
+    if (!scheduler) return
+    const saved = await scheduler.add({
+      id: randomId(), label: 'Weekly (Sun 12:00)',
+      schedule: { kind: 'weekly', time: '12:00', dayOfWeek: 0 },
+      enabled: true, createdAt: new Date().toISOString(),
+    })
+    setItems(p => [...p, saved])
+  }
+
+  async function addMonthly() {
+    if (!scheduler) return
+    const saved = await scheduler.add({
+      id: randomId(), label: 'Monthly (1st 12:00)',
+      schedule: { kind: 'monthly', time: '12:00', dayOfMonth: 1 },
+      enabled: true, createdAt: new Date().toISOString(),
+    })
+    setItems(p => [...p, saved])
+  }
+
+  async function addWindowed() {
+    if (!scheduler) return
+    const saved = await scheduler.add({
+      id: randomId(), label: 'Windowed (15m, 9-17)',
+      schedule: { kind: 'windowed', everyMinutes: 15, fromHour: 9, toHour: 17, days: [1, 2, 3, 4, 5] },
+      enabled: true, createdAt: new Date().toISOString(),
+    })
+    setItems(p => [...p, saved])
+  }
+
+  async function toggle(id: string, currentEnabled: boolean) {
+    if (!scheduler) return
+    const updated = await scheduler.toggle(id, !currentEnabled)
+    setItems(p => p.map(i => i.id === id ? updated : i))
+  }
+
+  async function snooze(id: string) {
+    if (!scheduler) return
+    const newSnoozeItem = await scheduler.snooze(id, 5) // 5 mins
+    setItems(p => [...p, newSnoozeItem])
+  }
+
   async function remove(id: string) {
     if (!scheduler) return
     await scheduler.remove(id)
@@ -180,13 +239,18 @@ function SchedulerSection() {
     <Section label="Scheduler — survives minimize">
       <Row label="Create">
         <Btn onClick={() => { void addOnce() }}>Once (5s)</Btn>
-        <Btn onClick={() => { void addInterval() }}>Interval (1 min)</Btn>
+        <Btn onClick={() => { void addInterval() }}>Interval (1m)</Btn>
+        <Btn onClick={() => { void addWeekly() }}>Weekly</Btn>
+        <Btn onClick={() => { void addMonthly() }}>Monthly</Btn>
+        <Btn onClick={() => { void addWindowed() }}>Windowed</Btn>
       </Row>
       {items.length > 0 && (
         <ul className="space-y-1">
           {items.map(i => (
-            <li key={i.id} className="flex items-center gap-2 text-sm text-fg-secondary font-mono">
-              <span className="flex-1">{i.label}</span>
+            <li key={i.id} className="flex items-center gap-2 text-sm font-mono text-fg-secondary">
+              <span className={`flex-1 ${i.enabled ? '' : 'line-through text-fg-ghost'}`}>{i.label}</span>
+              <Btn muted onClick={() => { void snooze(i.id) }}>snooze (5m)</Btn>
+              <Btn muted onClick={() => { void toggle(i.id, i.enabled) }}>{i.enabled ? 'disable' : 'enable'}</Btn>
               <Btn muted onClick={() => { void remove(i.id) }}>remove</Btn>
             </li>
           ))}
