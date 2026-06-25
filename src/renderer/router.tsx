@@ -41,6 +41,7 @@ const sharedRoutes: AppRoute[] = [
     { path: 'notes',  Component: NotesPage,   handle: { title: 'Notes',    inNav: true } },
     { path: 'settings', lazy: () => import('@renderer/pages/shared/settings/SettingsPage').then(m => ({ Component: m.default })), handle: { title: 'Settings', inSecretNav: true } },
     { path: 'gantt',    lazy: () => import('@renderer/pages/electron/GanttPage').then(m => ({ Component: m.default })),           handle: { title: 'Gantt',    inSecretNav: true } },
+    { path: 'ai-chat',  lazy: () => import('@renderer/pages/shared/AIChatPage').then(m => ({ Component: m.AIChatPage })), handle: { title: 'AI Chat', inNav: true } },
 ]
 
 // ── electron ──────────────────────────────────────────────────────────────────
