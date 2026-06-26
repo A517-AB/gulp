@@ -43,9 +43,10 @@ export function registerGitHandlers(): void {
     git(cwd, ['status', '--porcelain'])
   )
 
-  ipcMain.handle('git.log', (_e, cwd: string, limit = 20, branch?: string) =>
-      git(cwd, ['log', `--max-count=${String(limit)}`, '--pretty=format:%H|%s|%an|%ar|%D', ...(branch ? [branch] : [])])
-  )
+  ipcMain.handle('git.log', (_e, cwd: string, limit = 20, branch?: string) => {
+      if (branch && branch.startsWith('-')) return Promise.resolve({ ok: false, exitCode: 1, stderr: 'Invalid branch name', stdout: '' })
+      return git(cwd, ['log', `--max-count=${String(limit)}`, '--pretty=format:%H|%s|%an|%ar|%D', ...(branch ? [branch] : [])])
+  })
 
   ipcMain.handle('git.diff', (_e, cwd: string, args: string[] = []) =>
     git(cwd, ['diff', ...args])
@@ -91,13 +92,15 @@ export function registerGitHandlers(): void {
 
   // ── sync ──────────────────────────────────────────────────────────────────────
 
-  ipcMain.handle('git.push', (_e, cwd: string, remote = 'origin', branch?: string, force = false) =>
-      git(cwd, ['push', ...(force ? ['--force-with-lease'] : []), remote, ...(branch ? [branch] : [])] as string[])
-  )
+  ipcMain.handle('git.push', (_e, cwd: string, remote = 'origin', branch?: string, force = false) => {
+      if (branch && branch.startsWith('-')) return Promise.resolve({ ok: false, exitCode: 1, stderr: 'Invalid branch name', stdout: '' })
+      return git(cwd, ['push', ...(force ? ['--force-with-lease'] : []), remote, ...(branch ? [branch] : [])] as string[])
+  })
 
-  ipcMain.handle('git.pull', (_e, cwd: string, remote = 'origin', branch?: string, rebase = false) =>
-      git(cwd, ['pull', ...(rebase ? ['--rebase'] : []), remote, ...(branch ? [branch] : [])] as string[])
-  )
+  ipcMain.handle('git.pull', (_e, cwd: string, remote = 'origin', branch?: string, rebase = false) => {
+      if (branch && branch.startsWith('-')) return Promise.resolve({ ok: false, exitCode: 1, stderr: 'Invalid branch name', stdout: '' })
+      return git(cwd, ['pull', ...(rebase ? ['--rebase'] : []), remote, ...(branch ? [branch] : [])] as string[])
+  })
 
   ipcMain.handle('git.fetch', (_e, cwd: string, remote = 'origin', prune = true) =>
       git(cwd, ['fetch', ...(prune ? ['--prune'] : []), remote] as string[])
@@ -105,17 +108,20 @@ export function registerGitHandlers(): void {
 
   // ── branches ─────────────────────────────────────────────────────────────────
 
-  ipcMain.handle('git.checkout', (_e, cwd: string, branch: string, create = false) =>
-    git(cwd, create ? ['checkout', '-b', branch] : ['checkout', branch])
-  )
+  ipcMain.handle('git.checkout', (_e, cwd: string, branch: string, create = false) => {
+    if (branch.startsWith('-')) return Promise.resolve({ ok: false, exitCode: 1, stderr: 'Invalid branch name', stdout: '' })
+    return git(cwd, create ? ['checkout', '-b', branch] : ['checkout', branch])
+  })
 
-  ipcMain.handle('git.deleteBranch', (_e, cwd: string, branch: string, force = false) =>
-    git(cwd, ['branch', force ? '-D' : '-d', branch])
-  )
+  ipcMain.handle('git.deleteBranch', (_e, cwd: string, branch: string, force = false) => {
+    if (branch.startsWith('-')) return Promise.resolve({ ok: false, exitCode: 1, stderr: 'Invalid branch name', stdout: '' })
+    return git(cwd, ['branch', force ? '-D' : '-d', branch])
+  })
 
-  ipcMain.handle('git.merge', (_e, cwd: string, branch: string, noFF = false) =>
-    git(cwd, ['merge', ...(noFF ? ['--no-ff'] : []), branch])
-  )
+  ipcMain.handle('git.merge', (_e, cwd: string, branch: string, noFF = false) => {
+    if (branch.startsWith('-')) return Promise.resolve({ ok: false, exitCode: 1, stderr: 'Invalid branch name', stdout: '' })
+    return git(cwd, ['merge', ...(noFF ? ['--no-ff'] : []), branch])
+  })
 
   ipcMain.handle('git.rebase', (_e, cwd: string, onto: string) =>
     git(cwd, ['rebase', onto])

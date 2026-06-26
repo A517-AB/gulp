@@ -269,6 +269,10 @@ export function registerSdkHandlers() {
 
             const commitMessage = gitPatch.suggestedCommitMessage || 'Applied changes from Jules';
 
+            if (branchName.startsWith('-')) {
+                return { success: false, error: 'Invalid branch name.' };
+            }
+
             // Checkout a new branch to apply the changes
             execFileSync('git', ['checkout', '-b', branchName], { cwd: options.cwd, stdio: 'pipe' });
 
