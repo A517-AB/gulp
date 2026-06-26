@@ -49,5 +49,56 @@
         "task": "Replace custom dropdowns in BranchPicker and SourcePicker with a standard Radix DropdownMenu component for consistency (from TODO.md)."
       }
     ]
+  },
+  {
+    "group": "SDK IPC Migration",
+    "repo": "github/A517-AB/gulp",
+    "baseBranch": "main",
+    "tasks": [
+      {
+        "folder": "src/jules",
+        "topic": "Complete SDK Method Wiring",
+        "task": "Go through `jules-sdk-api with overvewi.md` and expose missing SDK methods via IPC. Add handler in `handlers.ts`, type in `sdk-ipc.ts`, and call in `bridge.ts`."
+      },
+      {
+        "folder": "src/renderer/components",
+        "topic": "Media Artifact Handling",
+        "task": "Implement robust rendering for `MediaArtifact` across formats (image/png, image/gif, video/mp4) in both the inline chat feed and sidebar, replacing the current <img> only approach."
+      }
+    ]
+  },
+  {
+    "group": "Core Performance",
+    "repo": "github/A517-AB/gulp",
+    "baseBranch": "main",
+    "tasks": [
+      {
+        "folder": "src/renderer/components",
+        "topic": "Fast diff via WASM",
+        "task": "Replace current diff library with `diff-match-patch` compiled to WASM to improve rendering of large Jules patch outputs."
+      },
+      {
+        "folder": "src/renderer/components",
+        "topic": "Tree-sitter WASM Integration",
+        "task": "Add `web-tree-sitter` for proper AST parsing in snippet/code editors, running entirely in the renderer without IPC."
+      }
+    ]
+  },
+  {
+    "group": "Electron Features",
+    "repo": "github/A517-AB/gulp",
+    "baseBranch": "main",
+    "tasks": [
+      {
+        "folder": "electron",
+        "topic": "Croner Expansion & Advanced Scheduling",
+        "task": "Expand croner capabilities in `scheduler.ts`: Expose windowed, weekly, and monthly schedules in UI; implement per-job enable/disable; wire up snooze functionality."
+      },
+      {
+        "folder": "electron",
+        "topic": "Notification Pipeline Cleanup",
+        "task": "Standardize notification styling and sound handling across `notification-preload.ts`, `notification.ts`, and renderer library. Fix debounce for fired scheduler items."
+      }
+    ]
   }
 ]
