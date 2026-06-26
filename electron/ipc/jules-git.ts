@@ -140,6 +140,9 @@ export function registerJulesGitHandlers(): void {
     ipcMain.handle('jules.git.applyPatch', async (_, cwd: string, patch: string) => {
         const branch = `jules-patch-${String(Date.now())}`
         const patchPath = path.join(cwd, 'jules_changes.patch')
+        if (branch.startsWith('-')) {
+            return {ok: false, error: 'Invalid branch name.'}
+        }
         try {
             execFileSync('git', ['checkout', '-b', branch], {cwd, stdio: 'pipe'})
             fs.writeFileSync(patchPath, patch)

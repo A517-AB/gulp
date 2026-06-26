@@ -261,6 +261,10 @@ ipcMain.handle("ipc.session.applyPatch", async (_, _sessionId: string, options: 
       }
       const commitMessage = 'Applied changes from Jules';
 
+      if (branchName.startsWith('-')) {
+          return { success: false, error: 'Invalid branch name.' };
+      }
+
       // Checkout a new branch to apply the changes
       execFileSync('git', ['checkout', '-b', branchName], { cwd: options.cwd, stdio: 'pipe' });
 
