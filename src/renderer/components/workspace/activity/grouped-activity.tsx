@@ -21,7 +21,7 @@ function buildUnifiedLines(items: Activity[]): UnifiedLine[] {
         }
         for (const art of a.artifacts) {
             if (art.type === "bashOutput") {
-                const b = art as unknown as BashArtifact
+                const b = art
                 lines.push({kind: "bash", command: b.command, stdout: b.stdout, exitCode: b.exitCode ?? null})
             }
         }
@@ -145,6 +145,14 @@ function CollapsibleProgress({ title, desc }: { title: string; desc: string }) {
     );
 }
 
+/**
+ * `GroupedActivity` renders an array of related background activities (like consecutive bash commands,
+ * file reads, or progress updates) into a single, compact UI element.
+ * It uses framer-motion for smooth expand/collapse animations to keep the feed clean.
+ *
+ * Props:
+ * - `item`: An array of `Activity` objects that should be grouped together.
+ */
 export const GroupedActivity = memo(
     function GroupedActivity({ item }: GroupedActivityProps) {
         const first = item[0];

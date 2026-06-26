@@ -12,6 +12,15 @@ interface MediaItemProps {
     index: number;
 }
 
+/**
+ * `MediaItemDownloader` fetches and renders media (like images) embedded within an activity.
+ * It uses the `media` IPC channel to download the content securely.
+ *
+ * Props:
+ * - `media`: The `MediaArtifact` metadata detailing the media to fetch.
+ * - `activityId`: The ID of the activity the media belongs to.
+ * - `index`: The index of this specific media item within the activity.
+ */
 export const MediaItemDownloader = memo(function MediaItemDownloader({ media, activityId, index }: MediaItemProps) {
     const [downloadState, setDownloadState] = useState<"idle" | "saving" | "done" | "error" >("idle");
 
@@ -114,6 +123,14 @@ interface ActivityArtifactsProps {
     only?: "changeset" | "media";
 }
 
+/**
+ * `ActivityArtifacts` is a layout component responsible for displaying multiple artifacts
+ * attached to a single activity (e.g., a mix of diffs, bash outputs, and media files).
+ *
+ * Props:
+ * - `activity`: The `Activity` object whose artifacts need rendering.
+ * - `only`: Optional filter to only render specific types of artifacts ("changeset" or "media").
+ */
 export const ActivityArtifacts = memo(
     function ActivityArtifacts({ activity, only }: ActivityArtifactsProps) {
         const bashOutputs =

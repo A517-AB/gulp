@@ -13,6 +13,22 @@ const QUICK_REVIEW_PROMPT =
 
 const EMPTY_ACTIVITIES: Activity[] = [];
 
+/**
+ * `ActivityFeed` is the primary communication and status thread for a Jules session.
+ * It listens to `sdkIpc` events directly to keep an optimistic, real-time list of activities
+ * while also synchronizing with the global `useStore`.
+ *
+ * It groups rapid or related actions (like back-to-back bash executions or progress ticks) into
+ * collapsible `GroupedActivity` components to prevent clutter, and renders complex interactions
+ * (like messages, plans, and diffs) using `SingleActivity`.
+ *
+ * Props:
+ * - `session`: The current `SessionResource` associated with the feed.
+ * - `onArchive`: Callback to archive the current session.
+ * - `onNewSession`: Callback to open the UI for creating a new session.
+ * - `showCodeDiffs`: State prop indicating if the code diff sidebar is visible.
+ * - `onToggleCodeDiffs`: Callback to toggle the visibility of the code diff sidebar.
+ */
 export function ActivityFeed({
     session,
     onArchive,

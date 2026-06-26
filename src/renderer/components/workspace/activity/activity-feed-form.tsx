@@ -8,6 +8,14 @@ interface ActivityFeedFormProps {
     sending: boolean;
 }
 
+/**
+ * `ActivityFeedForm` provides the text input interface for users to send messages to Jules.
+ * It sits at the bottom of the `ActivityFeed`.
+ *
+ * Props:
+ * - `onSubmitMessage`: Callback fired when the user submits a message.
+ * - `sending`: Boolean indicating if a message is currently in transit (disables the form).
+ */
 export const ActivityFeedForm = memo(
     function ActivityFeedForm({ onSubmitMessage, sending }: ActivityFeedFormProps) {
         const [message, setMessage] = useState("");

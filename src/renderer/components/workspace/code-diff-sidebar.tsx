@@ -14,6 +14,20 @@ interface CodeDiffSidebarProps {
 
 const EMPTY_ACTIVITIES: never[] = [];
 
+/**
+ * `CodeDiffSidebar` displays real-time git diff changes for a given session.
+ * It periodically polls for changes (`fetchSessionChanges` via `useStore`) and renders the diffs
+ * using `DiffViewer`. It also integrates with `GitSyncButton` for repository sync operations.
+ *
+ * Props:
+ * - `sessionId`: The ID of the session to fetch changes for.
+ * - `repoUrl`: Optional GitHub repository URL to provide context or links to the origin.
+ *
+ * State:
+ * - `changesets`: The retrieved array of `ChangeSetArtifact` from the backend.
+ * - `loading`: Loading state while fetching changes.
+ * - `error`: Error state if fetching fails.
+ */
 export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
     const activities = useStore(s => s.activities[sessionId] ?? EMPTY_ACTIVITIES);
     const sessionSnapshot = useStore(s => s.sessionSnapshot);

@@ -18,6 +18,19 @@ interface NewSessionDialogProps {
     onOpenChange?: (open: boolean) => void;
 }
 
+/**
+ * `NewSessionDialog` is a modal dialog for creating a new Jules session.
+ * It provides a form for inputting the initial prompt/request and optionally the target branch.
+ *
+ * It interacts with the `useStore` (`createSession`) to initialize a new session through the SDK.
+ *
+ * Props:
+ * - `onSessionCreated`: Callback fired when a session is successfully created.
+ * - `initialValues`: Pre-filled values for the session creation form (`SessionInitialValues` from `@jules`).
+ * - `trigger`: Optional React node to act as the dialog trigger button.
+ * - `open`: Controlled state for dialog visibility.
+ * - `onOpenChange`: Callback for handling dialog open state changes.
+ */
 export function NewSessionDialog({ onSessionCreated, initialValues, trigger, open: controlledOpen, onOpenChange }: NewSessionDialogProps) {
     const [internalOpen, setInternalOpen] = useState(false);
     const [portalContainer, setPortalContainer] = useState<HTMLDivElement | null>(null);

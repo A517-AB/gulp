@@ -12,6 +12,21 @@ interface SessionListProps {
     selectedSessionId?: string;
 }
 
+/**
+ * `SessionList` provides a navigable and selectable list of all active or historical sessions.
+ *
+ * It interfaces with the `useStore` to pull and manage session data (`initSessions`, `sessions`, `removeSession`, `archiveSessions`).
+ * It supports a "select mode" allowing users to multi-select and archive sessions in bulk.
+ *
+ * Props:
+ * - `onSelectSession`: Callback triggered when a session is clicked (and select mode is off).
+ * - `selectedSessionId`: The ID of the currently active/selected session for styling purposes.
+ *
+ * Internal State:
+ * - `selectMode`: Toggles the checkbox selection mode.
+ * - `selected`: A Set containing the IDs of all selected sessions.
+ * - `archiving`: Tracks if an archive operation is in progress.
+ */
 export function SessionList({ onSelectSession, selectedSessionId }: SessionListProps) {
     const sessions = useStore(s => s.sessions);
     const initSessions = useStore(s => s.initSessions);
@@ -126,6 +141,19 @@ export function SessionList({ onSelectSession, selectedSessionId }: SessionListP
     );
 }
 
+/**
+ * `SessionRow` displays an individual session item within the `SessionList`.
+ *
+ * Props:
+ * - `session`: The `SessionResource` data to display.
+ * - `isSelected`: Whether the session is currently checked in "select mode".
+ * - `isActive`: Whether the session is the currently active one displayed in the main workspace.
+ * - `selectMode`: Whether the list is in multi-select mode.
+ * - `dotClass`: CSS class for the status indicator dot.
+ * - `stateColor`: CSS class for the state text color.
+ * - `onSelect`: Callback for standard selection.
+ * - `onToggle`: Callback for toggling selection in select mode.
+ */
 const SessionRow = memo(function SessionRow({
                                                 session: s,
                                                 isSelected,

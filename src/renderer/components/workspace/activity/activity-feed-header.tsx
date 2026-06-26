@@ -38,6 +38,20 @@ const mapSessionStateToJulesState = (s: SessionResource["state"]): "idle" | "inP
     return "idle";
 };
 
+/**
+ * `ActivityFeedHeader` is the top bar of the activity feed for a given session.
+ * It displays session metadata (title, repo, status), handles status updates, and
+ * provides controls for archiving, opening new sessions, and toggling the diff view.
+ *
+ * It interacts with the `useStore` to update the session state/title.
+ *
+ * Props:
+ * - `session`: The current `SessionResource`.
+ * - `onArchive`: Callback to archive the session.
+ * - `onNewSession`: Callback to start a new session.
+ * - `showCodeDiffs`: Flag indicating if code diffs are visible.
+ * - `onToggleCodeDiffs`: Callback to toggle code diffs.
+ */
 export const ActivityFeedHeader = memo(
     function ActivityFeedHeader({
         session,

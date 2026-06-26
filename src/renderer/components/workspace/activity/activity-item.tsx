@@ -3,6 +3,17 @@ import type { ActivityItemProps } from "./types";
 import { SingleActivity } from "./single-activity.tsx";
 import { GroupedActivity } from "./grouped-activity.tsx";
 
+/**
+ * `ActivityItem` is a router component that determines how to render an item in the activity feed.
+ * It checks if the item is an array (and delegates to `GroupedActivity`) or a single `Activity` (and delegates to `SingleActivity`).
+ *
+ * Props:
+ * - `item`: The `Activity` or array of `Activity` objects to render.
+ * - `onApprovePlan`: Callback for plan approvals (passed down).
+ * - `approvingPlan`: State flag for plan approvals (passed down).
+ * - `planApproved`: State flag indicating if plan is approved (passed down).
+ * - `isNew`: Boolean indicating if this item was just added (used for animation).
+ */
 export const ActivityItem = memo(
     function ActivityItem({ item, onApprovePlan, approvingPlan, planApproved, isNew }: ActivityItemProps) {
         if (Array.isArray(item)) {
