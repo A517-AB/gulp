@@ -7,6 +7,14 @@ interface TerminalConsoleProps {
     bashOutputs: BashArtifact[];
 }
 
+/**
+ * `TerminalConsole` renders the output of bash commands executed by Jules.
+ * It provides a stylized, scrollable terminal window with syntax highlighting and
+ * exit code status indicators.
+ *
+ * Props:
+ * - `bashOutputs`: An array of `BashArtifact` objects containing the `command`, `stdout`, and `exitCode` for each execution.
+ */
 export const TerminalConsole = memo(
     function TerminalConsole({ bashOutputs }: TerminalConsoleProps) {
         const [copied, setCopied] = useState(false);

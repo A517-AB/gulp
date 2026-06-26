@@ -147,6 +147,18 @@ function renderContent(activity: Activity): ReactNode {
     }
 }
 
+/**
+ * `SingleActivity` renders a major, standalone activity item in the feed.
+ * This includes user messages, AI responses, execution plans, or terminal outputs
+ * that shouldn't be grouped. It delegates specific rendering to subcomponents
+ * (like `Markdown`, `TerminalConsole`, `ActivityArtifacts`).
+ *
+ * Props:
+ * - `activity`: The single `Activity` object to render.
+ * - `onApprovePlan`: Callback fired when a user approves a proposed plan.
+ * - `approvingPlan`: Boolean state indicating if a plan approval request is in flight.
+ * - `planApproved`: Boolean state indicating if the current plan has already been approved.
+ */
 export const SingleActivity = memo(
     function SingleActivity({ activity, onApprovePlan, approvingPlan, planApproved }: SingleActivityProps) {
         const isUser = activity.originator === "user";

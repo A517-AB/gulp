@@ -8,6 +8,14 @@ interface ChangeSetSummaryProps {
     className?: string;
 }
 
+/**
+ * `ChangeSetSummary` parses and displays a concise summary of a `ChangeSetArtifact` (e.g., modified files and line additions/deletions).
+ * It utilizes `parseUnidiff` from `useStore` to process the git patch.
+ *
+ * Props:
+ * - `artifact`: The `ChangeSetArtifact` containing the unidiff patch to summarize.
+ * - `className`: Optional CSS classes for the container.
+ */
 export function ChangeSetSummary({ artifact, className }: ChangeSetSummaryProps) {
     const patch = artifact.gitPatch.unidiffPatch;
     const [files, setFiles] = useState<ParsedFile[]>([]);

@@ -8,6 +8,22 @@ import {FlyingJules} from "@/components/workspace/flying-jules.tsx";
 import type {SessionResource as Session} from "@google/jules-sdk/types";
 import type {SessionInitialValues} from '@jules';
 
+/**
+ * `JulesPage` serves as the primary workspace layout component for managing Jules sessions.
+ *
+ * It is composed of three main areas:
+ * 1. Left Sidebar: Displays a list of active sessions using `SessionList`.
+ * 2. Main Content: Displays the active session's task feed via `ActivityFeed`, or an idle state if no session is selected.
+ * 3. Right Sidebar (Optional): Displays active code changes for the session via `CodeDiffSidebar`.
+ *
+ * State:
+ * - `selectedSession`: The currently active session (`SessionResource` from `@google/jules-sdk/types`).
+ * - `sidebarCollapsed`: Toggles the visibility of the left session list.
+ * - `showCodeDiffs`: Controls whether the right sidebar for code differences is visible.
+ * - `codeDiffCollapsed`: Toggles the expanded/collapsed state of the code difference sidebar.
+ * - `newSessionOpen`: Controls the visibility of the `NewSessionDialog` modal.
+ * - `newSessionValues`: Stores any initial values when creating a new session (`SessionInitialValues` from `@jules`).
+ */
 export default function JulesPage() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);

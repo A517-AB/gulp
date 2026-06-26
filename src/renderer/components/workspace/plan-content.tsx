@@ -116,6 +116,13 @@ function getPlanText(data: unknown): string {
   return normalized.description ? normalized.description + "\n\n" + steps : steps;
 }
 
+/**
+ * `PlanContent` parses and displays Markdown content as an interactive checklist or formatted plan.
+ * It is primarily used within the `ActivityFeed` or code diff views to show execution plans.
+ *
+ * Props:
+ * - `content`: The raw Markdown string containing the plan.
+ */
 export function PlanContent({ content }: PlanContentProps) {
   const [copied, setCopied] = useState(false);
   const parsed = parsePlanContent(content);

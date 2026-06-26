@@ -7,6 +7,15 @@ interface FlyingJulesProps {
   className?: string;
 }
 
+/**
+ * `FlyingJules` displays an animated, SVG-based representation of Jules.
+ * It is used for visual feedback or idle states (e.g., when no session is selected on JulesPage).
+ *
+ * Props:
+ * - `state`: The animation state, e.g., "idle" or "thinking".
+ * - `size`: The width and height in pixels.
+ * - `className`: Optional CSS classes for styling.
+ */
 export function FlyingJules({ state = "idle", size = 64, className = "" }: FlyingJulesProps) {
   const controls = useAnimation();
 
