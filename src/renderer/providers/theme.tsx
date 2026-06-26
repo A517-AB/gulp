@@ -24,6 +24,8 @@ interface ThemeCtx {
   setLetterSpacing: (s: string) => void
   wordSpacing: string // Word spacing (e.g. 'normal')
   setWordSpacing: (s: string) => void
+  accentHue: number // Hue value (0-360)
+  setAccentHue: (h: number) => void
 }
 
 const Ctx = createContext<ThemeCtx | null>(null)
@@ -115,6 +117,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   })
 
+  const [accentHue, setAccentHue] = useState<number>(() => {
+    try {
+      const val = localStorage.getItem('gulp:accentHueVal')
+      return val ? parseFloat(val) : 247
+    } catch {
+      return 247
+    }
+  })
+
   useEffect(() => {
     const root = document.documentElement
 
@@ -162,7 +173,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('gulp:lineHeightVal', String(lineHeight))
     localStorage.setItem('gulp:letterSpacingVal', letterSpacing)
     localStorage.setItem('gulp:wordSpacingVal', wordSpacing)
-  }, [theme, fontSize, fontBasic, fontMarkdown, fontCode, fontWeight, spacing, lineHeight, letterSpacing, wordSpacing])
+
+    root.style.setProperty('--accent-hue', String(accentHue))
+    localStorage.setItem('gulp:accentHueVal', String(accentHue))
+  }, [theme, fontSize, fontBasic, fontMarkdown, fontCode, fontWeight, spacing, lineHeight, letterSpacing, wordSpacing, accentHue])
 
   const toggle = () => { setTheme(t => (t === 'dark' ? 'light' : 'dark')) }
 
@@ -188,7 +202,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       letterSpacing,
       setLetterSpacing,
       wordSpacing,
-      setWordSpacing
+      setWordSpacing,
+      accentHue,
+      setAccentHue
     }}>
       {children}
     </Ctx.Provider>
