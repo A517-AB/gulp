@@ -24,9 +24,45 @@ interface ThemeCtx {
   setLetterSpacing: (s: string) => void
   wordSpacing: string // Word spacing (e.g. 'normal')
   setWordSpacing: (s: string) => void
+  accentHue: number // Hue value (0-360)
+  setAccentHue: (h: number) => void
+}
+
+
+const GF_MAP: Record<string, string> = {
+    'Inter':              'Inter:wght@300;400;500;600;700',
+    'Outfit':             'Outfit:wght@300;400;500;600;700',
+    'DM Sans':            'DM+Sans:wght@300;400;500;600;700',
+    'Nunito':             'Nunito:wght@300;400;500;600;700',
+    'Roboto':             'Roboto:wght@300;400;500;700',
+    'Open Sans':          'Open+Sans:wght@300;400;500;600;700',
+    'Geist':              'Geist:wght@300;400;500;600;700',
+    'Plus Jakarta Sans':  'Plus+Jakarta+Sans:wght@300;400;500;600;700',
+    'Lato':               'Lato:wght@300;400;700',
+    'Raleway':            'Raleway:wght@300;400;500;600;700',
+    'Poppins':            'Poppins:wght@300;400;500;600;700',
+    'JetBrains Mono':     'JetBrains+Mono:wght@300;400;500;600;700',
+    'Fira Code':          'Fira+Code:wght@300;400;500;600;700',
+    'Geist Mono':         'Geist+Mono:wght@300;400;500;600;700',
+    'Source Code Pro':    'Source+Code+Pro:wght@300;400;500;600;700',
+    'Inconsolata':        'Inconsolata:wght@300;400;500;600;700',
+    'IBM Plex Mono':      'IBM+Plex+Mono:wght@300;400;500;600;700',
+}
+
+function loadFont(name: string): void {
+    const family = GF_MAP[name]
+    if (!family) return
+    const id = `gf-${name.replace(/\s+/g, '-').toLowerCase()}`
+    if (document.getElementById(id)) return
+    const link = document.createElement('link')
+    link.id = id
+    link.rel = 'stylesheet'
+    link.href = `https://fonts.googleapis.com/css2?family=${family}&display=swap`
+    document.head.appendChild(link)
 }
 
 const Ctx = createContext<ThemeCtx | null>(null)
+
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
@@ -115,6 +151,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   })
 
+  const [accentHue, setAccentHue] = useState<number>(() => {
+    try {
+      const val = localStorage.getItem('gulp:accentHueVal')
+      return val ? parseFloat(val) : 247
+    } catch {
+      return 247
+    }
+  })
+
   useEffect(() => {
     const root = document.documentElement
 
@@ -135,6 +180,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.style.setProperty('--font-sans', formatFont(fontBasic, 'sans-serif'))
     root.style.setProperty('--font-markdown', formatFont(fontMarkdown, 'sans-serif'))
     root.style.setProperty('--font-mono', formatFont(fontCode, 'monospace'))
+
+    // Ensure selected fonts are loaded
+    loadFont(fontBasic)
+    loadFont(fontMarkdown)
+    loadFont(fontCode)
 
     localStorage.setItem('gulp:fontBasicVal', fontBasic)
     localStorage.setItem('gulp:fontMarkdownVal', fontMarkdown)
@@ -162,7 +212,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('gulp:lineHeightVal', String(lineHeight))
     localStorage.setItem('gulp:letterSpacingVal', letterSpacing)
     localStorage.setItem('gulp:wordSpacingVal', wordSpacing)
-  }, [theme, fontSize, fontBasic, fontMarkdown, fontCode, fontWeight, spacing, lineHeight, letterSpacing, wordSpacing])
+
+    root.style.setProperty('--accent-hue', String(accentHue))
+    localStorage.setItem('gulp:accentHueVal', String(accentHue))
+  }, [theme, fontSize, fontBasic, fontMarkdown, fontCode, fontWeight, spacing, lineHeight, letterSpacing, wordSpacing, accentHue])
 
   const toggle = () => { setTheme(t => (t === 'dark' ? 'light' : 'dark')) }
 
@@ -188,7 +241,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       letterSpacing,
       setLetterSpacing,
       wordSpacing,
-      setWordSpacing
+      setWordSpacing,
+      accentHue,
+      setAccentHue
     }}>
       {children}
     </Ctx.Provider>
