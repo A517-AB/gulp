@@ -20,14 +20,14 @@ export const ActivityFeedForm = memo(
         const { items, readCode } = useSnippets();
 
         const chatPresets = useMemo(
-            () => items.filter((item) => item.languageId === "session"),
+            () => items,
             [items]
         );
 
         const activePreset = chatPresets[activePresetIndex] ?? chatPresets[0] ?? null;
 
         const handleSubmit = (e?: React.SyntheticEvent) => {
-            if (e) e.preventDefault();
+            if (e) { e.preventDefault(); e.stopPropagation(); }
             if (!message.trim() || sending) return;
             onSubmitMessage(message);
             setMessage("");
@@ -86,6 +86,7 @@ export const ActivityFeedForm = memo(
                                     onMouseEnter={() => { setActivePresetIndex(index); }}
                                     onMouseDown={(e) => {
                                         e.preventDefault();
+                                e.stopPropagation();
                                         void applyPreset(preset, false);
                                     }}
                                     className={cn(
@@ -113,6 +114,9 @@ export const ActivityFeedForm = memo(
 
                             if (matchesAny(ev, ["ctrl+space", "meta+space"])) {
                                 e.preventDefault();
+                                e.stopPropagation();
+                                ev.stopPropagation();
+                                ev.stopImmediatePropagation();
                                 if (presetsOpen) setPresetsOpen(false);
                                 else openPresets();
                                 return;
@@ -121,24 +125,28 @@ export const ActivityFeedForm = memo(
                             if (presetsOpen) {
                                 if (matchesShortcut(ev, "escape")) {
                                     e.preventDefault();
+                                e.stopPropagation();
                                     setPresetsOpen(false);
                                     return;
                                 }
 
                                 if (matchesShortcut(ev, "downarrow")) {
                                     e.preventDefault();
+                                e.stopPropagation();
                                     setActivePresetIndex((index) => (index + 1) % chatPresets.length);
                                     return;
                                 }
 
                                 if (matchesShortcut(ev, "uparrow")) {
                                     e.preventDefault();
+                                e.stopPropagation();
                                     setActivePresetIndex((index) => (index - 1 + chatPresets.length) % chatPresets.length);
                                     return;
                                 }
 
                                 if (matchesAny(ev, ["enter", "ctrl+enter", "meta+enter"]) && activePreset) {
                                     e.preventDefault();
+                                e.stopPropagation();
                                     void applyPreset(activePreset, e.ctrlKey || e.metaKey);
                                     return;
                                 }
@@ -146,12 +154,14 @@ export const ActivityFeedForm = memo(
 
                             if (matchesAny(ev, ["ctrl+enter", "meta+enter"])) {
                                 e.preventDefault();
+                                e.stopPropagation();
                                 handleSubmit();
                                 return;
                             }
 
                             if (matchesShortcut(ev, "enter")) {
                                 e.preventDefault();
+                                e.stopPropagation();
                                 handleSubmit();
                             }
                         }}

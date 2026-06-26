@@ -49,8 +49,8 @@ describe("bridge", () => {
     const power = { onSuspend: vi.fn() };
     const popup = { show: vi.fn() };
 
-    const bridge = await importBridgeModule({
-      electron: {
+    Object.defineProperty(globalThis, 'electron', {
+      value: {
         terminal,
         window: windowControls,
         power,
@@ -61,7 +61,11 @@ describe("bridge", () => {
         notes,
         snippets,
       },
-    } as unknown as Window);
+      configurable: true,
+      writable: true,
+    });
+
+    const bridge = await importBridgeModule({} as unknown as Window);
 
     expect(bridge.isElectron).toBe(true);
     expect(bridge.isWeb).toBe(false);
