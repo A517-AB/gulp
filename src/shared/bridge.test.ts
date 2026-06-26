@@ -4,6 +4,7 @@ import type * as BridgeModuleNS from "./bridge";
 type BridgeModule = typeof BridgeModuleNS;
 
 function clearWindow() {
+  Reflect.deleteProperty(globalThis, "electron");
   Reflect.deleteProperty(globalThis, "window");
 }
 
@@ -11,6 +12,9 @@ async function importBridgeModule(windowValue?: Window): Promise<BridgeModule> {
   vi.resetModules();
 
   if (windowValue) {
+    if (windowValue.electron) {
+      Object.defineProperty(globalThis, "electron", { value: windowValue.electron, configurable: true });
+    }
     Object.defineProperty(globalThis, "window", {
       value: windowValue,
       configurable: true,

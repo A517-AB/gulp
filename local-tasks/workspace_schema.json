@@ -1,0 +1,53 @@
+[
+  {
+    "group": "Queues",
+    "repo": "github/A517-AB/gulp",
+    "baseBranch": "main",
+    "tasks": [
+      {
+        "folder": "src/renderer/pages/electron",
+        "topic": "QueuesPage - Improve Error Handling",
+        "task": "Add better error states and feedback when loading queues fails in `QueuesPage.tsx`."
+      },
+      {
+        "folder": "src/renderer/pages/electron",
+        "topic": "QueuesPage - Drag and Drop",
+        "task": "Implement drag and drop reordering for tasks within groups and across groups using `@dnd-kit`."
+      }
+    ]
+  },
+  {
+    "group": "Workspace",
+    "repo": "github/A517-AB/gulp",
+    "baseBranch": "main",
+    "tasks": [
+      {
+        "folder": "src/renderer/pages/shared",
+        "topic": "Create Workspace Dashboard",
+        "task": "Build a central `WorkspacePage.tsx` to overview all active projects, recent agent activities, and quick actions, acting as the main entry point for a session."
+      },
+      {
+        "folder": "src/store",
+        "topic": "Workspace State Management",
+        "task": "Add workspace-specific state in Zustand (e.g. `useWorkspaceStore`) to manage current project context, loaded schemas, and workspace-level preferences."
+      }
+    ]
+  },
+  {
+    "group": "Tools & Workflow",
+    "repo": "github/A517-AB/gulp",
+    "baseBranch": "main",
+    "tasks": [
+      {
+        "folder": "electron/ipc",
+        "topic": "System-wide Snippet Tool",
+        "task": "Implement the global hotkey (e.g., Ctrl+Shift+N) for a floating quick-note/snippet window as described in TODO.md."
+      },
+      {
+        "folder": "src/renderer/components",
+        "topic": "Unified Dropdown Component",
+        "task": "Replace custom dropdowns in BranchPicker and SourcePicker with a standard Radix DropdownMenu component for consistency (from TODO.md)."
+      }
+    ]
+  }
+]
