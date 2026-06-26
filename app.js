@@ -18,6 +18,7 @@ import { RichTextEditor, Toolbar as RteToolbar, Link, Image, HtmlEditor, QuickTo
 import { PdfViewer, Toolbar as PdfToolbar, Magnification, Navigation, LinkAnnotation, BookmarkView, ThumbnailView, Print, TextSelection, TextSearch, Annotation, FormDesigner, FormFields } from './ej2-pdfviewer/src/index.js';
 import { Chart, LineSeries, ColumnSeries, Category, Legend, Tooltip, DataLabel, PieSeries, AccumulationChart, AccumulationLegend, AccumulationTooltip, AccumulationDataLabel } from './ej2-charts/src/index.js';
 import { Toast as SyncfusionToast } from './ej2-notifications/dist/es6/ej2-notifications.es2015.js';
+import DOMPurify from 'dompurify';
 // Use Vite alias to local vanilla Spreadsheet build (lives under react/ej2-spreadsheet)
 
 // Inject required modules
@@ -2652,7 +2653,7 @@ const Letters = {
     // Internal: sanitize HTML text nodes while preserving markup
     _cleanHtmlContent(html) {
         const container = document.createElement('div');
-        container.innerHTML = html;
+        container.innerHTML = DOMPurify.sanitize(html);
 
         const isBlock = (node) => node && node.nodeType === 1 && /^(P|DIV|LI|H1|H2|H3|H4|H5|H6|BLOCKQUOTE)$/i.test(node.tagName);
 
