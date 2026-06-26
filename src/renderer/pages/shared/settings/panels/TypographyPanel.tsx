@@ -1,39 +1,7 @@
-import { useCallback } from 'react'
+
 import { useTheme } from '@renderer/providers/theme'
 
 // ── font loading ──────────────────────────────────────────────────────────────
-
-const GF_MAP: Record<string, string> = {
-    'Inter':              'Inter:wght@300;400;500;600;700',
-    'Outfit':             'Outfit:wght@300;400;500;600;700',
-    'DM Sans':            'DM+Sans:wght@300;400;500;600;700',
-    'Nunito':             'Nunito:wght@300;400;500;600;700',
-    'Roboto':             'Roboto:wght@300;400;500;700',
-    'Open Sans':          'Open+Sans:wght@300;400;500;600;700',
-    'Geist':              'Geist:wght@300;400;500;600;700',
-    'Plus Jakarta Sans':  'Plus+Jakarta+Sans:wght@300;400;500;600;700',
-    'Lato':               'Lato:wght@300;400;700',
-    'Raleway':            'Raleway:wght@300;400;500;600;700',
-    'Poppins':            'Poppins:wght@300;400;500;600;700',
-    'JetBrains Mono':     'JetBrains+Mono:wght@300;400;500;600;700',
-    'Fira Code':          'Fira+Code:wght@300;400;500;600;700',
-    'Geist Mono':         'Geist+Mono:wght@300;400;500;600;700',
-    'Source Code Pro':    'Source+Code+Pro:wght@300;400;500;600;700',
-    'Inconsolata':        'Inconsolata:wght@300;400;500;600;700',
-    'IBM Plex Mono':      'IBM+Plex+Mono:wght@300;400;500;600;700',
-}
-
-function loadFont(name: string): void {
-    const family = GF_MAP[name]
-    if (!family) return
-    const id = `gf-${name.replace(/\s+/g, '-').toLowerCase()}`
-    if (document.getElementById(id)) return
-    const link = document.createElement('link')
-    link.id = id
-    link.rel = 'stylesheet'
-    link.href = `https://fonts.googleapis.com/css2?family=${family}&display=swap`
-    document.head.appendChild(link)
-}
 
 // ── font suggestions ──────────────────────────────────────────────────────────
 
@@ -59,11 +27,6 @@ function FontRow({
     fallback: 'sans-serif' | 'monospace'
     onChange: (v: string) => void
 }) {
-    const handle = useCallback((v: string) => {
-        loadFont(v)
-        onChange(v)
-    }, [onChange])
-
     const fontFamily = `'${value}', ${fallback}`
 
     return (
@@ -74,7 +37,7 @@ function FontRow({
                     type="text"
                     list={listId}
                     value={value}
-                    onChange={e => { handle(e.target.value) }}
+                    onChange={e => { onChange(e.target.value) }}
                     placeholder={fallback}
                     className="bg-transparent border-none p-0 text-fg-primary font-mono text-3xs outline-none text-right w-40 placeholder-fg-ghost"
                     spellCheck={false}
