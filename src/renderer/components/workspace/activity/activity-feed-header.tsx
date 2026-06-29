@@ -1,6 +1,6 @@
 import {memo} from "react";
 import {Archive, Code, GitBranch, MoreVertical, Play, Plus} from "lucide-react";
-import type {SessionResource} from "./types";
+import type {SessionResource} from "@jules";
 import {Button} from "@/ui/button.tsx";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/ui/dropdown-menu.tsx";
 import {FlyingJules} from "@/components/workspace/flying-jules.tsx";
@@ -54,7 +54,9 @@ export const ActivityFeedHeader = memo(
         const sourceContext = session.sourceContext as typeof session.sourceContext | undefined | null;
         const outputs = session.outputs as typeof session.outputs | undefined | null;
 
-        const branch = sourceContext?.githubRepoContext?.startingBranch ?? "main";
+        const branch =
+            sourceContext?.githubRepoContext?.startingBranch ??
+            "main";
 
         const statusInfo = getStatusInfo(session.state);
         const hasDiffs = outputs?.some((o) => o.type === "changeSet") ?? false;

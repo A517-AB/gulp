@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { format } from 'date-fns'
-import { AnimatePresence, motion } from 'motion/react'
-import { BrowserSoundController } from '@notification/sounds'
-import { useNotification } from '@/library/notification'
-import { scheduler, notifLog } from '@shared/bridge'
-import type { ScheduledItem, NotifLogEntry } from '@shared/electron'
+import type {ReactNode} from 'react'
+import {useEffect, useMemo, useRef, useState} from 'react'
+import {format} from 'date-fns'
+import {AnimatePresence, motion} from 'motion/react'
+import {BrowserSoundController} from '@notification/sounds'
+import {useNotification} from '@/library/notification'
+import {notifLog, scheduler} from '@shared/bridge'
+import type {NotifLogEntry, ScheduledItem} from '@shared/electron'
 
 function randomId() {
   return Math.random().toString(36).slice(2, 10)
@@ -310,21 +310,80 @@ function MissedNotificationsSection() {
   )
 }
 
+// ── Fullscreen Clock ──────────────────────────────────────────────────────────
+
+function FullscreenClock({onClose}: { onClose: () => void }) {
+    const [time, setTime] = useState(() => format(new Date(), 'HH:mm:ss'))
+
+    useEffect(() => {
+        const id = setInterval(() => {
+            setTime(format(new Date(), 'HH:mm:ss'))
+        }, 1000)
+        return () => {
+            clearInterval(id)
+        }
+    }, [])
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose()
+        }
+        window.addEventListener('keydown', handler)
+        return () => {
+            window.removeEventListener('keydown', handler)
+        }
+    }, [onClose])
+
+    return (
+        <motion.div
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            exit={{opacity: 0}}
+            onClick={onClose}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-base cursor-pointer"
+        >
+      <span className="font-mono text-[12vw] font-bold text-fg-primary tabular-nums tracking-tight select-none">
+        {time}
+      </span>
+        </motion.div>
+    )
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function TimePage() {
+    const [fullscreen, setFullscreen] = useState(false)
+
   return (
-    <div className="p-6 space-y-8 max-w-2xl">
-      <SoundSection />
-      <SectionDivider />
-      <NotificationSection />
-      <SectionDivider />
-      <ActionSection />
-      <SectionDivider />
-      <SchedulerSection />
-      <SectionDivider />
-      <MissedNotificationsSection />
-    </div>
+      <>
+          <AnimatePresence>
+              {fullscreen && <FullscreenClock onClose={() => {
+                  setFullscreen(false)
+              }}/>}
+          </AnimatePresence>
+
+          <div className="p-6 space-y-8 max-w-2xl">
+              <div className="flex items-center justify-between">
+                  <button
+                      onClick={() => {
+                          setFullscreen(true)
+                      }}
+                      className="px-4 py-2 rounded-md text-sm font-medium border border-hair text-fg-secondary hover:text-fg-primary hover:bg-hover transition-colors"
+                  >
+                      Fullscreen clock
+                  </button>
+              </div>
+              <SoundSection/>
+              <SectionDivider/>
+              <NotificationSection/>
+              <SectionDivider/>
+              <ActionSection/>
+              <SectionDivider/>
+              <SchedulerSection/>
+              <SectionDivider/>
+              <MissedNotificationsSection/>
+          </div>
+      </>
   )
 }
 

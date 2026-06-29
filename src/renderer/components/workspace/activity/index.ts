@@ -5,13 +5,11 @@ export {MediaItemDownloader} from './activity-artifacts.tsx';
 export type {
     ActivityFeedProps,
     SingleActivityProps,
+    ActivityItemProps,
     TerminalConsoleProps,
     ActivityArtifactsProps,
     MediaItemGroupedProps,
     ActivityType,
-    Activity,
-    SessionResource,
-    BashArtifact,
-    Artifact,
-    MediaArtifact,
 } from './types';
+
+export type {Activity, Artifact, BashArtifact, ChangeSetArtifact, MediaArtifact, SessionResource} from '@jules';

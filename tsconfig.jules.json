@@ -3,8 +3,8 @@
     "target": "ES2022",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "rootDir": "./src/jules",
-    "declarationDir": "./dist-jules",
+    //    "rootDir": "./src/jules",
+    //    "declarationDir": "./dist-jules",
     "emitDeclarationOnly": true,
     "declaration": true,
     "types": [
@@ -15,6 +15,6 @@
     "resolveJsonModule": true
   },
   "include": [
-    "src/jules"
+    //    "src/jules"
   ]
 }

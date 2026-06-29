@@ -1,23 +1,25 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
-import {terminal, filesystem, store} from '@shared/bridge'
-import { useCommands } from '@/store/commands'
-import {jules} from '@jules'
+import {useCallback, useEffect, useRef, useState} from 'react'
+import {filesystem, store, terminal} from '@shared/bridge'
+import {useOverview} from '@/store/overview'
 import type {Activity, SessionClient} from '@jules'
-import {executeAt, executeDisplay, executeTerminal, executePreview} from '@shared/commands'
-import { CommandInput } from './CommandInput'
-import { BlockDisplay } from './BlockDisplay'
+import {jules} from '@jules'
+import type {AtCommand, DisplayCommand, PreviewCommand, TerminalCommand} from '@shared/commands'
+import {executeAt, executeDisplay, executePreview, executeTerminal} from '@shared/commands'
+import {CommandInput} from './CommandInput'
+import {BlockDisplay} from './BlockDisplay'
 import {TerminalPane} from './TerminalPane'
-import { DiffViewer } from '@/ui/diff-viewer'
-import type {AtCommand, DisplayCommand, TerminalCommand, PreviewCommand} from '@shared/commands'
+import {useSnippets} from '@/hooks/use-snippets'
+import {DiffViewer} from '@/ui/diff-viewer'
 
 type PanelMode = 'markdown' | 'terminal' | 'preview'
 
 
 export function OverviewPage() {
-    const commands = useCommands(s => s.commands)
-    const load = useCommands(s => s.load)
+    const commands = useOverview(s => s.commands)
+    const load = useOverview(s => s.load)
+    const {items: snippets} = useSnippets()
 
-    const sessionSnapshot = useCallback(async (_sessionId: string) => ({
+    const sessionSnapshot = useCallback((_sessionId: string) => Promise.resolve({
         generatedFiles: [] as {
             path: string;
             content: string
@@ -25,7 +27,6 @@ export function OverviewPage() {
     }), [])
     const hydrateSession = useCallback((sessionId: string) => jules.session(sessionId).activities.hydrate(), [])
     const selectSessionActivities = useCallback((sessionId: string, options?: Parameters<SessionClient['select']>[0]) => jules.session(sessionId).activities.select(options), [])
-    const sendMessage = useCallback((sessionId: string, msg: string) => jules.session(sessionId).send(msg), [])
     const subscribeActivity = useCallback((sessionId: string, cb: (a: Activity) => void) => {
         const ac = new AbortController()
         void (async () => {
@@ -154,20 +155,31 @@ export function OverviewPage() {
         }
     }, [hydrateSession, selectSessionActivities])
 
-    const handleSend = useCallback(async (command: AtCommand, prompt: string) => {
-        setStatus('sending...')
-        const result = await executeAt(
-            (sessionId, msg) => sendMessage(sessionId, msg),
-            command,
-            prompt,
-        )
-        if (result.status === 'sent') {
-            setStatus('sent')
-            setTimeout(() => { setStatus(null) }, 2000)
-        } else {
-            setStatus(result.error ?? 'error')
+    const handleSend = useCallback((command: AtCommand) => {
+        setStatus('running snippet...')
+        const snippet = snippets.find(s => s.id === command.snippetId)
+        if (!snippet) {
+            setStatus('snippet not found')
+            return
         }
-    }, [sendMessage])
+        if (!terminal) {
+            setStatus('no terminal')
+            return
+        }
+        setMode('terminal')
+        setStatus(null)
+
+        const absPath = `D:/fuse/${snippet.file}`
+        const result = executeAt(
+            {start: terminal.start, input: terminal.input},
+            command,
+            absPath,
+            snippet.languageId
+        )
+        if (result.status === 'error') {
+            setStatus(result.error ?? 'error running snippet')
+        }
+    }, [snippets])
 
     const handleRun = useCallback((command: TerminalCommand) => {
         if (!terminal) {
@@ -196,8 +208,8 @@ export function OverviewPage() {
                         onDisplay={command => {
                             void handleDisplay(command)
                         }}
-                        onSend={(command, prompt) => {
-                            void handleSend(command, prompt)
+                        onSend={command => {
+                            handleSend(command)
                         }}
                         onRun={handleRun}
                         onPreview={command => {

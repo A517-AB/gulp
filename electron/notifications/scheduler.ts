@@ -1,9 +1,9 @@
-import { Cron } from 'croner'
-import { ipcMain, app } from 'electron'
+import {Cron} from 'croner'
+import type {WebContents} from 'electron'
+import {app, ipcMain} from 'electron'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
-import type { WebContents } from 'electron'
-import { dispatchNotification } from './dispatch.js'
+import {dispatchNotification} from './dispatch.js'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -33,6 +33,8 @@ export interface ScheduledItem {
   enabled:      boolean
   sound?:       string
   category?:    string
+    actions?: { id: string; label: string; style?: 'primary' | 'ghost' }[]
+    leadTimeMin?: number
   createdAt:    string
   lastFiredAt?: string
 }
@@ -99,6 +101,74 @@ function toTrigger(s: ScheduleInput): string | Date | null {
   return `*/${s.everyMinutes} ${s.fromHour}-${s.toHour - 1} * * ${days}`
 }
 
+function toLeadTrigger(s: ScheduleInput, leadMin: number): string | Date | null {
+    if (s.kind === 'alarm') {
+        const {h, m} = parseTime(s.time)
+        let newM = m - leadMin
+        let newH = h
+        let days = s.days
+        while (newM < 0) {
+            newM += 60
+            newH -= 1
+        }
+        if (newH < 0) {
+            newH += 24
+            if (days.length > 0) {
+                days = days.map(d => ((d - 1 + 7) % 7) as WeekDay)
+            }
+        }
+        const daysStr = days.length > 0 ? days.join(',') : '*'
+        return `${newM} ${newH} * * ${daysStr}`
+    }
+    if (s.kind === 'once') {
+        const d = new Date(s.at)
+        const leadDate = new Date(d.getTime() - leadMin * 60_000)
+        return leadDate > new Date() ? leadDate : null
+    }
+    if (s.kind === 'daily') {
+        const {h, m} = parseTime(s.time)
+        let newM = m - leadMin
+        let newH = h
+        while (newM < 0) {
+            newM += 60
+            newH = (newH - 1 + 24) % 24
+        }
+        return `${newM} ${newH} * * *`
+    }
+    if (s.kind === 'weekly') {
+        const {h, m} = parseTime(s.time)
+        let newM = m - leadMin
+        let newH = h
+        let newDay = s.dayOfWeek
+        while (newM < 0) {
+            newM += 60
+            newH -= 1
+        }
+        while (newH < 0) {
+            newH += 24
+            newDay = ((newDay - 1 + 7) % 7) as WeekDay
+        }
+        return `${newM} ${newH} * * ${newDay}`
+    }
+    if (s.kind === 'monthly') {
+        const {h, m} = parseTime(s.time)
+        let newM = m - leadMin
+        let newH = h
+        let day = s.dayOfMonth
+        while (newM < 0) {
+            newM += 60
+            newH -= 1
+        }
+        while (newH < 0) {
+            newH += 24
+            day -= 1
+        }
+        if (day < 1) day = 1
+        return `${newM} ${newH} ${day} * *`
+    }
+    return null
+}
+
 // ── Scheduler ─────────────────────────────────────────────────────────────────
 
 const jobs = new Map<string, Cron>()
@@ -107,31 +177,69 @@ function startJob(item: ScheduledItem, getWebContents: () => WebContents | null)
   stopJob(item.id)
 
   const trigger = toTrigger(item.schedule)
-  if (!trigger) return
+    if (trigger) {
+        const job = new Cron(trigger, {protect: true, catch: true}, () => {
+            item.lastFiredAt = new Date().toISOString()
+            persistUpdate(item)
 
-  const job = new Cron(trigger, { protect: true, catch: true }, () => {
-    item.lastFiredAt = new Date().toISOString()
-    persistUpdate(item)
+            const wc = getWebContents()
+            if (wc) {
+                wc.send('notif.scheduler.fired', item)
+            } else {
+                dispatchNotification({
+                    title: item.label,
+                    body: item.body,
+                    sound: item.sound,
+                    id: item.id,
+                    actions: item.actions,
+                    extraData: {itemId: item.id},
+                    color: item.color,
+                    icon: item.icon
+                })
+            }
 
-    const wc = getWebContents()
-    if (wc) {
-      wc.send('notif.scheduler.fired', item)
-    } else {
-      dispatchNotification({ title: item.label, body: item.body, sound: item.sound, id: item.id })
+            if (item.schedule.kind === 'once') {
+                stopJob(item.id)
+                removeItem(item.id)
+            }
+        })
+        jobs.set(item.id, job)
     }
 
-    if (item.schedule.kind === 'once') {
-      stopJob(item.id)
-      removeItem(item.id)
+    if (item.leadTimeMin && item.leadTimeMin > 0) {
+        const leadTrigger = toLeadTrigger(item.schedule, item.leadTimeMin)
+        if (leadTrigger) {
+            const leadJob = new Cron(leadTrigger, {protect: true, catch: true}, () => {
+                const wc = getWebContents()
+                if (wc) {
+                    wc.send('notif.scheduler.fired', {
+                        ...item,
+                        label: `${item.label} (in ${item.leadTimeMin}m)`,
+                        id: `${item.id}_lead`
+                    })
+                } else {
+                    dispatchNotification({
+                        title: `${item.label} (in ${item.leadTimeMin}m)`,
+                        body: item.body,
+                        sound: item.sound,
+                        id: `${item.id}_lead`,
+                        actions: item.actions,
+                        extraData: {itemId: `${item.id}_lead`},
+                        color: item.color,
+                        icon: item.icon
+                    })
+                }
+            })
+            jobs.set(`${item.id}_lead`, leadJob)
+        }
     }
-  })
-
-  jobs.set(item.id, job)
 }
 
 function stopJob(id: string): void {
   jobs.get(id)?.stop()
   jobs.delete(id)
+    jobs.get(`${id}_lead`)?.stop()
+    jobs.delete(`${id}_lead`)
 }
 
 function persistUpdate(updated: ScheduledItem): void {
@@ -153,6 +261,7 @@ export function registerSchedulerHandlers(getWebContents: () => WebContents | nu
   ipcMain.handle('notif.scheduler.list', () => load())
 
   ipcMain.handle('notif.scheduler.add', (_, item: ScheduledItem) => {
+      stopJob(item.id)
     const items = load().filter(i => i.id !== item.id)
     items.push(item)
     save(items)

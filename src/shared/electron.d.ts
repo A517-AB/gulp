@@ -1,6 +1,5 @@
 import type {FileFilter, FsEntry, FsStat, ReaddirOptions} from './filesystem'
 import type {FuseChangeEvent, FuseManifest} from './fuse'
-import type {HistoryEntry} from './history'
 import type {NoteMeta} from './local-data'
 
 
@@ -120,13 +119,6 @@ export interface FilesystemAPI {
 export interface EnvAPI {
   getApiKey: () => Promise<string | null>;
 }
-
-export interface HistoryAPI {
-  get:    () => Promise<HistoryEntry[]>
-  push:   (text: string) => Promise<HistoryEntry[]>
-  remove: (id: string) => Promise<HistoryEntry[]>
-}
-
 export interface NotesAPI {
   get:       (id: string) => Promise<object[] | null>
   save:      (id: string, title: string, blocks: object[]) => Promise<boolean>
@@ -160,6 +152,8 @@ export interface UINotificationPayload {
   sound?:     string;
   extraData?: unknown;
   source?:    string;
+    color?: string;
+    icon?: string;
 }
 
 export interface UINotificationAPI {
@@ -216,9 +210,16 @@ export interface ScheduledItem {
   enabled:      boolean
   sound?:       string
   category?:    string
+    actions?: UINotifAction[]
+    leadTimeMin?: number
   createdAt:    string
   lastFiredAt?: string
+    completed?: boolean
+    completedAt?: string
+    color?: string
+    icon?: string
 }
+
 
 export interface SchedulerAPI {
   list:    ()                                  => Promise<ScheduledItem[]>
@@ -269,10 +270,74 @@ export interface GitHubBranch {
     protected: boolean;
 }
 
+export interface GitHubIssue {
+    number: number;
+    html_url: string;
+    title: string;
+    body?: string;
+    state: string;
+    labels: { name: string }[];
+    assignees: { login: string }[];
+}
+
+export interface GitHubPR {
+    number: number;
+    html_url: string;
+    title: string;
+    body?: string;
+    state: string;
+    head: { ref: string; sha: string };
+    base: { ref: string };
+    draft?: boolean;
+    merged?: boolean;
+}
+
+export interface GitHubCheckRun {
+    id: number;
+    name: string;
+    status: string;
+    conclusion: string | null;
+    html_url: string;
+}
+
 export interface GitHubAPI {
-    listBranches: (owner: string, repo: string) => Promise<GitHubBranch[]>;
-    listRepos: (sort?: string, per_page?: number) => Promise<unknown[]>;
     getUser: () => Promise<unknown>;
+    listRepos: (sort?: string, per_page?: number) => Promise<unknown[]>;
+    listBranches: (owner: string, repo: string) => Promise<GitHubBranch[]>;
+    deleteBranch: (owner: string, repo: string, branch: string) => Promise<void>;
+    listPRs: (owner: string, repo: string, state?: 'open' | 'closed' | 'all') => Promise<GitHubPR[]>;
+    getPR: (owner: string, repo: string, number: number) => Promise<GitHubPR>;
+    createPR: (owner: string, repo: string, data: {
+        title: string;
+        body?: string;
+        head: string;
+        base: string;
+        draft?: boolean
+    }) => Promise<GitHubPR>;
+    updatePR: (owner: string, repo: string, number: number, data: {
+        title?: string;
+        body?: string;
+        state?: 'open' | 'closed';
+        base?: string
+    }) => Promise<GitHubPR>;
+    mergePR: (owner: string, repo: string, number: number, method?: 'merge' | 'squash' | 'rebase') => Promise<void>;
+    getPRChecks: (owner: string, repo: string, ref: string) => Promise<{ check_runs: GitHubCheckRun[] }>;
+    listIssues: (owner: string, repo: string, state?: 'open' | 'closed' | 'all') => Promise<GitHubIssue[]>;
+    createIssue: (owner: string, repo: string, data: {
+        title: string;
+        body?: string;
+        labels?: string[];
+        assignees?: string[];
+        milestone?: number
+    }) => Promise<GitHubIssue>;
+    updateIssue: (owner: string, repo: string, number: number, data: {
+        title?: string;
+        body?: string;
+        state?: 'open' | 'closed';
+        labels?: string[];
+        assignees?: string[]
+    }) => Promise<GitHubIssue>;
+    addIssueComment: (owner: string, repo: string, number: number, body: string) => Promise<void>;
 }
 
 // ── root ───────────────────────────────────────────────────────────────────────
@@ -291,7 +356,6 @@ export interface ElectronAPI {
   popup:           PopupAPI;
   filesystem:      FilesystemAPI;
   env:             EnvAPI;
-  history:         HistoryAPI;
   notes:           NotesAPI;
   snippets:        SnippetsAPI;
   uiNotification:  UINotificationAPI;

@@ -1,4 +1,4 @@
-import type {Activity, SessionResource, BashArtifact, Artifact, MediaArtifact} from '@jules';
+import type {Activity, BashArtifact, MediaArtifact, SessionResource} from '@jules';
 
 export type ActivityType = Activity['type'];
 
@@ -15,6 +15,15 @@ export interface SingleActivityProps {
     onApprovePlan: () => void;
     approvingPlan: boolean;
     planApproved: boolean;
+    isNew?: boolean;
+}
+
+export interface ActivityItemProps {
+    item: Activity | Activity[];
+    onApprovePlan: () => void;
+    approvingPlan: boolean;
+    planApproved: boolean;
+    isNew?: boolean;
 }
 
 export interface TerminalConsoleProps {
@@ -31,5 +40,3 @@ export interface MediaItemGroupedProps {
     activityId: string;
     index: number;
 }
-
-export type {Activity, SessionResource, BashArtifact, Artifact, MediaArtifact};

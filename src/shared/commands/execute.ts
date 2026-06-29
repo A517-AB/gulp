@@ -1,32 +1,54 @@
-import type {AtResult, DisplayResult, TerminalResult, PreviewResult} from './types'
-import type {AtExecutor, DisplayExecutor, TerminalExecutor, PreviewExecutor} from './triggers'
+import type {AtResult, DisplayResult, PreviewResult, TerminalResult} from './types'
+import type {AtExecutor, DisplayExecutor, PreviewExecutor, TerminalExecutor} from './triggers'
 
-export const executeAt: AtExecutor = async (send, command, prompt) => {
-  const sentAt = Date.now()
+function getRunner(languageId: string, absPath: string): string {
+    const normalized = absPath.replace(/\\/g, '/')
+    switch (languageId) {
+        case 'python':
+            return `python "${normalized}"`
+        case 'javascript':
+            return `node "${normalized}"`
+        case 'typescript':
+            return `npx tsx "${normalized}"`
+        case 'bash':
+            return `bash "${normalized}"`
+        case 'pwsh':
+        case 'powershell':
+            return `powershell -File "${normalized}"`
+        default:
+            return `node "${normalized}"`
+    }
+}
+
+export const executeAt: AtExecutor = (deps, command, snippetFile, languageId) => {
+    const ranAt = Date.now()
   try {
-    await send(command.sessionId, prompt)
+      const runner = getRunner(languageId, snippetFile)
+      deps.start('D:/fuse')
+      deps.input(`${runner}\r`)
     return {
       trigger:   '@',
       commandId: command.id,
       alias:     command.alias,
-      sessionId: command.sessionId,
-      prompt,
-      sentAt,
-      status:    'sent',
+        snippetId: command.snippetId,
+        file: snippetFile,
+        ranAt,
+        status: 'ok',
     } satisfies AtResult
   } catch (err) {
     return {
       trigger:   '@',
       commandId: command.id,
       alias:     command.alias,
-      sessionId: command.sessionId,
-      prompt,
-      sentAt,
+        snippetId: command.snippetId,
+        file: snippetFile,
+        ranAt,
       status:    'error',
       error:     err instanceof Error ? err.message : String(err),
     } satisfies AtResult
   }
 }
+
 
 export const executeTerminal: TerminalExecutor = (deps, command) => {
     const ranAt = Date.now()

@@ -81,10 +81,26 @@ export interface JulesArtifactIPC {
     save: (data: string, filepath: string) => Promise<string>
 }
 
+export interface JulesCacheIPC {
+    sessions: () => Promise<unknown[]>
+    select: (query: unknown) => Promise<unknown[]>
+    sync: (options?: unknown) => Promise<{
+        sessionsIngested: number;
+        activitiesIngested: number;
+        isComplete: boolean;
+        durationMs: number
+    }>
+    getSession: (id: string) => Promise<unknown>
+    activities: (sessionId: string) => Promise<unknown[]>
+    send: (sessionId: string, msg: string) => Promise<void>
+    approve: (sessionId: string) => Promise<void>
+}
+
 export interface JulesIPC {
     git: JulesGitIPC
     github: JulesGitHubIPC
     artifact: JulesArtifactIPC
+    cache: JulesCacheIPC
 }
 
 declare global {

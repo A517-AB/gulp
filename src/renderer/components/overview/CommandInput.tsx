@@ -1,12 +1,12 @@
-import {useState, useCallback, useMemo, type KeyboardEvent} from 'react'
+import {type KeyboardEvent, useCallback, useMemo, useState} from 'react'
 import {AnimatePresence} from 'framer-motion'
-import { parseInput, isParseOk } from '@shared/commands'
-import type {AtCommand, Command, DisplayCommand, TerminalCommand, PreviewCommand} from '@shared/commands'
-import {useHistory} from '@/hooks/use-history'
+import type {AtCommand, Command, DisplayCommand, PreviewCommand, TerminalCommand} from '@shared/commands'
+import {isParseOk, parseInput} from '@shared/commands'
+import {useOverview} from '@/store/overview'
 import {GhostInput} from './GhostInput'
 import {CommandMenu} from './CommandMenu'
 import {HistoryPanel} from './HistoryPanel'
-import { cn } from '@/utils'
+import {cn} from '@/utils'
 
 type PanelMode = 'none' | 'commands' | 'history'
 
@@ -15,7 +15,7 @@ const TRIGGER_CHARS: string[] = ['/', '@', '>', ':']
 interface Props {
     commands: Command[]
     onDisplay: (command: DisplayCommand) => void
-    onSend: (command: AtCommand, prompt: string) => void
+    onSend: (command: AtCommand) => void
     onRun: (command: TerminalCommand) => void
     onPreview: (command: PreviewCommand) => void
     className?: string
@@ -27,7 +27,9 @@ export function CommandInput({commands, onDisplay, onSend, onRun, onPreview, cla
     const [panelMode, setPanelMode] = useState<PanelMode>('none')
     const [activeIndex, setIndex] = useState(0)
 
-    const {entries: history, push: pushHistory, remove: removeHistory} = useHistory()
+    const history = useOverview(s => s.history)
+    const pushHistory = useOverview(s => s.pushHistory)
+    const removeHistory = useOverview(s => s.removeHistory)
 
     const closePanel = useCallback(() => {
         setPanelMode('none');
@@ -58,10 +60,11 @@ export function CommandInput({commands, onDisplay, onSend, onRun, onPreview, cla
             setInput('')
             closePanel()
         } else {
-            setInput(`@${cmd.alias} `)
+            onSend(cmd)
+            setInput('')
             closePanel()
         }
-    }, [onDisplay, onRun, onPreview, closePanel])
+    }, [onDisplay, onRun, onPreview, onSend, closePanel])
 
     const handleChange = useCallback((val: string) => {
         setInput(val)
@@ -150,7 +153,7 @@ export function CommandInput({commands, onDisplay, onSend, onRun, onPreview, cla
             if (!isParseOk(parsed)) return
 
             if (parsed.value.trigger === '@') {
-                onSend(parsed.value.command, parsed.value.prompt)
+                onSend(parsed.value.command)
             } else if (parsed.value.trigger === '/') {
                 onDisplay(parsed.value.command)
             } else if (parsed.value.trigger === '>') {

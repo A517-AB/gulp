@@ -1,24 +1,36 @@
-import { useState, useEffect } from 'react'
+import {useEffect, useState} from 'react'
 import {DynamicDropdown} from '@/ui/dynamic-dropdown'
 import {TerminalConsole} from '@/components/workspace/activity'
-import { Folder, GitBranch, Zap } from 'lucide-react'
-import { Button } from '@/ui/button'
-import { Badge } from '@/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/ui/avatar'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/ui/tabs'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/ui/select'
-import { Separator } from '@/ui/separator'
-import { Label } from '@/ui/label'
-import { ScrollArea } from '@/ui/scroll-area'
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/ui/sheet'
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/ui/dialog'
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/ui/tooltip'
-import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuSeparator } from '@/ui/context-menu'
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/ui/accordion'
+import {Folder, GitBranch, Zap} from 'lucide-react'
+import {Button} from '@/ui/button'
+import {Badge} from '@/ui/badge'
+import {Avatar, AvatarFallback, AvatarImage} from '@/ui/avatar'
+import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/ui/tabs'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/ui/select'
+import {Separator} from '@/ui/separator'
+import {Label} from '@/ui/label'
+import {ScrollArea} from '@/ui/scroll-area'
+import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger} from '@/ui/sheet'
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger} from '@/ui/dialog'
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/ui/tooltip'
 import {
-  CommandDialog, CommandInput, CommandList,
-  CommandEmpty, CommandGroup, CommandItem, CommandSeparator,
+    ContextMenu,
+    ContextMenuContent,
+    ContextMenuItem,
+    ContextMenuSeparator,
+    ContextMenuTrigger
+} from '@/ui/context-menu'
+import {Accordion, AccordionContent, AccordionItem, AccordionTrigger} from '@/ui/accordion'
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
 } from '@/ui/command'
+import {ActionRow} from '@/ui/action-row'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -33,6 +45,15 @@ export default function KitPage() {
   const [selectVal, setSelectVal] = useState('')
   const [dropdownVal, setDropdownVal] = useState<string | null>(null)
   const [cmdOpen, setCmdOpen] = useState(false)
+    const [actionType, setActionType] = useState('jules')
+    const [actionSched, setActionSched] = useState<string | null>(null)
+    const [actionTitle, setActionTitle] = useState('Update dependencies')
+    const [actionStatus, setActionStatus] = useState<'idle' | 'running' | 'success' | 'failed'>('idle')
+    const [folder, setFolder] = useState('src/renderer/router.tsx')
+    const [prompt, setPrompt] = useState('Upgrade route declarations to use the React Router 6 configuration layout.')
+    const [command, setCommand] = useState('npm run lint && npm run typecheck')
+    const [sourceBranch, setSourceBranch] = useState('master')
+    const [targetBranch, setTargetBranch] = useState('dev')
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -360,6 +381,50 @@ export default function KitPage() {
               </div>
             </ScrollArea>
           </Section>
+
+            <Separator/>
+
+            <Section title="ActionRow (Interactive Morphing UI)">
+                <div className="w-full space-y-4">
+
+                    {/* Status Simulation Controls */}
+                    <div className="flex items-center gap-2">
+                        <span className="text-2xs font-mono text-fg-ghost">Simulate Status:</span>
+                        {(['idle', 'running', 'success', 'failed'] as const).map(s => (
+                            <button
+                                key={s}
+                                onClick={() => setActionStatus(s)}
+                                className={`px-2 py-0.5 rounded text-2xs font-mono transition-colors ${actionStatus === s ? 'bg-active text-fg-primary' : 'bg-hover text-fg-muted'}`}
+                            >
+                                {s}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Morphing Action Row */}
+                    <ActionRow
+                        title={actionTitle}
+                        onTitleChange={setActionTitle}
+                        typeValue={actionType}
+                        onTypeChange={setActionType}
+                        scheduleValue={actionSched}
+                        onScheduleChange={setActionSched}
+                        status={actionStatus}
+                        runCount={3}
+                        folder={folder}
+                        onFolderChange={setFolder}
+                        prompt={prompt}
+                        onPromptChange={setPrompt}
+                        command={command}
+                        onCommandChange={setCommand}
+                        sourceBranch={sourceBranch}
+                        onSourceBranchChange={setSourceBranch}
+                        targetBranch={targetBranch}
+                        onTargetBranchChange={setTargetBranch}
+                    />
+
+                </div>
+            </Section>
 
         </div>
       </ScrollArea>

@@ -1,7 +1,5 @@
 export type Trigger = '@' | '/' | '>' | ':'
 
-// ── @: fire-forget message to Jules ──────────────────────────────────────────
-
 export interface AtCommand {
   id:         string
   trigger:    '@'
@@ -9,17 +7,17 @@ export interface AtCommand {
   enabled:    boolean
   createdAt:  number
   updatedAt?: number
-  sessionId:  string
+    snippetId: string
 }
 
 export interface AtResult {
   trigger:   '@'
   commandId: string
   alias:     string
-  sessionId: string
-  prompt:    string
-  sentAt:    number
-  status:    'sent' | 'error'
+    snippetId: string
+    file: string
+    ranAt: number
+    status: 'ok' | 'error'
   error?:    string
 }
 

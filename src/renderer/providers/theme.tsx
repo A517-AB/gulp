@@ -1,6 +1,38 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import {createContext, type ReactNode, useContext, useEffect, useState} from 'react'
 
 export type Theme = 'light' | 'dark'
+
+const GF_MAP: Record<string, string> = {
+    'Inter': 'Inter:wght@300;400;500;600;700',
+    'Outfit': 'Outfit:wght@300;400;500;600;700',
+    'DM Sans': 'DM+Sans:wght@300;400;500;600;700',
+    'Nunito': 'Nunito:wght@300;400;500;600;700',
+    'Roboto': 'Roboto:wght@300;400;500;700',
+    'Open Sans': 'Open+Sans:wght@300;400;500;600;700',
+    'Geist': 'Geist:wght@300;400;500;600;700',
+    'Plus Jakarta Sans': 'Plus+Jakarta+Sans:wght@300;400;500;600;700',
+    'Lato': 'Lato:wght@300;400;700',
+    'Raleway': 'Raleway:wght@300;400;500;600;700',
+    'Poppins': 'Poppins:wght@300;400;500;600;700',
+    'JetBrains Mono': 'JetBrains+Mono:wght@300;400;500;600;700',
+    'Fira Code': 'Fira+Code:wght@300;400;500;600;700',
+    'Geist Mono': 'Geist+Mono:wght@300;400;500;600;700',
+    'Source Code Pro': 'Source+Code+Pro:wght@300;400;500;600;700',
+    'Inconsolata': 'Inconsolata:wght@300;400;500;600;700',
+    'IBM Plex Mono': 'IBM+Plex+Mono:wght@300;400;500;600;700',
+}
+
+export function loadFont(name: string): void {
+    const family = GF_MAP[name]
+    if (!family) return
+    const id = `gf-${name.replace(/\s+/g, '-').toLowerCase()}`
+    if (document.getElementById(id)) return
+    const link = document.createElement('link')
+    link.id = id
+    link.rel = 'stylesheet'
+    link.href = `https://fonts.googleapis.com/css2?family=${family}&display=swap`
+    document.head.appendChild(link)
+}
 
 interface ThemeCtx {
   theme: Theme
@@ -31,9 +63,7 @@ const Ctx = createContext<ThemeCtx | null>(null)
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     try {
-        // 2026-06-23: Commented out gulp:theme reference while investigating theme issues and settings data
-        // return (localStorage.getItem('gulp:theme') as Theme | null) ?? 'dark'
-        return 'dark'
+        return (localStorage.getItem('gulp:theme') as Theme | null) ?? 'dark'
     } catch {
       return 'dark'
     }
@@ -118,10 +148,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const root = document.documentElement
 
-    // Base Theme
     root.classList.toggle('dark', theme === 'dark')
-      // 2026-06-23: Commented out gulp:theme reference while investigating theme issues and settings data
-      // localStorage.setItem('gulp:theme', theme)
+      localStorage.setItem('gulp:theme', theme)
+
+      loadFont(fontBasic)
+      loadFont(fontMarkdown)
+      loadFont(fontCode)
 
     // Apply Dynamic Sizing (1rem = fontSize)
     root.style.fontSize = `${fontSize}px`
@@ -139,6 +171,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('gulp:fontBasicVal', fontBasic)
     localStorage.setItem('gulp:fontMarkdownVal', fontMarkdown)
     localStorage.setItem('gulp:fontCodeVal', fontCode)
+
+      // Keep BlockNote in sync with markdown font + base size
+      const bnId = 'bn-font-sync'
+      let bnEl = document.getElementById(bnId) as HTMLStyleElement | null
+      if (!bnEl) {
+          bnEl = document.createElement('style');
+          bnEl.id = bnId;
+          document.head.appendChild(bnEl)
+      }
+      bnEl.textContent = `.bn-editor .ProseMirror, .bn-editor .ProseMirror p { font-family: ${formatFont(fontMarkdown, 'sans-serif')}; font-size: ${fontSize}px; }`
 
     // Apply Dynamic Weights
     const w = fontWeight

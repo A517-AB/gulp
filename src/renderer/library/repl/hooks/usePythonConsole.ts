@@ -1,0 +1,260 @@
+import {useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react'
+import {PythonContext, suppressedMessages} from '../providers/PythonProvider'
+import type {Remote} from 'comlink'
+import {proxy, wrap} from 'comlink'
+import useFilesystem from './useFilesystem'
+
+import type {Packages} from '../types/Packages'
+import type {PythonRunner} from '../types/Runner'
+import {ConsoleState} from '../types/Console'
+
+interface UsePythonConsoleProps {
+    packages?: Packages
+}
+
+export default function usePythonConsole(props?: UsePythonConsoleProps) {
+    const {packages = {}} = props ?? {}
+
+    const [runnerId, setRunnerId] = useState<string>()
+    const [banner, setBanner] = useState<string | undefined>()
+    const [consoleState, setConsoleState] = useState<ConsoleState>()
+    const [isRunning, setIsRunning] = useState(false)
+    const [stdout, setStdout] = useState('')
+    const [stderr, setStderr] = useState('')
+    const [pendingCode, setPendingCode] = useState<string | undefined>()
+
+    const {
+        packages: globalPackages,
+        timeout,
+        lazy,
+        autoImportPackages,
+        sendInput,
+        workerAwaitingInputIds,
+        getPrompt
+    } = useContext(PythonContext)
+
+    const workerRef = useRef<Worker | undefined>(undefined)
+    const runnerRef = useRef<Remote<PythonRunner> | undefined>(undefined)
+    const outputRef = useRef<string[]>([])
+
+    const {
+        readFile,
+        writeFile,
+        mkdir,
+        rmdir,
+        watchModules,
+        unwatchModules,
+        watchedModules
+    } = useFilesystem({runner: runnerRef?.current})
+
+    const createWorker = () => {
+        const worker = new Worker(
+            new URL('../workers/python-worker', import.meta.url),
+            {type: 'module'}
+        )
+        workerRef.current = worker
+    }
+
+    useEffect(() => {
+        if (!lazy) {
+            // Spawn worker on mount
+            createWorker()
+        }
+
+        // Cleanup worker on unmount
+        return () => {
+            cleanup()
+        }
+    }, [])
+
+    const allPackages = useMemo(() => {
+        const official = [
+            ...new Set([
+                ...(globalPackages.official ?? []),
+                ...(packages.official ?? [])
+            ])
+        ]
+        const micropip = [
+            ...new Set([
+                ...(globalPackages.micropip ?? []),
+                ...(packages.micropip ?? [])
+            ])
+        ]
+        return [official, micropip]
+    }, [globalPackages, packages])
+
+    const isReady = !!runnerId
+
+    useEffect(() => {
+        if (workerRef.current && !isReady) {
+            const init = async () => {
+                try {
+                    const runner: Remote<PythonRunner> = wrap(workerRef.current as Worker)
+                    runnerRef.current = runner
+
+                    await runner.init(
+                        proxy((msg: string) => {
+                            // Suppress messages that are not useful for the user
+                            if (suppressedMessages.includes(msg)) {
+                                return
+                            }
+                            outputRef.current.push(msg)
+                        }),
+                        proxy(({id, version, banner}) => {
+                            setRunnerId(id)
+                            setBanner(banner)
+                            console.debug('Loaded pyodide version:', version)
+                        }),
+                        'console',
+                        allPackages
+                    )
+                } catch (error) {
+                    console.error('Error loading Pyodide:', error)
+                }
+            }
+            init()
+        }
+    }, [workerRef.current])
+
+    // React to ready state and run delayed code if pending
+    useEffect(() => {
+        if (pendingCode && isReady) {
+            const delayedRun = async () => {
+                await runPython(pendingCode)
+                setPendingCode(undefined)
+            }
+            delayedRun()
+        }
+    }, [pendingCode, isReady])
+
+    // prettier-ignore
+    const moduleReloadCode = (modules: Set<string>) => `
+import importlib
+import sys
+${Array.from(modules).map((name) => `
+if """${name}""" in sys.modules:
+    importlib.reload(sys.modules["""${name}"""])
+`).join('')}
+del importlib
+del sys
+`
+
+    const runPython = useCallback(
+        async (code: string) => {
+            // Clear stdout and stderr
+            outputRef.current = []
+            setStdout('')
+            setStderr('')
+
+            if (lazy && !isReady) {
+                // Spawn worker and set pending code
+                createWorker()
+                setPendingCode(code)
+                return
+            }
+
+            if (!isReady) {
+                throw new Error('Pyodide is not loaded yet')
+            }
+            let timeoutTimer
+            try {
+                setIsRunning(true)
+                if (!isReady || !runnerRef.current) {
+                    throw new Error('Pyodide is not loaded yet')
+                }
+                if (timeout > 0) {
+                    timeoutTimer = setTimeout(() => {
+                        setStdout('')
+                        setStderr(`Execution timed out. Reached limit of ${timeout} ms.`)
+                        interruptExecution()
+                    }, timeout)
+                }
+                if (watchedModules.size > 0) {
+                    await runnerRef.current.run(
+                        moduleReloadCode(watchedModules),
+                        autoImportPackages
+                    )
+                }
+                const runResult = await runnerRef.current.run(code, autoImportPackages)
+                const {state, error} = runResult ?? {}
+                setStdout(outputRef.current.join(''))
+                setConsoleState(ConsoleState[state as keyof typeof ConsoleState])
+                if (error) {
+                    setStderr(error)
+                }
+                // eslint-disable-next-line
+            } catch (error: any) {
+                console.error('Error pushing to console:', error)
+            } finally {
+                setIsRunning(false)
+                clearTimeout(timeoutTimer)
+            }
+        },
+        [lazy, isReady, timeout, watchedModules]
+    )
+
+    const interruptExecution = () => {
+        cleanup()
+        setIsRunning(false)
+        setRunnerId(undefined)
+        setBanner(undefined)
+        setConsoleState(undefined)
+        outputRef.current = []
+
+        // Spawn new worker
+        createWorker()
+    }
+
+    const cleanup = () => {
+        if (!workerRef.current) {
+            return
+        }
+        console.debug('Terminating worker')
+        workerRef.current.terminate()
+    }
+
+    const isAwaitingInput =
+        !!runnerId && workerAwaitingInputIds.includes(runnerId)
+
+    const sendUserInput = (value: string) => {
+        if (!runnerId) {
+            console.error('No runner id')
+            return
+        }
+        sendInput(runnerId, value)
+    }
+
+    const getCompletions = useCallback(
+        async (text: string): Promise<string[]> => {
+            if (!runnerRef.current) return []
+            try {
+                return await runnerRef.current.getCompletions(text)
+            } catch (err) {
+                console.error('Failed to get completions:', err)
+                return []
+            }
+        },
+        []
+    )
+
+    return {
+        runPython,
+        stdout,
+        stderr,
+        isReady,
+        isRunning,
+        interruptExecution,
+        readFile,
+        writeFile,
+        mkdir,
+        rmdir,
+        watchModules,
+        unwatchModules,
+        banner,
+        consoleState,
+        isAwaitingInput,
+        sendInput: sendUserInput,
+        prompt: runnerId ? getPrompt(runnerId) : '',
+        getCompletions
+    }
+}

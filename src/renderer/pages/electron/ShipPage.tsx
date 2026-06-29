@@ -1,12 +1,12 @@
-import {useMemo, useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {ScrollArea} from "@/ui/scroll-area";
 import {SourceRow} from "@/components/ship/SourceRow";
 import {ACTIVE_STATES} from "@/components/ship/JulesSection";
 import {useStore} from "@/store/app";
 import {useShipStore} from "@/store/ship";
 import {useNotification} from "@/library/notification/use-notification";
-import {jules} from "@jules";
 import type {SessionResource, Source} from "@jules";
+import {jules} from "@jules";
 
 export default function ShipPage() {
     const sources = useStore(s => s.sources);
@@ -14,6 +14,14 @@ export default function ShipPage() {
     const [sessionList, setSessionList] = useState<SessionResource[]>([]);
     const [openSourceId, setOpenSourceId] = useState<string | null>(null);
 
+    /**
+     * Bootstraps the list of all Jules sessions for the Ship page UI.
+     *
+     * Note: If you see "fetchPage @ sessions.ts" or "await in (anonymous) @ ShipPage.tsx:25"
+     * in your console stack traces, it is completely normal. `jules.sessions()` is an async
+     * generator that silently calls an internal SDK function called `fetchPage()`. It uses
+     * that to paginate through all your sessions from Google behind the scenes!
+     */
     useEffect(() => {
         void (async () => {
             try {

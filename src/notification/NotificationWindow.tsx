@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
-import { Toaster, toast } from 'sonner'
-import { BrowserSoundController } from './sounds'
-import { Welcome } from './Welcome'
-import type { SoundId } from './sounds'
+import {useEffect, useState} from 'react'
+import {toast, Toaster} from 'sonner'
+import type {SoundId} from './sounds'
+import {BrowserSoundController} from './sounds'
+import {Welcome} from './Welcome'
+import {Bell} from 'lucide-react'
+import {LANGUAGES} from '../renderer/lib/languages'
 
 // ── types ──────────────────────────────────────────────────────────────────────
 
@@ -22,6 +24,8 @@ export interface NotifPayload {
   sound?:     SoundId
   extraData?: unknown
   source?:    string
+    color?: string
+    icon?: string
 }
 
 interface NotifBridge {
@@ -55,13 +59,24 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
   const hasActions  = (data.actions?.length ?? 0) > 0
   const isClickable = !hasActions && data.extraData !== undefined
 
+    // Find language icon if specified, otherwise fall back to Bell
+    const langPreset = LANGUAGES.find(l => l.id === data.icon)
+    const Icon = langPreset?.icon || Bell
+    const accentColor = data.color || langPreset?.color
+
   return (
     <div
       onClick={isClickable ? () => { notif.clicked('default', data.extraData); toast.dismiss(id) } : undefined}
-      className={`relative flex items-start gap-3 w-full rounded-xl border border-hair bg-overlay/90 backdrop-blur-xl shadow-2xl overflow-hidden px-4 py-3${isClickable ? ' cursor-pointer' : ''}`}
+      className={`relative flex items-start gap-3.5 w-full rounded-xl border border-hair bg-overlay shadow-2xl overflow-hidden px-4.5 py-3.5${isClickable ? ' cursor-pointer' : ''}`}
+      style={accentColor ? {borderLeft: `3px solid ${accentColor}`} : undefined}
     >
-      <div className="flex-1 min-w-0 space-y-1.5">
-        <p className="text-xs font-medium text-fg-primary leading-snug">{data.title}</p>
+        <Icon
+            className="w-4.5 h-4.5 shrink-0 mt-0.5"
+            style={{color: accentColor || 'var(--color-fg-ghost)'}}
+        />
+
+        <div className="flex-1 min-w-0 space-y-2">
+            <p className="text-xs font-semibold text-fg-primary leading-snug">{data.title}</p>
 
         {data.body !== undefined && (
           <p className="text-2xs text-fg-secondary leading-snug">{data.body}</p>
@@ -107,9 +122,20 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
 
 const soundController = new BrowserSoundController({ volume: 0.35 })
 
-function fire(data: NotifPayload) {
+let lastSoundPlayTime = 0
+
+function fire(data: NotifPayload | null) {
+    if (data === null) {
+        toast.dismiss()
+        return
+    }
+
   if (data.sound && data.sound !== 'none') {
-    void soundController.play(data.sound)
+      const now = Date.now()
+      if (now - lastSoundPlayTime > 1500) {
+          lastSoundPlayTime = now
+          void soundController.play(data.sound)
+      }
   }
 
   toast.custom(
@@ -137,6 +163,7 @@ export function NotificationWindow() {
         theme={theme}
         position="bottom-right"
         gap={8}
+        expand={true}
         toastOptions={{ unstyled: true, classNames: { toast: 'w-full' } }}
       />
     </>

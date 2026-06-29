@@ -1,1 +1,1 @@
-export { default } from './overview/OverviewPage'
+export {OverviewPage as default} from '@/components/overview'

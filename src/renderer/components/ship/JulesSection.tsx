@@ -1,19 +1,13 @@
 import {AnimatePresence, motion} from "framer-motion";
-import {
-    Archive,
-    CheckCircle2,
-    ChevronDown,
-    Download,
-    GitBranch,
-    Loader2,
-} from "lucide-react";
+import {Archive, CheckCircle2, ChevronDown, Download, GitBranch, Loader2,} from "lucide-react";
 import {formatDistanceToNow} from "date-fns";
 import type {DiffFile} from "diff2html/lib-esm/types";
 import {LineType} from "diff2html/lib-esm/types";
 import {cn} from "@/utils";
-import {useShipStore} from "@/store/ship";
 import type {ActionState, ShipFile} from "@/store/ship";
-import type {SessionResource, SessionOutput} from "@jules";
+import {useShipStore} from "@/store/ship";
+import type {SessionOutput, SessionResource} from "@jules";
+import {ACTIVE_STATES} from "./active-states";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -23,7 +17,7 @@ const STATUS_DOT: Record<ShipFile["changeType"], string> = {
     modified: "bg-yellow-500",
 };
 
-export {ACTIVE_STATES} from "./active-states";
+export {ACTIVE_STATES};
 
 function fmtAge(createTime: string): string {
     try {

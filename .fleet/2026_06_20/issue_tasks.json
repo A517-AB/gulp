@@ -1,0 +1,142 @@
+{
+  "repo": "A517-AB/gulp",
+  "analyzed_at": "2026-06-20T01:11:43.511Z",
+  "root_causes": [
+    {
+      "id": "rc-croner-ui-wiring",
+      "title": "Croner UI wiring gap",
+      "severity": "medium",
+      "issues": [
+        21
+      ],
+      "files": [
+        "src/renderer/pages/electron/TardisPage.tsx",
+        "src/renderer/components/shared/ScheduleForm.tsx"
+      ],
+      "description": "Scheduler toggle and snooze exist in IPC but lack UI integration. Weekly/monthly models exist but lack UI form support.",
+      "solution_summary": "Add toggle and snooze UI elements in TardisPage.tsx. Add weekly and monthly kind types, and input support in ScheduleForm.tsx."
+    },
+    {
+      "id": "rc-feed-scroll-anchor",
+      "title": "Activity feed scroll anchor missing",
+      "severity": "low",
+      "issues": [
+        20
+      ],
+      "files": [
+        "src/renderer/components/workspace/activity/activity-feed.tsx"
+      ],
+      "description": "ActivityFeed renders items in a ScrollArea but doesn't automatically scroll to bottom when new messages arrive.",
+      "solution_summary": "Add a ref to an empty div at the bottom of the ScrollArea and trigger scrollIntoView on `activities` updates."
+    },
+    {
+      "id": "rc-snippet-save-path",
+      "title": "Snippet hardcoded save path",
+      "severity": "high",
+      "issues": [
+        18
+      ],
+      "files": [
+        "electron/snippets.ts"
+      ],
+      "description": "The `snippets.json` manifest path is hardcoded to `D:/fuse/snippets.json` in `electron/snippets.ts`, breaking snippet persistence on machines without this drive.",
+      "solution_summary": "Change `MANIFEST_PATH` to derive from `app.getPath('userData')` instead of the hardcoded D: drive path."
+    },
+    {
+      "id": "rc-ipc-missing-methods",
+      "title": "Missing SDK IPC methods",
+      "severity": "medium",
+      "issues": [
+        17
+      ],
+      "files": [
+        "electron/ipc/handlers.ts",
+        "src/jules/sdk-ipc.ts",
+        "src/shared/bridge.ts"
+      ],
+      "description": "Several SDK methods are not exposed via IPC, though they exist in the underlying SDK.",
+      "solution_summary": "Add missing methods to `SdkIpc` interface, `handlers.ts` bridge, and potentially `bridge.ts`."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-croner-ui",
+      "title": "Implement Croner UI wiring",
+      "root_cause": "rc-croner-ui-wiring",
+      "issues": [
+        21
+      ],
+      "files": [
+        "src/renderer/pages/electron/TardisPage.tsx",
+        "src/renderer/components/shared/ScheduleForm.tsx"
+      ],
+      "new_files": [],
+      "test_files": [],
+      "risk": "low",
+      "prompt": "You are tasked with fixing issue #21: Croner per-job enable/disable toggle and snooze UI.\n\nThe `scheduler.toggle` and `scheduler.snooze` handlers exist in `electron/notifications/scheduler.ts` but aren't fully wired up in the UI. Also, 'windowed', 'weekly', and 'monthly' schedule kinds are defined but not completely exposed.\n\nFiles to modify:\n1. `src/renderer/components/shared/ScheduleForm.tsx`:\n   - Add `'weekly'` and `'monthly'` to `type Kind`.\n   - Update the UI to render the buttons for 'weekly' and 'monthly'.\n   - Implement the corresponding input fields:\n     - For `weekly`, an input for `dayOfWeek` (0-6).\n     - For `monthly`, an input for `dayOfMonth` (1-31).\n   - Add state variables: `dayOfWeek` (default 1) and `dayOfMonth` (default 1).\n   - Update `buildSchedule()` to return the correct object for `'weekly'` and `'monthly'`.\n\n```diff\n// Before\n  function buildSchedule(): ScheduleInput | null {\n    if (kind === 'once')     return { kind: 'once',     at: new Date(Date.now() + minutes * 60_000).toISOString() }\n    if (kind === 'interval') return { kind: 'interval', everyMinutes: minutes }\n    if (kind === 'daily')    return { kind: 'daily',    time }\n    return { kind: 'windowed', everyMinutes: minutes, fromHour, toHour, days: [1, 2, 3, 4, 5] }\n  }\n// After\n  function buildSchedule(): ScheduleInput | null {\n    if (kind === 'once')     return { kind: 'once',     at: new Date(Date.now() + minutes * 60_000).toISOString() }\n    if (kind === 'interval') return { kind: 'interval', everyMinutes: minutes }\n    if (kind === 'daily')    return { kind: 'daily',    time }\n    if (kind === 'weekly')   return { kind: 'weekly',   time, dayOfWeek }\n    if (kind === 'monthly')  return { kind: 'monthly',  time, dayOfMonth }\n    return { kind: 'windowed', everyMinutes: minutes, fromHour, toHour, days: [1, 2, 3, 4, 5] }\n  }\n```\n\n2. `src/renderer/pages/electron/TardisPage.tsx`:\n   - Add an `async function snooze(id: string)` that calls `await scheduler.snooze(id, 15)` (snooze for 15 minutes).\n   - Add a 'snooze' button next to the toggle button in the item list UI that calls `snooze(item.id)`.\n\nAcceptance Criteria:\n- ScheduleForm can successfully create weekly and monthly schedules.\n- TardisPage displays a working 'snooze' button next to each custom schedule item.\n- TardisPage has per-job enable/disable toggle (already present, make sure it works).\n\nYou may ONLY modify the files listed above. If a test file outside your boundary fails, you must make your source changes backward-compatible so the existing test passes unmodified. Do NOT rename, move, or delete any files outside your boundary."
+    },
+    {
+      "id": "task-feed-scroll",
+      "title": "Fix Activity Feed Scroll Behavior",
+      "root_cause": "rc-feed-scroll-anchor",
+      "issues": [
+        20
+      ],
+      "files": [
+        "src/renderer/components/workspace/activity/activity-feed.tsx"
+      ],
+      "new_files": [],
+      "test_files": [],
+      "risk": "low",
+      "prompt": "You are tasked with fixing issue #20: Activity feed first message render vs scroll behavior.\n\nThe activity feed does not scroll to the bottom when new activities are added.\n\nFiles to modify:\n`src/renderer/components/workspace/activity/activity-feed.tsx`\n\nImplementation:\n- Create a `bottomRef = useRef<HTMLDivElement>(null)`.\n- Add `<div ref={bottomRef} />` at the bottom of the list of activities (inside the `ScrollArea` content).\n- Add a `useEffect` that depends on `grouped` (or `activities`) and calls `bottomRef.current?.scrollIntoView({ behavior: 'smooth' })`.\n\n```diff\n// Before\n                <ScrollArea className=\"h-full\">\n                    <div className=\"p-3 flex flex-col space-y-2.5\">\n                        {grouped.map((item, i) => (\n                            <ActivityItem\n                                key={Array.isArray(item) ? `group-${String(i)}` : item.id}\n                                item={item}\n                                onApprovePlan={handleApprovePlan}\n                                approvingPlan={approving}\n                                planApproved={planApproved}\n                            />\n                        ))}\n                    </div>\n                </ScrollArea>\n// After\n                <ScrollArea className=\"h-full\">\n                    <div className=\"p-3 flex flex-col space-y-2.5\">\n                        {grouped.map((item, i) => (\n                            <ActivityItem\n                                key={Array.isArray(item) ? `group-${String(i)}` : item.id}\n                                item={item}\n                                onApprovePlan={handleApprovePlan}\n                                approvingPlan={approving}\n                                planApproved={planApproved}\n                            />\n                        ))}\n                        <div ref={bottomRef} />\n                    </div>\n                </ScrollArea>\n```\n\nAcceptance Criteria:\n- Feed automatically scrolls to the newest message seamlessly.\n\nYou may ONLY modify the files listed above. If a test file outside your boundary fails, you must make your source changes backward-compatible so the existing test passes unmodified. Do NOT rename, move, or delete any files outside your boundary."
+    },
+    {
+      "id": "task-snippet-save-path",
+      "title": "Fix Snippet Hardcoded Save Path",
+      "root_cause": "rc-snippet-save-path",
+      "issues": [
+        18
+      ],
+      "files": [
+        "electron/snippets.ts"
+      ],
+      "new_files": [],
+      "test_files": [],
+      "risk": "medium",
+      "prompt": "You are tasked with fixing issue #18: Snippets not persisting.\n\nThe root cause is in `electron/snippets.ts`. The `MANIFEST_PATH` is hardcoded to an absolute path: `D:/fuse/snippets.json`.\n\nFiles to modify:\n`electron/snippets.ts`\n\nImplementation:\n- Import `app` from `electron`.\n- Change `MANIFEST_PATH` to be a dynamically computed path using `app.getPath('userData')`.\n\n```diff\n// Before\nimport { ipcMain } from 'electron'\nimport type { WebContents } from 'electron'\nimport fs from 'fs-extra'\nimport * as path from 'path'\nimport chokidar from 'chokidar'\nimport { FuseManifest, FUSE_ROOT } from '../src/shared/fuse'\nimport type { FuseManifest as FuseManifestType } from '../src/shared/fuse'\nimport { store } from './store'\n\nconst MANIFEST_PATH = 'D:/fuse/snippets.json'\nconst EMPTY_MANIFEST: FuseManifestType = { version: 1, items: [] }\n// After\nimport { ipcMain, app } from 'electron'\nimport type { WebContents } from 'electron'\nimport fs from 'fs-extra'\nimport * as path from 'path'\nimport chokidar from 'chokidar'\nimport { FuseManifest, FUSE_ROOT } from '../src/shared/fuse'\nimport type { FuseManifest as FuseManifestType } from '../src/shared/fuse'\nimport { store } from './store'\n\nconst MANIFEST_PATH = path.join(app.getPath('userData'), 'snippets.json')\nconst EMPTY_MANIFEST: FuseManifestType = { version: 1, items: [] }\n```\n\nAcceptance Criteria:\n- No hardcoded `D:/` paths exist in `electron/snippets.ts`.\n- Snippets manifest is saved to the user data directory.\n\nYou may ONLY modify the files listed above. If a test file outside your boundary fails, you must make your source changes backward-compatible so the existing test passes unmodified. Do NOT rename, move, or delete any files outside your boundary."
+    },
+    {
+      "id": "task-ipc-missing-methods",
+      "title": "Expose Missing SDK Methods via IPC",
+      "root_cause": "rc-ipc-missing-methods",
+      "issues": [
+        17
+      ],
+      "files": [
+        "electron/ipc/handlers.ts",
+        "src/jules/sdk-ipc.ts",
+        "src/shared/bridge.ts"
+      ],
+      "new_files": [],
+      "test_files": [],
+      "risk": "medium",
+      "prompt": "You are tasked with fixing issue #17: Expose missing SDK methods via IPC bridge.\n\nFiles to modify:\n- `electron/ipc/handlers.ts`\n- `src/jules/sdk-ipc.ts`\n- `src/shared/bridge.ts`\n\nImplementation:\nLet's add a few useful methods like:\n1. `jules.getCacheInfo(rootDirOverride)` -> expose as `sdk:client.getCacheInfo`\n2. `jules.updateGlobalCacheMetadata(rootDirOverride)` -> expose as `sdk:client.updateGlobalCacheMetadata`\n3. `jules.getSessionCount(rootDirOverride)` -> expose as `sdk:client.getSessionCount`\n\n```diff\n// Before in handlers.ts\n    ipcMain.handle('sdk:client.all', async (_, configs: SessionConfig[], options?: {\n        concurrency?: number;\n        stopOnError?: boolean;\n        delayMs?: number\n    }) => {\n        const sessions = await jules.all(configs, (c) => c, options)\n        return serialize(sessions.map(s => ({id: s.id})))\n    })\n\n// After in handlers.ts\n    ipcMain.handle('sdk:client.all', async (_, configs: SessionConfig[], options?: {\n        concurrency?: number;\n        stopOnError?: boolean;\n        delayMs?: number\n    }) => {\n        const sessions = await jules.all(configs, (c) => c, options)\n        return serialize(sessions.map(s => ({id: s.id})))\n    })\n\n    ipcMain.handle('sdk:client.getCacheInfo', async (_, rootDirOverride?: string) => {\n        return serialize(await jules.getCacheInfo(rootDirOverride))\n    })\n\n    ipcMain.handle('sdk:client.updateGlobalCacheMetadata', async (_, rootDirOverride?: string) => {\n        await jules.updateGlobalCacheMetadata(rootDirOverride)\n    })\n\n    ipcMain.handle('sdk:client.getSessionCount', async (_, rootDirOverride?: string) => {\n        return await jules.getSessionCount(rootDirOverride)\n    })\n```\n\nAdd the handler to `handlers.ts` and the signature to `SdkIpc` in `sdk-ipc.ts`. Expose anything missing to `src/shared/bridge.ts` if needed (the `sdkIpc` export handles `sdk:` routes dynamically but make sure to double check).\n\nAcceptance Criteria:\n- Handlers added to `handlers.ts`.\n- Types added to `sdk-ipc.ts`.\n\nYou may ONLY modify the files listed above. If a test file outside your boundary fails, you must make your source changes backward-compatible so the existing test passes unmodified. Do NOT rename, move, or delete any files outside your boundary."
+    }
+  ],
+  "unaddressable": [
+    {
+      "issue": 19,
+      "reason": "MediaArtifact is already fully implemented to handle video (video/*), audio (audio/*), and images. The issue description is outdated compared to the current codebase state.",
+      "suggested_owner": "None (Close issue)"
+    }
+  ],
+  "file_ownership": {
+    "src/renderer/pages/electron/TardisPage.tsx": "task-croner-ui",
+    "src/renderer/components/shared/ScheduleForm.tsx": "task-croner-ui",
+    "src/renderer/components/workspace/activity/activity-feed.tsx": "task-feed-scroll",
+    "electron/snippets.ts": "task-snippet-save-path",
+    "electron/ipc/handlers.ts": "task-ipc-missing-methods",
+    "src/jules/sdk-ipc.ts": "task-ipc-missing-methods",
+    "src/shared/bridge.ts": "task-ipc-missing-methods"
+  }
+}

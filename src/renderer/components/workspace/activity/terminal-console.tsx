@@ -1,11 +1,7 @@
-import { memo, useState } from "react";
-import { motion } from "framer-motion";
-import { Check, Copy } from "lucide-react";
-import type { BashArtifact } from "./types";
-
-interface TerminalConsoleProps {
-    bashOutputs: BashArtifact[];
-}
+import {memo, useState} from "react";
+import {motion} from "framer-motion";
+import {Check, Copy} from "lucide-react";
+import type {TerminalConsoleProps} from "./types";
 
 export const TerminalConsole = memo(
     function TerminalConsole({ bashOutputs }: TerminalConsoleProps) {

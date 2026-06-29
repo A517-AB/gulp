@@ -1,12 +1,12 @@
-import { memo, useState } from "react";
-import { cn } from "@/utils";
-import type {Activity, BashArtifact, Artifact, MediaArtifact} from "./types";
-import { TerminalConsole } from "./terminal-console.tsx";
-import { MediaItemDownloader } from "./activity-artifacts.tsx";
-import { ChangeSetSummary } from "@/components/workspace/changeset-summary.tsx";
-import { ChevronDown, Terminal } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Markdown } from "./markdown.tsx";
+import {memo, useState} from "react";
+import {cn} from "@/utils";
+import type {Activity, Artifact, BashArtifact, MediaArtifact} from "@jules";
+import {TerminalConsole} from "./terminal-console.tsx";
+import {MediaItemDownloader} from "./activity-artifacts.tsx";
+import {ChangeSetSummary} from "@/components/workspace/changeset-summary.tsx";
+import {ChevronDown, Terminal} from "lucide-react";
+import {AnimatePresence, motion} from "framer-motion";
+import {Markdown} from "./markdown.tsx";
 
 type UnifiedLine =
     | { kind: "progress"; text: string }

@@ -13,10 +13,10 @@
         "./electron/*"
       ],
       "@jules": [
-        "./src/jules/index.ts"
+        "./electron/ipc/dist/index.d.ts"
       ],
       "@jules/*": [
-        "./src/jules/*"
+        "./electron/ipc/dist/*"
       ]
     },
 
@@ -48,5 +48,9 @@
     "electron/**/*.mts",
     "vite.config.ts"
   ],
-  "exclude": []
+  "exclude": [
+    "electron/ipc/Jules",
+    "electron/ipc/dist",
+    "library"
+  ]
 }

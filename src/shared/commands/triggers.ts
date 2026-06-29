@@ -1,16 +1,21 @@
-import type {Activity, SessionClient, JulesClient as Jules} from '@jules'
-import type {AtCommand, AtResult, DisplayCommand, DisplayResult, TerminalCommand, TerminalResult, PreviewCommand, PreviewResult} from './types'
+import type {Activity, JulesClient as Jules, SessionClient} from '@jules'
+import type {
+    AtCommand,
+    AtResult,
+    DisplayCommand,
+    DisplayResult,
+    PreviewCommand,
+    PreviewResult,
+    TerminalCommand,
+    TerminalResult
+} from './types'
 
-// ── @: fire-forget ────────────────────────────────────────────────────────────
-
-type SendFn = (sessionId: string, prompt: string) => Promise<void>
-
-export type AtExecutor = (send: SendFn, command: AtCommand, prompt: string) => Promise<AtResult>
+export type AtExecutor = (deps: TerminalDeps, command: AtCommand, snippetFile: string, languageId: string) => AtResult
 
 export const AT_META = {
   trigger:     '@' as const,
-  label:       'message',
-  description: 'Send a message to a Jules session, no response',
+    label: 'snippet',
+    description: 'Run a snippet in the terminal',
 }
 
 // ── /: pull latest MD ─────────────────────────────────────────────────────────

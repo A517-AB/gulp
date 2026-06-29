@@ -1,56 +1,37 @@
-import { useState, useCallback } from 'react'
-import { GitBranch } from 'lucide-react'
-import { git } from '@shared/bridge'
-import { useNotification } from '@renderer/library/notification'
+import {useCallback, useState} from 'react'
+import {GitBranch} from 'lucide-react'
+import {git, uiNotification} from '@shared/bridge'
 
+// check this shit later and see what it does
 export function GitSyncButton() {
   const [syncing, setSyncing] = useState(false)
-  const notification = useNotification()
 
   const handleSync = useCallback(async () => {
     if (syncing) return
     if (!git) {
-      notification.error({ 
-        title: 'Sync Failed', 
-        body: 'Git bridge API not available.' 
-      })
+        uiNotification?.show({title: 'Sync Failed', body: 'Git bridge API not available.'})
       return
     }
 
     setSyncing(true)
     try {
-      // 1. Stage all changes in D:/fuse
       const addRes = await git.add('D:/fuse')
-      if (!addRes.ok) {
-        throw new Error(addRes.stderr || 'git add failed')
-      }
+        if (!addRes.ok) throw new Error(addRes.stderr || 'git add failed')
 
-      // 2. Commit changes (allow empty so it doesn't fail if there's nothing new to commit)
       const commitRes = await git.commit('D:/fuse', 'sync', true)
-      if (!commitRes.ok) {
-        throw new Error(commitRes.stderr || 'git commit failed')
-      }
+        if (!commitRes.ok) throw new Error(commitRes.stderr || 'git commit failed')
 
-      // 3. Push to upstream
       const pushRes = await git.push('D:/fuse')
-      if (!pushRes.ok) {
-        throw new Error(pushRes.stderr || 'git push failed')
-      }
+        if (!pushRes.ok) throw new Error(pushRes.stderr || 'git push failed')
 
-      notification.success({ 
-        title: 'Git Sync Success', 
-        body: 'Successfully staged, committed, and pushed changes in D:/fuse.' 
-      })
+        uiNotification?.show({title: 'Git Sync Success', body: 'Staged, committed, and pushed D:/fuse.'})
     } catch (err) {
       console.error('Git sync error:', err)
-      notification.error({ 
-        title: 'Git Sync Failed', 
-        body: err instanceof Error ? err.message : String(err) 
-      })
+        uiNotification?.show({title: 'Git Sync Failed', body: err instanceof Error ? err.message : String(err)})
     } finally {
       setSyncing(false)
     }
-  }, [syncing, notification])
+  }, [syncing])
 
   return (
     <button

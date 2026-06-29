@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import type {ReactNode} from 'react'
+import {useState} from 'react'
+import {AnimatePresence, motion} from 'framer-motion'
 
 interface SectionProps {
   title: string
@@ -10,11 +10,15 @@ interface SectionProps {
 
 export function Section({ title, children, defaultOpen = false }: SectionProps) {
   const [open, setOpen] = useState(defaultOpen)
+    const [settled, setSettled] = useState(defaultOpen)
 
   return (
     <div className="border-b border-hair last:border-0">
       <button
-        onClick={() => { setOpen(v => !v); }}
+          onClick={() => {
+              setOpen(v => !v);
+              setSettled(false)
+          }}
         className="w-full flex items-center justify-between py-4 text-xs font-mono uppercase tracking-widest text-fg-dim hover:text-fg-primary transition-colors text-left"
       >
         {title}
@@ -27,7 +31,10 @@ export function Section({ title, children, defaultOpen = false }: SectionProps) 
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="overflow-hidden"
+            className={settled ? 'overflow-visible' : 'overflow-hidden'}
+            onAnimationComplete={() => {
+                setSettled(true)
+            }}
           >
             <div className="pb-8">{children}</div>
           </motion.div>

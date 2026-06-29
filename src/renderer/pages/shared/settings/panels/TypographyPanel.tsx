@@ -1,38 +1,28 @@
-import { useCallback } from 'react'
-import { useTheme } from '@renderer/providers/theme'
+import {useCallback, useEffect, useState} from 'react'
+import {loadFont, useTheme} from '@renderer/providers/theme'
 
-// ── font loading ──────────────────────────────────────────────────────────────
+const SYSTEM_FONTS = new Set(['system-ui', 'sans-serif', 'monospace', 'ui-monospace', 'ui-sans-serif', 'serif'])
 
-const GF_MAP: Record<string, string> = {
-    'Inter':              'Inter:wght@300;400;500;600;700',
-    'Outfit':             'Outfit:wght@300;400;500;600;700',
-    'DM Sans':            'DM+Sans:wght@300;400;500;600;700',
-    'Nunito':             'Nunito:wght@300;400;500;600;700',
-    'Roboto':             'Roboto:wght@300;400;500;700',
-    'Open Sans':          'Open+Sans:wght@300;400;500;600;700',
-    'Geist':              'Geist:wght@300;400;500;600;700',
-    'Plus Jakarta Sans':  'Plus+Jakarta+Sans:wght@300;400;500;600;700',
-    'Lato':               'Lato:wght@300;400;700',
-    'Raleway':            'Raleway:wght@300;400;500;600;700',
-    'Poppins':            'Poppins:wght@300;400;500;600;700',
-    'JetBrains Mono':     'JetBrains+Mono:wght@300;400;500;600;700',
-    'Fira Code':          'Fira+Code:wght@300;400;500;600;700',
-    'Geist Mono':         'Geist+Mono:wght@300;400;500;600;700',
-    'Source Code Pro':    'Source+Code+Pro:wght@300;400;500;600;700',
-    'Inconsolata':        'Inconsolata:wght@300;400;500;600;700',
-    'IBM Plex Mono':      'IBM+Plex+Mono:wght@300;400;500;600;700',
-}
-
-function loadFont(name: string): void {
-    const family = GF_MAP[name]
-    if (!family) return
-    const id = `gf-${name.replace(/\s+/g, '-').toLowerCase()}`
-    if (document.getElementById(id)) return
-    const link = document.createElement('link')
-    link.id = id
-    link.rel = 'stylesheet'
-    link.href = `https://fonts.googleapis.com/css2?family=${family}&display=swap`
-    document.head.appendChild(link)
+function useFontLoaded(family: string): boolean | null {
+    const [loaded, setLoaded] = useState<boolean | null>(null)
+    useEffect(() => {
+        if (!family || SYSTEM_FONTS.has(family)) {
+            setLoaded(true);
+            return
+        }
+        setLoaded(null)
+        const check = () => {
+            void document.fonts.load(`16px '${family}'`).then(faces => {
+                setLoaded(faces.length > 0)
+            })
+        }
+        check()
+        document.fonts.addEventListener('loadingdone', check)
+        return () => {
+            document.fonts.removeEventListener('loadingdone', check)
+        }
+    }, [family])
+    return loaded
 }
 
 // ── font suggestions ──────────────────────────────────────────────────────────
@@ -64,21 +54,32 @@ function FontRow({
         onChange(v)
     }, [onChange])
 
-    const fontFamily = `'${value}', ${fallback}`
+    const loaded = useFontLoaded(value)
+    const fontFamily = SYSTEM_FONTS.has(value) ? value : `'${value}', ${fallback}`
 
     return (
         <div className="space-y-1">
-            <div className="flex items-center justify-between text-3xs font-mono">
-                <span className="text-fg-dim uppercase tracking-wider shrink-0 mr-4">{label}</span>
-                <input
-                    type="text"
-                    list={listId}
-                    value={value}
-                    onChange={e => { handle(e.target.value) }}
-                    placeholder={fallback}
-                    className="bg-transparent border-none p-0 text-fg-primary font-mono text-3xs outline-none text-right w-40 placeholder-fg-ghost"
-                    spellCheck={false}
-                />
+            <div className="flex items-center justify-between text-3xs">
+                <span className="text-fg-dim uppercase tracking-wider shrink-0 mr-4 font-sans">{label}</span>
+                <div className="flex items-center gap-1.5">
+                    {loaded === false && (
+                        <span className="text-destructive text-3xs" title="Font not loaded">✗</span>
+                    )}
+                    {loaded === true && (
+                        <span className="text-emerald-500 text-3xs" title="Font loaded">✓</span>
+                    )}
+                    <input
+                        type="text"
+                        list={listId}
+                        value={value}
+                        onChange={e => {
+                            handle(e.target.value)
+                        }}
+                        placeholder={fallback}
+                        className="bg-transparent border-none p-0 text-fg-primary font-mono text-3xs outline-none text-right w-40 placeholder-fg-ghost"
+                        spellCheck={false}
+                    />
+                </div>
                 <datalist id={listId}>
                     {suggestions.map(s => <option key={s} value={s} />)}
                 </datalist>
@@ -102,8 +103,8 @@ function NumRow({
     onChange: (v: string) => void
 }) {
     return (
-        <div className="flex items-center justify-between text-3xs font-mono">
-            <span className="text-fg-dim uppercase tracking-wider">{label}</span>
+        <div className="flex items-center justify-between text-3xs">
+            <span className="text-fg-dim uppercase tracking-wider font-sans">{label}</span>
             <select
                 value={String(value)}
                 onChange={e => { onChange(e.target.value) }}
@@ -161,8 +162,8 @@ export function TypographyPanel() {
     } = useTheme()
 
     return (
-        <div className="space-y-3 font-mono select-none">
-            <div className="text-3xs text-fg-ghost pb-2 border-b border-hair leading-relaxed">
+        <div className="space-y-3 select-none">
+            <div className="text-3xs text-fg-ghost pb-2 border-b border-hair leading-relaxed font-sans">
                 Type any font name — system fonts work directly, Google Fonts load on demand.
             </div>
 

@@ -1,79 +1,50 @@
 # Agents
 
-> Last updated: 2026-06-12
+> Last updated: 2026-06-28
 
-This file is a working document to track rules, architectural decisions, and specific instructions for AI agents working on this project. Mirrors CLAUDE.md and extends it with agent-specific directives.
+Working document for AI agents on this project — rules, architecture, directives.
+
+## What this is
+
+A personal productivity desktop app combining different tools in one place. Not an AI app. It does have integration with
+Jules, which is an API to a remote VM that executes coding tasks — nothing runs locally, there is no local AI.
 
 ## General Directives
 
 - **Architecture**: Electron + Vite + React + whatever deemed to provide usage, ask first
 - **Styling**: Tailwind CSS
-- **State Management**: Zustand but currently not used much + local via electron
+- **State Management**: Zustand but currently not used much + local via Electron
 
 - Basic rules:
   - don't use the word vibe
   - don't change documents without getting clear request
-  - a question is not a request — if a question is asked, answer it. don't assume an import doesn't work, answer what it is
-  - this is a personal project, don't purpose shitter or easier tools and methods because it's personal. it's annoying
-  - no lazy loading
+  - if the user greets you, respond normally. Do not start analyzing the workspace or editing files/tools without an
+    explicit request
+  - a question is not a request — if a question is asked, answer it
+  - i'm still learning, occasional explaining is nice
+  - this is a personal project, don't suggest simpler or easier tools because it's personal
+  - no lazy loading to main pages
   - no loading screens, no spinners, no skeleton loaders, no loading states — if data isn't ready, render nothing or render what you have
-  - zero lint errors and zero typecheck errors — run `npm run lint` and `npm run typecheck` after all changes are done, not after each file. fix everything before reporting done
-  - never use left border lines (e.g., `border-l`, `border-left`) anywhere. do not use borderlines on one side.
-  - ~~there's no more bun (as of May 30 2026)~~ — Bun is active (running server.ts and queues/storage APIs). Theme
-    settings/variables (with prefix `gulp:`) originate from theme.tsx and index.css.
+  - zero lint errors and zero typecheck errors — run `npm run lint` and `npm run typecheck` after all changes are done.
+    fix everything before reporting done
+  - `eslint-disable` comments and `@ts-ignore` / `@ts-expect-error` are banned. fix the actual problem. existing ones in
+    the codebase are known and will be handled — do not add new ones. in extremely rare cases explicit agreement from
+    the user is required before using one — never assume permission.
   - don't respond with wall text
-  - don't give compliments. just answer if asked
+  - don't give compliments
   - a package beats handrolled. always provide package names if something is nicer with it
-  - **Pause Instructions**: If the user requests to 'pause' (or similar commands), stop executing tools immediately,
-    suspend background tasks/polling/actions, and reply acknowledging the pause while waiting for further direction.
-
-## Jules Type Lookup
-
-Use `scripts/lookup-type.ts` to find types/interfaces without reading full files:
-
-```bash
-deno run --allow-read scripts/lookup-type.ts <TypeName> <dir>
-# --similar   fuzzy match on name
-# --related   also pull referenced types from the match
-# --ext dts   only .d.ts files
-```
-
-Common dirs: `src/jules` (modjules), `node_modules/@google/jules-sdk/dist` (old SDK)
-
-Research files at `D:\LAST\research\`: `modjules-api.md`, `api-diff-summary.md` — grep these first for fast answers
-before touching source files.
-
-## Project Specifics
-
-- it's for productive shit, still don't know
-- Jules AI via API key — not SDK, not IPC (as of May 30 2026)
-- `julesHttp` is already the exposed Jules interface in the renderer — do not wrap it in hooks or context. Call it
-  directly in stores or components. Use `import type { ... } from '@jules'` for types only. The Bun server holds the SDK
-  and makes the actual Jules API calls; the renderer talks to Bun over HTTP.
-
-## Jules IPC — locked
-
-**`electron/ipc/jules-git.ts` is the only IPC entry point for Jules local actions.**
-
-- Covers: local git ops (`resolveSource`, `applyPatch`), artifact save (binary base64→file), GitHub API (`getPr`,
-  `getChecks`, `mergePr`, `parsePrUrl`), `parseUnidiff`.
-- Do NOT add new Jules IPC channels anywhere else. Do NOT expand this file beyond what `src/shared/jules-ipc.ts`
-  defines.
-- Jules HTTP (sessions, activities, sources, plans) → Bun server via `julesHttp`. Never IPC.
+  - ask for screenshots when diagnosing UI issues — it's easy to get them
 
 ## Commands
 
 ```bash
 # Development
 npm run dev          # Vite dev server (renderer)
-npm run dev:web      # Web target (VITE_TARGET=web)
 
 # Build & run
-npm run build        # tsc -b, then vite build (vite-plugin-electron also builds the Electron main)
-npm run build:web    # web-target build (VITE_TARGET=web)
+npm run build        # tsc -b, then vite build
 npm start            # build + launch Electron
-npm run run:e        # launch Electron against the existing build (no rebuild)
-npm run start:web    # build:web + vite preview
+npm run run:e        # launch Electron against existing build (no rebuild)
 
 # Quality
 npm run lint         # ESLint (TypeScript strict + React hooks)
@@ -83,63 +54,45 @@ npm test             # Vitest
 
 ## Architecture
 
-Dual-deployment app: runs as an **Electron desktop app** or a **web app** in a browser. The same React renderer serves
-both; a runtime check (`isElectron` in `src/shared/bridge.ts`) switches transport. for now it'll stay global do not add
-on there. type out your electron types
+Dual-deployment: runs as an **Electron desktop app** or a **web app**. Same React renderer for both.
 
 ### Two layers
 
 **1. Renderer** (`src/renderer/`) — React 19 SPA
 - Pages split under `pages/electron/`, `pages/web/`, `pages/shared/`
-- Data via React Query hooks (`hooks/use-session*`)
-- Global session stream/outcome state in Zustand (`store/app.ts`)
-- Jules access: HTTP client only (no more SDK via IPC or sdkIpc) — see blueprints/jules-architecture.md for the full
-  picture
-    - HTTP client (lib/jules/client.ts) — works in both modes, accessed via useJules().client
+- Global session state in Zustand (`store/app.ts`)
 
-**2. Electron main** (`electron/` — at the repo **root**, not under `src/`) — Node.js context, never imported by the renderer
+**2. Electron main** (`electron/` — repo root, not under `src/`) — Node.js, never imported by renderer
 
-- `main.mts`: window lifecycle, tray, global shortcut,
-- `preload.mts`: context-isolated bridge exposing IPC to the renderer via `contextBridge`
-  - Also builds `notification-preload.ts` as a second preload entry
-- IPC handlers (06/23 for now still havne't moved to http for jukes old sdk ipc ): `Terminal.ts` (node-pty),
-  `queues.ts`, `filesystem.ts/`, `git.ts`, `github.ts`, `snippets.ts`, `popup.ts`, `aliases.ts`, `history.ts`,
-  `notes.ts`, `notification.ts`, `ipc/handlers.ts` (Jules SDK)
-- Built by `vite-plugin-electron` (rolldown) → `dist-electron/main.mjs`
+- `main.mts`: window lifecycle, tray, global shortcut, power monitoring
+- `preload.mts`: context-isolated bridge via `contextBridge`
+- IPC handlers: `Terminal.ts` (node-pty), `queues.ts`, `filesystem.ts`, `git.ts`, `github.ts`, `snippets.ts`,
+  `popup.ts`, `aliases.ts`, `history.ts`, `notes.ts`, `notification.ts`
+- Built by `vite-plugin-electron` → `dist-electron/main.mjs`
 
-there two sdk jules, one is @google/jules-sdk and one is modjules, i have mod jules but not via an npm packakge, i got
-the clone repo that has ts files and run it striagth with bun, it works, it;s only ts files with no index.mjs file,
-there's also the old npm package still mostly for backup still attached around, mod jules offres more.
+> Bun/Hono sidecar server is removed. `hono` lingers in `package.json` but unused.
 
 ### Data flow
 
-- Both modes now route Jules operations via the HTTP client targeting the `/api/jules` proxy endpoint. There is no IPC
-  transport to a local Jules SDK.
-
-Web mode also has a Vite dev proxy: `/api/jules` → `https://jules.googleapis.com/v1alpha`.
+- **Jules**: renderer → `@jules` SDK → Jules API directly. No IPC, no main process involvement.
+- **Electron IPC**: renderer → `window.electron` → main process. Filesystem, git, terminal, native OS only.
 
 ## Path aliases
 
-### Renderer tsconfig (`tsconfig.app.json`) — `include: ["src"]`, excludes `electron/`
+### Renderer (`tsconfig.app.json`)
 
-| Alias | Resolves to |
-|---|---|
-| `@/*` | `src/renderer/*` |
-| `@/types`, `@/types/*` | `src/types/*` |
-| `@/components/*` | `src/renderer/components/*` |
-| `@/ui/*` | `src/renderer/ui/*` |
-| `@/store/*` | `src/renderer/store/*` |
-| `@/hooks/*` | `src/renderer/hooks/*` |
-| `@/lib/*` | `src/renderer/lib/*` |
-| `@/utils`, `@/utils/*` | `src/renderer/utils/*` |
-| `@/features/*` | `src/renderer/features/*` |
-| `@shared`, `@shared/*` | `src/shared/*` |
-| `@renderer`, `@renderer/*` | `src/renderer/*` |
-| `@electron/*` | `electron/*` |
+| Alias                  | Resolves to                                                       |
+|------------------------|-------------------------------------------------------------------|
+| `@/*`                  | `src/renderer/*`                                                  |
+| `@/components/*`       | `src/renderer/components/*`                                       |
+| `@/ui/*`               | `src/renderer/ui/*`                                               |
+| `@/store/*`            | `src/renderer/store/*`                                            |
+| `@/hooks/*`            | `src/renderer/hooks/*`                                            |
+| `@/utils`, `@/utils/*` | `src/renderer/utils/*`                                            |
+| `@shared`, `@shared/*` | `src/shared/*`                                                    |
+| `@jules`               | `./dist-jules` (TS types) / `src/jules/browser.ts` (Vite runtime) |
 
-Prefer `@/` for renderer-internal imports. Use `@shared/` to import from `src/shared/`. `@renderer/` still resolves but treat as legacy — migrate to `@/`. `@api` is dead.
-
-### Node tsconfig (`tsconfig.node.json`) — covers `electron/`, `scripts/`, `vite.config.ts`
+### Node (`tsconfig.node.json`)
 
 | Alias | Resolves to |
 |---|---|
@@ -149,103 +102,105 @@ Prefer `@/` for renderer-internal imports. Use `@shared/` to import from `src/sh
 
 ## Environment
 
-Copy `.env.example` to `.env`:
-- `JULES_API_KEY` — Google Jules API key (also read from `~/.jules` by `vite.config.ts`)
-- `GITHUB_TOKEN` — GitHub personal access token, used by the Electron main process (`electron/github.ts`) both from my
-  user dir, except if you are in a remote vm then it's also straigth in your vm already.
-
-## User conventions
-
-- **"push"** always means: merge current work to `master` (the repo's default branch). Never just push to a feature branch and stop.
-- **ej2** (`@syncfusion/ej2-react-gantt` / `@syncfusion/ej2-gantt`) is local from the owner. Since it's a locally set
-  tool, it is not in `package.json` dependencies but works locally. it's removed from local so remove jules can oporate
-  withouth issies
--
-
-## Working conventions
-
-**Exports** — always export types through an `index.ts` barrel in the folder they belong to. No `export *`, no ad-hoc re-exports scattered across files. If a type needs to be consumed elsewhere, it goes through the index.
-
-**Folder structure** — this is an active, evolving codebase. Some folders are intentionally flat or mid-refactor. When you're already inside a folder, tidy up what you touch. Don't add new mess on top of existing mess, and don't restructure folders you weren't asked to touch.
-
-**Lint** — if you open a file and spot a lint error you didn't cause, fix it anyway before moving on. Leave things
-cleaner than you found them. there might be certain issues with lint so be careful and if faced with such. lint the
-files you made only
-
-**Electron global** — `window.electron` is currently used broadly across the renderer. This is being cleaned up incrementally. Don't spread it further, but don't try to fix the whole thing at once either — wait for direction.
-
-**Locked files** — some files are off-limits. If you're unsure whether a file is safe to edit, ask before touching it. Do not silently work around a file you can't access — that's worse than asking.
-
-**Blueprints** — `blueprints/` contains design docs for subsystems. Read the relevant one before touching that subsystem. Currently: `blueprints/jules-architecture.md`.
-
-**Jules reference docs** — `D:\jules rest\modjules-main\` has two reference dirs to consult before touching
-Jules-related code:
-
-- `context/` — `features.md`, `jules-rest-api.md`, `session-analysis.md`
-- `docs/` — `activity.md`, `artifacts.md`, `automated-runs.md`, `batch-processing.md`, `browser.md`,
-  `getting-started.md`, `github-design.md`, `interactive-sessions.md`, `local-first.md`, `mcp-composing-servers.md`,
-  `mcp-configuration.md`, `mcp-integrations.md`, `mcp-tool-reference.md`, `mcp-use-cases.md`, `PROXY.md`,
-  `PROXY_USE_CASES.md`, `README.md`, `sessions.md`
+- `JULES_API_KEY` — read from `~/.jules` or `.env`
+- `GITHUB_TOKEN` — used by `electron/github.ts`, read from user path or `.env`
 
 ## TypeScript config
 
-Two tsconfig roots composed by `tsconfig.json` (project references):
-- `tsconfig.app.json` — renderer (browser; excludes `electron/`)
-- `tsconfig.node.json` — Electron main + Vite config (Node types)
+Two tsconfig roots via project references:
 
-Run `typecheck` against the root. The project is on **TypeScript 6** — `baseUrl` is deprecated; all path mappings are self-prefixed (`./src/...`) with no `baseUrl`.
+- `tsconfig.app.json` — renderer, excludes `electron/` and `src/jules/`
+- `tsconfig.node.json` — Electron main + Vite config
 
-Strict mode is on in both configs. Notable extra flags in the renderer: `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `noPropertyAccessFromIndexSignature`.
+TypeScript 6. Strict mode on both. Renderer extras: `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`,
+`noPropertyAccessFromIndexSignature`.
+
+## Working conventions
+
+**Exports** — always through an `index.ts` barrel. No `export *`, no scattered re-exports.
+
+**Folder structure** — active, evolving codebase. Tidy what you touch. Don't restructure folders you weren't asked to
+touch.
+
+**Lint** — fix lint errors you didn't cause if you spot them. Leave things cleaner than you found them.
+
+**Electron global** — `window.electron` is being cleaned up incrementally. Don't spread it further.
+
+**Locked files** — if unsure whether a file is safe to edit, ask. Don't silently work around it.
 
 ## Agent Notes
 
+### Jules
+
+Use the `/jules` skill for SDK docs and type lookup.
+
+Jules is a remote service — an API to a remote VM that executes coding tasks. Nothing runs locally. Because it's remote:
+don't shove it into every component or feature. If the service is down or the key is missing, everything that touches it
+fails. Ask before wiring Jules into something new.
+
+The goal is not to build a sessions page. It's a productivity corner. Jules is one tool in it. Wild ideas for how to use
+it are welcome — say them.
+
+#### Methods tried
+
+> 2026-06-28
+
+- Bun sidecar server
+- IPC routes through Electron main
+- npm package
+- Pure fetch
+
+None are the set method. There is no set method yet.
+
+#### Current method
+
+> 2026-06-28
+
+Browser entry from modjules via Vite alias (`src/jules/browser.ts`). It works — it's an ok fetch. Missing the good stuff
+that makes this worth doing. The app is half web half Electron, so both sides are on the table.
+
+`browser.mjs` = web version, almost the same but without features that matter.
+`index.mjs` = Node entry, still figuring out how to use it properly from the main process.
+
+`src/jules/` = the actual SDK source files. Don't touch unless asked. If push comes to shove, it can be edited — it's
+owned.
+
+`dist-jules/` = safest import option. Just `.d.ts` files. Probable future home of the `@jules` alias. If going via Node,
+an IPC route from there is possible — shape not decided yet.
+
+`app.ts` — not critical but has usage. Was being used as a tool without realising there's 100MB of IndexedDB storage
+sitting unused. Dated note: 2026-06-28, don't gut it.
+
+#### Rules when working with Jules
+
+- Don't keep suggesting browser-via-Vite as a new idea. It's already in. Saying it again is pointless.
+- Don't rewrap IPC as a fresh idea if it's been discussed. Known.
+- If asked for a new idea, give an actual new one. If your idea is "don't do it" or the thing already being ignored,
+  don't say it.
+- If you find something creative — in sessions, activities, anywhere — say it. Don't wing it silently and build your own
+  thing.
+- If a genuinely better method exists (different runtime, different access pattern), say it once clearly. If it's
+  faster, cleaner, gives better access — worth saying. Say it once.
+- All new entries in this section must be dated.
+
 ### Notification system
 
-The notification UI is a **separate BrowserWindow** — not rendered inside the main app window.
+Notification UI is a **separate BrowserWindow**, not inside the main app window.
 
-- `electron/notifications/dispatch.ts` — creates/manages the notification `BrowserWindow` (340×360, bottom-right, always-on-top, frameless, transparent). Sends payloads via `webContents.send('notif.show', payload)`.
-- `notification.html` — the HTML entry for that window. Loaded from `${devUrl}notification.html` in dev, `dist/notification.html` in prod.
-- `src/notification/main.tsx` → `NotificationWindow` — the React component that renders inside that window. This is the actual UI.
-- IPC bridge: renderer → `notif.dispatch` (ipcMain) → `dispatch.ts` → `notif.show` (webContents) → `NotificationWindow`.
-- `electron/notifications/preload.ts` is the preload for the notification window specifically (separate from the main preload).
+- `electron/notifications/dispatch.ts` — manages the notification window (340×360, bottom-right, always-on-top,
+  frameless). Routes payloads via `webContents.send('notif.show', payload)`.
+- `src/notification/main.tsx` — React component inside that window.
+- IPC bridge: renderer → `notif.dispatch` → `dispatch.ts` → `notif.show` → component.
+- `electron/notifications/preload.ts` — separate preload for the notification window.
 
-**Do not duplicate the notification window shape/styling in `dispatch.ts`** — that belongs in the React component. `dispatch.ts` only manages the window lifecycle and routing of payloads.
+Shape and styling belong in the React component, not in `dispatch.ts`.
 
 ### Notification daemon (`electron/main-notif.mts`)
 
-There is a **second Electron process** — a standalone tray-only notification daemon separate from the main app.
+Second Electron process — standalone tray-only daemon, separate from the main app.
 
-- Entry: `electron/main-notif.mts` — built to `dist-electron/notif-main.mjs`
-- Runs independently of the main window. Intentionally stays alive when all windows are closed (`window-all-closed` handler is empty).
-- Has its own tray icon (programmatically drawn purple hexagon at 16×16).
-- Registers: `registerUINotificationHandlers`, `registerNotifLogHandlers`, `registerSchedulerHandlers`, `prewarmNotificationWindow`
-- This is the intended home for persistent notification scheduling — reminders can fire even when the main app window is not open.
-- Do not confuse with the main process (`main.mts`). They are separate Electron `app` instances.
-
-## Local CI Verification
-
-Before pushing code or opening a PR, verify changes pass CI locally using `act`.
-
-### Prerequisites
-- Docker must be running
-- If `act` is not installed, run: `bash scripts/act/install-act.sh`
-
-### How to Verify
-
-1. Read `.github/workflows/` to find the CI workflow and identify the job ID
-2. Run the verification script:
-   ```bash
-   bash scripts/act/run-act.sh "push -j <JOB_ID>"
-   ```
-   With matrix: `bash scripts/act/run-act.sh "push -j <JOB_ID> --matrix <KEY>:<VALUE>"`
-3. If the run fails, read the log output, fix the code, and re-run
-4. After verification, clean up:
-   ```bash
-   rm -f act_output.log
-   git checkout <any unintended file changes>
-   ```
-
-### Configuration
-- Timeout: `ACT_TIMEOUT=900 bash scripts/act/run-act.sh "..."`  (default: 600s)
-- Poll interval: `ACT_POLL=15 bash scripts/act/run-act.sh "..."`  (default: 10s)
-- Custom image: pass `-P ubuntu-latest=node:20-bookworm` in the arguments for faster pulls
+- Built to `dist-electron/notif-main.mjs`
+- Stays alive when all windows are closed
+- Has its own tray icon (purple hexagon, 16×16, drawn programmatically)
+- Home for persistent notification scheduling — reminders fire even when main window is closed
+- Do not confuse with `main.mts` — they are separate `app` instances

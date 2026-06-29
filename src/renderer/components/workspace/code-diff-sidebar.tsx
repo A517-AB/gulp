@@ -1,58 +1,50 @@
-import {useMemo, useState, useEffect} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {FileCode} from "lucide-react";
 import {ScrollArea} from "@/ui/scroll-area.tsx";
 import {DiffViewer} from "@/ui/diff-viewer.tsx";
-import {MediaItemDownloader} from "@/components/workspace/activity";
-import type {Artifact, MediaArtifact, Activity} from "@jules";
-import {jules} from "@jules";
+import {MediaItemDownloader} from "@/components/workspace/activity/activity-artifacts.tsx";
+import type {Activity, ChangeSetArtifact, MediaArtifact} from "@jules";
 import {filesystem} from "@shared/bridge";
-
-type ChangeSetArtifact = Extract<Artifact, { type: 'changeSet' }>;
+import {getActivities} from "@/lib/jules-client.ts";
 
 interface CodeDiffSidebarProps {
     sessionId: string;
     repoUrl?: string;
 }
 
-type GeneratedFile = { path: string; content: string };
+interface GeneratedFile {
+    path: string;
+    content: string;
+}
 
 export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
     const [activities, setActivities] = useState<Activity[]>([]);
 
     useEffect(() => {
-        const controller = new AbortController();
-        const {signal} = controller;
-
+        let cancelled = false;
         void (async () => {
             try {
-                const sessionClient = jules.session(sessionId);
-                const cached = await sessionClient.activities.select();
-                if (signal.aborted) return;
-                setActivities(cached);
-
-                for await (const act of sessionClient.activities.updates()) {
-                    if (signal.aborted) return;
-                    setActivities(prev => prev.some(a => a.id === act.id) ? prev : [...prev, act]);
-                }
-            } catch {
-                // sidebar — swallow errors silently
+                const cached = await getActivities(sessionId);
+                if (!cancelled) setActivities(cached);
+            } catch (err) {
+                console.error("[CodeDiffSidebar] failed to fetch activities:", err);
             }
         })();
-
         return () => {
-            controller.abort();
+            cancelled = true;
         };
     }, [sessionId]);
+
     const finalDiff = useMemo(() => activities
         .flatMap(a => {
-            const cs = (a as {artifacts?: unknown[]}).artifacts?.find((art): art is ChangeSetArtifact => (art as {type?: string}).type === 'changeSet');
+            const cs = a.artifacts.find((art): art is ChangeSetArtifact => art.type === 'changeSet');
             return cs ? [{id: a.id, patch: cs.gitPatch.unidiffPatch}] : [];
         })
         .slice(-1), [activities]);
 
     const mediaItems = useMemo(() => activities.flatMap(a =>
-        ((a as {artifacts?: unknown[]}).artifacts ?? [])
-            .filter((art): art is MediaArtifact => (art as {type?: string}).type === 'media')
+        a.artifacts
+            .filter((art): art is MediaArtifact => art.type === 'media')
             .map((media, i) => ({ media, activityId: a.id, index: i }))
     ), [activities]);
 
@@ -62,7 +54,7 @@ export function CodeDiffSidebar({ sessionId, repoUrl }: CodeDiffSidebarProps) {
     const handleDownloadFile = async (filename: string) => {
         try {
             const snapshot = await sessionSnapshot(sessionId);
-            const matchedFile = snapshot.generatedFiles.find((f: GeneratedFile) => f.path === filename);
+            const matchedFile = snapshot.generatedFiles.find(f => f.path === filename);
 
             if (!matchedFile) {
                 throw new Error(`Full content for ${filename} was not found in the session snapshot`);

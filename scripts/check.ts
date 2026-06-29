@@ -64,9 +64,19 @@ async function runJob(cmd: string[]): Promise<{
 }
 
 async function main() {
-    const timestamp = new Date().toISOString();
-    const dateStr = timestamp.replace(/[:.]/g, "-").slice(0, 16);
-    const logFilename = `check_${dateStr}.log`;
+    const now = new Date();
+    // Generate local ISO-like string: YYYY-MM-DD_HH-mm-ss
+    const offsetMs = now.getTimezoneOffset() * 60 * 1000;
+    const localISOTime = new Date(now.getTime() - offsetMs).toISOString();
+    const dateStr = localISOTime.replace("T", "_").replace(/[:.]/g, "-").slice(0, 19);
+
+    // Ensure reports/ directory exists
+    try {
+        await Deno.mkdir("reports");
+    } catch {
+        // Already exists or ignore
+    }
+    const logFilename = `reports/check_${dateStr}.log`;
 
     // Define jobs
     const typecheckJob = [npmCmd, "run", "typecheck"];
@@ -85,7 +95,8 @@ async function main() {
         "================================================================================",
         "                           CHECK RUN OVERVIEW                                   ",
         "================================================================================",
-        `Timestamp:  ${timestamp}`,
+        `Local Time: ${now.toString()}`,
+        `UTC Time:   ${now.toISOString()}`,
         `Status:     ${allSuccess ? "PASS" : "FAIL"}`,
         `Typecheck:  ${tcResult.success ? "PASS" : `FAIL (${tcResult.errors.length} error lines)`}`,
         `Lint:       ${lintResult.success ? "PASS" : `FAIL (${lintResult.errors.length} error lines)`}`,
@@ -102,7 +113,7 @@ async function main() {
         lintResult.output || "(no output)",
     ].join("\n");
 
-    // Write log to root directory
+    // Write log to reports directory
     await Deno.writeTextFile(logFilename, logContent);
 
     if (isAiMode) {

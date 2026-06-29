@@ -37,13 +37,8 @@
       "@notification": ["./src/notification"],
       "@notification/*": ["./src/notification/*"],
       "@jules": [
-        "./src/dist-jules/*"
+        "./dist-jules"
       ],
-      //      "@jules/*": ["./src/jules/*"],
-      "@jules": [
-        "D:/jules rest/modjules-main/packages/core/dist/browser.d.ts"
-      ],
-      //      "@jules/*": ["D:/jules rest/modjules-main/packages/core/dist/*"],
       "@syncfusion/ej2-react-gantt": ["D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/index.d.ts"],
       "@syncfusion/ej2-gantt": ["D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/index.d.ts"],
       "@syncfusion/ej2-react-base": ["D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-base/index.d.ts"],
@@ -87,6 +82,7 @@
   "exclude": [
     "electron",
     "src/renderer/lib/jules/client.test.ts",
-    "src/jules"
+    "src/jules",
+    "library"
   ]
 }

@@ -29,7 +29,12 @@ typecheck.log
 /coverage/
 /jules/
 /dist-jules/
+/library/
 
 # act artifacts
 act_output.log
 .secrets
+
+# ESLint cache
+.eslintcache
+

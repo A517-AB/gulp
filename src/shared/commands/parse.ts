@@ -1,11 +1,10 @@
-import type {AtCommand, DisplayCommand, TerminalCommand, PreviewCommand, Command} from './types'
+import type {AtCommand, Command, DisplayCommand, PreviewCommand, TerminalCommand} from './types'
 
 // ── per-trigger parse results ─────────────────────────────────────────────────
 
 export interface AtParsed {
     trigger: '@';
     command: AtCommand;
-    prompt: string
 }
 
 export interface DisplayParsed {
@@ -32,21 +31,13 @@ export const isParseOk = (r: ParseResult): r is { ok: true; value: ParsedInput }
 // ── parse functions ───────────────────────────────────────────────────────────
 
 function parseAt(input: string, registry: Command[]): ParseResult {
-  const rest  = input.slice(1).trim()
-  const space = rest.indexOf(' ')
-
-  if (space === -1)    return { ok: false, error: 'Message required' }
-
-  const alias  = rest.slice(0, space)
-  const prompt = rest.slice(space + 1).trim()
-
-  if (!alias)  return { ok: false, error: 'Alias required' }
-  if (!prompt) return { ok: false, error: 'Message required' }
+    const alias = input.slice(1).trim()
+    if (!alias) return {ok: false, error: 'Alias required'}
 
   const command = registry.find((c): c is AtCommand => c.trigger === '@' && c.alias === alias && c.enabled)
   if (!command) return { ok: false, error: `Unknown command: @${alias}` }
 
-  return { ok: true, value: { trigger: '@', command, prompt } }
+    return {ok: true, value: {trigger: '@', command}}
 }
 
 function parseDisplay(input: string, registry: Command[]): ParseResult {

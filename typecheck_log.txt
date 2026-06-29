@@ -1,0 +1,50 @@
+
+> last@1.0 typecheck
+> tsc -b --pretty false
+
+src/renderer/components/workspace/code-diff-sidebar.tsx(6,48): error TS2305: Module '"@jules"' has no exported member 'GeneratedFile'.
+src/renderer/components/workspace/code-diff-sidebar.tsx(18,40): error TS2339: Property 'activities' does not exist on type 'AppStore'.
+src/renderer/components/workspace/code-diff-sidebar.tsx(20,18): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(26,57): error TS7006: Parameter 'a' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(85,27): error TS7006: Parameter 'x' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(94,30): error TS7031: Binding element 'media' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(94,37): error TS7031: Binding element 'activityId' implicitly has an 'any' type.
+src/renderer/components/workspace/code-diff-sidebar.tsx(94,49): error TS7031: Binding element 'index' implicitly has an 'any' type.
+src/renderer/library/repl/hooks/usePython.ts(44,21): error TS2554: Expected 1 arguments, but got 0.
+src/renderer/library/repl/hooks/usePython.ts(45,21): error TS2554: Expected 1 arguments, but got 0.
+src/renderer/library/repl/hooks/usePythonConsole.ts(44,21): error TS2554: Expected 1 arguments, but got 0.
+src/renderer/library/repl/hooks/usePythonConsole.ts(45,21): error TS2554: Expected 1 arguments, but got 0.
+src/renderer/library/repl/types/Console.ts(1,13): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/renderer/library/repl/workers/python-worker.ts(42,50): error TS2304: Cannot find name 'PyProxy'.
+src/renderer/library/repl/workers/python-worker.ts(73,28): error TS2304: Cannot find name 'PyProxy'.
+src/renderer/library/repl/workers/python-worker.ts(75,19): error TS18046: 'namespace' is of type 'unknown'.
+src/renderer/library/repl/workers/python-worker.ts(75,54): error TS2304: Cannot find name 'PyProxy'.
+src/renderer/library/repl/workers/python-worker.ts(91,57): error TS7030: Not all code paths return a value.
+src/renderer/library/repl/workers/python-worker.ts(103,56): error TS2304: Cannot find name 'PyProxy'.
+src/renderer/library/repl/workers/python-worker.ts(103,75): error TS2304: Cannot find name 'PyProxy'.
+src/renderer/pages/electron/TardisPage.tsx(92,31): error TS2339: Property 'color' does not exist on type 'NotificationPayload'.
+src/renderer/pages/electron/TardisPage.tsx(93,30): error TS2339: Property 'icon' does not exist on type 'NotificationPayload'.
+src/renderer/pages/electron/TardisPage.tsx(139,13): error TS2345: Argument of type '"interval" | "once" | "daily" | "weekly" | "alarm" | "monthly" | "windowed"' is not assignable to parameter of type 'SetStateAction<ScheduleKind>'.
+  Type '"alarm"' is not assignable to type 'SetStateAction<ScheduleKind>'.
+src/renderer/pages/shared/settings/panels/CommandsPanel.tsx(68,13): error TS2741: Property 'tags' is missing in type '{ id: `${string}-${string}-${string}-${string}-${string}`; title: string; languageId: string; type: "snippet"; file: string; createdAt: string; updatedAt: string; }' but required in type '{ id: string; title: string | null; languageId: string; type: "snippet" | "build"; file: string; tags: string[]; createdAt: string; updatedAt: string; preview?: string | undefined; }'.
+src/renderer/pages/shared/settings/panels/CommandsPanel.tsx(117,31): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(config: SessionConfig): Promise<SessionClient>', gave the following error.
+    Object literal may only specify known properties, and 'path' does not exist in type 'SourceInput'.
+  Overload 2 of 2, '(sessionId: string): SessionClient', gave the following error.
+    Argument of type '{ prompt: string; source: { path: string; }; }' is not assignable to parameter of type 'string'.
+src/renderer/pages/shared/settings/panels/CommandsPanel.tsx(119,30): error TS2339: Property 'title' does not exist on type 'SessionClient'.
+src/renderer/store/overview.ts(2,24): error TS6196: 'AtCommand' is declared but never used.
+src/renderer/store/overview.ts(2,35): error TS6196: 'DisplayCommand' is declared but never used.
+src/renderer/store/overview.ts(2,51): error TS6196: 'TerminalCommand' is declared but never used.
+src/renderer/store/overview.ts(2,68): error TS6196: 'PreviewCommand' is declared but never used.
+src/renderer/store/queues.ts(4,15): error TS2305: Module '"@jules"' has no exported member 'FleetTaskGroup'.
+src/renderer/store/queues.ts(4,31): error TS2305: Module '"@jules"' has no exported member 'FleetTask'.
+src/renderer/store/queues.ts(4,42): error TS2305: Module '"@jules"' has no exported member 'TaskAction'.
+src/renderer/store/queues.ts(111,54): error TS7006: Parameter 't' implicitly has an 'any' type.
+src/renderer/store/queues.ts(111,57): error TS7006: Parameter 'j' implicitly has an 'any' type.
+src/renderer/store/queues.ts(137,57): error TS7006: Parameter '_' implicitly has an 'any' type.
+src/renderer/store/queues.ts(137,60): error TS7006: Parameter 'j' implicitly has an 'any' type.
+electron/notifications/scheduler.ts(196,23): error TS2339: Property 'color' does not exist on type 'ScheduledItem'.
+electron/notifications/scheduler.ts(197,22): error TS2339: Property 'icon' does not exist on type 'ScheduledItem'.
+electron/notifications/scheduler.ts(228,25): error TS2339: Property 'color' does not exist on type 'ScheduledItem'.
+electron/notifications/scheduler.ts(229,24): error TS2339: Property 'icon' does not exist on type 'ScheduledItem'.

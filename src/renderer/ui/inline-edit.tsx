@@ -1,5 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import {cn} from "@/utils";
+"use client";
+
+import {useEffect, useRef, useState} from "react";
+import {cn} from "@/utils/utils";
 
 interface InlineEditProps {
   value: string;

@@ -3,6 +3,7 @@ import {TestingPanel} from './panels/TestingPanel'
 import {NotificationPanel} from './panels/NotificationPanel'
 import {TypographyPanel} from './panels/TypographyPanel'
 import {ColorPalettePanel} from './panels/ColorPalettePanel'
+import {CommandsPanel} from './panels/CommandsPanel'
 
 export default function SettingsPage() {
   return (
@@ -13,6 +14,9 @@ export default function SettingsPage() {
         </Section>
         <Section title="Color Palette">
           <ColorPalettePanel />
+        </Section>
+          <Section title="Custom Commands">
+              <CommandsPanel/>
         </Section>
         <Section title="Jules Connection">
           <TestingPanel />

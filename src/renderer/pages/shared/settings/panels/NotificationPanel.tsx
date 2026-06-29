@@ -1,17 +1,16 @@
-import { useState } from 'react'
-import { useNotification } from '@/library/notification'
+import {useState} from 'react'
+import {uiNotification} from '@shared/bridge'
 
 const SOUNDS = ['none', 'pulse', 'chime', 'alert', 'soft']
 const DURATIONS = [3000, 5000, 8000, 12000, 0]
 const DURATION_LABELS: Record<number, string> = { 3000: '3s', 5000: '5s', 8000: '8s', 12000: '12s', 0: 'persistent' }
 
 export function NotificationPanel() {
-  const { notify } = useNotification()
   const [sound, setSound] = useState('chime')
   const [duration, setDuration] = useState(5000)
 
-  const test = () => {
-    notify({
+    const fire = () => {
+        uiNotification?.show({
       title: 'Test notification',
       body: 'This is what your notifications look like.',
       sound: sound as never,
@@ -46,12 +45,20 @@ export function NotificationPanel() {
         </div>
       </div>
 
-      <button
-        onClick={test}
-        className="px-4 py-1.5 rounded border border-hair text-[10px] font-mono text-fg-secondary hover:text-fg-primary hover:border-subtle transition-colors"
-      >
-        Send test notification
-      </button>
+        <div className="flex gap-2">
+            <button
+                onClick={fire}
+                className="px-4 py-1.5 rounded border border-hair text-[10px] font-mono text-fg-secondary hover:text-fg-primary hover:border-subtle transition-colors"
+            >
+                Fire
+            </button>
+            <button
+                onClick={() => uiNotification?.show({title: 'Quick test', sound: 'chime' as never, duration: 3000})}
+                className="px-4 py-1.5 rounded border border-hair text-[10px] font-mono text-fg-ghost hover:text-fg-secondary hover:border-subtle transition-colors"
+            >
+                Quick
+            </button>
+        </div>
     </div>
   )
 }

@@ -1,17 +1,18 @@
-import type { ReactNode } from "react";
-import { memo } from "react";
-import { motion } from "framer-motion";
-import { CheckCircle2, XCircle } from "lucide-react";
-import type {Activity, ActivityType, SingleActivityProps} from "./types";
+import type {ReactNode} from "react";
+import {memo} from "react";
+import {motion} from "framer-motion";
+import {CheckCircle2, XCircle} from "lucide-react";
+import type {Activity} from "@jules";
+import type {ActivityType, SingleActivityProps} from "./types";
 import {CardContent} from "@/ui/card.tsx";
-import { Badge } from "@/ui/badge.tsx";
-import { Avatar, AvatarFallback } from "@/ui/avatar.tsx";
-import { Button } from "@/ui/button.tsx";
-import { FlyingJules } from "@/components/workspace/flying-jules.tsx";
-import { PlanContent } from "@/components/workspace/plan-content.tsx";
+import {Badge} from "@/ui/badge.tsx";
+import {Avatar, AvatarFallback} from "@/ui/avatar.tsx";
+import {Button} from "@/ui/button.tsx";
+import {FlyingJules} from "@/components/workspace/flying-jules.tsx";
+import {PlanContent} from "@/components/workspace/plan-content.tsx";
 import {Markdown} from "./markdown.tsx";
 import {ActivityArtifacts} from "./activity-artifacts.tsx";
-import { formatDistanceToNow, isValid, parseISO } from "date-fns";
+import {formatDistanceToNow, isValid, parseISO} from "date-fns";
 
 const fmt = (d: string) => {
     try {
@@ -22,7 +23,8 @@ const fmt = (d: string) => {
     }
 };
 
-const TYPE_COLOR: Record<ActivityType, string> = {
+const getActivityTypeColor = (type: ActivityType): string => {
+    const map: Record<ActivityType, string> = {
     agentMessaged: "bg-blue-500",
     userMessaged: "bg-purple-500",
     planGenerated: "bg-indigo-500",
@@ -30,21 +32,27 @@ const TYPE_COLOR: Record<ActivityType, string> = {
     progressUpdated: "bg-amber-500",
     sessionCompleted: "bg-emerald-500",
     sessionFailed: "bg-red-500",
+    };
+    return map[type] ?? "";
 };
 
 function TypeBadge({ type }: { type: ActivityType }) {
     return (
         <Badge
             variant="outline"
-            className={`text-3xs h-4 px-1.5 font-mono uppercase tracking-wider ${TYPE_COLOR[type]} border-transparent text-black font-bold`}
+            className={`text-3xs h-4 px-1.5 font-mono uppercase tracking-wider ${getActivityTypeColor(
+                type
+            )} border-transparent text-black font-bold`}
         >
             {type}
         </Badge>
     );
 }
 
-function Av({originator}: { originator: Activity["originator"] }) {
-    if (originator !== "user") {
+function Av({originator}: { originator: Activity['originator'] }) {
+    const isAgent = originator !== "user";
+
+    if (isAgent) {
         return (
             <motion.div
                 whileHover={{ scale: 1.08 }}

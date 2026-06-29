@@ -1,13 +1,13 @@
-import type { WebContents } from 'electron'
-import { BrowserWindow, ipcMain, screen } from 'electron'
+import type {WebContents} from 'electron'
+import {BrowserWindow, ipcMain, screen} from 'electron'
 import * as path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { appendToLog } from './log.js'
+import {fileURLToPath} from 'node:url'
+import {appendToLog} from './log.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const WIDTH  = 340
-const HEIGHT = 360
+const WIDTH = 960
+const HEIGHT = 540
 const OFFSET = 12
 
 let win: BrowserWindow | null = null
@@ -76,7 +76,10 @@ export function dispatchNotification(payload: unknown): void {
 
 export function registerUINotificationHandlers(getWebContents: () => WebContents | null): void {
   ipcMain.on('notif.dispatch', (_e, info: unknown) => {
-    if (!info) return
+      if (info === null) {
+          send(null)
+          return
+      }
     const p = info as { title?: string; body?: string; source?: string; id?: string | number; actions?: { id: string; label: string }[] }
     if (p.title) appendToLog(p as Parameters<typeof appendToLog>[0])
     send(info)

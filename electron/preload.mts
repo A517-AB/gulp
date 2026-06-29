@@ -1,6 +1,6 @@
-import type { IpcRendererEvent } from "electron";
-import { contextBridge, ipcRenderer } from "electron";
-import type { ShellType, PopupNotification, ElectronAPI } from "../src/shared/electron";
+import type {IpcRendererEvent} from "electron";
+import {contextBridge, ipcRenderer} from "electron";
+import type {ElectronAPI, PopupNotification, ShellType} from "../src/shared/electron";
 // ── terminal ───────────────────────────────────────────────────────────────────
 
 const terminal: ElectronAPI["terminal"] = {
@@ -145,15 +145,6 @@ const filesystem: ElectronAPI["filesystem"] = {
 const env: ElectronAPI["env"] = {
   getApiKey: () => ipcRenderer.invoke("env.getApiKey"),
 };
-
-// ── history ────────────────────────────────────────────────────────────────────
-
-const history: ElectronAPI["history"] = {
-  get:    () => ipcRenderer.invoke("history.get"),
-  push:   (text) => ipcRenderer.invoke("history.push", text),
-  remove: (id) => ipcRenderer.invoke("history.remove", id),
-}
-
 // ── notes ──────────────────────────────────────────────────────────────────────
 
 const notes: ElectronAPI["notes"] = {
@@ -229,9 +220,20 @@ const git: ElectronAPI["git"] = {
 // ── github ─────────────────────────────────────────────────────────────────────
 
 const github: ElectronAPI["github"] = {
-    listBranches: (owner, repo) => ipcRenderer.invoke("github.listBranches", owner, repo),
-    listRepos: (sort, per_page) => ipcRenderer.invoke("github.listRepos", sort, per_page),
     getUser: () => ipcRenderer.invoke("github.getUser"),
+    listRepos: (sort, per_page) => ipcRenderer.invoke("github.listRepos", sort, per_page),
+    listBranches: (owner, repo) => ipcRenderer.invoke("github.listBranches", owner, repo),
+    deleteBranch: (owner, repo, branch) => ipcRenderer.invoke("github.deleteBranch", owner, repo, branch),
+    listPRs: (owner, repo, state) => ipcRenderer.invoke("github.listPRs", owner, repo, state),
+    getPR: (owner, repo, number) => ipcRenderer.invoke("github.getPR", owner, repo, number),
+    createPR: (owner, repo, data) => ipcRenderer.invoke("github.createPR", owner, repo, data),
+    updatePR: (owner, repo, number, data) => ipcRenderer.invoke("github.updatePR", owner, repo, number, data),
+    mergePR: (owner, repo, number, method) => ipcRenderer.invoke("github.mergePR", owner, repo, number, method),
+    getPRChecks: (owner, repo, ref) => ipcRenderer.invoke("github.getPRChecks", owner, repo, ref),
+    listIssues: (owner, repo, state) => ipcRenderer.invoke("github.listIssues", owner, repo, state),
+    createIssue: (owner, repo, data) => ipcRenderer.invoke("github.createIssue", owner, repo, data),
+    updateIssue: (owner, repo, number, data) => ipcRenderer.invoke("github.updateIssue", owner, repo, number, data),
+    addIssueComment: (owner, repo, number, body) => ipcRenderer.invoke("github.addIssueComment", owner, repo, number, body),
 }
 
 // ── notifLog ───────────────────────────────────────────────────────────────────
@@ -283,6 +285,15 @@ const jules = {
     artifact: {
         save: (data: string, filepath: string) => ipcRenderer.invoke('jules.artifact.save', data, filepath),
     },
+    cache: {
+        // list sessions via SessionCursor (network, write-through)
+        sessions: (options?: unknown) => ipcRenderer.invoke('jules.cache.sessions', options),
+        // read disk cache (no network)
+        select: (query: unknown) => ipcRenderer.invoke('jules.cache.select', query),
+        activities: (sessionId: string) => ipcRenderer.invoke('jules.cache.activities', sessionId),
+        // fill cache (network → disk)
+        sync: (options?: unknown) => ipcRenderer.invoke('jules.cache.sync', options),
+    },
 }
 
 contextBridge.exposeInMainWorld('jules', jules)
@@ -297,7 +308,6 @@ const api: ElectronAPI = {
   popup,
   filesystem,
   env,
-  history,
   notes,
   snippets,
   uiNotification,
@@ -310,4 +320,3 @@ const api: ElectronAPI = {
 };
 
 contextBridge.exposeInMainWorld("electron", api);
-

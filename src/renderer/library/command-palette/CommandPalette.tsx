@@ -1,18 +1,18 @@
-import { useEffect } from "react";
+import {useEffect} from "react";
 import {
-  KBarPortal,
-  KBarPositioner,
-  KBarAnimator,
-  KBarSearch,
-  KBarResults,
-  useMatches,
-  useRegisterActions,
-  useKBar,
+    KBarAnimator,
+    KBarPortal,
+    KBarPositioner,
+    KBarResults,
+    KBarSearch,
+    useKBar,
+    useMatches,
+    useRegisterActions,
 } from "kbar";
-import { useNavigate } from "react-router";
-import { mainNavRoutes, secretNavRoutes } from "@renderer/router";
-import { matchesShortcut } from "@renderer/base/keyboard";
-import { systemActions, fleetActions, sessionActions } from "./registry";
+import {useNavigate} from "react-router";
+import {mainNavRoutes, secretNavRoutes} from "@renderer/router";
+import {matchesShortcut} from "@renderer/base/keyboard";
+import {fleetActions, sessionActions, systemActions} from "./registry";
 
 function Results() {
   const { results } = useMatches();
@@ -79,7 +79,7 @@ function StaticActions() {
   return null;
 }
 
-const PALETTE_SHORTCUT = "ctrl+space";
+const PALETTE_SHORTCUT = "ctrl+alt+space";
 
 function ShortcutHandler() {
   const { query } = useKBar();

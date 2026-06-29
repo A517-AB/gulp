@@ -1,20 +1,21 @@
-import type { ReactNode, ChangeEvent } from 'react'
-import { useEffect, useRef } from 'react'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-base/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-buttons/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-dropdowns/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-inputs/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-lists/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-navigations/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-popups/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/styles/tailwind3.css'
-import 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/styles/pdfviewer/tailwind3.css'
+import type {ChangeEvent, ReactNode} from 'react'
+import {useEffect, useRef} from 'react'
 import {
-    PdfViewer, Toolbar, Magnification, Navigation, LinkAnnotation,
-    BookmarkView, ThumbnailView, Print, TextSelection, TextSearch,
-    Annotation, FormFields, FormDesigner,
+    Annotation,
+    BookmarkView,
+    FormDesigner,
+    FormFields,
+    LinkAnnotation,
+    Magnification,
+    Navigation,
+    PdfViewer,
+    Print,
+    TextSearch,
+    TextSelection,
+    ThumbnailView,
+    Toolbar,
 } from '@syncfusion/ej2-pdfviewer'
-import { useTheme } from '@renderer/providers/theme'
+import {useTheme} from '@renderer/providers/theme'
 
 PdfViewer.Inject(
     Toolbar, Magnification, Navigation, LinkAnnotation, BookmarkView,

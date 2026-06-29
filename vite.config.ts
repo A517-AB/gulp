@@ -1,11 +1,11 @@
-import { defineConfig } from 'vite'
-import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import {defineConfig} from 'vite'
+import react, {reactCompilerPreset} from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
-import { isAbsolute, resolve } from 'node:path'
-import { existsSync, readFileSync } from 'node:fs'
-import { homedir } from 'node:os'
+import {isAbsolute, resolve} from 'node:path'
+import {existsSync, readFileSync} from 'node:fs'
+import {homedir} from 'node:os'
 
 function readJulesKey(): string {
   const p = resolve(homedir(), '.jules')
@@ -15,6 +15,7 @@ function readJulesKey(): string {
 
 
 const nodeExternal = (id: string) =>
+    id !== '@jules' &&
   !id.startsWith('.') && !isAbsolute(id) && !id.startsWith('\0')
 
 const isNotif     = process.env.VITE_BUILD_TARGET === 'notif'
@@ -22,7 +23,7 @@ const keepVendors = process.env.VITE_KEEP_VENDORS  === 'true'
 const isWeb       = process.env.VITE_TARGET === 'web'
 
 // https://vite.dev/config/
-const julesApiKey = process.env['JULES_API_KEY'] ?? readJulesKey()
+const julesApiKey = process.env.JULES_API_KEY ?? readJulesKey()
 
 export default defineConfig({
   clearScreen: false,
@@ -37,7 +38,12 @@ export default defineConfig({
         // modjules aliases — compiled dist from D:/jules rest/modjules-main/packages/core/dist/ do not touch this.
         // browser.mjs = browser entry (BrowserPlatform + IndexedDB), index.mjs = Node entry
         // 2026-06-22: crossed out — switching to second port bun; restore when that's ready
+        // i know the second and third are broken/unused (vite takes first match) — leave them unless asked
         {find: '@jules', replacement: 'D:/jules rest/modjules-main/packages/core/dist/browser.mjs'},
+        // {find: '@jules', replacement: 'D:/jules rest/modjules-main/packages/core/dist/index.mjs'},
+        // {find: '@jules', replacement: 'D:/jules rest/modjules-main/packages/core/dist/memory-CxgfVdNh.js'},
+
+
         {find: 'react', replacement: resolve(__dirname, 'node_modules/react')},
       { find: 'react-dom',   replacement: resolve(__dirname, 'node_modules/react-dom') },
         // 2026-06-22: For later, not for dev
@@ -71,12 +77,8 @@ export default defineConfig({
         './src/renderer/components/shared/Clock.tsx',
       ],
     },
-    proxy: {
-      '/api': {
-        target: 'http://127.0.0.1:3939',
-        changeOrigin: false,
-      },
-    },
+      // proxy removed — Bun/Hono sidecar server scrapped (~2026-06-01).
+      // was: /api → 127.0.0.1:3939 (standalone Bun server)
   },
   // can you not change it to rollup because this is vite 8, if you don't know you don't know
   build: {
@@ -98,6 +100,9 @@ export default defineConfig({
       },
     },
   },
+    worker: {
+        format: 'es',
+    },
   preview: {
     host: '127.0.0.1',
     port: 4173,
@@ -113,6 +118,13 @@ export default defineConfig({
         main: {
           entry: 'electron/main.mts',
           vite: {
+              resolve: {
+                  // main is Node — @jules must be the node source (disk cache),
+                  // NOT the renderer's browser.mjs. Scoped to this build only.
+                  alias: [
+                      {find: '@jules', replacement: resolve(__dirname, 'electron/ipc/Jules/index.ts')},
+                  ],
+              },
             build: {
               rolldownOptions: {
                 external: nodeExternal,

@@ -1,28 +1,32 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage, powerMonitor } from "electron";
+import {app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeImage, powerMonitor, Tray} from "electron";
 import * as path from "path";
 import * as fs from "fs";
-import { fileURLToPath } from "url";
+import {fileURLToPath} from "url";
 import log from "electron-log/main";
-import { execFileSync } from "child_process";
-
-log.initialize();
-Object.assign(console, log.functions);
-
-import { registerTerminalHandlers } from "./Terminal";
-import { registerQueuesHandlers } from "./queues";
-import { registerFilesystemHandlers } from "./filesystem/handlers";
-import { registerSnippetsHandlers } from "./snippets";
-import { registerGitHandlers } from "./git";
-import { registerGitHubHandlers } from "./github";
-import { registerHistoryHandlers } from "./history";
-import { registerNotesHandlers } from "./notes";
-import { registerUINotificationHandlers, prewarmNotificationWindow, registerSchedulerHandlers, registerNotifLogHandlers } from "./notifications";
+import {execFileSync} from "child_process";
+import {registerTerminalHandlers} from "./Terminal";
+import {registerQueuesHandlers} from "./queues";
+import {registerFilesystemHandlers} from "./filesystem/handlers";
+import {registerSnippetsHandlers} from "./snippets";
+import {registerGitHandlers} from "./git";
+import {registerGitHubHandlers} from "./github";
+import {registerNotesHandlers} from "./notes";
+import {
+    prewarmNotificationWindow,
+    registerNotifLogHandlers,
+    registerSchedulerHandlers,
+    registerUINotificationHandlers
+} from "./notifications";
 // SDK IPC handlers removed — Jules SDK moved to renderer (direct fetch, no IPC overhead)
 // import { registerSdkHandlers } from "./ipc/handlers";
 // Jules events w@jorker removed — moving to renderer-side SDK
 // import { startJulesWorker, registerJulesEventsHandlers } from "./jules-events";
-import { registerStoreHandlers } from "./store";
+import {registerStoreHandlers} from "./store";
 import {registerJulesGitHandlers} from "./ipc/jules-git";
+import {registerJulesCacheHandlers} from "./ipc/jules-cache";
+
+log.initialize();
+Object.assign(console, log.functions);
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -166,9 +170,6 @@ void app.whenReady().then(() => {
   registerGitHubHandlers();
   t("registerGitHubHandlers done");
 
-  registerHistoryHandlers();
-  t("registerHistoryHandlers done");
-
   registerNotesHandlers(() => mainWindow?.webContents ?? null);
   t("registerNotesHandlers done");
 
@@ -194,6 +195,10 @@ void app.whenReady().then(() => {
 
     registerJulesGitHandlers();
     t("registerJulesGitHandlers done");
+
+    registerJulesCacheHandlers(ipcMain);
+    t("registerJulesCacheHandlers done");
+
 
   createWindow();
   t("createWindow done");
@@ -222,7 +227,8 @@ void app.whenReady().then(() => {
   powerMonitor.on("lock-screen",   () => mainWindow?.webContents.send("power.suspend"));
   powerMonitor.on("unlock-screen", () => mainWindow?.webContents.send("power.resume"));
 
-  app.on("activate", () => {
+
+    app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });

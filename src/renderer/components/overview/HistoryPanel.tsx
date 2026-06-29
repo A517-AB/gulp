@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
-import type { HistoryEntry } from '@shared/history'
+import {motion} from 'framer-motion'
+import type {HistoryEntry} from '@/store/overview'
 
 interface HistoryPanelProps {
     entries:     HistoryEntry[]
