@@ -45,7 +45,7 @@ export function SessionsSidebar({onSelect, selectedId}: SessionsSidebarProps) {
                             </span>
                         </div>
                         {repo !== '' && (
-                            <span className="truncate pl-3.5 font-mono text-[10px] text-fg-dim">
+                            <span className={`truncate pl-3.5 font-mono text-[10px] ${meta.text}`}>
                                 {repo}
                             </span>
                         )}
