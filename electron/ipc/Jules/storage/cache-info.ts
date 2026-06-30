@@ -228,7 +228,7 @@ export async function getLatestActivities(
             lines.unshift(tail);
         }
 
-        const finalLines = lines.slice(-n).reverse();
+        const finalLines = lines.slice(-n);
         return finalLines.map((line) => JSON.parse(line));
     } catch (e: any) {
         if (e.code === 'ENOENT') return [];
