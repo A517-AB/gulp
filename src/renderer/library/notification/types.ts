@@ -15,6 +15,8 @@ export interface NotificationPayload {
   id?:        string | number
   extraData?: unknown
   source?:    string
+    color?: string
+    icon?: string
 }
 
 export type NotificationType = 'default' | 'success' | 'error' | 'info' | 'warning'

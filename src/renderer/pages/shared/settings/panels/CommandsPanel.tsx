@@ -70,6 +70,7 @@ export function CommandsPanel() {
                 languageId: lang,
                 type: 'snippet',
                 file,
+                tags: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
             }

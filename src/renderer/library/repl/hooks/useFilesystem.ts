@@ -1,10 +1,7 @@
 import {useState} from 'react'
 
-import type {Remote} from 'comlink'
-import type {Runner} from '../types/Runner'
-
 interface UseFilesystemProps {
-    runner: Remote<Runner> | undefined
+    runner: any
 }
 
 export default function useFilesystem(props: UseFilesystemProps) {

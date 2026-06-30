@@ -293,6 +293,8 @@ const jules = {
         activities: (sessionId: string) => ipcRenderer.invoke('jules.cache.activities', sessionId),
         // fill cache (network → disk)
         sync: (options?: unknown) => ipcRenderer.invoke('jules.cache.sync', options),
+        send: (sessionId: string, msg: string) => ipcRenderer.invoke('jules.cache.send', sessionId, msg),
+        approve: (sessionId: string) => ipcRenderer.invoke('jules.cache.approve', sessionId),
     },
 }
 

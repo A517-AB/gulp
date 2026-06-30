@@ -1,4 +1,4 @@
-const src = await Deno.readTextFile('./node_modules/@google/jules-sdk/dist/index.mjs')
+const src = await Deno.readTextFile('./electron/ipc/dist/*')
 
 // API routes — strings matching sdk: prefix or /v1alpha patterns
 const channels = [...new Set([

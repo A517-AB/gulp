@@ -37,6 +37,8 @@ export interface ScheduledItem {
     leadTimeMin?: number
   createdAt:    string
   lastFiredAt?: string
+    color?: string
+    icon?: string
 }
 
 interface Store {

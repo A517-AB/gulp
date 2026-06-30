@@ -7,7 +7,7 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/ui/too
 import {formatDate} from '@/utils/activity.ts'
 import {getStatusInfo, STATE_BADGE, STATE_DOT} from './session-status.ts'
 import {SessionContextMenu} from './SessionContextMenu.tsx'
-import type {SessionResource} from '@jules'
+import type {SessionResource, Source} from '@jules'
 import {useCallback, useEffect, useMemo, useState} from 'react'
 import {listSessions, triggerSync} from '@/lib/jules-client.ts'
 
@@ -46,7 +46,8 @@ export function SessionList({onSelectSession, selectedSessionId}: SessionListPro
         if (!searchQuery) return sessions
         const q = searchQuery.toLowerCase()
         return sessions.filter(s => {
-            const repo = s.source.type === 'githubRepo' ? s.source.githubRepo : null
+            const source = s.source as Source | undefined
+            const repo = source?.type === 'githubRepo' ? source.githubRepo : null
             const repoStr = repo ? `${repo.owner}/${repo.repo}` : ''
             return (s.title ?? '').toLowerCase().includes(q) || repoStr.toLowerCase().includes(q)
         })
@@ -95,7 +96,8 @@ export function SessionList({onSelectSession, selectedSessionId}: SessionListPro
                     ) : (
                         <TooltipProvider>
                             {visible.map(s => {
-                                const repo = s.source.type === 'githubRepo' ? s.source.githubRepo : null
+                                const source = s.source as Source | undefined
+                                const repo = source?.type === 'githubRepo' ? source.githubRepo : null
                                 return (
                                     <SessionContextMenu key={s.id} session={s}>
                                         <button

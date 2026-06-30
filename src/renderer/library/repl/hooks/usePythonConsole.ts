@@ -6,7 +6,8 @@ import useFilesystem from './useFilesystem'
 
 import type {Packages} from '../types/Packages'
 import type {PythonRunner} from '../types/Runner'
-import {ConsoleState} from '../types/Console'
+import type {ConsoleState} from '../types/Console'
+import {ConsoleStates} from '../types/Console'
 
 interface UsePythonConsoleProps {
     packages?: Packages
@@ -21,12 +22,10 @@ export default function usePythonConsole(props?: UsePythonConsoleProps) {
     const [isRunning, setIsRunning] = useState(false)
     const [stdout, setStdout] = useState('')
     const [stderr, setStderr] = useState('')
-    const [pendingCode, setPendingCode] = useState<string | undefined>()
 
     const {
         packages: globalPackages,
         timeout,
-        lazy,
         autoImportPackages,
         sendInput,
         workerAwaitingInputIds,
@@ -56,10 +55,8 @@ export default function usePythonConsole(props?: UsePythonConsoleProps) {
     }
 
     useEffect(() => {
-        if (!lazy) {
-            // Spawn worker on mount
-            createWorker()
-        }
+        // Spawn worker eagerly on mount
+        createWorker()
 
         // Cleanup worker on unmount
         return () => {
@@ -116,17 +113,6 @@ export default function usePythonConsole(props?: UsePythonConsoleProps) {
         }
     }, [workerRef.current])
 
-    // React to ready state and run delayed code if pending
-    useEffect(() => {
-        if (pendingCode && isReady) {
-            const delayedRun = async () => {
-                await runPython(pendingCode)
-                setPendingCode(undefined)
-            }
-            delayedRun()
-        }
-    }, [pendingCode, isReady])
-
     // prettier-ignore
     const moduleReloadCode = (modules: Set<string>) => `
 import importlib
@@ -145,13 +131,6 @@ del sys
             outputRef.current = []
             setStdout('')
             setStderr('')
-
-            if (lazy && !isReady) {
-                // Spawn worker and set pending code
-                createWorker()
-                setPendingCode(code)
-                return
-            }
 
             if (!isReady) {
                 throw new Error('Pyodide is not loaded yet')
@@ -178,19 +157,18 @@ del sys
                 const runResult = await runnerRef.current.run(code, autoImportPackages)
                 const {state, error} = runResult ?? {}
                 setStdout(outputRef.current.join(''))
-                setConsoleState(ConsoleState[state as keyof typeof ConsoleState])
+                setConsoleState(ConsoleStates[state as keyof typeof ConsoleStates])
                 if (error) {
                     setStderr(error)
                 }
-                // eslint-disable-next-line
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error('Error pushing to console:', error)
             } finally {
                 setIsRunning(false)
                 clearTimeout(timeoutTimer)
             }
         },
-        [lazy, isReady, timeout, watchedModules]
+        [isReady, timeout, watchedModules]
     )
 
     const interruptExecution = () => {

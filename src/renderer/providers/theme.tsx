@@ -1,4 +1,5 @@
-import {createContext, type ReactNode, useContext, useEffect, useState} from 'react'
+import {type ReactNode} from 'react'
+import {create} from 'zustand'
 
 export type Theme = 'light' | 'dark'
 
@@ -23,6 +24,7 @@ const GF_MAP: Record<string, string> = {
 }
 
 export function loadFont(name: string): void {
+    if (typeof document === 'undefined') return
     const family = GF_MAP[name]
     if (!family) return
     const id = `gf-${name.replace(/\s+/g, '-').toLowerCase()}`
@@ -58,188 +60,170 @@ interface ThemeCtx {
   setWordSpacing: (s: string) => void
 }
 
-const Ctx = createContext<ThemeCtx | null>(null)
-
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
+export const useThemeStore = create<ThemeCtx>((set) => ({
+    theme: (() => {
     try {
         return (localStorage.getItem('gulp:theme') as Theme | null) ?? 'dark'
     } catch {
       return 'dark'
     }
-  })
-
-  const [fontSize, setFontSize] = useState<number>(() => {
+    })(),
+    toggle: () => set((state) => ({theme: state.theme === 'dark' ? 'light' : 'dark'})),
+    set: (t: Theme) => set({theme: t}),
+    fontSize: (() => {
     try {
       const val = localStorage.getItem('gulp:fontSizeVal')
       return val ? parseInt(val, 10) : 16
     } catch {
       return 16
     }
-  })
-
-  const [fontBasic, setFontBasic] = useState<string>(() => {
+    })(),
+    setFontSize: (s: number) => set({fontSize: s}),
+    fontBasic: (() => {
     try {
       return localStorage.getItem('gulp:fontBasicVal') ?? 'Inter'
     } catch {
       return 'Inter'
     }
-  })
-
-  const [fontMarkdown, setFontMarkdown] = useState<string>(() => {
+    })(),
+    setFontBasic: (f: string) => set({fontBasic: f}),
+    fontMarkdown: (() => {
     try {
       return localStorage.getItem('gulp:fontMarkdownVal') ?? 'Inter'
     } catch {
       return 'Inter'
     }
-  })
-
-  const [fontCode, setFontCode] = useState<string>(() => {
+    })(),
+    setFontMarkdown: (f: string) => set({fontMarkdown: f}),
+    fontCode: (() => {
     try {
       return localStorage.getItem('gulp:fontCodeVal') ?? 'JetBrains Mono'
     } catch {
       return 'JetBrains Mono'
     }
-  })
-
-  const [fontWeight, setFontWeight] = useState<number>(() => {
+    })(),
+    setFontCode: (f: string) => set({fontCode: f}),
+    fontWeight: (() => {
     try {
       const val = localStorage.getItem('gulp:fontWeightVal')
       return val ? parseInt(val, 10) : 400
     } catch {
       return 400
     }
-  })
-
-  const [spacing, setSpacing] = useState<number>(() => {
+    })(),
+    setFontWeight: (w: number) => set({fontWeight: w}),
+    spacing: (() => {
     try {
       const val = localStorage.getItem('gulp:spacingVal')
       return val ? parseFloat(val) : 0.25
     } catch {
       return 0.25
     }
-  })
-
-  const [lineHeight, setLineHeight] = useState<number>(() => {
+    })(),
+    setSpacing: (s: number) => set({spacing: s}),
+    lineHeight: (() => {
     try {
       const val = localStorage.getItem('gulp:lineHeightVal')
       return val ? parseFloat(val) : 1.5
     } catch {
       return 1.5
     }
-  })
-
-  const [letterSpacing, setLetterSpacing] = useState<string>(() => {
+    })(),
+    setLineHeight: (l: number) => set({lineHeight: l}),
+    letterSpacing: (() => {
     try {
       return localStorage.getItem('gulp:letterSpacingVal') ?? 'normal'
     } catch {
       return 'normal'
     }
-  })
-
-  const [wordSpacing, setWordSpacing] = useState<string>(() => {
+    })(),
+    setLetterSpacing: (s: string) => set({letterSpacing: s}),
+    wordSpacing: (() => {
     try {
       return localStorage.getItem('gulp:wordSpacingVal') ?? 'normal'
     } catch {
       return 'normal'
     }
-  })
+    })(),
+    setWordSpacing: (s: string) => set({wordSpacing: s}),
+}))
 
-  useEffect(() => {
+const SYSTEM_FONTS = new Set(['system-ui', 'sans-serif', 'monospace', 'ui-monospace', 'ui-sans-serif', 'ui-serif', 'serif', 'cursive', 'fantasy'])
+const formatFont = (name: string, fallback: 'sans-serif' | 'monospace') =>
+    SYSTEM_FONTS.has(name) ? name : `'${name}', ${fallback}`
+
+export function applyThemeStyles(state: ThemeCtx): void {
+    if (typeof document === 'undefined') return
     const root = document.documentElement
 
-    root.classList.toggle('dark', theme === 'dark')
-      localStorage.setItem('gulp:theme', theme)
+    root.classList.toggle('dark', state.theme === 'dark')
+    localStorage.setItem('gulp:theme', state.theme)
 
-      loadFont(fontBasic)
-      loadFont(fontMarkdown)
-      loadFont(fontCode)
+    loadFont(state.fontBasic)
+    loadFont(state.fontMarkdown)
+    loadFont(state.fontCode)
 
     // Apply Dynamic Sizing (1rem = fontSize)
-    root.style.fontSize = `${fontSize}px`
-    localStorage.setItem('gulp:fontSizeVal', String(fontSize))
-
-    const SYSTEM_FONTS = new Set(['system-ui', 'sans-serif', 'monospace', 'ui-monospace', 'ui-sans-serif', 'ui-serif', 'serif', 'cursive', 'fantasy'])
-    const formatFont = (name: string, fallback: 'sans-serif' | 'monospace') =>
-      SYSTEM_FONTS.has(name) ? name : `'${name}', ${fallback}`
+    root.style.fontSize = `${state.fontSize}px`
+    localStorage.setItem('gulp:fontSizeVal', String(state.fontSize))
 
     // Apply Font Families
-    root.style.setProperty('--font-sans', formatFont(fontBasic, 'sans-serif'))
-    root.style.setProperty('--font-markdown', formatFont(fontMarkdown, 'sans-serif'))
-    root.style.setProperty('--font-mono', formatFont(fontCode, 'monospace'))
+    root.style.setProperty('--font-sans', formatFont(state.fontBasic, 'sans-serif'))
+    root.style.setProperty('--font-markdown', formatFont(state.fontMarkdown, 'sans-serif'))
+    root.style.setProperty('--font-mono', formatFont(state.fontCode, 'monospace'))
 
-    localStorage.setItem('gulp:fontBasicVal', fontBasic)
-    localStorage.setItem('gulp:fontMarkdownVal', fontMarkdown)
-    localStorage.setItem('gulp:fontCodeVal', fontCode)
+    localStorage.setItem('gulp:fontBasicVal', state.fontBasic)
+    localStorage.setItem('gulp:fontMarkdownVal', state.fontMarkdown)
+    localStorage.setItem('gulp:fontCodeVal', state.fontCode)
 
-      // Keep BlockNote in sync with markdown font + base size
-      const bnId = 'bn-font-sync'
-      let bnEl = document.getElementById(bnId) as HTMLStyleElement | null
-      if (!bnEl) {
-          bnEl = document.createElement('style');
-          bnEl.id = bnId;
-          document.head.appendChild(bnEl)
-      }
-      bnEl.textContent = `.bn-editor .ProseMirror, .bn-editor .ProseMirror p { font-family: ${formatFont(fontMarkdown, 'sans-serif')}; font-size: ${fontSize}px; }`
+    // Keep BlockNote in sync with markdown font + base size
+    const bnId = 'bn-font-sync'
+    let bnEl = document.getElementById(bnId) as HTMLStyleElement | null
+    if (!bnEl) {
+        bnEl = document.createElement('style')
+        bnEl.id = bnId
+        document.head.appendChild(bnEl)
+    }
+    bnEl.textContent = `.bn-editor .ProseMirror, .bn-editor .ProseMirror p { font-family: ${formatFont(state.fontMarkdown, 'sans-serif')}; font-size: ${state.fontSize}px; }`
 
     // Apply Dynamic Weights
-    const w = fontWeight
+    const w = state.fontWeight
     root.style.setProperty('--font-weight-thin', `${Math.max(100, w - 300)}`)
     root.style.setProperty('--font-weight-light', `${Math.max(100, w - 100)}`)
     root.style.setProperty('--font-weight-normal', `${w}`)
     root.style.setProperty('--font-weight-medium', `${Math.min(900, w + 100)}`)
     root.style.setProperty('--font-weight-semibold', `${Math.min(900, w + 200)}`)
     root.style.setProperty('--font-weight-bold', `${Math.min(900, w + 300)}`)
-    localStorage.setItem('gulp:fontWeightVal', String(fontWeight))
+    localStorage.setItem('gulp:fontWeightVal', String(state.fontWeight))
 
     // Apply Dynamic Spacing
-    root.style.setProperty('--spacing', `${spacing}rem`)
-    localStorage.setItem('gulp:spacingVal', String(spacing))
+    root.style.setProperty('--spacing', `${state.spacing}rem`)
+    localStorage.setItem('gulp:spacingVal', String(state.spacing))
 
     // Apply Line Height, Letter Spacing, and Word Spacing variables
-    root.style.setProperty('--line-height-base', String(lineHeight))
-    root.style.setProperty('--letter-spacing-base', letterSpacing)
-    root.style.setProperty('--word-spacing-base', wordSpacing)
+    root.style.setProperty('--line-height-base', String(state.lineHeight))
+    root.style.setProperty('--letter-spacing-base', state.letterSpacing)
+    root.style.setProperty('--word-spacing-base', state.wordSpacing)
 
-    localStorage.setItem('gulp:lineHeightVal', String(lineHeight))
-    localStorage.setItem('gulp:letterSpacingVal', letterSpacing)
-    localStorage.setItem('gulp:wordSpacingVal', wordSpacing)
-  }, [theme, fontSize, fontBasic, fontMarkdown, fontCode, fontWeight, spacing, lineHeight, letterSpacing, wordSpacing])
-
-  const toggle = () => { setTheme(t => (t === 'dark' ? 'light' : 'dark')) }
-
-  return (
-    <Ctx.Provider value={{
-      theme,
-      toggle,
-      set: setTheme,
-      fontSize,
-      setFontSize,
-      fontBasic,
-      setFontBasic,
-      fontMarkdown,
-      setFontMarkdown,
-      fontCode,
-      setFontCode,
-      fontWeight,
-      setFontWeight,
-      spacing,
-      setSpacing,
-      lineHeight,
-      setLineHeight,
-      letterSpacing,
-      setLetterSpacing,
-      wordSpacing,
-      setWordSpacing
-    }}>
-      {children}
-    </Ctx.Provider>
-  )
+    localStorage.setItem('gulp:lineHeightVal', String(state.lineHeight))
+    localStorage.setItem('gulp:letterSpacingVal', state.letterSpacing)
+    localStorage.setItem('gulp:wordSpacingVal', state.wordSpacing)
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
+// Subscribe to store updates to apply DOM adjustments
+useThemeStore.subscribe((state) => {
+    applyThemeStyles(state)
+})
+
+// Initialize stylesheets on load
+if (typeof document !== 'undefined') {
+    applyThemeStyles(useThemeStore.getState())
+}
+
+export function ThemeProvider({children}: { children: ReactNode }) {
+    return <>{children}</>
+}
+
 export function useTheme(): ThemeCtx {
-  const ctx = useContext(Ctx)
-  if (!ctx) throw new Error('useTheme requires ThemeProvider')
-  return ctx
+    return useThemeStore()
 }

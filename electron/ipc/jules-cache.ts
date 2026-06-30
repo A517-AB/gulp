@@ -29,8 +29,18 @@ export function registerJulesCacheHandlers(ipcMain: IpcMain): void {
     ipcMain.handle('jules.cache.select', (_e: IpcMainInvokeEvent, query: JulesQuery<JulesDomain>) =>
         client.select(query));
 
-    ipcMain.handle('jules.cache.activities', (_e: IpcMainInvokeEvent, sessionId: string) =>
-        client.session(sessionId).activities.select());
+    // history() = local first, fetches from network if cache empty
+    ipcMain.handle('jules.cache.activities', async (_e: IpcMainInvokeEvent, sessionId: string) => {
+        const acts = []
+        for await (const a of client.session(sessionId).history()) acts.push(a)
+        return acts
+    });
+
+    ipcMain.handle('jules.cache.send', (_e: IpcMainInvokeEvent, sessionId: string, msg: string) =>
+        client.session(sessionId).send(msg));
+
+    ipcMain.handle('jules.cache.approve', (_e: IpcMainInvokeEvent, sessionId: string) =>
+        client.session(sessionId).approve());
 
     // ── fill cache (network → disk, write-through) ──────────────────────────
     ipcMain.handle('jules.cache.sync', (_e: IpcMainInvokeEvent, options?: Parameters<typeof client.sync>[0]) =>

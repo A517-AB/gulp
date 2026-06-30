@@ -127,7 +127,12 @@ export default function TardisPage() {
         setEditingId(item.id)
         setLabel(item.label)
         setBody(item.body || '')
-        setKind(item.schedule.kind)
+        if (item.schedule.kind === 'once' ||
+            item.schedule.kind === 'interval' ||
+            item.schedule.kind === 'daily' ||
+            item.schedule.kind === 'weekly') {
+            setKind(item.schedule.kind)
+        }
 
         // Parse schedule configuration
         if (item.schedule.kind === 'once') {
@@ -440,7 +445,9 @@ export default function TardisPage() {
                                             </button>
 
                                             <button
-                                                onClick={() => openEditModal(item)}
+                                                onClick={() => {
+                                                    openEditModal(item);
+                                                }}
                                                 className="p-1 rounded text-fg-ghost hover:text-fg-primary hover:bg-hover transition-colors cursor-pointer"
                                                 title="Edit Reminder"
                                             >
@@ -473,7 +480,9 @@ export default function TardisPage() {
                             initial={{opacity: 0}}
                             animate={{opacity: 1}}
                             exit={{opacity: 0}}
-                            onClick={() => setIsModalOpen(false)}
+                            onClick={() => {
+                                setIsModalOpen(false);
+                            }}
                             className="absolute inset-0 bg-black/60"
                         />
 
@@ -493,7 +502,9 @@ export default function TardisPage() {
                                 </h2>
                                 <button
                                     type="button"
-                                    onClick={() => setIsModalOpen(false)}
+                                    onClick={() => {
+                                        setIsModalOpen(false);
+                                    }}
                                     className="p-1 rounded text-fg-ghost hover:text-fg-primary hover:bg-hover transition-colors cursor-pointer"
                                 >
                                     <X className="w-4 h-4"/>
@@ -513,7 +524,9 @@ export default function TardisPage() {
                                         type="text"
                                         required
                                         value={label}
-                                        onChange={e => setLabel(e.target.value)}
+                                        onChange={e => {
+                                            setLabel(e.target.value);
+                                        }}
                                         placeholder="E.g. Drink water, Code review..."
                                         className="w-full bg-hover border border-hair rounded-lg px-3 py-2 text-xs text-fg-primary placeholder-fg-ghost/30 focus:border-subtle outline-none transition-colors"
                                     />
@@ -527,7 +540,9 @@ export default function TardisPage() {
                                     </label>
                                     <textarea
                                         value={body}
-                                        onChange={e => setBody(e.target.value)}
+                                        onChange={e => {
+                                            setBody(e.target.value);
+                                        }}
                                         placeholder="Short description of the event..."
                                         className="w-full h-16 bg-hover border border-hair rounded-lg px-3 py-2 text-xs text-fg-primary placeholder-fg-ghost/30 focus:border-subtle outline-none resize-none transition-colors"
                                     />
@@ -544,7 +559,9 @@ export default function TardisPage() {
                                             <button
                                                 key={tab}
                                                 type="button"
-                                                onClick={() => setKind(tab)}
+                                                onClick={() => {
+                                                    setKind(tab);
+                                                }}
                                                 className={`py-1 rounded-md text-3xs font-semibold capitalize transition-all cursor-pointer ${
                                                     kind === tab
                                                         ? 'bg-selected text-fg-primary shadow-sm'
@@ -568,7 +585,9 @@ export default function TardisPage() {
                                                     min={1}
                                                     required
                                                     value={minutes}
-                                                    onChange={e => setMinutes(Number(e.target.value))}
+                                                    onChange={e => {
+                                                        setMinutes(Number(e.target.value));
+                                                    }}
                                                     className="w-16 bg-hover border border-hair rounded px-2 py-1 text-xs font-mono text-center text-fg-primary focus:border-subtle outline-none"
                                                 />
                                                 <span className="text-2xs text-fg-ghost">minutes</span>
@@ -585,7 +604,9 @@ export default function TardisPage() {
                                                     min={1}
                                                     required
                                                     value={minutes}
-                                                    onChange={e => setMinutes(Number(e.target.value))}
+                                                    onChange={e => {
+                                                        setMinutes(Number(e.target.value));
+                                                    }}
                                                     className="w-16 bg-hover border border-hair rounded px-2 py-1 text-xs font-mono text-center text-fg-primary focus:border-subtle outline-none"
                                                 />
                                                 <span className="text-2xs text-fg-ghost">minutes</span>
@@ -600,7 +621,9 @@ export default function TardisPage() {
                                                 type="time"
                                                 required
                                                 value={time}
-                                                onChange={e => setTime(e.target.value)}
+                                                onChange={e => {
+                                                    setTime(e.target.value);
+                                                }}
                                                 className="bg-hover border border-hair rounded px-2.5 py-1 text-xs font-mono text-fg-primary focus:border-subtle outline-none"
                                             />
                                         </div>
@@ -614,7 +637,9 @@ export default function TardisPage() {
                                                     type="time"
                                                     required
                                                     value={time}
-                                                    onChange={e => setTime(e.target.value)}
+                                                    onChange={e => {
+                                                        setTime(e.target.value);
+                                                    }}
                                                     className="bg-hover border border-hair rounded px-2.5 py-1 text-xs font-mono text-fg-primary focus:border-subtle outline-none"
                                                 />
                                             </div>
@@ -628,7 +653,9 @@ export default function TardisPage() {
                                                         <button
                                                             key={idx}
                                                             type="button"
-                                                            onClick={() => setDayOfWeek(idx)}
+                                                            onClick={() => {
+                                                                setDayOfWeek(idx);
+                                                            }}
                                                             className={`py-1 rounded text-3xs font-bold transition-all cursor-pointer ${
                                                                 dayOfWeek === idx
                                                                     ? 'bg-selected border border-subtle text-fg-primary font-extrabold'
@@ -655,7 +682,9 @@ export default function TardisPage() {
                                             <button
                                                 key={soundId}
                                                 type="button"
-                                                onClick={() => setSound(soundId)}
+                                                onClick={() => {
+                                                    setSound(soundId);
+                                                }}
                                                 className={`px-3 py-1 rounded-lg text-3xs font-semibold capitalize border transition-all cursor-pointer ${
                                                     sound === soundId
                                                         ? 'bg-selected text-fg-primary border-subtle'
@@ -676,7 +705,9 @@ export default function TardisPage() {
                                     </label>
                                     <select
                                         value={icon}
-                                        onChange={e => setIcon(e.target.value)}
+                                        onChange={e => {
+                                            setIcon(e.target.value);
+                                        }}
                                         className="w-full bg-hover border border-hair rounded-lg px-3 py-2 text-xs text-fg-primary focus:border-subtle outline-none"
                                     >
                                         <option value="">Default (Bell)</option>
@@ -710,7 +741,9 @@ export default function TardisPage() {
                                             <button
                                                 key={c.name}
                                                 type="button"
-                                                onClick={() => setColor(c.value)}
+                                                onClick={() => {
+                                                    setColor(c.value);
+                                                }}
                                                 className={`px-2.5 py-1 rounded border text-3xs font-semibold transition-all cursor-pointer ${
                                                     color === c.value
                                                         ? 'bg-selected text-fg-primary border-subtle'
@@ -734,7 +767,9 @@ export default function TardisPage() {
                                         <input
                                             type="checkbox"
                                             checked={hasLeadTime}
-                                            onChange={e => setHasLeadTime(e.target.checked)}
+                                            onChange={e => {
+                                                setHasLeadTime(e.target.checked);
+                                            }}
                                             className="w-4 h-4 accent-fg-primary border-hair rounded cursor-pointer"
                                         />
                                     </div>
@@ -749,7 +784,9 @@ export default function TardisPage() {
                                                     min={1}
                                                     max={120}
                                                     value={leadTimeMin}
-                                                    onChange={e => setLeadTimeMin(Number(e.target.value))}
+                                                    onChange={e => {
+                                                        setLeadTimeMin(Number(e.target.value));
+                                                    }}
                                                     className="w-12 bg-hover border border-hair rounded px-1.5 py-0.5 text-3xs font-mono text-center text-fg-primary outline-none"
                                                 />
                                                 <span className="text-3xs text-fg-ghost">minutes</span>
@@ -781,7 +818,9 @@ export default function TardisPage() {
                                                     {/* Preset Selection Dropdown */}
                                                     <select
                                                         value={action.preset}
-                                                        onChange={e => updateActionPreset(idx, e.target.value as ActionPreset)}
+                                                        onChange={e => {
+                                                            updateActionPreset(idx, e.target.value as ActionPreset);
+                                                        }}
                                                         className="bg-hover border border-hair rounded px-1.5 py-1 text-3xs text-fg-primary focus:border-subtle outline-none"
                                                     >
                                                         <option value="snooze-10">Snooze 10m</option>
@@ -799,14 +838,18 @@ export default function TardisPage() {
                                                             <input
                                                                 type="text"
                                                                 value={action.label}
-                                                                onChange={e => updateActionValue(idx, 'label', e.target.value)}
+                                                                onChange={e => {
+                                                                    updateActionValue(idx, 'label', e.target.value);
+                                                                }}
                                                                 placeholder="Label"
                                                                 className="flex-1 bg-hover border border-hair rounded px-2 py-1 text-3xs text-fg-primary focus:border-subtle outline-none"
                                                             />
                                                             <input
                                                                 type="text"
                                                                 value={action.id}
-                                                                onChange={e => updateActionValue(idx, 'id', e.target.value)}
+                                                                onChange={e => {
+                                                                    updateActionValue(idx, 'id', e.target.value);
+                                                                }}
                                                                 placeholder="action-id"
                                                                 className="w-16 bg-hover border border-hair rounded px-2 py-1 text-3xs font-mono text-fg-muted focus:border-subtle outline-none"
                                                             />
@@ -822,7 +865,9 @@ export default function TardisPage() {
                                                     {/* Accent/Ghost Style select */}
                                                     <select
                                                         value={action.style}
-                                                        onChange={e => updateActionStyle(idx, e.target.value as 'primary' | 'ghost')}
+                                                        onChange={e => {
+                                                            updateActionStyle(idx, e.target.value as 'primary' | 'ghost');
+                                                        }}
                                                         className="bg-hover border border-hair rounded px-1.5 py-1 text-3xs text-fg-ghost focus:border-subtle outline-none"
                                                     >
                                                         <option value="primary">accent</option>
@@ -831,7 +876,9 @@ export default function TardisPage() {
 
                                                     <button
                                                         type="button"
-                                                        onClick={() => removeActionField(idx)}
+                                                        onClick={() => {
+                                                            removeActionField(idx);
+                                                        }}
                                                         className="text-fg-ghost hover:text-red-400 p-1 transition-colors cursor-pointer"
                                                     >
                                                         ×
@@ -846,7 +893,9 @@ export default function TardisPage() {
                                 <div className="pt-4 border-t border-hair flex items-center justify-end gap-2 shrink-0">
                                     <button
                                         type="button"
-                                        onClick={() => setIsModalOpen(false)}
+                                        onClick={() => {
+                                            setIsModalOpen(false);
+                                        }}
                                         className="px-4 py-2 rounded-lg border border-hair bg-hover/20 hover:bg-hover text-fg-secondary text-3xs font-semibold transition-colors cursor-pointer"
                                     >
                                         Cancel

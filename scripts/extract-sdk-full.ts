@@ -1,7 +1,7 @@
 // Produces research/sdk-reference.json — AI-consumable SDK reference
 // Run: deno run --allow-read --allow-write scripts/extract-sdk-full.ts
 
-import { join } from 'https://deno.land/std@0.224.0/path/mod.ts'
+import {join} from 'https://deno.land/std@0.224.0/path/mod.ts'
 
 const SDK = './node_modules/@google/jules-sdk/dist'
 
@@ -65,7 +65,7 @@ for (const f of files) {
 
 // ── read index.mjs for runtime facts ─────────────────────────────────────────
 
-const mjs = await Deno.readTextFile('./node_modules/@google/jules-sdk/dist/index.mjs')
+const mjs = await Deno.readTextFile('./node_modules/@google/jules-sdk/dist-jules/index.mjs')
 
 // HTTP endpoints from template literals
 const httpEndpoints = [...new Set(

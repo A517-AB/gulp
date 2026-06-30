@@ -34,22 +34,18 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: [
-        // DO NOT. TOUCH. unless......
-        // modjules aliases — compiled dist from D:/jules rest/modjules-main/packages/core/dist/ do not touch this.
-        // browser.mjs = browser entry (BrowserPlatform + IndexedDB), index.mjs = Node entry
-        // 2026-06-22: crossed out — switching to second port bun; restore when that's ready
-        // i know the second and third are broken/unused (vite takes first match) — leave them unless asked
+
+        // this is the backup option, do not assume this is the correct way, this offers backup while the rotues to sdk is being setup
         {find: '@jules', replacement: 'D:/jules rest/modjules-main/packages/core/dist/browser.mjs'},
-        // {find: '@jules', replacement: 'D:/jules rest/modjules-main/packages/core/dist/index.mjs'},
-        // {find: '@jules', replacement: 'D:/jules rest/modjules-main/packages/core/dist/memory-CxgfVdNh.js'},
 
 
+        {find: 'node:path', replacement: 'path-browserify'},
         {find: 'react', replacement: resolve(__dirname, 'node_modules/react')},
       { find: 'react-dom',   replacement: resolve(__dirname, 'node_modules/react-dom') },
         // 2026-06-22: For later, not for dev
-        // { find: '@syncfusion/ej2-gantt',            replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist/es6/ej2-gantt.es5.js' },
-        // { find: '@syncfusion/ej2-react-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist/es6/ej2-react-gantt.es5.js' },
-        // { find: '@syncfusion/ej2-pdfviewer',         replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/dist/es6/ej2-pdfviewer.es5.js' },
+        // { find: '@syncfusion/ej2-gantt',            replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist-jules/es6/ej2-gantt.es5.js' },
+        // { find: '@syncfusion/ej2-react-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist-jules/es6/ej2-react-gantt.es5.js' },
+        // { find: '@syncfusion/ej2-pdfviewer',         replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-pdfviewer/dist-jules/es6/ej2-pdfviewer.es5.js' },
         // { find: /^@syncfusion\/(.+)$/, replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/$1' },
     ],
   },
@@ -58,7 +54,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     watch: {
-      ignored: ['**/.workspace/**'],
+        ignored: ['**/.workspace/**', '**/.jules/**'],
     },
     hmr: {
       overlay: false
@@ -100,6 +96,9 @@ export default defineConfig({
       },
     },
   },
+    optimizeDeps: {
+        exclude: ['pyodide'],
+    },
     worker: {
         format: 'es',
     },

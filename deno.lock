@@ -151,7 +151,7 @@
         "npm:@types/babel__core@^7.20.5",
         "npm:@types/fs-extra@^11.0.4",
         "npm:@types/jszip@^3.4.0",
-        "npm:@types/node@^24.12.4",
+        "npm:@types/node@^24.13.2",
         "npm:@types/path-browserify@^1.0.3",
         "npm:@types/react-dom@^19.2.3",
         "npm:@types/react@^19.2.14",

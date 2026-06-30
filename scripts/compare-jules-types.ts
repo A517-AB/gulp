@@ -196,7 +196,7 @@ console.log("Extracting modjules types from src/jules (.ts)...");
 const modSymbols = await collectSymbols(MOD_DIR, ".ts", true);
 console.log(`  Found ${modSymbols.length} exports`);
 
-console.log("Extracting @google/jules-sdk types from dist (.d.ts)...");
+console.log("Extracting @google/jules-sdk types from dist-jules (.d.ts)...");
 const sdkSymbols = await collectSymbols(SDK_DIR, ".d.ts", false);
 console.log(`  Found ${sdkSymbols.length} exports`);
 

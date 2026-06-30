@@ -19,13 +19,11 @@ export default function usePython(props?: UsePythonProps) {
     const [output, setOutput] = useState<string[]>([])
     const [stdout, setStdout] = useState('')
     const [stderr, setStderr] = useState('')
-    const [pendingCode, setPendingCode] = useState<string | undefined>()
     const [hasRun, setHasRun] = useState(false)
 
     const {
         packages: globalPackages,
         timeout,
-        lazy,
         terminateOnCompletion,
         autoImportPackages,
         sendInput,
@@ -55,10 +53,8 @@ export default function usePython(props?: UsePythonProps) {
     }
 
     useEffect(() => {
-        if (!lazy) {
-            // Spawn worker on mount
-            createWorker()
-        }
+        // Spawn worker eagerly on mount
+        createWorker()
 
         // Cleanup worker on unmount
         return () => {
@@ -121,17 +117,6 @@ export default function usePython(props?: UsePythonProps) {
         }
     }, [output])
 
-    // React to ready state and run delayed code if pending
-    useEffect(() => {
-        if (pendingCode && isReady) {
-            const delayedRun = async () => {
-                await runPython(pendingCode)
-                setPendingCode(undefined)
-            }
-            delayedRun()
-        }
-    }, [pendingCode, isReady])
-
     // React to run completion and run cleanup if worker should terminate on completion
     useEffect(() => {
         if (terminateOnCompletion && hasRun && !isRunning) {
@@ -159,13 +144,6 @@ del sys
             setStdout('')
             setStderr('')
 
-            if (lazy && !isReady) {
-                // Spawn worker and set pending code
-                createWorker()
-                setPendingCode(code)
-                return
-            }
-
             if (!isReady) {
                 throw new Error('Pyodide is not loaded yet')
             }
@@ -192,15 +170,15 @@ del sys
                     )
                 }
                 await runnerRef.current.run(code, autoImportPackages)
-                // eslint-disable-next-line
-            } catch (error: any) {
-                setStderr('Traceback (most recent call last):\n' + error.message)
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : String(error)
+                setStderr('Traceback (most recent call last):\n' + message)
             } finally {
                 setIsRunning(false)
                 clearTimeout(timeoutTimer)
             }
         },
-        [lazy, isReady, timeout, watchedModules]
+        [isReady, timeout, watchedModules]
     )
 
     const interruptExecution = () => {

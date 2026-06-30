@@ -1,6 +1,5 @@
 import type {PyodideInterface} from 'pyodide'
 import {loadPyodide} from 'pyodide'
-import type {PyProxy} from 'pyodide/ffi'
 import {expose} from 'comlink'
 
 let pyodide: PyodideInterface | null = null
@@ -33,7 +32,7 @@ const python = {
         packages?: string[][]
     ) {
         console.info('[repl] worker: loading pyodide…')
-        pyodide = await loadPyodide({indexURL: '/@fs/D:/LAST/library/xbuildenv/pyodide-root/dist/', stdout})
+        pyodide = await loadPyodide({indexURL: '/pyodide/', stdout})
         console.info('[repl] worker: pyodide', pyodide.version, 'loaded')
 
         const official = packages?.[0]
@@ -45,7 +44,7 @@ const python = {
         }
         if (micropip && micropip.length > 0) {
             await pyodide.loadPackage(['micropip'])
-            const mp = pyodide.pyimport('micropip') as PyProxy & { install: (pkgs: string[]) => Promise<void> }
+            const mp = pyodide.pyimport('micropip') as any
             await mp.install(micropip)
         }
 
@@ -59,8 +58,7 @@ sys.tracebacklimit = 0
 `)
 
         if (mode === 'console') {
-            const globals = pyodide.globals as unknown as { get: (k: string) => PyFn }
-            const namespace = globals.get('dict')() as PyProxy
+            const namespace = pyodide.runPython('dict()')
             await pyodide.runPythonAsync(`
 import sys
 from pyodide.ffi import to_js
@@ -88,20 +86,47 @@ async def await_fut(fut):
   return to_js([res], depth=1)
 def clear_console():
   pyconsole.buffer = []
+import os
+def _ls(path='.'):
+  try:
+    for item in sorted(os.listdir(path)):
+      full = os.path.join(path, item)
+      if os.path.isdir(full):
+        print(f"📁 {item}/")
+      else:
+        print(f"📄 {item} ({os.path.getsize(full)} bytes)")
+  except Exception as e:
+    print(f"Error: {e}")
+def _cat(path):
+  try:
+    with open(path, 'r', encoding='utf-8') as f:
+      print(f.read())
+  except Exception as e:
+    print(f"Error: {e}")
+def _write(path, text):
+  try:
+    with open(path, 'w', encoding='utf-8') as f:
+      f.write(text)
+    print(f"Wrote {len(text)} chars to {path}")
+  except Exception as e:
+    print(f"Error: {e}")
+builtins.ls = _ls
+builtins.cat = _cat
+builtins.pwd = os.getcwd
+builtins.write = _write
 `, {globals: namespace})
 
-            const namespaceTyped = namespace as unknown as { get: (k: string) => PyProxy }
-            const get = namespaceTyped.get
-            const pyconsole = get('pyconsole') as unknown as PyConsole
+            const namespaceTyped = namespace as any
+            const pyconsole = namespaceTyped.get('pyconsole') as unknown as PyConsole
             pyconsole.stdout_callback = stdout
 
             pythonConsole = {
-                awaitFut: get('await_fut') as unknown as PyFn,
-                getCompletions: get('get_completions') as unknown as PyFn,
+                awaitFut: namespaceTyped.get('await_fut') as unknown as PyFn,
+                getCompletions: namespaceTyped.get('get_completions') as unknown as PyFn,
                 pyconsole,
             }
 
-            const banner = get('BANNER') as unknown as string
+            const banner = namespaceTyped.get('BANNER') as unknown as string
             onLoad({id, version, banner})
         } else {
             onLoad({id, version})
@@ -120,7 +145,7 @@ def clear_console():
             for (const line of code.split('\n')) {
                 const fut = pythonConsole.pyconsole.push(line)
                 state = fut.syntax_check
-                const wrapped = pythonConsole.awaitFut(fut) as PyProxy & Promise<[PyProxy | null]>
+                const wrapped = pythonConsole.awaitFut(fut) as any
                 try {
                     const [value] = await wrapped
                     if (value instanceof pyodide.ffi.PyProxy) {
@@ -134,7 +159,9 @@ def clear_console():
                     throw error
                 } finally {
                     fut.destroy()
-                    ;(wrapped as unknown as { destroy: () => void }).destroy()
+                    if (wrapped && typeof wrapped.destroy === 'function') {
+                        wrapped.destroy()
+                    }
                 }
             }
             return {state: state ?? 'complete'}

@@ -6,18 +6,21 @@ export interface AppStore {
     sources: Source[]
     sourcesLoaded: boolean
     archivedSessionIds: string[]
+    drafts: Record<string, string>
 
     startSession?: (config: SessionConfig) => Promise<SessionResource>
     parseUnidiff: (patch?: string | null) => Promise<JulesParsedFile[]>
     saveArtifact: (data: string, filepath: string) => Promise<string>
     applyPatch: (cwd: string, patch: string) => Promise<{ ok: boolean; branch?: string; error?: string }>
     archiveSessions: (id: string) => void
+    setDraft: (sessionId: string, text: string) => void
 }
 
 export const useStore = create<AppStore>((set) => ({
     sources: [],
     sourcesLoaded: false,
     archivedSessionIds: [],
+    drafts: {},
 
     parseUnidiff: async (patch) => {
         if (!patch) return []
@@ -36,5 +39,9 @@ export const useStore = create<AppStore>((set) => ({
 
     archiveSessions: (id) => {
         set(s => ({archivedSessionIds: [...s.archivedSessionIds, id]}))
+    },
+
+    setDraft: (sessionId, text) => {
+        set(s => ({drafts: {...s.drafts, [sessionId]: text}}))
     },
 }))
