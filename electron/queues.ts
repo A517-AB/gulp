@@ -1,8 +1,6 @@
-import {ipcMain} from "electron";
+import {ipcMain, app} from "electron";
 import * as fs from "fs/promises";
 import * as path from "path";
-
-const BASE_DIR = "D:\\fuse";
 
 async function ensureFile(filePath: string, defaultContent = "[]"): Promise<void> {
     try {
@@ -30,23 +28,23 @@ async function readJsonArray(filePath: string): Promise<unknown[]> {
 }
 
 async function resolvePath(filename: string): Promise<string> {
-  const filePath = path.join(BASE_DIR, filename);
-    await ensureFile(filePath);
+  const filePath = path.isAbsolute(filename) ? filename : path.join(app.getPath('userData'), filename);
+  await ensureFile(filePath);
   return filePath;
 }
 
 export function registerQueuesHandlers(): void {
-    ipcMain.handle("queues.getTasks", async () => {
-        return readJsonArray(await resolvePath("tasks.json"));
+    ipcMain.handle("queues.getTasks", async (_event, jsonPath?: string) => {
+        return readJsonArray(await resolvePath(jsonPath || "tasks.json"));
   });
 
-    ipcMain.handle("queues.getQueue", async () => {
-        return readJsonArray(await resolvePath("tasks.json"));
+    ipcMain.handle("queues.getQueue", async (_event, jsonPath?: string) => {
+        return readJsonArray(await resolvePath(jsonPath || "tasks.json"));
     });
 
-    ipcMain.handle("queues.saveTasks", async (_event, data: unknown[]) => {
+    ipcMain.handle("queues.saveTasks", async (_event, data: unknown[], jsonPath?: string) => {
     try {
-        const filePath = await resolvePath("tasks.json");
+        const filePath = await resolvePath(jsonPath || "tasks.json");
         await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
       return true;
     } catch (err) {
