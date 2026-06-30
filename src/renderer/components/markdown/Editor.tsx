@@ -3,7 +3,6 @@ import {useCreateBlockNote} from '@blocknote/react'
 import {BlockNoteView, darkDefaultTheme, lightDefaultTheme} from '@blocknote/mantine'
 import type {BlockNoteEditor, BlockSchema, InlineContentSchema, StyleSchema} from '@blocknote/core'
 import {cn} from '@/utils'
-import '@blocknote/mantine/style.css'
 import {useTheme} from '@renderer/providers/theme'
 import type {MarkdownEditorProps} from './types'
 

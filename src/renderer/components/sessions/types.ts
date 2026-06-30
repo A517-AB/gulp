@@ -1,4 +1,4 @@
-import type {Activity, GitHubRepo, SessionOutput, SessionResource, SessionState, Source, SourceContext} from '@jules'
+import type {GitHubRepo, SessionOutput, SessionState} from '@jules'
 
 // The SDK types this feature renders against. Consumers import them from the
 // sessions folder rather than reaching into @jules directly.

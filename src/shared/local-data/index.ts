@@ -1,5 +1,6 @@
-import { isElectron, filesystem, store } from '@shared/bridge'
-import type { GanttTask } from './types'
+import {isElectron} from '@shared/env'
+import {filesystem, store} from '@shared/bridge'
+import type {GanttTask} from './types'
 
 export type { NoteMeta, GanttTask } from './types'
 

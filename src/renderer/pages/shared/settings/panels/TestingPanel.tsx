@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {isElectron} from '@shared/bridge'
+import {isElectron} from '@shared/env'
 import getConnectionTests from './connection-tests'
 import {TestRow} from './TestRow'
 import type {TestResult} from '../types'

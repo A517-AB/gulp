@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { isElectron, notes } from '@shared/bridge'
-import { MarkdownEditor } from './Editor'
-import type { NoteBlock, NotePartialBlock } from './types'
+import {useCallback, useEffect, useRef, useState} from 'react'
+import {isElectron} from '@shared/env'
+import {notes} from '@shared/bridge'
+import {MarkdownEditor} from './Editor'
+import type {NoteBlock, NotePartialBlock} from './types'
 
 interface NoteEditorProps {
   id: string

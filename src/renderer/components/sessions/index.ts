@@ -1,6 +1,6 @@
 export {SessionsSidebar} from './SessionsSidebar.tsx'
 export {Feed} from './Feed.tsx'
 export {useSessions, refreshSessions} from './cache.ts'
-export {useActivities, syncFeed} from './feed.ts'
+export {useActivities} from './feed.ts'
 export type {CachedSession, SessionResource, SessionState, Activity} from './types.ts'
 export {STATE_META, repoFromSource, relativeTime} from './format.ts'

@@ -258,7 +258,7 @@
   }
   body {
     @apply bg-base text-fg-primary;
-    font-family: var(--font-sans) !important;
+      font-family: var(--font-sans);
     overflow-x: hidden;
     position: relative;
     font-feature-settings:
@@ -267,7 +267,7 @@
     text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-    line-height: var(--line-height-base, 1.5);
+      line-height: var(--linethere '' -height-base, 1.5);
     letter-spacing: var(--letter-spacing-base, normal);
     word-spacing: var(--word-spacing-base, normal);
   }
@@ -280,7 +280,7 @@
   .prose,
   .bn-container {
     --bn-font-family: var(--font-markdown);
-    font-family: var(--font-markdown) !important;
+      font-family: var(--font-markdown);
   }
 
   /* ── Force minimum typography sizes of 13px (0.8125rem) ── */
@@ -306,7 +306,7 @@
   pre,
   kbd,
   samp {
-    font-family: var(--font-mono) !important;
+      font-family: var(--font-mono);
     font-feature-settings:
       "liga" 1,
       "calt" 1,
@@ -317,19 +317,30 @@
 
   /* ── Dynamic Utility Overrides to prevent static Tailwind compiler inlining ── */
   .font-sans {
-    font-family: var(--font-sans) !important;
+      font-family: var(--font-sans);
   }
   .font-mono {
-    font-family: var(--font-mono) !important;
+      font-family: var(--font-mono);
   }
   .font-markdown {
-    font-family: var(--font-markdown) !important;
+      font-family: var(--font-markdown);
   }
 
-  .font-thin { font-weight: var(--font-weight-thin) !important; }
-  .font-light { font-weight: var(--font-weight-light) !important; }
-  .font-normal { font-weight: var(--font-weight-normal) !important; }
-  .font-medium { font-weight: var(--font-weight-medium) !important; }
+    .font-thin {
+        font-weight: var(--font-weight-thin);
+    }
+
+    .font-light {
+        font-weight: var(--font-weight-light);
+    }
+
+    .font-normal {
+        font-weight: var(--font-weight-normal);
+    }
+
+    .font-medium {
+        font-weight: var(--font-weight-medium);
+    }
   .font-semibold { font-weight: var(--font-weight-semibold) !important; }
   .font-bold { font-weight: var(--font-weight-bold) !important; }
 
@@ -372,19 +383,7 @@
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--border-subtle);
-  border-radius: 3px;
-  transition: background 0.2s ease;
-}
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border-moderate);
-}
-
-::-webkit-scrollbar-corner {
-  background: transparent;
-}
 
 /* Electron drag region */
 .app-drag-region {

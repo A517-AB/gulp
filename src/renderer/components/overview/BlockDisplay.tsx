@@ -1,10 +1,9 @@
-import { useEffect } from 'react'
-import { useCreateBlockNote } from '@blocknote/react'
-import { BlockNoteView, darkDefaultTheme, lightDefaultTheme } from '@blocknote/mantine'
-import '@blocknote/mantine/style.css'
-import type { BlockNoteEditor, BlockSchema, InlineContentSchema, StyleSchema } from '@blocknote/core'
-import { useTheme } from '@renderer/providers/theme'
-import { cn } from '@/utils'
+import {useEffect} from 'react'
+import {useCreateBlockNote} from '@blocknote/react'
+import {BlockNoteView, darkDefaultTheme, lightDefaultTheme} from '@blocknote/mantine'
+import type {BlockNoteEditor, BlockSchema, InlineContentSchema, StyleSchema} from '@blocknote/core'
+import {useTheme} from '@renderer/providers/theme'
+import {cn} from '@/utils'
 
 type AnyEditor = BlockNoteEditor<BlockSchema, InlineContentSchema, StyleSchema>
 

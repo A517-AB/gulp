@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react'
-import type { editor } from 'monaco-editor'
-import { CodeEditor } from '@/ui/code-editor'
-import { useCreateBlockNote } from '@blocknote/react'
-import { BlockNoteView, darkDefaultTheme, lightDefaultTheme } from '@blocknote/mantine'
-import type { BlockNoteEditor, BlockSchema, InlineContentSchema, StyleSchema } from '@blocknote/core'
-import { useTheme } from '@renderer/providers/theme'
-import type { NoteBlock, NotePartialBlock } from '@/components/markdown/types'
-import '@blocknote/mantine/style.css'
+import {useEffect, useState} from 'react'
+import type {editor} from 'monaco-editor'
+import {CodeEditor} from '@/ui/code-editor'
+import {useCreateBlockNote} from '@blocknote/react'
+import {BlockNoteView, darkDefaultTheme, lightDefaultTheme} from '@blocknote/mantine'
+import type {BlockNoteEditor, BlockSchema, InlineContentSchema, StyleSchema} from '@blocknote/core'
+import {useTheme} from '@renderer/providers/theme'
+import type {NoteBlock, NotePartialBlock} from '@/components/markdown/types'
 
 type CompatEditor = BlockNoteEditor<BlockSchema, InlineContentSchema, StyleSchema>
 

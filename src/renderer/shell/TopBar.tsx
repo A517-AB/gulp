@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import type { TopBarProps } from './types';
-import { isElectron, windowControls } from '@shared/bridge';
-import { ThemeToggle } from '@/ui/theme-toggle';
+import {useEffect, useState} from 'react';
+import type {TopBarProps} from './types';
+import {isElectron} from '@shared/env'
+import {windowControls} from '@shared/bridge';
+import {ThemeToggle} from '@/ui/theme-toggle';
 
 export function TopBar({ left, center, right }: TopBarProps) {
     const [mounted, setMounted] = useState(false);
