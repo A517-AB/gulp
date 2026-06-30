@@ -1,20 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    //    "rootDir": "./src/jules",
-    //    "declarationDir": "./dist-jules",
-    "emitDeclarationOnly": true,
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "declaration": true,
-    "types": [
-      "node"
-    ],
+    "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "strict": false,
-    "resolveJsonModule": true
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": "./electron/ipc/Jules",
+    "outDir": "./dist-jules"
   },
   "include": [
-    //    "src/jules"
+    "electron/ipc/Jules"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist-jules"
   ]
 }

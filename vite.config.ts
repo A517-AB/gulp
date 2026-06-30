@@ -3,16 +3,7 @@ import react, {reactCompilerPreset} from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
-import {isAbsolute, resolve} from 'node:path'
-import {existsSync, readFileSync} from 'node:fs'
-import {homedir} from 'node:os'
-
-function readJulesKey(): string {
-  const p = resolve(homedir(), '.jules')
-  if (existsSync(p)) return readFileSync(p, 'utf-8').trim()
-  return ''
-}
-
+import {isAbsolute} from 'node:path'
 
 const nodeExternal = (id: string) =>
     id !== '@jules' &&
@@ -22,14 +13,11 @@ const isNotif     = process.env.VITE_BUILD_TARGET === 'notif'
 const keepVendors = process.env.VITE_KEEP_VENDORS  === 'true'
 const isWeb       = process.env.VITE_TARGET === 'web'
 
-// https://vite.dev/config/
-const julesApiKey = process.env.JULES_API_KEY ?? readJulesKey()
-
 export default defineConfig({
   clearScreen: false,
   define: {
-    'import.meta.env.JULES_API_KEY': JSON.stringify(julesApiKey),
-      'process.env.JULES_API_KEY': JSON.stringify(julesApiKey),
+      'import.meta.env.JULES_API_KEY': JSON.stringify(process.env.JULES_API_KEY ?? ''),
+      'process.env.JULES_API_KEY': JSON.stringify(process.env.JULES_API_KEY ?? ''),
   },
   resolve: {
     tsconfigPaths: true,
@@ -87,8 +75,8 @@ export default defineConfig({
       output: isNotif ? {} : {
         manualChunks(id: string): string | undefined {
           if (id.includes('node_modules/react')) return 'vendor-react'
-          if (id.includes('monaco-editor') || id.includes('@monaco-editor')) return 'vendor-monaco'
-          if (id.includes('@blocknote')) return 'vendor-blocknote'
+            // if (id.includes('monaco-editor') || id.includes('@monaco-editor')) return 'vendor-monaco'
+            // if (id.includes('@blocknote')) return 'vendor-blocknote'
             // 2026-06-22: For later, not for dev
             // if (id.includes('@syncfusion') || id.includes('ej2-gantt') || id.includes('ej2-pdfviewer')) return 'vendor-ej2'
           return undefined
@@ -101,11 +89,11 @@ export default defineConfig({
     },
     worker: {
         format: 'es',
-    },
-  preview: {
-    host: '127.0.0.1',
-    port: 4173,
-    strictPort: true,
+        //   },
+        // preview: {
+        //   host: '127.0.0.1',
+        //   port: 4173,
+        //   strictPort: true,
   },
   plugins: [
     tailwindcss(),

@@ -43,6 +43,12 @@ export function registerJulesCacheHandlers(ipcMain: IpcMain): void {
         client.session(sessionId).approve());
 
     // ── fill cache (network → disk, write-through) ──────────────────────────
-    ipcMain.handle('jules.cache.sync', (_e: IpcMainInvokeEvent, options?: Parameters<typeof client.sync>[0]) =>
-        client.sync(options));
+    let syncInProgress: Promise<unknown> | null = null
+    ipcMain.handle('jules.cache.sync', (_e: IpcMainInvokeEvent, options?: Parameters<typeof client.sync>[0]) => {
+        if (syncInProgress) return syncInProgress
+        syncInProgress = client.sync(options).finally(() => {
+            syncInProgress = null
+        })
+        return syncInProgress
+    });
 }

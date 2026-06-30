@@ -90,6 +90,41 @@ Candidate: `diff-match-patch-wasm` on npm, or build `xdiff` via Emscripten.
 
 From the explorer page, gather local repos so files can be sent straight to Jules via quickie. After Jules finishes, patch the result back to the local repo. Very far future.
 
+## 16. Feed — fix map guards + Activity type
+
+Guards inside `.map()` in `Feed.tsx` need to move to `.filter()`. `Activity` type comes from `@jules` via `types.ts`
+re-export — confirm it's being used correctly.
+
+## 17. build:jules — 40 TypeScript errors
+
+`tsc -p tsconfig.jules.json` produces 40 errors. Fix before `dist-jules` can replace `browser.mjs` as the `@jules`
+alias.
+
+## 18. npm run check — 250 issues
+
+250 lint/typecheck errors. Don't run before dev. Deal with in batches. Don't run until device can handle it.
+
+## 19. check.ts — split report + cleaner terminal output
+
+Split AI vs human report so AI can't grab the entire log. Terminal output shows too much — trim it down.
+
+## 20. 25s renderer load time in dev
+
+Renderer takes 25 seconds after Electron is ready. Need console.log placement to identify which import/module is
+hanging.
+
+## 21. Fix inlineDynamicImports warning
+
+`WARN: inlineDynamicImports ignored because codeSplitting: true`. Both conflict in `vite.config.ts` preload build.
+
+## 22. Fix start script
+
+`start` and `dev` are identical. `start` should be `electron .` — launch Electron against existing build.
+
+## 23. GPU cache creation + unknown CSS issue
+
+GPU cache creation flagged as something to investigate. Also a CSS issue somewhere — unidentified.
+
 ## Notes
 
 - SDK types are from an older clone, runtime shape may differ from type definitions — always guard defensively

@@ -285,17 +285,6 @@ const jules = {
     artifact: {
         save: (data: string, filepath: string) => ipcRenderer.invoke('jules.artifact.save', data, filepath),
     },
-    cache: {
-        // list sessions via SessionCursor (network, write-through)
-        sessions: (options?: unknown) => ipcRenderer.invoke('jules.cache.sessions', options),
-        // read disk cache (no network)
-        select: (query: unknown) => ipcRenderer.invoke('jules.cache.select', query),
-        activities: (sessionId: string) => ipcRenderer.invoke('jules.cache.activities', sessionId),
-        // fill cache (network → disk)
-        sync: (options?: unknown) => ipcRenderer.invoke('jules.cache.sync', options),
-        send: (sessionId: string, msg: string) => ipcRenderer.invoke('jules.cache.send', sessionId, msg),
-        approve: (sessionId: string) => ipcRenderer.invoke('jules.cache.approve', sessionId),
-    },
 }
 
 contextBridge.exposeInMainWorld('jules', jules)

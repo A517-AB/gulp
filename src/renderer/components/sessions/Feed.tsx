@@ -19,6 +19,7 @@ function ActivityRow({act, sessionId, isAwaitingApproval, planApproved}: {
     const [approving, setApproving] = useState(false)
 
     switch (act.type) {
+        // ── progress · timestamp + title + description + bash artifacts
         case 'progressUpdated': {
             return (
                 <div className="space-y-1">

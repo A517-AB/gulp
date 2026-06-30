@@ -1,13 +1,15 @@
 {
-  "name": "last",
+  "name": "creed",
+  "productName": "Creed",
   "private": true,
   "version": "1.0",
   "type": "module",
   "main": "dist-electron/main.mjs",
   "scripts": {
-    "dev": "vite",
+    "dev": "node dev.mjs",
     "dev:web": "cross-env VITE_TARGET=web vite",
     "build": "node build.mjs",
+    "build:jules": "tsc -p tsconfig.jules.json",
     "build:notif": "tsc -b && cross-env VITE_BUILD_TARGET=notif vite build",
     "build:all": "tsc -b && concurrently \"vite build\" \"cross-env VITE_BUILD_TARGET=notif vite build\"",
     "start": "vite",

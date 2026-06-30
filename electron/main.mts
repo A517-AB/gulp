@@ -17,13 +17,10 @@ import {
     registerSchedulerHandlers,
     registerUINotificationHandlers
 } from "./notifications";
-// SDK IPC handlers removed — Jules SDK moved to renderer (direct fetch, no IPC overhead)
-// import { registerSdkHandlers } from "./ipc/handlers";
-// Jules events w@jorker removed — moving to renderer-side SDK
-// import { startJulesWorker, registerJulesEventsHandlers } from "./jules-events";
+
+
 import {registerStoreHandlers} from "./store";
 import {registerJulesGitHandlers} from "./ipc/jules-git";
-import {registerJulesCacheHandlers} from "./ipc/jules-cache";
 
 log.initialize();
 Object.assign(console, log.functions);
@@ -195,9 +192,6 @@ void app.whenReady().then(() => {
 
     registerJulesGitHandlers();
     t("registerJulesGitHandlers done");
-
-    registerJulesCacheHandlers(ipcMain);
-    t("registerJulesCacheHandlers done");
 
 
   createWindow();
