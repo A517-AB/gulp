@@ -22,7 +22,7 @@ const date = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit
   .format(new Date())
   .replaceAll("-", "_");
 
-const root = path.dirname(findUpSync(".git")!);
+const root = path.dirname(findUpSync(".git", { type: "directory" }) ?? findUpSync(".git")!);
 const fleetDir = path.join(root, ".fleet", date);
 const tasksPath = path.join(fleetDir, "issue_tasks.json");
 const analysis = await Bun.file(tasksPath).json() as IssueAnalysis;

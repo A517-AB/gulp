@@ -21,7 +21,7 @@ import { jules } from "@google/jules-sdk";
 const repoInfo = await getGitRepoInfo();
 const OWNER = repoInfo.owner;
 const REPO = repoInfo.repo;
-const BASE_BRANCH = process.env.FLEET_BASE_BRANCH ?? "main";
+const BASE_BRANCH = process.env.FLEET_BASE_BRANCH ?? "master";
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 // Re-dispatch configuration
@@ -46,7 +46,7 @@ const date = new Intl.DateTimeFormat("en-CA", { year: "numeric", month: "2-digit
   .format(new Date())
   .replaceAll("-", "_");
 
-const root = path.dirname(findUpSync(".git")!);
+const root = path.dirname(findUpSync(".git", { type: "directory" }) ?? findUpSync(".git")!);
 const fleetDir = path.join(root, ".fleet", date);
 
 // Load task ordering (already sorted by risk in the analysis phase)
