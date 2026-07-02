@@ -3,48 +3,6 @@ import type {FuseChangeEvent, FuseManifest} from './fuse'
 import type {NoteMeta} from './local-data'
 
 
-// ── event bus ─────────────────────────────────────────────────────────────────
-
-export interface EventBusEntry {
-  id:      string
-  eventId: string
-  data:    Record<string, unknown>
-  ts:      string
-}
-
-export interface NotifRuleAction {
-  id:     string
-  label:  string
-  style?: 'primary' | 'ghost'
-}
-
-export interface NotifRule {
-  id:      string
-  eventId: string
-  enabled: boolean
-  notif: {
-    title:     string
-    body?:     string
-    type?:     'default' | 'success' | 'error' | 'info' | 'warning'
-    sound?:    string
-    duration?: number
-    size?:     'compact' | 'full'
-    color?:    string
-    actions?:  NotifRuleAction[]
-  }
-}
-
-export interface EventBusAPI {
-  getLog:      () => Promise<EventBusEntry[]>
-  clearLog:    () => Promise<void>
-  getRules:    () => Promise<NotifRule[]>
-  saveRule:    (rule: NotifRule) => Promise<NotifRule[]>
-  deleteRule:  (id: string) => Promise<void>
-  subscribe:   () => void
-  unsubscribe: () => void
-  on:          (cb: (entry: EventBusEntry) => void) => () => void
-}
-
 // ── per-tool APIs ──────────────────────────────────────────────────────────────
 // TODO: figure out the setup here. the diffrence between the types in electron.d.ts and the the rest of the files and bridge.
 export type ShellType =

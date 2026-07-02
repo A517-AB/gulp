@@ -1,5 +1,6 @@
 import {create} from 'zustand'
 import {persist} from 'zustand/middleware'
+import {uiNotification} from '@shared/bridge'
 
 export type TimerState = 'idle' | 'running' | 'paused' | 'done'
 
@@ -95,7 +96,11 @@ export const useTimerStore = create<TimerStoreState>()(persist(
                 timers: s.timers.map(t => {
                     if (t.state !== 'running' || t.endAt === undefined) return t
                     const remaining = Math.max(0, Math.round((t.endAt - now) / 1000))
-                    if (remaining <= 0) return {...t, remaining: 0, state: 'done', endAt: undefined}
+                    if (remaining <= 0) {
+                        // TODO: temp inline fire — move to the notification "kind" registry once that lands
+                        uiNotification?.show({title: t.label, body: 'Timer done', sound: 'bell', icon: 'clock'})
+                        return {...t, remaining: 0, state: 'done', endAt: undefined}
+                    }
                     if (remaining <= 30 && !t.warned30) return {...t, remaining, warned30: true}
                     return {...t, remaining}
                 }),
@@ -104,3 +109,8 @@ export const useTimerStore = create<TimerStoreState>()(persist(
     }),
     {name: 'timer-store'}
 ))
+
+// TODO: temp — drives tick() globally so timers flip to 'done' (and notify) even off-page; revisit once this is wired properly
+setInterval(() => {
+    useTimerStore.getState().tick()
+}, 1000)

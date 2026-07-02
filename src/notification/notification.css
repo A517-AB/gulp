@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-overlay:      oklch(0.16 0 0);
-  --color-hair:         color-mix(in srgb, white 7%,  transparent);
-  --color-subtle:       color-mix(in srgb, white 10%, transparent);
-  --color-fg-primary:   oklch(0.95 0 0);
-  --color-fg-secondary: oklch(0.75 0 0);
-  --color-fg-muted:     oklch(0.58 0 0);
-  --color-fg-ghost:     oklch(0.33 0 0);
-  --color-hover:        color-mix(in srgb, white 5%,  transparent);
-  --color-selected:     color-mix(in srgb, white 4%,  transparent);
+  --color-overlay:      oklch(0.99 0 0);
+  --color-hair:         color-mix(in srgb, black 8%,  transparent);
+  --color-subtle:       color-mix(in srgb, black 12%, transparent);
+  --color-fg-primary:   oklch(0.18 0 0);
+  --color-fg-secondary: oklch(0.38 0 0);
+  --color-fg-muted:     oklch(0.52 0 0);
+  --color-fg-ghost:     oklch(0.72 0 0);
+  --color-hover:        color-mix(in srgb, black 5%,  transparent);
+  --color-selected:     color-mix(in srgb, black 6%,  transparent);
 
   --text-2xs:              0.625rem;
   --text-2xs--line-height: 1.4;

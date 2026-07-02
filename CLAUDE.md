@@ -16,7 +16,6 @@ Jules, which is an API to a remote VM that executes coding tasks — nothing run
 - **State Management**: Zustand but currently not used much + local via Electron
 
 - Basic rules:
-    - NO GLASSMORPHISM. ever. not subtle, not "just a hint", not backdrop-blur on a card. no.
     - don't use the word vibe
     - don't change documents without getting clear request
     - if the user greets you, respond normally. Do not start analyzing the workspace or editing files/tools without an

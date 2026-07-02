@@ -10,9 +10,10 @@
 import type {Activity, SessionResource} from '@jules'
 import type {JulesSessionSnapshot} from '@shared/jules-ipc'
 
-/** Network call, write-through to disk cache. See `jules.cache.sessions` in jules-cache.ts. */
+/** Local cache read (select) — instant, no network. Call triggerSync() to refresh from the API. */
 export async function listSessions(): Promise<SessionResource[]> {
-    return ((await window.jules?.cache.sessions()) ?? []) as SessionResource[]
+    const result = await window.jules?.cache.select({from: 'sessions', order: 'desc', limit: 50})
+    return (result ?? []) as SessionResource[]
 }
 
 /** Local cache read (history-first, falls back to network if empty). No cache = no cost. */

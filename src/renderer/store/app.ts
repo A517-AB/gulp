@@ -2,16 +2,21 @@ import {create} from 'zustand'
 import type {SessionConfig, SessionCursor, SessionResource, Source} from '@jules'
 import {jules} from '@jules'
 import type {JulesParsedFile} from '@shared/jules-ipc'
+import {listSessions, triggerSync} from '@/lib/jules-client.ts'
 
 export interface AppStore {
     sources: Source[]
     sourcesLoaded: boolean
+    sessions: SessionResource[]
+    sessionsLoaded: boolean
     archivedSessionIds: string[]
     drafts: Record<string, string>
     selectedSession: SessionResource | null
     sessionCursor: SessionCursor | null
 
     sync: () => Promise<void>
+    loadSessions: () => Promise<void>
+    refreshSessions: () => Promise<void>
     startSession?: (config: SessionConfig) => Promise<SessionResource>
     parseUnidiff: (patch?: string | null) => Promise<JulesParsedFile[]>
     saveArtifact: (data: string, filepath: string) => Promise<string>
@@ -21,9 +26,11 @@ export interface AppStore {
     setSelectedSession: (session: SessionResource | null) => void
 }
 
-export const useStore = create<AppStore>((set) => ({
+export const useStore = create<AppStore>((set, get) => ({
     sources: [],
     sourcesLoaded: false,
+    sessions: [],
+    sessionsLoaded: false,
     archivedSessionIds: [],
     drafts: {},
     selectedSession: null,
@@ -33,6 +40,18 @@ export const useStore = create<AppStore>((set) => ({
         const sources: Source[] = []
         for await (const source of jules.sources()) sources.push(source)
         set({sources, sourcesLoaded: true})
+    },
+
+    // Local cache read (select) — instant, no network.
+    loadSessions: async () => {
+        const sessions = await listSessions()
+        set({sessions, sessionsLoaded: true})
+    },
+
+    // Network sync (write-through to disk cache), then re-reads the local cache.
+    refreshSessions: async () => {
+        await triggerSync()
+        await get().loadSessions()
     },
 
     parseUnidiff: async (patch) => {

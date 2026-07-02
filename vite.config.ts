@@ -3,7 +3,7 @@ import react, {reactCompilerPreset} from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
 import tailwindcss from '@tailwindcss/vite'
 import electron from 'vite-plugin-electron/simple'
-import {isAbsolute} from 'node:path'
+import {isAbsolute, resolve} from 'node:path'
 
 const nodeExternal = (id: string) =>
     id !== '@jules' &&
@@ -64,12 +64,12 @@ export default defineConfig({
         './src/renderer/components/shared/Clock.tsx',
       ],
     },
-      proxy: {
-          '/api': {
-              target: 'http://127.0.0.1:3939',
-              changeOrigin: true,
-          },
-      },
+      // proxy: {
+      //     '/api': {
+      //         target: 'http://127.0.0.1:3939',
+      //         changeOrigin: true,
+      //     },
+      // },
   },
   // can you not change it to rollup because this is vite 8, if you don't know you don't know
   build: {

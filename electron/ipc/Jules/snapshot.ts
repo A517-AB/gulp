@@ -39,7 +39,7 @@ export class SessionSnapshotImpl implements SessionSnapshot {
         this.durationMs = this.updatedAt.getTime() - this.createdAt.getTime();
         this.prompt = session.prompt;
         this.title = session.title;
-        this.pr = session.outputs.find(
+        this.pr = (session.outputs ?? []).find(
             (o) => o.type === 'pullRequest',
         )?.pullRequest;
         this.activities = Object.freeze(activities);

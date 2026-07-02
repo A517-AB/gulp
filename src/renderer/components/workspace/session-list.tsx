@@ -9,7 +9,7 @@ import {getStatusInfo, STATE_BADGE, STATE_DOT} from './session-status.ts'
 import {SessionContextMenu} from './SessionContextMenu.tsx'
 import type {SessionResource} from '@jules'
 import {useCallback, useEffect, useMemo, useState} from 'react'
-import {listSessions, triggerSync} from '@/lib/jules-client.ts'
+import {useStore} from '@/store/app.ts'
 
 interface SessionListProps {
     onSelectSession: (session: SessionResource) => void
@@ -17,30 +17,27 @@ interface SessionListProps {
 }
 
 export function SessionList({onSelectSession, selectedSessionId}: SessionListProps) {
-    const [sessions, setSessions] = useState<SessionResource[]>([])
+    const sessions = useStore(s => s.sessions)
+    const sessionsLoaded = useStore(s => s.sessionsLoaded)
+    const loadSessions = useStore(s => s.loadSessions)
+    const refreshSessions = useStore(s => s.refreshSessions)
     const [searchQuery, setSearchQuery] = useState('')
     const [syncing, setSyncing] = useState(false)
 
-    const load = useCallback(async () => {
-        const data = await listSessions()
-        setSessions(data)
-    }, [])
-
     useEffect(() => {
-        void load()
-    }, [load])
+        if (!sessionsLoaded) void loadSessions()
+    }, [sessionsLoaded, loadSessions])
 
     const handleSync = useCallback(() => {
         setSyncing(true)
-        triggerSync()
-            .then(load)
+        refreshSessions()
             .catch((e: unknown) => {
                 console.error('[session-list] sync failed:', e)
             })
             .finally(() => {
                 setSyncing(false)
             })
-    }, [load])
+    }, [refreshSessions])
 
     const visible = useMemo(() => {
         if (!searchQuery) return sessions

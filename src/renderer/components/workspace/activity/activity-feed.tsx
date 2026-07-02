@@ -172,7 +172,7 @@ export function ActivityFeed({
                             />
                         ))}
                         {(() => {
-                            const pr = session.outputs.find(o => o.type === 'pullRequest')
+                            const pr = session.outputs?.find(o => o.type === 'pullRequest')
                             if (pr?.type !== 'pullRequest') return null
                             return (
                                 <div className="flex justify-center py-2 px-6">

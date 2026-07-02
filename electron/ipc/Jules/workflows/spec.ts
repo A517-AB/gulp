@@ -22,7 +22,7 @@ export const WorkflowTriggersSchema = z.object({
         .optional(),
     workflow_dispatch: z
         .object({
-            inputs: z.record(z.any()).optional(),
+            inputs: z.record(z.string(), z.any()).optional(),
         })
         .optional(),
     schedule: z.array(z.object({cron: z.string()})).optional(),

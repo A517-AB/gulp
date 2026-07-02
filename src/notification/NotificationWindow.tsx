@@ -5,6 +5,7 @@ import {BrowserSoundController} from './sounds'
 import {Welcome} from './Welcome'
 import {Bell} from 'lucide-react'
 import {LANGUAGES} from '../renderer/lib/languages'
+import {resolveNotifIcon} from './icons'
 
 // ── types ──────────────────────────────────────────────────────────────────────
 
@@ -59,9 +60,10 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
   const hasActions  = (data.actions?.length ?? 0) > 0
   const isClickable = !hasActions && data.extraData !== undefined
 
-    // Find language icon if specified, otherwise fall back to Bell
-    const langPreset = LANGUAGES.find(l => l.id === data.icon)
-    const Icon = langPreset?.icon ?? Bell
+    // icon resolution: curated notif icon set → language icon (Jules etc.) → Bell
+    const kindIcon = resolveNotifIcon(data.icon)
+    const langPreset = kindIcon ? undefined : LANGUAGES.find(l => l.id === data.icon)
+    const Icon = kindIcon ?? langPreset?.icon ?? Bell
     const accentColor = data.color ?? langPreset?.color
 
   return (

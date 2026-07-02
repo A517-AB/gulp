@@ -238,7 +238,7 @@ export default function ShipPage() {
             .filter(s => {
                 if (archivedSessionIds.includes(s.id)) return false;
                 const sc = s.sourceContext as { source?: string } | undefined;
-                return s.source?.id === selectedSource.id
+                return s.source.id === selectedSource.id
                     || sc?.source === selectedSource.name;
             })
             .sort((a, b) => new Date(b.createTime).getTime() - new Date(a.createTime).getTime());
