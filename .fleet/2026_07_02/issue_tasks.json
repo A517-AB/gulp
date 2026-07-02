@@ -1,0 +1,1 @@
+{"tasks":[{"id":"test-task-1","title":"Test fleet dispatch","root_cause":"test","issues":[],"files":["tasks.json"],"new_files":[],"test_files":[],"risk":"low","prompt":"Create a test file"}]}
