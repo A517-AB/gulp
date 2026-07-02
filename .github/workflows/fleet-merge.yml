@@ -25,7 +25,7 @@ on:
       base_branch:
         description: "Base branch for merge"
         type: string
-        default: "main"
+        default: "master"
 
 concurrency:
   group: fleet-merge
@@ -51,7 +51,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          BASE_BRANCH="${{ inputs.base_branch || 'main' }}"
+          BASE_BRANCH="${{ inputs.base_branch || 'master' }}"
           MAX_CI_WAIT=600   # 10 minutes per PR
           MAX_RETRIES=2     # Max re-dispatch attempts per PR
           PR_POLL_TIMEOUT=900  # 15 minutes to wait for re-dispatched PR
