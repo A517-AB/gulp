@@ -1,5 +1,5 @@
 import type {IpcRendererEvent} from "electron";
-import {contextBridge, ipcRenderer} from "electron";
+import {contextBridge, ipcRenderer, webUtils} from "electron";
 import type {ElectronAPI, PopupNotification, ShellType} from "../src/shared/electron";
 // ── terminal ───────────────────────────────────────────────────────────────────
 
@@ -138,6 +138,7 @@ const filesystem: ElectronAPI["filesystem"] = {
   showOpenDialog:      ()           => ipcRenderer.invoke("fs.showOpenDialog"),
   showOpenFileDialog:  (f)          => ipcRenderer.invoke("fs.showOpenFileDialog", f),
   showSaveDialog:      (n)          => ipcRenderer.invoke("fs.showSaveDialog", n),
+    getPathForFile: (file) => webUtils.getPathForFile(file),
 };
 
 // ── env ────────────────────────────────────────────────────────────────────────
@@ -198,11 +199,8 @@ const scheduler: ElectronAPI["scheduler"] = {
   remove: (id)                 => ipcRenderer.invoke("notif.scheduler.remove", id),
   toggle: (id, enabled)        => ipcRenderer.invoke("notif.scheduler.toggle", id, enabled),
   snooze: (id, minutes)        => ipcRenderer.invoke("notif.scheduler.snooze", id, minutes),
-  onFired: (cb) => {
-    const handler = (_event: IpcRendererEvent, item: Parameters<typeof cb>[0]) => { cb(item) }
-    ipcRenderer.on("notif.scheduler.fired", handler)
-    return () => { ipcRenderer.off("notif.scheduler.fired", handler) }
-  },
+    markDone: (id) => ipcRenderer.invoke("notif.scheduler.markDone", id),
+    upcoming: () => ipcRenderer.invoke("notif.scheduler.upcoming"),
 }
 
 // ── git ────────────────────────────────────────────────────────────────────────
@@ -284,6 +282,16 @@ const jules = {
     },
     artifact: {
         save: (data: string, filepath: string) => ipcRenderer.invoke('jules.artifact.save', data, filepath),
+    },
+    cache: {
+        sessions: (options?: unknown) => ipcRenderer.invoke('jules.cache.sessions', options),
+        select: (query: unknown) => ipcRenderer.invoke('jules.cache.select', query),
+        sync: (options?: unknown) => ipcRenderer.invoke('jules.cache.sync', options),
+        getSession: (id: string) => ipcRenderer.invoke('jules.cache.getSession', id),
+        activities: (sessionId: string) => ipcRenderer.invoke('jules.cache.activities', sessionId),
+        send: (sessionId: string, msg: string) => ipcRenderer.invoke('jules.cache.send', sessionId, msg),
+        approve: (sessionId: string) => ipcRenderer.invoke('jules.cache.approve', sessionId),
+        snapshot: (sessionId: string) => ipcRenderer.invoke('jules.cache.snapshot', sessionId),
     },
 }
 

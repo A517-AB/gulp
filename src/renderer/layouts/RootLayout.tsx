@@ -1,12 +1,52 @@
-import { useState, useEffect, useMemo } from 'react'
-import type { ReactNode } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router'
-import { KBarProvider } from 'kbar'
-import { TopBar } from '@renderer/shell/TopBar'
-import { ThemeProvider } from '@renderer/providers/theme'
-import { mainNavRoutes, secretNavRoutes } from '@renderer/router'
-import { Popover, PopoverContent, PopoverTrigger } from '@renderer/ui/popover'
-import { CommandPalette, CommandPaletteActions } from '@renderer/library/command-palette'
+import type {ReactNode} from 'react'
+import {useEffect, useMemo, useState} from 'react'
+import {NavLink, Outlet, useNavigate} from 'react-router'
+import {KBarProvider} from 'kbar'
+import {TopBar} from '@renderer/shell/TopBar'
+import {ThemeProvider} from '@renderer/providers/theme-provider'
+import {mainNavRoutes, secretNavRoutes} from '@renderer/router'
+import {Popover, PopoverContent, PopoverTrigger} from '@renderer/ui/popover'
+import {CommandPalette, CommandPaletteActions} from '@renderer/library/command-palette'
+import {useNotification} from '@/library/notification'
+import {scheduler} from '@shared/bridge'
+import {useTimerEngine} from '@/hooks/useTimerEngine'
+import {useTimerStore} from '@/store/timer'
+import {matchesShortcut} from '@renderer/base/keyboard'
+
+const TIMER_RESET_SHORTCUT = 'ctrl+shift+r'
+
+async function handleReminderAction(actionId: string, extraData: unknown): Promise<void> {
+    const data = extraData as { itemId?: string } | undefined
+    if (!data?.itemId) return
+    const baseId = data.itemId.replace('_lead', '')
+
+    if (actionId.startsWith('snooze')) {
+        const mins = actionId === 'snooze' ? 10 : Number(actionId.split('-')[1]) || 10
+        try {
+            await scheduler?.snooze(baseId, mins)
+        } catch (err) {
+            console.error('[RootLayout] Snooze failed:', err)
+        }
+        return
+    }
+
+    if (actionId === 'done') {
+        try {
+            await scheduler?.markDone(baseId)
+        } catch (err) {
+            console.error('[RootLayout] Mark done failed:', err)
+        }
+    }
+}
+
+// Lives at the root so reminder snooze/done clicks work no matter which page is open.
+function useReminderActions(): void {
+    useNotification({
+        onAction: (actionId, extraData) => {
+            void handleReminderAction(actionId, extraData)
+        }
+    })
+}
 
 function SecretButton() {
     const [open, setOpen] = useState(false)
@@ -44,10 +84,29 @@ export default function RootLayout(): ReactNode {
     const navigate = useNavigate()
     const [topbarVisible, setTopbarVisible] = useState(() => localStorage.getItem('topbar-visible') !== 'false')
 
+    useReminderActions()
+    useTimerEngine()
+
     const inNavRoutes = useMemo(() => mainNavRoutes, [])
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.shiftKey) {
+                if (matchesShortcut(e, TIMER_RESET_SHORTCUT)) {
+                    e.preventDefault()
+                    const {lastActiveId, reset} = useTimerStore.getState()
+                    if (lastActiveId) reset(lastActiveId)
+                    return
+                }
+                const num = parseInt(e.key, 10)
+                if (num >= 1 && num <= 9) {
+                    const timer = useTimerStore.getState().timers[num - 1]
+                    if (!timer) return
+                    e.preventDefault()
+                    useTimerStore.getState().toggle(timer.id)
+                    return
+                }
+            }
             if (!(e.ctrlKey || e.metaKey)) return
             if (e.key === '\\') {
                 e.preventDefault()

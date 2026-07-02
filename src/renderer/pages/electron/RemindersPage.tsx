@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, Plus, Trash2, ToggleLeft, ToggleRight, Clock } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
-import { cn } from '@/utils'
-import { scheduler } from '@shared/bridge'
-import type { ScheduledItem, ScheduleInput } from '@shared/electron'
+import {useEffect, useRef, useState} from 'react'
+import {AnimatePresence, motion} from 'framer-motion'
+import {Bell, Clock, Plus, ToggleLeft, ToggleRight, Trash2} from 'lucide-react'
+import {formatDistanceToNow} from 'date-fns'
+import {cn} from '@/utils'
+import {scheduler} from '@shared/bridge'
+import type {ScheduledItem, ScheduleInput} from '@shared/electron'
 
 type RepeatMode = 'none' | 'daily' | 'weekly'
 const SOUNDS    = ['none', 'pulse', 'chime', 'bell', 'beep', 'alert']
@@ -202,11 +202,6 @@ export default function RemindersPage() {
     loaded.current = true
     void scheduler.list().then(all => {
       setItems(all.filter(i => i.category === 'reminder'))
-    })
-    return scheduler.onFired((fired) => {
-      if (fired.schedule.kind === 'once') {
-        setItems(p => p.filter(i => i.id !== fired.id))
-      }
     })
   }, [])
 

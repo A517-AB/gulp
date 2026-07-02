@@ -1,11 +1,11 @@
 import type {ReactNode} from 'react'
 import {useEffect, useMemo, useRef, useState} from 'react'
-import {format} from 'date-fns'
+import {format, formatDistanceToNow} from 'date-fns'
 import {AnimatePresence, motion} from 'motion/react'
 import {BrowserSoundController} from '@notification/sounds'
 import {useNotification} from '@/library/notification'
 import {notifLog, scheduler} from '@shared/bridge'
-import type {NotifLogEntry, ScheduledItem} from '@shared/electron'
+import type {NotifLogEntry, ScheduledItem, UpcomingRun} from '@shared/electron'
 
 function randomId() {
   return Math.random().toString(36).slice(2, 10)
@@ -128,18 +128,29 @@ function ActionSection() {
 // ── Scheduler ─────────────────────────────────────────────────────────────────
 
 function SchedulerSection() {
-  const [items, setItems] = useState<ScheduledItem[]>([])
-  const [fired, setFired] = useState<string[]>([])
-  const loaded            = useRef(false)
+    const [items, setItems] = useState<ScheduledItem[]>([])
+    const [upcoming, setUpcoming] = useState<UpcomingRun[]>([])
+    const [history, setHistory] = useState<NotifLogEntry[]>([])
+    const loaded = useRef(false)
 
   useEffect(() => {
     if (!scheduler || loaded.current) return
     loaded.current = true
     void scheduler.list().then(setItems)
-    return scheduler.onFired((item) => {
-      setFired(p => [`${item.label} @ ${format(new Date(), 'HH:mm:ss')}`, ...p].slice(0, 5))
-      setItems(p => p.filter(i => i.id !== item.id))
+      void scheduler.upcoming().then(setUpcoming)
+      void notifLog?.get().then(entries => {
+          setHistory(entries.filter(e => e.source === 'scheduler'))
     })
+
+      const id = setInterval(() => {
+          void scheduler?.upcoming().then(setUpcoming)
+          void notifLog?.get().then(entries => {
+              setHistory(entries.filter(e => e.source === 'scheduler'))
+          })
+      }, 15_000)
+      return () => {
+          clearInterval(id)
+      }
   }, [])
 
   if (!scheduler) {
@@ -150,6 +161,11 @@ function SchedulerSection() {
     )
   }
 
+    async function refreshUpcoming() {
+        const next = await scheduler?.upcoming()
+        if (next) setUpcoming(next)
+    }
+
   async function addOnce() {
     if (!scheduler) return
     const saved = await scheduler.add({
@@ -158,6 +174,7 @@ function SchedulerSection() {
       enabled: true, sound: 'chime', createdAt: new Date().toISOString(),
     })
     setItems(p => [...p, saved])
+      void refreshUpcoming()
   }
 
   async function addInterval() {
@@ -168,12 +185,14 @@ function SchedulerSection() {
       enabled: true, createdAt: new Date().toISOString(),
     })
     setItems(p => [...p, saved])
+      void refreshUpcoming()
   }
 
   async function remove(id: string) {
     if (!scheduler) return
     await scheduler.remove(id)
     setItems(p => p.filter(i => i.id !== id))
+      void refreshUpcoming()
   }
 
   return (
@@ -192,12 +211,33 @@ function SchedulerSection() {
           ))}
         </ul>
       )}
-      {fired.length > 0 && (
-        <ul className="space-y-0.5 pt-1">
-          {fired.map((entry, i) => (
-            <li key={i} className="text-xs text-fg-ghost font-mono">{entry}</li>
-          ))}
-        </ul>
+        {upcoming.length > 0 && (
+            <div className="space-y-1 pt-2">
+                <p className="text-2xs text-fg-ghost uppercase tracking-wider">Upcoming</p>
+                <ul className="space-y-0.5">
+                    {upcoming.map(u => (
+                        <li key={u.id} className="flex items-center gap-2 text-xs text-fg-secondary font-mono">
+                            <span className="flex-1">{u.label}</span>
+                            <span className="text-fg-ghost">
+                  {u.nextRun ? formatDistanceToNow(new Date(u.nextRun), {addSuffix: true}) : '—'}
+                </span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )}
+        {history.length > 0 && (
+            <div className="space-y-1 pt-2">
+                <p className="text-2xs text-fg-ghost uppercase tracking-wider">History</p>
+                <ul className="space-y-0.5">
+                    {history.slice(0, 8).map(h => (
+                        <li key={h.id} className="flex items-center gap-2 text-xs text-fg-ghost font-mono">
+                            <span className="flex-1">{h.title}</span>
+                            <span>{format(new Date(h.firedAt), 'HH:mm:ss')}</span>
+                        </li>
+                    ))}
+                </ul>
+            </div>
       )}
     </Section>
   )

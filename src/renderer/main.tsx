@@ -1,5 +1,6 @@
-import { createRoot } from 'react-dom/client'
+import {createRoot} from 'react-dom/client'
 import App from '@renderer/App'
+import '@blocknote/mantine/style.css'
 
 const t0 = performance.now()
 console.log('[renderer] evaluating main.tsx')

@@ -1,16 +1,13 @@
-import { useState, useMemo, useCallback, memo, useRef, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Code2, Plus, Trash2, Search, Pencil, Copy, Check } from 'lucide-react'
-import { useSnippets } from '@renderer/hooks/use-snippets'
-import type { SnippetItem } from '@renderer/hooks/use-snippets'
-import { InlineEdit } from '@renderer/ui/inline-edit'
-import { CodeEditor } from '@renderer/ui/code-editor'
+import {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {Check, Code2, Copy, Pencil, Plus, Search, Trash2} from 'lucide-react'
+import type {SnippetItem} from '@renderer/hooks/use-snippets'
+import {useSnippets} from '@renderer/hooks/use-snippets'
+import {InlineEdit} from '@renderer/ui/inline-edit'
+import {CodeEditor} from '@renderer/ui/code-editor'
 import {DynamicDropdown} from '@/ui/dynamic-dropdown'
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from '@renderer/ui/dialog'
-import { LANGUAGES, langFor, toMonacoLang } from '@renderer/lib/languages'
-import { fuseFilePath } from '@shared/fuse'
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,} from '@renderer/ui/dialog'
+import {langFor, LANGUAGES, toMonacoLang} from '@renderer/lib/languages'
+import {fuseFilePath} from '@shared/fuse'
 import {GitSyncButton} from '@renderer/components/git/GitSyncButton'
 
 const LANGUAGE_ITEMS = LANGUAGES.map(l => ({ id: l.id, label: l.name, icon: l.icon, color: l.color }))
@@ -43,25 +40,28 @@ const SnippetRow = memo(function SnippetRow({
 }: SnippetRowProps) {
   const lang = langFor(snippet.languageId)
   const gradientColor = lang?.color ? withAlpha(lang.color, 0.4) : null
-  const [hovered, setHovered] = useState(false)
+    const LangIcon = lang?.icon
 
   return (
     <div
-      className="group/snippet relative flex flex-col py-3 px-2 border-b border-hair last:border-0 rounded cursor-pointer hover:bg-hover transition-colors duration-200"
+        className="group/snippet relative flex items-center gap-3 py-2.5 px-3 border-b border-hair last:border-0 rounded cursor-pointer hover:bg-hover transition-colors duration-200"
       onClick={() => { onOpen(snippet) }}
-      onMouseEnter={() => { setHovered(true) }}
-      onMouseLeave={() => { setHovered(false) }}
     >
       {gradientColor && (
-        <motion.div
-          className="absolute inset-0 rounded pointer-events-none"
-          animate={{ opacity: hovered ? 1 : 0.4 }}
-          transition={{ duration: 0.2 }}
+          <div
+              className="absolute inset-0 rounded pointer-events-none opacity-40 group-hover/snippet:opacity-100 transition-opacity duration-200"
           style={{ background: `linear-gradient(to top left, ${gradientColor} 0%, transparent 55%)` }}
         />
       )}
 
-      <div className="relative flex flex-col gap-1 min-w-0">
+        {LangIcon && (
+            <LangIcon
+                className="relative h-4 w-4 shrink-0"
+                style={{color: lang.color}}
+            />
+        )}
+
+        <div className="relative flex flex-col gap-0.5 min-w-0 flex-1">
         <div className="flex items-center gap-2" onClick={e => { e.stopPropagation() }}>
           <InlineEdit
             value={snippet.title ?? ''}
@@ -80,7 +80,9 @@ const SnippetRow = memo(function SnippetRow({
         </p>
       </div>
 
-      <div className="relative flex items-center justify-end gap-1 mt-2" onClick={e => { e.stopPropagation() }}>
+        <div className="relative flex items-center gap-1 shrink-0" onClick={e => {
+            e.stopPropagation()
+        }}>
         <div className="flex items-center gap-1 opacity-0 group-hover/snippet:opacity-100 transition-opacity duration-200">
           <button
             onClick={e => { onCopy(snippet, e) }}
@@ -125,6 +127,12 @@ export function SnippetsPage() {
   const [draftScript, setDraftScript] = useState('')
   const [draftLang, setDraftLang] = useState('python')
   const [copiedId, setCopiedId] = useState<string | null>(null)
+
+    const langStats = useMemo(() => {
+        const counts = new Map<string, number>()
+        for (const s of items) counts.set(s.languageId, (counts.get(s.languageId) ?? 0) + 1)
+        return [...counts.entries()].sort((a, b) => b[1] - a[1])
+    }, [items])
 
   const filtered = useMemo(() => {
     if (!search) return items
@@ -229,7 +237,7 @@ export function SnippetsPage() {
               placeholder="SEARCH..."
               value={search}
               onChange={e => { setSearch(e.target.value) }}
-              className="h-8 pl-8 pr-3 rounded bg-surface border border-subtle text-[10px] font-mono text-fg-primary uppercase tracking-wider placeholder:text-fg-dim focus:outline-none focus:border-moderate transition-colors w-44"
+              className="h-8 pl-8 pr-3 rounded bg-surface border border-subtle text-[10px] font-mono text-fg-primary uppercase tracking-wider placeholder:text-fg-dim focus:outline-none focus:border-moderate transition-all duration-200 w-44 focus:w-56"
             />
           </div>
           <button
@@ -239,8 +247,23 @@ export function SnippetsPage() {
             <Plus className="h-3 w-3" />
             NEW SNIPPET
           </button>
-          <span className="bg-surface border border-subtle text-fg-muted text-[10px] px-2.5 py-1 rounded font-mono flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+            <span
+                className="bg-surface border border-subtle text-fg-muted text-[10px] px-2.5 py-1 rounded font-mono flex items-center gap-2"
+                title={langStats.map(([id, n]) => `${langFor(id)?.name ?? id} ${n.toString()}`).join(' · ')}
+            >
+            {langStats.length > 0 && (
+                <span className="flex h-1 w-12 rounded-full overflow-hidden">
+                {langStats.map(([id, n]) => (
+                    <span
+                        key={id}
+                        style={{
+                            flex: `${n.toString()} 1 0%`,
+                            background: langFor(id)?.color ?? 'var(--fg-ghost)',
+                        }}
+                    />
+                ))}
+              </span>
+            )}
             {items.length} TOTAL
           </span>
             <GitSyncButton/>

@@ -111,8 +111,15 @@ export function FileEditor({ path, content, mode = 'default', onMount, onChange 
     )
   }
   if (isHtml(path) && mode === 'default') {
+      const title = path.split(/[\\/]/).pop()
+      // Dev loads from http://localhost, where file:/// iframes are blocked by
+      // web security — render the already-read content inline instead. Prod
+      // (file:// origin) keeps the real URL so relative assets resolve.
+      if (import.meta.env.DEV) {
+          return <iframe srcDoc={content} className="w-full h-full border-0" title={title}/>
+      }
     const src = 'file:///' + path.replace(/\\/g, '/')
-    return <iframe src={src} className="w-full h-full border-0" title={path.split(/[\\/]/).pop()} />
+      return <iframe src={src} className="w-full h-full border-0" title={title}/>
   }
   if (isMd(path) && mode === 'default') {
     return <MdFileEditor path={path} content={content} {...(onChange !== undefined ? { onChange } : {})} />

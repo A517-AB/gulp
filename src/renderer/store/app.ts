@@ -1,5 +1,6 @@
 import {create} from 'zustand'
-import type {SessionConfig, SessionResource, Source} from '@jules'
+import type {SessionConfig, SessionCursor, SessionResource, Source} from '@jules'
+import {jules} from '@jules'
 import type {JulesParsedFile} from '@shared/jules-ipc'
 
 export interface AppStore {
@@ -7,13 +8,17 @@ export interface AppStore {
     sourcesLoaded: boolean
     archivedSessionIds: string[]
     drafts: Record<string, string>
+    selectedSession: SessionResource | null
+    sessionCursor: SessionCursor | null
 
+    sync: () => Promise<void>
     startSession?: (config: SessionConfig) => Promise<SessionResource>
     parseUnidiff: (patch?: string | null) => Promise<JulesParsedFile[]>
     saveArtifact: (data: string, filepath: string) => Promise<string>
     applyPatch: (cwd: string, patch: string) => Promise<{ ok: boolean; branch?: string; error?: string }>
     archiveSessions: (id: string) => void
     setDraft: (sessionId: string, text: string) => void
+    setSelectedSession: (session: SessionResource | null) => void
 }
 
 export const useStore = create<AppStore>((set) => ({
@@ -21,6 +26,14 @@ export const useStore = create<AppStore>((set) => ({
     sourcesLoaded: false,
     archivedSessionIds: [],
     drafts: {},
+    selectedSession: null,
+    sessionCursor: null,
+
+    sync: async () => {
+        const sources: Source[] = []
+        for await (const source of jules.sources()) sources.push(source)
+        set({sources, sourcesLoaded: true})
+    },
 
     parseUnidiff: async (patch) => {
         if (!patch) return []
@@ -43,5 +56,10 @@ export const useStore = create<AppStore>((set) => ({
 
     setDraft: (sessionId, text) => {
         set(s => ({drafts: {...s.drafts, [sessionId]: text}}))
+    },
+
+    setSelectedSession: (session) => {
+        console.log('[store] selectedSession:', session?.id ?? null)
+        set({selectedSession: session})
     },
 }))

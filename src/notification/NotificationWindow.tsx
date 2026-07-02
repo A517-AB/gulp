@@ -61,18 +61,17 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
 
     // Find language icon if specified, otherwise fall back to Bell
     const langPreset = LANGUAGES.find(l => l.id === data.icon)
-    const Icon = langPreset?.icon || Bell
-    const accentColor = data.color || langPreset?.color
+    const Icon = langPreset?.icon ?? Bell
+    const accentColor = data.color ?? langPreset?.color
 
   return (
     <div
       onClick={isClickable ? () => { notif.clicked('default', data.extraData); toast.dismiss(id) } : undefined}
       className={`relative flex items-start gap-3.5 w-full rounded-xl border border-hair bg-overlay shadow-2xl overflow-hidden px-4.5 py-3.5${isClickable ? ' cursor-pointer' : ''}`}
-      style={accentColor ? {borderLeft: `3px solid ${accentColor}`} : undefined}
     >
         <Icon
             className="w-4.5 h-4.5 shrink-0 mt-0.5"
-            style={{color: accentColor || 'var(--color-fg-ghost)'}}
+            style={{color: accentColor ?? 'var(--color-fg-ghost)'}}
         />
 
         <div className="flex-1 min-w-0 space-y-2">
@@ -89,6 +88,7 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
                 key={action.id}
                 onClick={(e) => {
                   e.stopPropagation()
+                    stopAlarm(data.id)
                   notif.clicked(action.id, data.extraData)
                   toast.dismiss(id)
                 }}
@@ -106,7 +106,12 @@ function NotifToast({ id, data }: { id: string | number; data: NotifPayload }) {
       </div>
 
       <button
-        onClick={(e) => { e.stopPropagation(); notif.dismissed(data.extraData); toast.dismiss(id) }}
+          onClick={(e) => {
+              e.stopPropagation();
+              stopAlarm(data.id);
+              notif.dismissed(data.extraData);
+              toast.dismiss(id)
+          }}
         className="shrink-0 mt-0.5 text-fg-ghost hover:text-fg-secondary transition-colors"
         aria-label="Dismiss"
       >
@@ -124,13 +129,52 @@ const soundController = new BrowserSoundController({ volume: 0.35 })
 
 let lastSoundPlayTime = 0
 
+// alarm sound loops for ALARM_LOOP_MS, then goes quiet and re-fires the whole
+// notification after ALARM_RETRY_MS if it was never dismissed — repeats until dismissed.
+const ALARM_LOOP_MS = 60_000
+const ALARM_RETRY_MS = 5 * 60_000
+const alarmCleanups = new Map<string | number, () => void>()
+
+function stopAlarm(id: string | number | undefined) {
+    if (id === undefined) return
+    alarmCleanups.get(id)?.()
+    alarmCleanups.delete(id)
+}
+
+function startAlarmLoop(data: NotifPayload) {
+    const key = data.id ?? 'alarm'
+    stopAlarm(key)
+
+    void soundController.play('alarm', {loopCount: 1})
+    const interval = setInterval(() => {
+        void soundController.play('alarm', {loopCount: 1})
+    }, 1500)
+
+    const loopTimeout = setTimeout(() => {
+        clearInterval(interval)
+        const retryTimeout = setTimeout(() => {
+            fire(data)
+        }, ALARM_RETRY_MS)
+        alarmCleanups.set(key, () => {
+            clearTimeout(retryTimeout)
+        })
+    }, ALARM_LOOP_MS)
+
+    alarmCleanups.set(key, () => {
+        clearInterval(interval);
+        clearTimeout(loopTimeout)
+    })
+}
+
 function fire(data: NotifPayload | null) {
     if (data === null) {
         toast.dismiss()
         return
     }
 
-  if (data.sound && data.sound !== 'none') {
+    if (data.sound === 'alarm') {
+        startAlarmLoop(data)
+    } else if (data.sound && data.sound !== 'none') {
       const now = Date.now()
       if (now - lastSoundPlayTime > 1500) {
           lastSoundPlayTime = now

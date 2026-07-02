@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import {ipcMain} from 'electron'
 import {execSync} from 'node:child_process'
 
 const GITHUB_API = 'https://api.github.com'
@@ -6,7 +6,7 @@ const GITHUB_API = 'https://api.github.com'
 function detectGitRemote(): string | null {
     try {
         const url = execSync('git remote get-url origin', {encoding: 'utf-8'}).trim()
-        const match = url.match(/github\.com[:/](.+?)(?:\.git)?$/)
+        const match = /github\.com[:/](.+?)(?:\.git)?$/.exec(url)
         return match?.[1] ?? null
     } catch {
         return null

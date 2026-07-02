@@ -1,6 +1,6 @@
 # Agents
 
-> Last updated: 2026-06-28
+> Last updated: 2026-07-01
 
 Working document for AI agents on this project — rules, architecture, directives.
 
@@ -36,6 +36,9 @@ Jules, which is an API to a remote VM that executes coding tasks — nothing run
     - don't give compliments
     - a package beats handrolled. always provide package names if something is nicer with it
     - ask for screenshots when diagnosing UI issues — it's easy to get them
+  - unused isn't the same as dead. don't delete unused exports/code just because nothing currently imports it — it may
+    be placed there on purpose (in-progress work, planned API surface). flag what's unused and let the user decide;
+    removing it preemptively creates future conflicts
 
 ## Commands
 
@@ -83,16 +86,16 @@ Electron desktop app. `isWeb` / `VITE_TARGET=web` was an unfinished attempt — 
 
 ### Renderer (`tsconfig.app.json`)
 
-| Alias                  | Resolves to                                                       |
-|------------------------|-------------------------------------------------------------------|
-| `@/*`                  | `src/renderer/*`                                                  |
-| `@/components/*`       | `src/renderer/components/*`                                       |
-| `@/ui/*`               | `src/renderer/ui/*`                                               |
-| `@/store/*`            | `src/renderer/store/*`                                            |
-| `@/hooks/*`            | `src/renderer/hooks/*`                                            |
-| `@/utils`, `@/utils/*` | `src/renderer/utils/*`                                            |
-| `@shared`, `@shared/*` | `src/shared/*`                                                    |
-| `@jules`               | `./dist-jules` (TS types) / `src/jules/browser.ts` (Vite runtime) |
+| Alias                  | Resolves to                                                                                |
+|------------------------|--------------------------------------------------------------------------------------------|
+| `@/*`                  | `src/renderer/*`                                                                           |
+| `@/components/*`       | `src/renderer/components/*`                                                                |
+| `@/ui/*`               | `src/renderer/ui/*`                                                                        |
+| `@/store/*`            | `src/renderer/store/*`                                                                     |
+| `@/hooks/*`            | `src/renderer/hooks/*`                                                                     |
+| `@/utils`, `@/utils/*` | `src/renderer/utils/*`                                                                     |
+| `@shared`, `@shared/*` | `src/shared/*`                                                                             |
+| `@jules`               | `./dist-jules` (TS types + Vite runtime, as of 2026-07-01 — `src/jules/` no longer exists) |
 
 ### Node (`tsconfig.node.json`)
 
@@ -145,7 +148,7 @@ it are welcome — say them.
 
 #### Methods tried
 
-> 2026-06-28
+> 2026-06-28 — superseded, see 2026-07-01 update below. Kept for history only.
 
 - Bun sidecar server
 - IPC routes through Electron main
@@ -156,7 +159,7 @@ None are the set method. There is no set method yet.
 
 #### Current method
 
-> 2026-06-28
+> 2026-06-28 — superseded, see 2026-07-01 update below. Kept for history only.
 
 Browser entry from modjules via Vite alias (`src/jules/browser.ts`). It works — it's an ok fetch. Missing the good stuff
 that makes this worth doing. The app is half web half Electron, so both sides are on the table.
@@ -172,6 +175,22 @@ an IPC route from there is possible — shape not decided yet.
 
 `app.ts` — not critical but has usage. Was being used as a tool without realising there's 100MB of IndexedDB storage
 sitting unused. Dated note: 2026-06-28, don't gut it.
+
+#### Update — 2026-07-01
+
+Everything above this point in "Methods tried" / "Current method" can be ignored. `src/jules/` doesn't exist anymore —
+that reference is stale.
+
+- **IPC works.** The earlier "IPC routes through Electron main" attempt wasn't a dead end because IPC-as-an-approach is
+  wrong — it failed because the wiring was bad (handlers wrote but never registered in `main.mts`, no preload bridge,
+  dead code). Don't rule out IPC because of that history.
+- **Browser (`@jules` via Vite alias) still works but is fragile.** It can crash from changes elsewhere in the app, not
+  just when touched directly — treat it as a secondary/backup path, not the main one.
+- **Current direction: half IPC.** Route the fast, cache-backed stuff (session/activity reads, sync) through the real
+  Node SDK via Electron main + preload — `electron/ipc/jules-cache.ts` (handlers) registered in `main.mts`, bridged in
+  `preload.mts` as `window.jules.cache`, backed by `electron/ipc/Jules/` (Node SDK source, disk cache under
+  `.jules/cache`). Renderer calls go through `src/renderer/lib/jules-client.ts`. Keep browser-via-Vite for whatever
+  isn't worth wiring through IPC yet — this is a split, not a full migration off browser.
 
 #### Rules when working with Jules
 

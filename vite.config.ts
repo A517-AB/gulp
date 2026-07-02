@@ -23,13 +23,16 @@ export default defineConfig({
     tsconfigPaths: true,
     alias: [
 
-        // this is the backup option, do not assume this is the correct way, this offers backup while the rotues to sdk is being setup
-        {find: '@jules', replacement: 'D:/jules rest/modjules-main/packages/core/dist/browser.mjs'},
+        // renderer runs in the browser — must load the browser build (IndexedDB storage),
+        // not dist-jules/index.mjs (the Node build, which imports node:fs/node:crypto and
+        // gets externalized/crashes in the browser). tsconfig-paths still points @jules's
+        // *types* at the plain dist-jules dir (index.d.ts) since it's a superset of browser.d.ts.
+        {find: '@jules', replacement: resolve(__dirname, 'dist-jules/browser.mjs')},
 
 
         {find: 'node:path', replacement: 'path-browserify'},
         {find: 'react', replacement: resolve(__dirname, 'node_modules/react')},
-      { find: 'react-dom',   replacement: resolve(__dirname, 'node_modules/react-dom') },
+        {find: 'react-dom', replacement: resolve(__dirname, 'node_modules/react-dom')},
         // 2026-06-22: For later, not for dev
         // { find: '@syncfusion/ej2-gantt',            replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist-jules/es6/ej2-gantt.es5.js' },
         // { find: '@syncfusion/ej2-react-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist-jules/es6/ej2-react-gantt.es5.js' },
@@ -61,13 +64,17 @@ export default defineConfig({
         './src/renderer/components/shared/Clock.tsx',
       ],
     },
-      // proxy removed — Bun/Hono sidecar server scrapped (~2026-06-01).
-      // was: /api → 127.0.0.1:3939 (standalone Bun server)
+      proxy: {
+          '/api': {
+              target: 'http://127.0.0.1:3939',
+              changeOrigin: true,
+          },
+      },
   },
   // can you not change it to rollup because this is vite 8, if you don't know you don't know
   build: {
     target:      'esnext',
-    emptyOutDir: !keepVendors,
+      emptyOutDir: !keepVendors && !isNotif,
     rolldownOptions: {
       input: isNotif
         ? { notification: resolve(__dirname, 'notification.html') }
@@ -75,8 +82,8 @@ export default defineConfig({
       output: isNotif ? {} : {
         manualChunks(id: string): string | undefined {
           if (id.includes('node_modules/react')) return 'vendor-react'
-            // if (id.includes('monaco-editor') || id.includes('@monaco-editor')) return 'vendor-monaco'
-            // if (id.includes('@blocknote')) return 'vendor-blocknote'
+            if (id.includes('monaco-editor') || id.includes('@monaco-editor')) return 'vendor-monaco'
+            if (id.includes('@blocknote')) return 'vendor-blocknote'
             // 2026-06-22: For later, not for dev
             // if (id.includes('@syncfusion') || id.includes('ej2-gantt') || id.includes('ej2-pdfviewer')) return 'vendor-ej2'
           return undefined

@@ -1,6 +1,11 @@
-import { app, Tray, Menu, nativeImage } from 'electron'
+import {app, Menu, nativeImage, Tray} from 'electron'
 import log from 'electron-log/main'
-import { prewarmNotificationWindow, registerUINotificationHandlers, registerSchedulerHandlers, registerNotifLogHandlers } from './notifications/index.js'
+import {
+    prewarmNotificationWindow,
+    registerNotifLogHandlers,
+    registerSchedulerHandlers,
+    registerUINotificationHandlers
+} from './notifications/index.js'
 
 log.initialize()
 Object.assign(console, log.functions)
@@ -35,7 +40,7 @@ void app.whenReady().then(() => {
   registerUINotificationHandlers(() => null)
   registerNotifLogHandlers()
   prewarmNotificationWindow()
-  registerSchedulerHandlers(() => null)
+    registerSchedulerHandlers()
 
   const tray = new Tray(buildTrayIcon())
   tray.setToolTip('Last — Notifications')

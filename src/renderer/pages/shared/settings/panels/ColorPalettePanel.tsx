@@ -210,7 +210,7 @@ export function ColorPalettePanel() {
 
     return (
         <div className="space-y-6 font-sans">
-            <div className="flex items-center gap-1 bg-surface-raised p-1 rounded-md w-fit border border-hair">
+            <div className="flex items-center gap-1 bg-raised p-1 rounded-md w-fit border border-hair">
                 <button
                     onClick={() => {
                         setEditTheme('light')

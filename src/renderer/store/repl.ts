@@ -1,37 +1,50 @@
 import {create} from 'zustand'
 
-export interface ReplLine {
-    id: number
+export interface LogEntry {
+    type: 'input' | 'stdout' | 'stderr' | 'result' | 'error' | 'info'
     text: string
-    kind: 'in' | 'out' | 'err'
 }
 
-export interface ReplStore {
-    lines: ReplLine[]
-    input: string
+interface ReplStore {
+    logs: LogEntry[]
     history: string[]
-    histCursor: number
-    setLines: (lines: ReplLine[] | ((prev: ReplLine[]) => ReplLine[])) => void
-    setInput: (input: string) => void
-    setHistory: (history: string[] | ((prev: string[]) => string[])) => void
-    setHistCursor: (cursor: number | ((prev: number) => number)) => void
-    clearLines: () => void
+    setLogs: (updater: LogEntry[] | ((prev: LogEntry[]) => LogEntry[])) => void
+    setHistory: (updater: string[] | ((prev: string[]) => string[])) => void
+    clearLogs: () => void
 }
 
 export const useReplStore = create<ReplStore>((set) => ({
-    lines: [],
-    input: '',
-    history: [],
-    histCursor: -1,
-    setLines: (updater) => set((state) => ({
-        lines: typeof updater === 'function' ? updater(state.lines) : updater
-    })),
-    setInput: (input) => set({input}),
-    setHistory: (updater) => set((state) => ({
-        history: typeof updater === 'function' ? updater(state.history) : updater
-    })),
-    setHistCursor: (updater) => set((state) => ({
-        histCursor: typeof updater === 'function' ? updater(state.histCursor) : updater
-    })),
-    clearLines: () => set({lines: []}),
+    logs: [],
+    history: (() => {
+        try {
+            const saved = localStorage.getItem('repl_history')
+            if (saved) {
+                const parsed = JSON.parse(saved) as unknown
+                if (Array.isArray(parsed)) return parsed as string[]
+            }
+        } catch {
+            // localStorage unavailable
+        }
+        return []
+    })(),
+    setLogs: (updater) => {
+        set((state) => ({
+            logs: typeof updater === 'function' ? updater(state.logs) : updater,
+        }))
+    },
+    setHistory: (updater) => {
+        set((state) => {
+            const next =
+                typeof updater === 'function' ? updater(state.history) : updater
+            try {
+                localStorage.setItem('repl_history', JSON.stringify(next))
+            } catch {
+                // localStorage unavailable
+            }
+            return {history: next}
+        })
+    },
+    clearLogs: () => {
+        set({logs: []})
+    },
 }))

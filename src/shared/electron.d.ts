@@ -114,6 +114,7 @@ export interface FilesystemAPI {
   showOpenDialog:      ()                                       => Promise<string | null>;
   showOpenFileDialog:  (filters?: FileFilter[])                => Promise<string | null>;
   showSaveDialog:      (defaultName?: string)                  => Promise<string | null>;
+    getPathForFile: (file: File) => string;
 }
 
 export interface EnvAPI {
@@ -221,13 +222,20 @@ export interface ScheduledItem {
 }
 
 
+export interface UpcomingRun {
+    id: string
+    label: string
+    nextRun: string | null
+}
+
 export interface SchedulerAPI {
-  list:    ()                                  => Promise<ScheduledItem[]>
-  add:     (item: ScheduledItem)               => Promise<ScheduledItem>
-  remove:  (id: string)                        => Promise<void>
-  toggle:  (id: string, enabled: boolean)      => Promise<ScheduledItem>
-  snooze:  (id: string, minutes: number)       => Promise<ScheduledItem>
-  onFired: (cb: (item: ScheduledItem) => void) => () => void
+    list: () => Promise<ScheduledItem[]>
+    add: (item: ScheduledItem) => Promise<ScheduledItem>
+    remove: (id: string) => Promise<void>
+    toggle: (id: string, enabled: boolean) => Promise<ScheduledItem>
+    snooze: (id: string, minutes: number) => Promise<ScheduledItem>
+    markDone: (id: string) => Promise<ScheduledItem | undefined>
+    upcoming: () => Promise<UpcomingRun[]>
 }
 
 export type JulesWorkerEvent =

@@ -1,4 +1,4 @@
-import {app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeImage, powerMonitor, Tray} from "electron";
+import {app, BrowserWindow, globalShortcut, ipcMain, Menu, nativeImage, powerMonitor, shell, Tray} from "electron";
 import * as path from "path";
 import * as fs from "fs";
 import {fileURLToPath} from "url";
@@ -21,6 +21,7 @@ import {
 
 import {registerStoreHandlers} from "./store";
 import {registerJulesGitHandlers} from "./ipc/jules-git";
+import {registerJulesCacheHandlers} from "./ipc/jules-cache";
 
 log.initialize();
 Object.assign(console, log.functions);
@@ -88,6 +89,12 @@ function createWindow() {
   } else {
     void mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
   }
+
+    // Redirect any link that tries to open a new window to the system browser
+    mainWindow.webContents.setWindowOpenHandler(({url}) => {
+        void shell.openExternal(url);
+        return {action: "deny"};
+    });
 
   const windowStart = performance.now();
   mainWindow.webContents.on("did-finish-load", () => {
@@ -176,7 +183,7 @@ void app.whenReady().then(() => {
   prewarmNotificationWindow();
   t("prewarmNotificationWindow done");
 
-  registerSchedulerHandlers(() => mainWindow?.webContents ?? null);
+    registerSchedulerHandlers();
   t("registerSchedulerHandlers done");
 
   registerNotifLogHandlers();
@@ -192,6 +199,9 @@ void app.whenReady().then(() => {
 
     registerJulesGitHandlers();
     t("registerJulesGitHandlers done");
+
+    registerJulesCacheHandlers(ipcMain);
+    t("registerJulesCacheHandlers done");
 
 
   createWindow();

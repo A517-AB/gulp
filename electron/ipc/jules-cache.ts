@@ -29,6 +29,9 @@ export function registerJulesCacheHandlers(ipcMain: IpcMain): void {
     ipcMain.handle('jules.cache.select', (_e: IpcMainInvokeEvent, query: JulesQuery<JulesDomain>) =>
         client.select(query));
 
+    ipcMain.handle('jules.cache.getSession', (_e: IpcMainInvokeEvent, id: string) =>
+        client.session(id).info());
+
     // history() = local first, fetches from network if cache empty
     ipcMain.handle('jules.cache.activities', async (_e: IpcMainInvokeEvent, sessionId: string) => {
         const acts = []
@@ -41,6 +44,10 @@ export function registerJulesCacheHandlers(ipcMain: IpcMain): void {
 
     ipcMain.handle('jules.cache.approve', (_e: IpcMainInvokeEvent, sessionId: string) =>
         client.session(sessionId).approve());
+
+    // snapshot() computes insights (failed commands, plan regenerations, etc.) in one call
+    ipcMain.handle('jules.cache.snapshot', async (_e: IpcMainInvokeEvent, sessionId: string) =>
+        (await client.session(sessionId).snapshot()).toJSON());
 
     // ── fill cache (network → disk, write-through) ──────────────────────────
     let syncInProgress: Promise<unknown> | null = null

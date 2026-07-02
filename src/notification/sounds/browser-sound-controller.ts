@@ -4,7 +4,7 @@ const DEFAULT_VOLUME = 0.2
 
 type OscillatorShape = OscillatorType
 
-export type SoundId = 'none' | 'beep' | 'chime' | 'bell' | 'pulse'
+export type SoundId = 'none' | 'beep' | 'chime' | 'bell' | 'pulse' | 'alarm'
 
 export interface SoundPlaybackOptions {
   volume?: number
@@ -173,6 +173,14 @@ function getSoundPattern(soundId: SoundId, options: SoundPlaybackOptions, baseVo
         volume,
         type: 'square',
       }))
+
+      case 'alarm':
+          return [1200, 900].map((frequency) => ({
+              frequency,
+              durationMs: Math.max(120, Math.round(durationMs * 0.5)),
+              volume: clampVolume(volume * 1.4),
+              type: 'square',
+          }))
 
     case 'none':
       return []

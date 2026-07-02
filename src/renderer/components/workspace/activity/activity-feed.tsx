@@ -6,6 +6,7 @@ import type {ActivityFeedProps} from './types'
 import {SingleActivity} from './single-activity.tsx'
 import {ActivityFeedHeader} from './activity-feed-header.tsx'
 import {ActivityFeedForm} from './activity-feed-form.tsx'
+import {InsightsBar} from './insights-bar.tsx'
 import {approvePlan, getActivities, sendMessage} from '@/lib/jules-client.ts'
 
 const QUICK_REVIEW_PROMPT =
@@ -24,15 +25,17 @@ export function ActivityFeed({
     const [error, setError] = useState<string | null>(null)
     const planApproved = activities.some(a => a.type === 'planApproved')
 
+    const cancelledRef = useRef(false)
+
     useEffect(() => {
-        let cancelled = false
+        cancelledRef.current = false
 
         void (async () => {
             try {
                 const cached = await getActivities(session.id)
-                if (!cancelled) setActivities(cached)
+                if (!cancelledRef.current) setActivities(cached)
             } catch (err) {
-                if (!cancelled) {
+                if (!cancelledRef.current) {
                     console.error('[feed] activities:', err)
                     setError(String(err))
                 }
@@ -40,11 +43,10 @@ export function ActivityFeed({
         })()
 
         return () => {
-            cancelled = true
+            cancelledRef.current = true
         }
     }, [session.id])
 
-    const scrollRef = useRef<HTMLDivElement>(null)
     const [sending, setSending] = useState(false)
     const [approving, setApproving] = useState(false)
     const [applyState, setApplyState] = useState<{
@@ -124,6 +126,8 @@ export function ActivityFeed({
                 onArchive={onArchive}
             />
 
+            <InsightsBar key={session.id} sessionId={session.id}/>
+
             {error && (
                 <div className="border-b border-hair bg-red-950/20 px-4 py-3 flex items-center justify-between gap-2">
                     <p className="text-[11px] font-mono text-red-400 uppercase">{error}</p>
@@ -156,7 +160,7 @@ export function ActivityFeed({
             )}
 
             <div className="flex-1 overflow-hidden">
-                <ScrollArea ref={scrollRef} className="h-full">
+                <ScrollArea className="h-full">
                     <div className="p-3 flex flex-col space-y-2.5">
                         {activities.map(activity => (
                             <SingleActivity
@@ -168,7 +172,7 @@ export function ActivityFeed({
                             />
                         ))}
                         {(() => {
-                            const pr = session.outputs?.find(o => o.type === 'pullRequest')
+                            const pr = session.outputs.find(o => o.type === 'pullRequest')
                             if (pr?.type !== 'pullRequest') return null
                             return (
                                 <div className="flex justify-center py-2 px-6">
@@ -190,7 +194,7 @@ export function ActivityFeed({
                 </ScrollArea>
             </div>
 
-            <ActivityFeedForm onSubmitMessage={onSubmitMessage} sending={sending} />
+            <ActivityFeedForm sessionId={session.id} onSubmitMessage={onSubmitMessage} sending={sending}/>
         </div>
     )
 }

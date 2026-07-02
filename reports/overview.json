@@ -1,11 +1,11 @@
 {
   "_note": "Start here. Read this before check.log. Full test output is in reports/check.log.",
-  "timestamp": "2026-06-30T11:43:33.428Z",
+  "timestamp": "2026-07-01T22:39:47.080Z",
   "success": false,
-  "totalMs": 2815,
+  "totalMs": 13783,
   "test": {
     "success": false,
-    "durationMs": 2812,
+    "durationMs": 13717,
     "failures": []
   }
 }

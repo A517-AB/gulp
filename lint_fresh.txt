@@ -1,0 +1,586 @@
+
+> creed@1.0 lint
+> eslint --cache .
+
+
+D:\LAST\electron\github.ts
+  9:27  error  Use the `RegExp#exec()` method instead  @typescript-eslint/prefer-regexp-exec
+
+D:\LAST\electron\ipc\jules-git.ts
+   91:36  error  ["BASE_BRANCH"] is better written in dot notation   @typescript-eslint/dot-notation
+   92:33  error  ["GITHUB_REPO"] is better written in dot notation   @typescript-eslint/dot-notation
+  108:31  error  ["GITHUB_TOKEN"] is better written in dot notation  @typescript-eslint/dot-notation
+  140:82  error  Async arrow function has no 'await' expression      @typescript-eslint/require-await
+
+D:\LAST\electron\main.mts
+  254:113  error  Async arrow function has no 'await' expression  @typescript-eslint/require-await
+
+D:\LAST\electron\queues.ts
+  25:5  error  Unsafe return of a value of type `any[]`  @typescript-eslint/no-unsafe-return
+
+D:\LAST\src\notification\NotificationWindow.tsx
+  64:35  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  65:36  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  75:40  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+D:\LAST\src\notification\Welcome.tsx
+  20:11  error  Unnecessary conditional, value is always truthy  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\sessions\ActivityRow.tsx
+  63:102  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\sessions\Feed.tsx
+  0:0  error  Parsing error: D:\LAST\src\renderer\components\sessions\Feed.tsx was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+D:\LAST\src\renderer\components\sessions\cache.ts
+  22:70  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+D:\LAST\src\renderer\components\sessions\feed.ts
+  34:24  error  Unnecessary conditional, value is always truthy                @typescript-eslint/no-unnecessary-condition
+  35:28  error  Unsafe object destructuring of a property with an `any` value  @typescript-eslint/no-unsafe-assignment
+  36:33  error  Unnecessary conditional, value is always falsy                 @typescript-eslint/no-unnecessary-condition
+  42:21  error  Unnecessary conditional, value is always truthy                @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\ship\RepoCommandPalette.tsx
+  48:8  warning  React Hook useEffect has a missing dependency: 'setOpen'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  58:8  warning  React Hook useEffect has a missing dependency: 'setOpen'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\LAST\src\renderer\components\ship\SourceRow.tsx
+  33:22  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  33:39  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  47:21  error  Unnecessary conditional, value is always truthy                                                     @typescript-eslint/no-unnecessary-condition
+  53:17  error  Unnecessary conditional, value is always truthy                                                     @typescript-eslint/no-unnecessary-condition
+  63:32  error  Unnecessary conditional, value is always falsy                                                      @typescript-eslint/no-unnecessary-condition
+  65:28  error  Unnecessary conditional, value is always falsy                                                      @typescript-eslint/no-unnecessary-condition
+  67:21  error  Unnecessary conditional, value is always truthy                                                     @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\activity\activity-feed.tsx
+   33:21  error  Unnecessary conditional, value is always truthy    @typescript-eslint/no-unnecessary-condition
+   35:21  error  Unnecessary conditional, value is always truthy    @typescript-eslint/no-unnecessary-condition
+  171:55  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\activity\grouped-activity.tsx
+  25:53  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  25:78  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\activity\single-activity.tsx
+   36:12  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   84:25  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   84:41  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+   89:25  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+   89:41  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  121:27  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  121:41  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  122:26  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  122:46  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  148:84  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\code-diff-sidebar.tsx
+  28:21   error  Unnecessary conditional, value is always truthy                   @typescript-eslint/no-unnecessary-condition
+  51:102  error  Async arrow function 'sessionSnapshot' has no 'await' expression  @typescript-eslint/require-await
+
+D:\LAST\src\renderer\components\workspace\new-session-dialog.tsx
+   95:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\components\workspace\new-session-dialog.tsx:95:9
+  93 |     useEffect(() => {
+  94 |         if (!open) return;
+> 95 |         setGithub(initialValues?.source?.github ?? "");
+     |         ^^^^^^^^^ Avoid calling setState() directly within an effect
+  96 |         setBranch(initialValues?.source?.branch ?? "");
+  97 |         setTitle(initialValues?.title ?? "");
+  98 |         setPrompt(initialValues?.prompt ?? "");  react-hooks/set-state-in-effect
+  121:54  error  `FormEvent` is deprecated. FormEvent doesn't actually exist.
+You probably meant to use {@link ChangeEvent}, {@link InputEvent}, {@link SubmitEvent}, or just {@link SyntheticEvent} instead
+depending on the event type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-deprecated
+  134:32  error  Unnecessary optional chain on a non-nullish value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\components\workspace\session-list.tsx
+   30:14   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\components\workspace\session-list.tsx:30:14
+  28 |
+  29 |     useEffect(() => {
+> 30 |         void load()
+     |              ^^^^ Avoid calling setState() directly within an effect
+  31 |     }, [load])
+  32 |
+  33 |     const handleSync = useCallback(() => {  react-hooks/set-state-in-effect
+   49:26   error  Unnecessary conditional, comparison is always true, since `"githubRepo" === "githubRepo"` is true                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unnecessary-condition
+   51:21   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unnecessary-condition
+   98:46   error  Unnecessary conditional, comparison is always true, since `"githubRepo" === "githubRepo"` is true                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-unnecessary-condition
+  110:123  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unnecessary-condition
+  110:155  error  ["unspecified"] is better written in dot notation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/dot-notation
+  123:62   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unnecessary-condition
+  128:61   error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unnecessary-condition
+  140:164  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             @typescript-eslint/no-unnecessary-condition
+  140:200  error  ["unspecified"] is better written in dot notation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/dot-notation
+
+D:\LAST\src\renderer\library\command-palette\CommandPalette.tsx
+   65:13  error  Forbidden non-null assertion                                                                                                    @typescript-eslint/no-non-null-assertion
+  127:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  129:24  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\src\renderer\library\notification\eventBus.ts
+  3:13  error  Use an `interface` instead of a `type`  @typescript-eslint/consistent-type-definitions
+
+D:\LAST\src\renderer\library\repl\hooks\useFilesystem.ts
+   4:13  error  Unexpected any. Specify a different type                       @typescript-eslint/no-explicit-any
+   8:12  error  Unsafe object destructuring of a property with an `any` value  @typescript-eslint/no-unsafe-assignment
+  13:9   error  Unsafe return of a value of type `any`                         @typescript-eslint/no-unsafe-return
+  13:16  error  Unsafe call of an `any` typed value                            @typescript-eslint/no-unsafe-call
+  13:24  error  Unsafe member access .readFile on an `any` value               @typescript-eslint/no-unsafe-member-access
+  17:9   error  Unsafe return of a value of type `any`                         @typescript-eslint/no-unsafe-return
+  17:16  error  Unsafe call of an `any` typed value                            @typescript-eslint/no-unsafe-call
+  17:24  error  Unsafe member access .writeFile on an `any` value              @typescript-eslint/no-unsafe-member-access
+  21:9   error  Unsafe return of a value of type `any`                         @typescript-eslint/no-unsafe-return
+  21:16  error  Unsafe call of an `any` typed value                            @typescript-eslint/no-unsafe-call
+  21:24  error  Unsafe member access .mkdir on an `any` value                  @typescript-eslint/no-unsafe-member-access
+  25:9   error  Unsafe return of a value of type `any`                         @typescript-eslint/no-unsafe-return
+  25:16  error  Unsafe call of an `any` typed value                            @typescript-eslint/no-unsafe-call
+  25:24  error  Unsafe member access .rmdir on an `any` value                  @typescript-eslint/no-unsafe-member-access
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts
+   45:32  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:45:32
+  43 |         unwatchModules,
+  44 |         watchedModules
+> 45 |     } = useFilesystem({runner: runnerRef?.current})
+     |                                ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  46 |
+  47 |     const createWorker = () => {
+  48 |         const worker = new Worker(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/refs
+   45:32  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:45:32
+  43 |         unwatchModules,
+  44 |         watchedModules
+> 45 |     } = useFilesystem({runner: runnerRef?.current})
+     |                                ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  46 |
+  47 |     const createWorker = () => {
+  48 |         const worker = new Worker(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/refs
+   45:41  error    Unnecessary optional chain on a non-nullish value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unnecessary-condition
+   61:13  error    Error: Cannot access variable before it is declared
+
+`cleanup` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:61:13
+  59 |         // Cleanup worker on unmount
+  60 |         return () => {
+> 61 |             cleanup()
+     |             ^^^^^^^ `cleanup` accessed before it is declared
+  62 |         }
+  63 |     }, [])
+  64 |
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:194:5
+  192 |     }
+  193 |
+> 194 |     const cleanup = () => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^
+> 195 |         if (!workerRef.current) {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 196 |             return
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 197 |         }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 198 |         console.debug('Terminating worker')
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 199 |         workerRef.current.terminate()
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 200 |     }
+      | ^^^^^^ `cleanup` is declared here
+  201 |
+  202 |     const isAwaitingInput =
+  203 |         !!runnerId && workerAwaitingInputIds.includes(runnerId)                                                                                                                                                                                                                          react-hooks/immutability
+   87:63  error    Use a ! assertion to more succinctly remove null and undefined from the type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    @typescript-eslint/non-nullable-type-assertion-style
+  109:13  error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-floating-promises
+  111:8   warning  React Hook useEffect has missing dependencies: 'allPackages' and 'isReady'. Either include them or remove the dependency array. Mutable values like 'workerRef.current' aren't valid dependencies because mutating them doesn't re-render the component                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+  111:9   error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:111:9
+  109 |             init()
+  110 |         }
+> 111 |     }, [workerRef.current])
+      |         ^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  112 |
+  113 |     // Immediately set stdout upon receiving new input
+  114 |     useEffect(() => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/refs
+  111:9   error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:111:9
+  109 |             init()
+  110 |         }
+> 111 |     }, [workerRef.current])
+      |         ^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  112 |
+  113 |     // Immediately set stdout upon receiving new input
+  114 |     useEffect(() => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   react-hooks/refs
+  116:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:116:13
+  114 |     useEffect(() => {
+  115 |         if (output.length > 0) {
+> 116 |             setStdout(output.join('\n'))
+      |             ^^^^^^^^^ Avoid calling setState() directly within an effect
+  117 |         }
+  118 |     }, [output])
+  119 |                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/set-state-in-effect
+  124:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:124:13
+  122 |         if (terminateOnCompletion && hasRun && !isRunning) {
+  123 |             cleanup()
+> 124 |             setIsRunning(false)
+      |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  125 |             setRunnerId(undefined)
+  126 |         }
+  127 |     }, [terminateOnCompletion, hasRun, isRunning])                                                                                                                                                                                                                                                                                                           react-hooks/set-state-in-effect
+  156:21  error    Unnecessary conditional, value is always falsy                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unnecessary-condition
+  163:25  error    Error: Cannot access variable before it is declared
+
+`interruptExecution` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:163:25
+  161 |                         setStdout('')
+  162 |                         setStderr(`Execution timed out. Reached limit of ${timeout} ms.`)
+> 163 |                         interruptExecution()
+      |                         ^^^^^^^^^^^^^^^^^^ `interruptExecution` accessed before it is declared
+  164 |                     }, timeout)
+  165 |                 }
+  166 |                 if (watchedModules.size > 0) {
+
+D:\LAST\src\renderer\library\repl\hooks\usePython.ts:184:5
+  182 |     )
+  183 |
+> 184 |     const interruptExecution = () => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 185 |         cleanup()
+      | ^^^^^^^^^^^^^^^^^
+> 186 |         setIsRunning(false)
+      | ^^^^^^^^^^^^^^^^^
+> 187 |         setRunnerId(undefined)
+      | ^^^^^^^^^^^^^^^^^
+> 188 |         setOutput([])
+      | ^^^^^^^^^^^^^^^^^
+> 189 |
+      | ^^^^^^^^^^^^^^^^^
+> 190 |         // Spawn new worker
+      | ^^^^^^^^^^^^^^^^^
+> 191 |         createWorker()
+      | ^^^^^^^^^^^^^^^^^
+> 192 |     }
+      | ^^^^^^ `interruptExecution` is declared here
+  193 |
+  194 |     const cleanup = () => {
+  195 |         if (!workerRef.current) {  react-hooks/immutability
+  181:9   warning  React Hook useCallback has missing dependencies: 'autoImportPackages' and 'interruptExecution'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              react-hooks/exhaustive-deps
+
+D:\LAST\src\renderer\library\repl\hooks\usePythonConsole.ts
+   47:32  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+D:\LAST\src\renderer\library\repl\hooks\usePythonConsole.ts:47:32
+  45 |         unwatchModules,
+  46 |         watchedModules
+> 47 |     } = useFilesystem({runner: runnerRef?.current})
+     |                                ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  48 |
+  49 |     const createWorker = () => {
+  50 |         const worker = new Worker(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/refs
+   47:32  error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+D:\LAST\src\renderer\library\repl\hooks\usePythonConsole.ts:47:32
+  45 |         unwatchModules,
+  46 |         watchedModules
+> 47 |     } = useFilesystem({runner: runnerRef?.current})
+     |                                ^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  48 |
+  49 |     const createWorker = () => {
+  50 |         const worker = new Worker(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/refs
+   47:41  error    Unnecessary optional chain on a non-nullish value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-unnecessary-condition
+   63:13  error    Error: Cannot access variable before it is declared
+
+`cleanup` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+D:\LAST\src\renderer\library\repl\hooks\usePythonConsole.ts:63:13
+  61 |         // Cleanup worker on unmount
+  62 |         return () => {
+> 63 |             cleanup()
+     |             ^^^^^^^ `cleanup` accessed before it is declared
+  64 |         }
+  65 |     }, [])
+  66 |
+
+D:\LAST\src\renderer\library\repl\hooks\usePythonConsole.ts:186:5
+  184 |     }
+  185 |
+> 186 |     const cleanup = () => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^
+> 187 |         if (!workerRef.current) {
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 188 |             return
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 189 |         }
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 190 |         console.debug('Terminating worker')
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 191 |         workerRef.current.terminate()
+      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 192 |     }
+      | ^^^^^^ `cleanup` is declared here
+  193 |
+  194 |     const isAwaitingInput =
+  195 |         !!runnerId && workerAwaitingInputIds.includes(runnerId)         react-hooks/immutability
+   89:63  error    Use a ! assertion to more succinctly remove null and undefined from the type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @typescript-eslint/non-nullable-type-assertion-style
+  112:13  error    Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-floating-promises
+  114:8   warning  React Hook useEffect has missing dependencies: 'allPackages' and 'isReady'. Either include them or remove the dependency array. Mutable values like 'workerRef.current' aren't valid dependencies because mutating them doesn't re-render the component                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/exhaustive-deps
+  114:9   error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+D:\LAST\src\renderer\library\repl\hooks\usePythonConsole.ts:114:9
+  112 |             init()
+  113 |         }
+> 114 |     }, [workerRef.current])
+      |         ^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  115 |
+  116 |     // prettier-ignore
+  117 |     const moduleReloadCode = (modules: Set<string>) => `                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/refs
+  114:9   error    Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+D:\LAST\src\renderer\library\repl\hooks\usePythonConsole.ts:114:9
+  112 |             init()
+  113 |         }
+> 114 |     }, [workerRef.current])
+      |         ^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  115 |
+  116 |     // prettier-ignore
+  117 |     const moduleReloadCode = (modules: Set<string>) => `                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      react-hooks/refs
+  141:21  error    Unnecessary conditional, value is always falsy                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unnecessary-condition
+  148:25  error    Error: Cannot access variable before it is declared
+
+`interruptExecution` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+D:\LAST\src\renderer\library\repl\hooks\usePythonConsole.ts:148:25
+  146 |                         setStdout('')
+  147 |                         setStderr(`Execution timed out. Reached limit of ${timeout} ms.`)
+> 148 |                         interruptExecution()
+      |                         ^^^^^^^^^^^^^^^^^^ `interruptExecution` accessed before it is declared
+  149 |                     }, timeout)
+  150 |                 }
+  151 |                 if (watchedModules.size > 0) {
+
+D:\LAST\src\renderer\library\repl\hooks\usePythonConsole.ts:174:5
+  172 |     )
+  173 |
+> 174 |     const interruptExecution = () => {
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 175 |         cleanup()
+      | ^^^^^^^^^^^^^^^^^
+> 176 |         setIsRunning(false)
+      …
+      | ^^^^^^^^^^^^^^^^^
+> 183 |         createWorker()
+      | ^^^^^^^^^^^^^^^^^
+> 184 |     }
+      | ^^^^^^ `interruptExecution` is declared here
+  185 |
+  186 |     const cleanup = () => {
+  187 |         if (!workerRef.current) {  react-hooks/immutability
+  171:9   warning  React Hook useCallback has missing dependencies: 'autoImportPackages' and 'interruptExecution'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           react-hooks/exhaustive-deps
+
+D:\LAST\src\renderer\library\repl\providers\PythonProvider.tsx
+  25:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\LAST\src\renderer\library\repl\workers\python-worker.ts
+   47:19  error  Unsafe assignment of an `any` value                                                                 @typescript-eslint/no-unsafe-assignment
+   47:24  error  This assertion is unnecessary since it does not change the type of the expression                   @typescript-eslint/no-unnecessary-type-assertion
+   47:56  error  Unexpected any. Specify a different type                                                            @typescript-eslint/no-explicit-any
+   48:19  error  Unsafe call of an `any` typed value                                                                 @typescript-eslint/no-unsafe-call
+   48:22  error  Unsafe member access .install on an `any` value                                                     @typescript-eslint/no-unsafe-member-access
+   61:19  error  Unsafe assignment of an `any` value                                                                 @typescript-eslint/no-unsafe-assignment
+  117:5   error  Unsafe assignment of an `any` value                                                                 @typescript-eslint/no-unsafe-assignment
+  119:19  error  Unsafe assignment of an `any` value                                                                 @typescript-eslint/no-unsafe-assignment
+  119:36  error  This assertion is unnecessary since it does not change the type of the expression                   @typescript-eslint/no-unnecessary-type-assertion
+  119:49  error  Unexpected any. Specify a different type                                                            @typescript-eslint/no-explicit-any
+  120:31  error  Unsafe call of an `any` typed value                                                                 @typescript-eslint/no-unsafe-call
+  120:46  error  Unsafe member access .get on an `any` value                                                         @typescript-eslint/no-unsafe-member-access
+  124:27  error  Unsafe call of an `any` typed value                                                                 @typescript-eslint/no-unsafe-call
+  124:42  error  Unsafe member access .get on an `any` value                                                         @typescript-eslint/no-unsafe-member-access
+  125:33  error  Unsafe call of an `any` typed value                                                                 @typescript-eslint/no-unsafe-call
+  125:48  error  Unsafe member access .get on an `any` value                                                         @typescript-eslint/no-unsafe-member-access
+  129:28  error  Unsafe call of an `any` typed value                                                                 @typescript-eslint/no-unsafe-call
+  129:43  error  Unsafe member access .get on an `any` value                                                         @typescript-eslint/no-unsafe-member-access
+  148:23  error  Unsafe assignment of an `any` value                                                                 @typescript-eslint/no-unsafe-assignment
+  148:64  error  Unexpected any. Specify a different type                                                            @typescript-eslint/no-explicit-any
+  150:27  error  Unsafe assignment of an `any` value                                                                 @typescript-eslint/no-unsafe-assignment
+  157:40  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+  162:51  error  Unsafe member access .destroy on an `any` value                                                     @typescript-eslint/no-unsafe-member-access
+  163:25  error  Unsafe call of an `any` typed value                                                                 @typescript-eslint/no-unsafe-call
+  163:33  error  Unsafe member access .destroy on an `any` value                                                     @typescript-eslint/no-unsafe-member-access
+  176:9   error  Unsafe return of a value of type error                                                              @typescript-eslint/no-unsafe-return
+  176:16  error  Unsafe call of a type that could not be resolved                                                    @typescript-eslint/no-unsafe-call
+  176:27  error  Unsafe member access .readFile on a type that cannot be resolved                                    @typescript-eslint/no-unsafe-member-access
+  181:9   error  Unsafe call of a type that could not be resolved                                                    @typescript-eslint/no-unsafe-call
+  181:20  error  Unsafe member access .writeFile on a type that cannot be resolved                                   @typescript-eslint/no-unsafe-member-access
+  186:9   error  Unsafe call of a type that could not be resolved                                                    @typescript-eslint/no-unsafe-call
+  186:20  error  Unsafe member access .mkdir on a type that cannot be resolved                                       @typescript-eslint/no-unsafe-member-access
+  191:9   error  Unsafe call of a type that could not be resolved                                                    @typescript-eslint/no-unsafe-call
+  191:20  error  Unsafe member access .rmdir on a type that cannot be resolved                                       @typescript-eslint/no-unsafe-member-access
+
+D:\LAST\src\renderer\library\repl\workers\service-worker.ts
+   5:5   error  Unsafe call of a type that could not be resolved                                                           @typescript-eslint/no-unsafe-call
+   9:5   error  Unsafe call of a type that could not be resolved                                                           @typescript-eslint/no-unsafe-call
+   9:18  error  Unsafe member access .claim on a type that cannot be resolved                                              @typescript-eslint/no-unsafe-member-access
+  16:20  error  Unsafe member access .type on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  17:45  error  Unsafe argument of type `any` assigned to a parameter of type `string`                                     @typescript-eslint/no-unsafe-argument
+  17:56  error  Unsafe member access .id on an `any` value                                                                 @typescript-eslint/no-unsafe-member-access
+  24:31  error  Unsafe argument of type `any` assigned to a parameter of type `BodyInit | null | undefined`                @typescript-eslint/no-unsafe-argument
+  24:42  error  Unsafe member access .value on an `any` value                                                              @typescript-eslint/no-unsafe-member-access
+  29:25  error  Unsafe argument of type error typed assigned to a parameter of type `string | URL`                         @typescript-eslint/no-unsafe-argument
+  29:39  error  Unsafe member access .url on a type that cannot be resolved                                                @typescript-eslint/no-unsafe-member-access
+  35:9   error  Unsafe call of a type that could not be resolved                                                           @typescript-eslint/no-unsafe-call
+  36:23  error  Async arrow function has no 'await' expression                                                             @typescript-eslint/require-await
+  38:17  error  Unsafe call of a type that could not be resolved                                                           @typescript-eslint/no-unsafe-call
+  38:17  error  Unsafe call of a type that could not be resolved                                                           @typescript-eslint/no-unsafe-call
+  38:30  error  Unsafe member access .matchAll on a type that cannot be resolved                                           @typescript-eslint/no-unsafe-member-access
+  38:41  error  Unsafe member access .then on a type that cannot be resolved                                               @typescript-eslint/no-unsafe-member-access
+  39:21  error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  39:29  error  Unsafe member access .forEach on an `any` value                                                            @typescript-eslint/no-unsafe-member-access
+  40:36  error  Unsafe member access .type on an `any` value                                                               @typescript-eslint/no-unsafe-member-access
+  41:29  error  Unsafe call of an `any` typed value                                                                        @typescript-eslint/no-unsafe-call
+  41:36  error  Unsafe member access .postMessage on an `any` value                                                        @typescript-eslint/no-unsafe-member-access
+  63:54  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  65:9   error  Unsafe call of a type that could not be resolved                                                           @typescript-eslint/no-unsafe-call
+
+D:\LAST\src\renderer\pages\electron\FileEditor.tsx
+  23:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\LAST\src\renderer\pages\electron\KitPage.tsx
+   66:18  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  352:64  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+  396:48  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function  @typescript-eslint/no-confusing-void-expression
+
+D:\LAST\src\renderer\pages\electron\QueuesPage.tsx
+  304:17  error  Unnecessary optional chain on a non-nullish value                                                   @typescript-eslint/no-unnecessary-condition
+  374:28  error  Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\pages\electron\ShipPage.tsx
+  245:32  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+
+D:\LAST\src\renderer\pages\electron\TardisPage.tsx
+   46:9   error  Promise-returning function provided to property where a void return was expected                                                                                                                                         @typescript-eslint/no-misused-promises
+   77:35  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                @typescript-eslint/prefer-nullish-coalescing
+   79:39  error  Unsafe assignment of an `any` value                                                                                                                                                                                      @typescript-eslint/no-unsafe-assignment
+   79:69  error  Unexpected any. Specify a different type                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  129:27  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                @typescript-eslint/prefer-nullish-coalescing
+  151:19  error  Unnecessary conditional, value is always truthy                                                                                                                                                                          @typescript-eslint/no-unnecessary-condition
+  152:27  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                @typescript-eslint/prefer-nullish-coalescing
+  153:29  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                @typescript-eslint/prefer-nullish-coalescing
+  155:41  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                @typescript-eslint/prefer-nullish-coalescing
+  157:45  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                @typescript-eslint/prefer-nullish-coalescing
+  170:32  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                @typescript-eslint/prefer-nullish-coalescing
+  281:47  error  Unsafe assignment of an `any` value                                                                                                                                                                                      @typescript-eslint/no-unsafe-assignment
+  281:71  error  Unexpected any. Specify a different type                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  286:42  error  `FormEvent` is deprecated. FormEvent doesn't actually exist.
+You probably meant to use {@link ChangeEvent}, {@link InputEvent}, {@link SubmitEvent}, or just {@link SyntheticEvent} instead
+depending on the event type  @typescript-eslint/no-deprecated
+  296:27  error  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator                                                                                                                @typescript-eslint/prefer-nullish-coalescing
+  402:68  error  Unnecessary conditional, comparison is always true, since `"interval" === "interval"` is true                                                                                                                            @typescript-eslint/no-unnecessary-condition
+  404:65  error  Unnecessary conditional, comparison is always true, since `"daily" === "daily"` is true                                                                                                                                  @typescript-eslint/no-unnecessary-condition
+  406:66  error  Unnecessary conditional, comparison is always true, since `"weekly" === "weekly"` is true                                                                                                                                @typescript-eslint/no-unnecessary-condition
+  437:57  error  Promise-returning function provided to attribute where a void return was expected                                                                                                                                        @typescript-eslint/no-misused-promises
+  458:57  error  Promise-returning function provided to attribute where a void return was expected                                                                                                                                        @typescript-eslint/no-misused-promises
+  515:44  error  Promise-returning function provided to attribute where a void return was expected                                                                                                                                        @typescript-eslint/no-misused-promises
+
+D:\LAST\src\renderer\pages\shared\settings\panels\ColorPalettePanel.tsx
+  125:21  error    Expected an assignment or function call and instead saw an expression                                                         @typescript-eslint/no-unused-expressions
+  184:8   warning  React Hook useMemo has unnecessary dependencies: 'editTheme' and 'theme'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\LAST\src\renderer\pages\shared\settings\panels\NotificationPanel.tsx
+  16:14  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  56:82  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+
+D:\LAST\src\renderer\pages\shared\settings\panels\TypographyPanel.tsx
+  10:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\LAST\src\renderer\pages\shared\settings\panels\TypographyPanel.tsx:10:13
+   8 |     useEffect(() => {
+   9 |         if (!family || SYSTEM_FONTS.has(family)) {
+> 10 |             setLoaded(true);
+     |             ^^^^^^^^^ Avoid calling setState() directly within an effect
+  11 |             return
+  12 |         }
+  13 |         setLoaded(null)  react-hooks/set-state-in-effect
+
+D:\LAST\src\renderer\providers\theme.tsx
+   31:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+   39:19  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+   40:24  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+   49:33  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+   57:34  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+   65:37  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+   73:33  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+   82:35  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+   91:32  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+  100:35  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+  108:38  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+  116:36  error  Returning a void expression from an arrow function shorthand is forbidden. Please add braces to the arrow function              @typescript-eslint/no-confusing-void-expression
+  143:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  156:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  234:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\LAST\src\renderer\utils\git-patch.ts
+   56:40  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+   99:40  error  Unnecessary optional chain on a non-nullish value  @typescript-eslint/no-unnecessary-condition
+  110:27  error  Forbidden non-null assertion                       @typescript-eslint/no-non-null-assertion
+
+✖ 210 problems (203 errors, 7 warnings)
+  29 errors and 0 warnings potentially fixable with the `--fix` option.
+

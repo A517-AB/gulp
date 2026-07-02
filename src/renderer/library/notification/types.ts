@@ -1,4 +1,4 @@
-export type SoundId = 'none' | 'beep' | 'chime' | 'bell' | 'pulse'
+export type SoundId = 'none' | 'beep' | 'chime' | 'bell' | 'pulse' | 'alarm'
 
 export interface NotifAction {
   id:     string

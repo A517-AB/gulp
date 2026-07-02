@@ -88,8 +88,8 @@ function parseUnidiff(patch?: string | null): ParsedFile[] {
 // ── git ───────────────────────────────────────────────────────────────────────
 
 function resolveGitSource(cwd?: string): { github: string | null; baseBranch: string } {
-    const baseBranch = process.env['BASE_BRANCH'] ?? 'main'
-    const fromEnv = process.env['GITHUB_REPO']
+    const baseBranch = process.env.BASE_BRANCH ?? 'main'
+    const fromEnv = process.env.GITHUB_REPO
     if (fromEnv) return {github: fromEnv, baseBranch}
     try {
         const url = execFileSync('git', ['remote', 'get-url', 'origin'], {cwd, encoding: 'utf-8'}).trim()
@@ -105,7 +105,7 @@ function resolveGitSource(cwd?: string): { github: string | null; baseBranch: st
 const GITHUB_API = 'https://api.github.com'
 
 function getToken(): string {
-    const token = process.env['GITHUB_TOKEN']
+    const token = process.env.GITHUB_TOKEN
     if (!token) throw new Error('GITHUB_TOKEN not set')
     return token
 }

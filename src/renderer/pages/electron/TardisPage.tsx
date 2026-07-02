@@ -2,13 +2,17 @@ import {useEffect, useRef, useState} from 'react'
 import {AnimatePresence, motion} from 'framer-motion'
 import {scheduler} from '@shared/bridge'
 import type {ScheduledItem, ScheduleInput, UINotifAction} from '@shared/electron'
-import {useNotification} from '@/library/notification'
 import {AlertCircle, Bell, Clock, Edit2, Plus, Trash2, Volume2, X} from 'lucide-react'
+
+function toLocalInputValue(d: Date): string {
+    const pad = (n: number) => String(n).padStart(2, '0')
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 type ScheduleKind = 'once' | 'interval' | 'daily' | 'weekly'
 type SoundId = 'none' | 'beep' | 'chime' | 'bell' | 'pulse'
 
-type ActionPreset = 'snooze-10' | 'snooze-5' | 'snooze-30' | 'todo' | 'done' | 'dismiss' | 'custom'
+type ActionPreset = 'snooze-10' | 'snooze-5' | 'snooze-30' | 'done'
 
 interface CustomActionInput {
     preset: ActionPreset
@@ -26,13 +30,12 @@ export default function TardisPage() {
 
     // Form Fields
     const [label, setLabel] = useState('')
-    const [body, setBody] = useState('')
     const [kind, setKind] = useState<ScheduleKind>('once')
+    const [onceAt, setOnceAt] = useState('')
     const [minutes, setMinutes] = useState(15)
     const [time, setTime] = useState('09:00')
     const [dayOfWeek, setDayOfWeek] = useState<number>(1) // Monday
     const [sound, setSound] = useState<SoundId>('chime')
-    const [icon, setIcon] = useState<string>('')
     const [color, setColor] = useState<string>('')
 
     const [hasLeadTime, setHasLeadTime] = useState(false)
@@ -40,57 +43,6 @@ export default function TardisPage() {
     const [customActions, setCustomActions] = useState<CustomActionInput[]>([])
 
   const loaded = useRef(false)
-
-    // Notifications hook
-    const {notify, success} = useNotification({
-        onAction: async (actionId, extraData) => {
-            console.log(`[TardisPage] Action clicked: ${actionId}`, extraData)
-            const data = extraData as { itemId?: string } | undefined
-            if (!data?.itemId) return
-            const baseId = data.itemId.replace('_lead', '')
-
-            if (actionId.startsWith('snooze')) {
-                const mins = actionId === 'snooze' ? 10 : Number(actionId.split('-')[1]) || 10
-                try {
-                    await scheduler?.snooze(baseId, mins)
-                    const existing = await scheduler?.list()
-                    if (existing) setItems(existing)
-                } catch (err) {
-                    console.error('[TardisPage] Snooze failed:', err)
-                }
-            }
-        }
-    })
-
-    // Listen to scheduler triggers when app is open
-  useEffect(() => {
-    if (!scheduler) return
-    return scheduler.onFired((item) => {
-        const isLead = item.id.endsWith('_lead')
-      const fn = item.sound === 'none' ? notify : success
-
-        const payload: Parameters<typeof fn>[0] = {
-            title: item.label,
-            id: `sched-${item.id}`
-        }
-
-        const bodyVal = item.body || (isLead ? 'Starting soon' : undefined)
-        if (bodyVal !== undefined) payload.body = bodyVal
-        if (item.sound !== undefined) payload.sound = item.sound as any
-        if (item.actions !== undefined) payload.actions = item.actions
-
-        payload.extraData = {itemId: item.id}
-        if (item.color) payload.color = item.color
-        if (item.icon) payload.icon = item.icon
-
-        fn(payload)
-
-        // Clean up once-off alerts from the UI state
-        if (item.schedule.kind === 'once') {
-            setItems(p => p.filter(i => i.id !== item.id && i.id !== `${item.id}_lead`))
-        }
-    })
-  }, [notify, success])
 
     // Load schedules on mount
   useEffect(() => {
@@ -108,13 +60,12 @@ export default function TardisPage() {
     function openAddModal() {
         setEditingId(null)
         setLabel('')
-        setBody('')
         setKind('once')
+        setOnceAt(toLocalInputValue(new Date(Date.now() + 15 * 60_000)))
         setMinutes(15)
         setTime('09:00')
         setDayOfWeek(1)
         setSound('chime')
-        setIcon('')
         setColor('')
         setHasLeadTime(false)
         setLeadTimeMin(15)
@@ -126,7 +77,6 @@ export default function TardisPage() {
     function openEditModal(item: ScheduledItem) {
         setEditingId(item.id)
         setLabel(item.label)
-        setBody(item.body || '')
         if (item.schedule.kind === 'once' ||
             item.schedule.kind === 'interval' ||
             item.schedule.kind === 'daily' ||
@@ -136,9 +86,7 @@ export default function TardisPage() {
 
         // Parse schedule configuration
         if (item.schedule.kind === 'once') {
-            const triggerTime = new Date(item.schedule.at).getTime()
-            const diffMs = triggerTime - Date.now()
-            setMinutes(Math.max(1, Math.round(diffMs / 60_000)))
+            setOnceAt(toLocalInputValue(new Date(item.schedule.at)))
         } else if (item.schedule.kind === 'interval') {
             setMinutes(item.schedule.everyMinutes)
         } else if (item.schedule.kind === 'daily') {
@@ -149,19 +97,16 @@ export default function TardisPage() {
         }
 
         setSound((item.sound as SoundId) || 'none')
-        setIcon(item.icon || '')
         setColor(item.color || '')
         setHasLeadTime(!!item.leadTimeMin)
         setLeadTimeMin(item.leadTimeMin || 15)
 
         const actionsMapped = (item.actions || []).map(a => {
-            let preset: ActionPreset = 'custom'
+            let preset: ActionPreset = 'snooze-10'
             if (a.id === 'snooze-10') preset = 'snooze-10'
             else if (a.id === 'snooze-5') preset = 'snooze-5'
             else if (a.id === 'snooze-30') preset = 'snooze-30'
-            else if (a.id === 'todo') preset = 'todo'
             else if (a.id === 'done') preset = 'done'
-            else if (a.id === 'dismiss') preset = 'dismiss'
 
             return {
                 preset,
@@ -224,36 +169,15 @@ export default function TardisPage() {
                 id = 'snooze-30'
                 label = 'Snooze 30m'
                 break
-            case 'todo':
-                id = 'todo'
-                label = 'To Do'
-                break
             case 'done':
                 id = 'done'
-                label = 'Done'
-                break
-            case 'dismiss':
-                id = 'dismiss'
-                label = 'Dismiss'
-                break
-            case 'custom':
-                id = 'custom-action'
-                label = 'Custom'
+                label = 'Mark Done'
                 break
         }
 
         setCustomActions(p => p.map((act, i) => {
             if (i === idx) {
                 return {...act, preset, id, label}
-            }
-            return act
-        }))
-    }
-
-    function updateActionValue(idx: number, field: 'id' | 'label', val: string) {
-        setCustomActions(p => p.map((act, i) => {
-            if (i === idx) {
-                return {...act, [field]: val}
             }
             return act
         }))
@@ -272,7 +196,7 @@ export default function TardisPage() {
     function buildScheduleInput(): ScheduleInput {
         switch (kind) {
             case 'once':
-                return {kind: 'once', at: new Date(Date.now() + minutes * 60_000).toISOString()}
+                return {kind: 'once', at: new Date(onceAt).toISOString()}
             case 'interval':
                 return {kind: 'interval', everyMinutes: minutes}
             case 'daily':
@@ -300,12 +224,9 @@ export default function TardisPage() {
             createdAt: new Date().toISOString()
         }
 
-        const b = body.trim()
-        if (b) savedItem.body = b
         if (sound !== 'none') savedItem.sound = sound
         if (hasLeadTime) savedItem.leadTimeMin = leadTimeMin
         if (actionsPayload.length > 0) savedItem.actions = actionsPayload
-        if (icon) savedItem.icon = icon
         if (color) savedItem.color = color
 
         try {
@@ -532,22 +453,6 @@ export default function TardisPage() {
                                     />
                                 </div>
 
-                                {/* Description */}
-                                <div className="space-y-1">
-                                    <label
-                                        className="text-3xs font-semibold text-fg-ghost uppercase tracking-wider block">
-                                        Description (Optional)
-                                    </label>
-                                    <textarea
-                                        value={body}
-                                        onChange={e => {
-                                            setBody(e.target.value);
-                                        }}
-                                        placeholder="Short description of the event..."
-                                        className="w-full h-16 bg-hover border border-hair rounded-lg px-3 py-2 text-xs text-fg-primary placeholder-fg-ghost/30 focus:border-subtle outline-none resize-none transition-colors"
-                                    />
-                                </div>
-
                                 {/* Schedule Tab Bar */}
                                 <div className="space-y-2">
                                     <label
@@ -578,20 +483,16 @@ export default function TardisPage() {
                                 <div className="p-3.5 bg-hover/40 border border-hair/50 rounded-lg">
                                     {kind === 'once' && (
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-2xs text-fg-secondary">Trigger once in:</span>
-                                            <div className="flex items-center gap-1.5">
-                                                <input
-                                                    type="number"
-                                                    min={1}
-                                                    required
-                                                    value={minutes}
-                                                    onChange={e => {
-                                                        setMinutes(Number(e.target.value));
-                                                    }}
-                                                    className="w-16 bg-hover border border-hair rounded px-2 py-1 text-xs font-mono text-center text-fg-primary focus:border-subtle outline-none"
-                                                />
-                                                <span className="text-2xs text-fg-ghost">minutes</span>
-                                            </div>
+                                            <span className="text-2xs text-fg-secondary">Trigger at:</span>
+                                            <input
+                                                type="datetime-local"
+                                                required
+                                                value={onceAt}
+                                                onChange={e => {
+                                                    setOnceAt(e.target.value);
+                                                }}
+                                                className="bg-hover border border-hair rounded px-2.5 py-1 text-xs font-mono text-fg-primary focus:border-subtle outline-none"
+                                            />
                                         </div>
                                     )}
 
@@ -678,7 +579,7 @@ export default function TardisPage() {
                                         Alert Sound
                                     </label>
                                     <div className="flex flex-wrap gap-1.5">
-                                        {(['none', 'beep', 'chime', 'bell', 'pulse'] as const).map(soundId => (
+                                        {(['none', 'chime'] as const).map(soundId => (
                                             <button
                                                 key={soundId}
                                                 type="button"
@@ -695,32 +596,6 @@ export default function TardisPage() {
                                             </button>
                                         ))}
                                     </div>
-                                </div>
-
-                                {/* Icon Selector */}
-                                <div className="space-y-1">
-                                    <label
-                                        className="text-3xs font-semibold text-fg-ghost uppercase tracking-wider block">
-                                        Icon Indicator
-                                    </label>
-                                    <select
-                                        value={icon}
-                                        onChange={e => {
-                                            setIcon(e.target.value);
-                                        }}
-                                        className="w-full bg-hover border border-hair rounded-lg px-3 py-2 text-xs text-fg-primary focus:border-subtle outline-none"
-                                    >
-                                        <option value="">Default (Bell)</option>
-                                        <option value="python">Python</option>
-                                        <option value="javascript">JavaScript</option>
-                                        <option value="typescript">TypeScript</option>
-                                        <option value="bash">Bash</option>
-                                        <option value="pwsh">PowerShell</option>
-                                        <option value="json">JSON</option>
-                                        <option value="markdown">Markdown</option>
-                                        <option value="html">HTML</option>
-                                        <option value="session">Jules</option>
-                                    </select>
                                 </div>
 
                                 {/* Color Accent highlight */}
@@ -826,41 +701,12 @@ export default function TardisPage() {
                                                         <option value="snooze-10">Snooze 10m</option>
                                                         <option value="snooze-5">Snooze 5m</option>
                                                         <option value="snooze-30">Snooze 30m</option>
-                                                        <option value="todo">To Do</option>
-                                                        <option value="done">Done</option>
-                                                        <option value="dismiss">Dismiss</option>
-                                                        <option value="custom">Custom...</option>
+                                                        <option value="done">Mark Done</option>
                                                     </select>
 
-                                                    {/* Editable Inputs for Custom preset */}
-                                                    {action.preset === 'custom' && (
-                                                        <>
-                                                            <input
-                                                                type="text"
-                                                                value={action.label}
-                                                                onChange={e => {
-                                                                    updateActionValue(idx, 'label', e.target.value);
-                                                                }}
-                                                                placeholder="Label"
-                                                                className="flex-1 bg-hover border border-hair rounded px-2 py-1 text-3xs text-fg-primary focus:border-subtle outline-none"
-                                                            />
-                                                            <input
-                                                                type="text"
-                                                                value={action.id}
-                                                                onChange={e => {
-                                                                    updateActionValue(idx, 'id', e.target.value);
-                                                                }}
-                                                                placeholder="action-id"
-                                                                className="w-16 bg-hover border border-hair rounded px-2 py-1 text-3xs font-mono text-fg-muted focus:border-subtle outline-none"
-                                                            />
-                                                        </>
-                                                    )}
-
-                                                    {action.preset !== 'custom' && (
-                                                        <span className="flex-1 text-3xs text-fg-ghost italic px-1">
+                                                    <span className="flex-1 text-3xs text-fg-ghost italic px-1">
                               {action.label} ({action.id})
                             </span>
-                                                    )}
 
                                                     {/* Accent/Ghost Style select */}
                                                     <select

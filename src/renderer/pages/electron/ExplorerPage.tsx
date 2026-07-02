@@ -1,22 +1,21 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import type { editor } from 'monaco-editor'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import type {editor} from 'monaco-editor'
+import {CheckCircle2, ChevronDown, FolderOpen, GitBranch, Plus, RefreshCw, Save, Star, StarOff, X} from 'lucide-react'
+import {FileTree} from '@/components/shared/FileTree'
+import {FileEditor, isImage} from './FileEditor'
+import {filesystem, git} from '@shared/bridge'
+import {cn} from '@/utils'
+import {useExplorerStore} from '@/store/explorer'
+import {GIT_COLORS, normalizePath, parseGitStatusPorcelain} from '@/utils/git'
 import {
-  FolderOpen, Save, X, GitBranch,
-  RefreshCw, ChevronDown, Plus, CheckCircle2,
-  Star, StarOff
-} from 'lucide-react'
-import { FileTree } from '@/components/shared/FileTree'
-import { FileEditor, isImage } from './FileEditor'
-import { filesystem, git } from '@shared/bridge'
-import { cn } from '@/utils'
-import { useExplorerStore } from '@/store/explorer'
-import { GIT_COLORS, normalizePath, parseGitStatusPorcelain } from '@/utils/git'
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '@/ui/dropdown-menu'
-import { useQuickie } from '@/components/quickie/use-quickie'
-import type { QuickiePreset } from '@/components/quickie/types'
+import {useQuickie} from '@/components/quickie/use-quickie'
+import type {QuickiePreset} from '@/components/quickie/types'
 
 const FILE_PRESETS: Record<string, QuickiePreset<'repoless_file'>> = {
   explain: {
@@ -450,7 +449,22 @@ export function ExplorerPage() {
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0 relative">
 
         {/* Editor */}
-        <div className="flex-1 overflow-hidden">
+          <div
+              className="flex-1 overflow-hidden"
+              onDragOverCapture={e => {
+                  if (!e.dataTransfer.types.includes('Files')) return
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'link'
+              }}
+              onDropCapture={e => {
+                  if (!e.dataTransfer.types.includes('Files')) return
+                  e.preventDefault()
+                  const file = e.dataTransfer.files[0]
+                  if (!file || !filesystem) return
+                  const path = filesystem.getPathForFile(file)
+                  if (path) void handleSelectFile(path)
+              }}
+          >
           {activePath && activeContent !== undefined ? (
             <FileEditor
               path={activePath}

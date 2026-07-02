@@ -1,7 +1,5 @@
 import {useState} from 'react'
-import {useSessions} from './cache.ts'
-import type {CachedSession} from './types.ts'
-import {relativeTime, repoFromSource, STATE_META, type StateMeta} from './format.ts'
+import {type CachedSession, relativeTime, repoFromSource, STATE_META, type StateMeta, useSessions} from './index.ts'
 
 interface SessionsSidebarProps {
     onSelect?: (session: CachedSession) => void
@@ -17,7 +15,7 @@ export function SessionsSidebar({onSelect, selectedId}: SessionsSidebarProps) {
         <div className="flex h-full flex-col overflow-y-auto bg-surface">
             {sessions.map((session) => {
                 const state = session.state ?? 'unspecified'
-                const meta = (STATE_META[state] as StateMeta | undefined) ?? STATE_META['unspecified']
+                const meta = (STATE_META[state] as StateMeta | undefined) ?? STATE_META.unspecified
                 const repo = repoFromSource(session.sourceContext?.source ?? '')
                 const active = session.id === activeId
                 const title = session.title ?? 'Untitled'

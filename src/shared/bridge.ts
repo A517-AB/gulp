@@ -10,7 +10,7 @@ export {isElectron, isWeb} from './env'
 export const terminal = el?.terminal ?? null
 export const queues = el?.queues ?? null
 export const windowControls = el?.window ?? null
-export const power = el?.power ?? null
+// export const power = el?.power ?? null
 export const popup = el?.popup ?? null
 export const filesystem = el?.filesystem ?? null
 export const notes = el?.notes ?? null

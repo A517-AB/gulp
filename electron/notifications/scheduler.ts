@@ -1,5 +1,4 @@
 import {Cron} from 'croner'
-import type {WebContents} from 'electron'
 import {app, ipcMain} from 'electron'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
@@ -39,6 +38,8 @@ export interface ScheduledItem {
   lastFiredAt?: string
     color?: string
     icon?: string
+    completed?: boolean
+    completedAt?: string
 }
 
 interface Store {
@@ -175,30 +176,30 @@ function toLeadTrigger(s: ScheduleInput, leadMin: number): string | Date | null 
 
 const jobs = new Map<string, Cron>()
 
-function startJob(item: ScheduledItem, getWebContents: () => WebContents | null): void {
-  stopJob(item.id)
+function fireItem(item: ScheduledItem, id: string, label: string): void {
+    dispatchNotification({
+        title: label,
+        body: item.body,
+        sound: item.sound,
+        id,
+        source: 'scheduler',
+        actions: item.actions,
+        extraData: {itemId: id},
+        color: item.color,
+        icon: item.icon
+    })
+}
 
-  const trigger = toTrigger(item.schedule)
+function startJob(item: ScheduledItem): void {
+    stopJob(item.id)
+
+    const trigger = toTrigger(item.schedule)
     if (trigger) {
         const job = new Cron(trigger, {protect: true, catch: true}, () => {
             item.lastFiredAt = new Date().toISOString()
             persistUpdate(item)
 
-            const wc = getWebContents()
-            if (wc) {
-                wc.send('notif.scheduler.fired', item)
-            } else {
-                dispatchNotification({
-                    title: item.label,
-                    body: item.body,
-                    sound: item.sound,
-                    id: item.id,
-                    actions: item.actions,
-                    extraData: {itemId: item.id},
-                    color: item.color,
-                    icon: item.icon
-                })
-            }
+            fireItem(item, item.id, item.label)
 
             if (item.schedule.kind === 'once') {
                 stopJob(item.id)
@@ -212,29 +213,39 @@ function startJob(item: ScheduledItem, getWebContents: () => WebContents | null)
         const leadTrigger = toLeadTrigger(item.schedule, item.leadTimeMin)
         if (leadTrigger) {
             const leadJob = new Cron(leadTrigger, {protect: true, catch: true}, () => {
-                const wc = getWebContents()
-                if (wc) {
-                    wc.send('notif.scheduler.fired', {
-                        ...item,
-                        label: `${item.label} (in ${item.leadTimeMin}m)`,
-                        id: `${item.id}_lead`
-                    })
-                } else {
-                    dispatchNotification({
-                        title: `${item.label} (in ${item.leadTimeMin}m)`,
-                        body: item.body,
-                        sound: item.sound,
-                        id: `${item.id}_lead`,
-                        actions: item.actions,
-                        extraData: {itemId: `${item.id}_lead`},
-                        color: item.color,
-                        icon: item.icon
-                    })
-                }
+                fireItem(item, `${item.id}_lead`, `${item.label} (in ${item.leadTimeMin}m)`)
             })
             jobs.set(`${item.id}_lead`, leadJob)
         }
     }
+}
+
+export interface UpcomingRun {
+    id: string
+    label: string
+    nextRun: string | null
+}
+
+function getUpcoming(): UpcomingRun[] {
+    const items = load()
+    const upcoming: UpcomingRun[] = []
+    for (const [id, job] of jobs) {
+        const isLead = id.endsWith('_lead')
+        const baseId = isLead ? id.slice(0, -5) : id
+        const item = items.find(i => i.id === baseId)
+        if (!item) continue
+        const next = job.nextRun()
+        upcoming.push({
+            id,
+            label: isLead ? `${item.label} (lead)` : item.label,
+            nextRun: next ? next.toISOString() : null
+        })
+    }
+    return upcoming.sort((a, b) => {
+        if (!a.nextRun) return 1
+        if (!b.nextRun) return -1
+        return a.nextRun.localeCompare(b.nextRun)
+    })
 }
 
 function stopJob(id: string): void {
@@ -255,19 +266,21 @@ function removeItem(id: string): void {
 
 // ── Registration ──────────────────────────────────────────────────────────────
 
-export function registerSchedulerHandlers(getWebContents: () => WebContents | null): void {
+export function registerSchedulerHandlers(): void {
   for (const item of load()) {
-    if (item.enabled) startJob(item, getWebContents)
+      if (item.enabled) startJob(item)
   }
 
   ipcMain.handle('notif.scheduler.list', () => load())
+
+    ipcMain.handle('notif.scheduler.upcoming', () => getUpcoming())
 
   ipcMain.handle('notif.scheduler.add', (_, item: ScheduledItem) => {
       stopJob(item.id)
     const items = load().filter(i => i.id !== item.id)
     items.push(item)
     save(items)
-    if (item.enabled) startJob(item, getWebContents)
+      if (item.enabled) startJob(item)
     return item
   })
 
@@ -282,10 +295,21 @@ export function registerSchedulerHandlers(getWebContents: () => WebContents | nu
     if (!item) return
     item.enabled = enabled
     save(items)
-    if (enabled) startJob(item, getWebContents)
+      if (enabled) startJob(item)
     else stopJob(id)
     return item
   })
+
+    ipcMain.handle('notif.scheduler.markDone', (_, id: string) => {
+        const items = load()
+        const item = items.find(i => i.id === id)
+        if (!item) return
+        item.completed = !item.completed
+        if (item.completed) item.completedAt = new Date().toISOString()
+        else delete item.completedAt
+        save(items)
+        return item
+    })
 
   ipcMain.handle('notif.scheduler.snooze', (_, id: string, minutes: number) => {
     const item = load().find(i => i.id === id)
@@ -299,7 +323,7 @@ export function registerSchedulerHandlers(getWebContents: () => WebContents | nu
     const items = load()
     items.push(snoozeItem)
     save(items)
-    startJob(snoozeItem, getWebContents)
+      startJob(snoozeItem)
     return snoozeItem
   })
 }

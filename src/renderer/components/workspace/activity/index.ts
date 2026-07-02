@@ -1,6 +1,7 @@
 export {ActivityFeed} from './activity-feed.tsx';
 export {TerminalConsole} from './terminal-console.tsx';
 export {MediaItemDownloader} from './activity-artifacts.tsx';
+export {InsightsBar} from './insights-bar.tsx';
 
 export type {
     ActivityFeedProps,

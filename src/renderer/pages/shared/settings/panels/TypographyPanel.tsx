@@ -4,16 +4,20 @@ import {loadFont, useTheme} from '@renderer/providers/theme'
 const SYSTEM_FONTS = new Set(['system-ui', 'sans-serif', 'monospace', 'ui-monospace', 'ui-sans-serif', 'serif'])
 
 function useFontLoaded(family: string): boolean | null {
-    const [loaded, setLoaded] = useState<boolean | null>(null)
+    const isSystem = !family || SYSTEM_FONTS.has(family)
+    const [result, setResult] = useState<{ family: string; loaded: boolean | null }>({family, loaded: null})
+
+    // Reset during render when the family changes — avoids a synchronous
+    // setState inside the effect (react-hooks/set-state-in-effect)
+    if (result.family !== family) {
+        setResult({family, loaded: null})
+    }
+
     useEffect(() => {
-        if (!family || SYSTEM_FONTS.has(family)) {
-            setLoaded(true);
-            return
-        }
-        setLoaded(null)
+        if (isSystem) return
         const check = () => {
             void document.fonts.load(`16px '${family}'`).then(faces => {
-                setLoaded(faces.length > 0)
+                setResult(prev => prev.family === family ? {family, loaded: faces.length > 0} : prev)
             })
         }
         check()
@@ -21,8 +25,10 @@ function useFontLoaded(family: string): boolean | null {
         return () => {
             document.fonts.removeEventListener('loadingdone', check)
         }
-    }, [family])
-    return loaded
+    }, [family, isSystem])
+
+    if (isSystem) return true
+    return result.family === family ? result.loaded : null
 }
 
 // ── font suggestions ──────────────────────────────────────────────────────────

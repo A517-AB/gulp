@@ -88,7 +88,7 @@ export const MediaItemDownloader = memo(function MediaItemDownloader({ media, ac
                     </span>
                 </button>
             </div>
-            <div className="flex justify-center bg-surface-raised rounded p-2 border border-hair">
+            <div className="flex justify-center bg-raised rounded p-2 border border-hair">
                 {media.format.startsWith("video/") ? (
                     <video
                         src={`data:${media.format};base64,${media.data}`}

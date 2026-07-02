@@ -1,6 +1,18 @@
+# ⚠️ RULE ZERO — READ BEFORE TOUCHING ANYTHING
+
+**UNUSED ≠ DEAD. DO NOT DELETE UNUSED CODE.**
+
+If something isn't currently imported or called, that does not mean it should be removed.
+It may be in-progress work, a planned API surface, or intentionally placed there.
+**Flag it. Let the user decide. Never remove it preemptively.**
+This applies to: functions, imports, exports, helpers, variables — everything.
+Violating this creates conflicts and wastes time.
+
+---
+
 # Agents
 
-> Last updated: 2026-06-28
+> Last updated: 2026-07-01
 
 Working document for AI agents on this project — rules, architecture, directives.
 
@@ -34,6 +46,9 @@ Jules, which is an API to a remote VM that executes coding tasks — nothing run
   - don't give compliments
   - a package beats handrolled. always provide package names if something is nicer with it
   - ask for screenshots when diagnosing UI issues — it's easy to get them
+  - unused isn't the same as dead. don't delete unused exports/code just because nothing currently imports it — it may
+    be placed there on purpose (in-progress work, planned API surface). flag what's unused and let the user decide;
+    removing it preemptively creates future conflicts
 
 ## Commands
 

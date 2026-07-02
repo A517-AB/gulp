@@ -1,7 +1,7 @@
 import {useState} from 'react'
 import {uiNotification} from '@shared/bridge'
 
-const SOUNDS = ['none', 'pulse', 'chime', 'alert', 'soft']
+const SOUNDS = ['none', 'beep', 'chime', 'bell', 'pulse', 'alarm']
 const DURATIONS = [3000, 5000, 8000, 12000, 0]
 const DURATION_LABELS: Record<number, string> = { 3000: '3s', 5000: '5s', 8000: '8s', 12000: '12s', 0: 'persistent' }
 

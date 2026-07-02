@@ -129,3 +129,5 @@ GPU cache creation flagged as something to investigate. Also a CSS issue somewhe
 
 - SDK types are from an older clone, runtime shape may differ from type definitions — always guard defensively
 - IPC bridge pattern: handler in `electron/ipc/handlers.ts` → type in `src/jules/sdk-ipc.ts` → bridge call in `electron/ipc/bridge.ts`
+
+previois is old, might be finished already.

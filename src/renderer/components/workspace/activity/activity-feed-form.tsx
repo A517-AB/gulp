@@ -1,19 +1,27 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react";
-import { ArrowUp } from "lucide-react";
-import { Textarea } from "@/ui/textarea.tsx";
-import { Button } from "@/ui/button.tsx";
-import { useSnippets, type SnippetItem } from "@/hooks/use-snippets.ts";
-import { cn } from "@/utils";
-import { matchesShortcut, matchesAny } from "@base/keyboard.ts";
+import {memo, useCallback, useMemo, useRef, useState} from "react";
+import {ArrowUp} from "lucide-react";
+import {Textarea} from "@/ui/textarea.tsx";
+import {Button} from "@/ui/button.tsx";
+import {type SnippetItem, useSnippets} from "@/hooks/use-snippets.ts";
+import {cn} from "@/utils";
+import {matchesAny, matchesShortcut} from "@base/keyboard.ts";
+import {useStore} from "@/store/app.ts";
 
 interface ActivityFeedFormProps {
+    sessionId: string;
     onSubmitMessage: (message: string) => void;
     sending: boolean;
 }
 
 export const ActivityFeedForm = memo(
-    function ActivityFeedForm({ onSubmitMessage, sending }: ActivityFeedFormProps) {
-        const [message, setMessage] = useState("");
+    function ActivityFeedForm({sessionId, onSubmitMessage, sending}: ActivityFeedFormProps) {
+        // draft lives in the store (keyed by session) instead of local state so it
+        // survives switching pages mid-write — see store/app.ts `drafts`.
+        const message = useStore(useCallback(s => s.drafts[sessionId] ?? "", [sessionId]));
+        const setDraft = useStore(s => s.setDraft);
+        const setMessage = useCallback((text: string) => {
+            setDraft(sessionId, text);
+        }, [setDraft, sessionId]);
         const [presetsOpen, setPresetsOpen] = useState(false);
         const [activePresetIndex, setActivePresetIndex] = useState(0);
         const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -169,6 +177,9 @@ export const ActivityFeedForm = memo(
             </form>
         );
     },
-    (prevProps, nextProps) => prevProps.sending === nextProps.sending && prevProps.onSubmitMessage === nextProps.onSubmitMessage
+    (prevProps, nextProps) =>
+        prevProps.sending === nextProps.sending &&
+        prevProps.onSubmitMessage === nextProps.onSubmitMessage &&
+        prevProps.sessionId === nextProps.sessionId
 );
 export default ActivityFeedForm;

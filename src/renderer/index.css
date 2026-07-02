@@ -267,7 +267,7 @@
     text-rendering: optimizeLegibility;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      line-height: var(--linethere '' -height-base, 1.5);
+      line-height: var(--line-height-base, 1.5);
     letter-spacing: var(--letter-spacing-base, normal);
     word-spacing: var(--word-spacing-base, normal);
   }
@@ -425,8 +425,8 @@
 }
 
 /* ── XTERM OVERRIDES ───────────────────────────────────────────────────────── */
-.xterm-viewport, .xterm-screen {
-    background-color: transparent;
+.xterm, .xterm-viewport, .xterm-screen {
+    background-color: transparent !important;
 }
 
 /* ── SMALL WINDOW / WIDGET MODE TOPBAR OVERRIDES ───────────────────────────── */

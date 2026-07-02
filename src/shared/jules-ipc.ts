@@ -81,6 +81,34 @@ export interface JulesArtifactIPC {
     save: (data: string, filepath: string) => Promise<string>
 }
 
+export interface JulesSessionInsights {
+    completionAttempts: number
+    planRegenerations: number
+    userInterventions: number
+    failedCommandCount: number
+}
+
+export interface JulesTimelineEntry {
+    time: string
+    type: string
+    summary: string
+}
+
+export interface JulesSessionSnapshot {
+    id: string
+    state: string
+    url: string
+    title: string
+    prompt: string
+    createdAt: string
+    updatedAt: string
+    durationMs: number
+    activityCounts: Record<string, number>
+    timeline: JulesTimelineEntry[]
+    insights: JulesSessionInsights
+    pr?: { url: string; title: string; description: string }
+}
+
 export interface JulesCacheIPC {
     sessions: () => Promise<unknown[]>
     select: (query: unknown) => Promise<unknown[]>
@@ -94,6 +122,7 @@ export interface JulesCacheIPC {
     activities: (sessionId: string) => Promise<unknown[]>
     send: (sessionId: string, msg: string) => Promise<void>
     approve: (sessionId: string) => Promise<void>
+    snapshot: (sessionId: string) => Promise<JulesSessionSnapshot>
 }
 
 export interface JulesIPC {

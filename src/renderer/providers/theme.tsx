@@ -1,4 +1,3 @@
-import {type ReactNode} from 'react'
 import {create} from 'zustand'
 
 export type Theme = 'light' | 'dark'
@@ -36,8 +35,12 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 'dark'
     }
     })(),
-    toggle: () => set((state) => ({theme: state.theme === 'dark' ? 'light' : 'dark'})),
-    set: (t: Theme) => set({theme: t}),
+    toggle: () => {
+        set((state) => ({theme: state.theme === 'dark' ? 'light' : 'dark'}))
+    },
+    set: (t: Theme) => {
+        set({theme: t})
+    },
     fontSize: (() => {
     try {
       const val = localStorage.getItem('gulp:fontSizeVal')
@@ -46,7 +49,9 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 16
     }
     })(),
-    setFontSize: (s: number) => set({fontSize: s}),
+    setFontSize: (s: number) => {
+        set({fontSize: s})
+    },
     fontBasic: (() => {
     try {
       return localStorage.getItem('gulp:fontBasicVal') ?? 'Inter'
@@ -54,7 +59,9 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 'Inter'
     }
     })(),
-    setFontBasic: (f: string) => set({fontBasic: f}),
+    setFontBasic: (f: string) => {
+        set({fontBasic: f})
+    },
     fontMarkdown: (() => {
     try {
       return localStorage.getItem('gulp:fontMarkdownVal') ?? 'Inter'
@@ -62,7 +69,9 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 'Inter'
     }
     })(),
-    setFontMarkdown: (f: string) => set({fontMarkdown: f}),
+    setFontMarkdown: (f: string) => {
+        set({fontMarkdown: f})
+    },
     fontCode: (() => {
     try {
       return localStorage.getItem('gulp:fontCodeVal') ?? 'JetBrains Mono'
@@ -70,7 +79,9 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 'JetBrains Mono'
     }
     })(),
-    setFontCode: (f: string) => set({fontCode: f}),
+    setFontCode: (f: string) => {
+        set({fontCode: f})
+    },
     fontWeight: (() => {
     try {
       const val = localStorage.getItem('gulp:fontWeightVal')
@@ -79,7 +90,9 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 400
     }
     })(),
-    setFontWeight: (w: number) => set({fontWeight: w}),
+    setFontWeight: (w: number) => {
+        set({fontWeight: w})
+    },
     spacing: (() => {
     try {
       const val = localStorage.getItem('gulp:spacingVal')
@@ -88,7 +101,9 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 0.25
     }
     })(),
-    setSpacing: (s: number) => set({spacing: s}),
+    setSpacing: (s: number) => {
+        set({spacing: s})
+    },
     lineHeight: (() => {
     try {
       const val = localStorage.getItem('gulp:lineHeightVal')
@@ -97,7 +112,9 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 1.5
     }
     })(),
-    setLineHeight: (l: number) => set({lineHeight: l}),
+    setLineHeight: (l: number) => {
+        set({lineHeight: l})
+    },
     letterSpacing: (() => {
     try {
       return localStorage.getItem('gulp:letterSpacingVal') ?? 'normal'
@@ -105,7 +122,9 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 'normal'
     }
     })(),
-    setLetterSpacing: (s: string) => set({letterSpacing: s}),
+    setLetterSpacing: (s: string) => {
+        set({letterSpacing: s})
+    },
     wordSpacing: (() => {
     try {
       return localStorage.getItem('gulp:wordSpacingVal') ?? 'normal'
@@ -113,12 +132,47 @@ export const useThemeStore = create<ThemeCtx>((set) => ({
       return 'normal'
     }
     })(),
-    setWordSpacing: (s: string) => set({wordSpacing: s}),
+    setWordSpacing: (s: string) => {
+        set({wordSpacing: s})
+    },
 }))
 
 const SYSTEM_FONTS = new Set(['system-ui', 'sans-serif', 'monospace', 'ui-monospace', 'ui-sans-serif', 'ui-serif', 'serif', 'cursive', 'fantasy'])
 const formatFont = (name: string, fallback: 'sans-serif' | 'monospace') =>
     SYSTEM_FONTS.has(name) ? name : `'${name}', ${fallback}`
+
+const GF_MAP: Record<string, string> = {
+    'Inter': 'Inter:wght@300;400;500;600;700',
+    'Outfit': 'Outfit:wght@300;400;500;600;700',
+    'DM Sans': 'DM+Sans:wght@300;400;500;600;700',
+    'Nunito': 'Nunito:wght@300;400;500;600;700',
+    'Roboto': 'Roboto:wght@300;400;500;700',
+    'Open Sans': 'Open+Sans:wght@300;400;500;600;700',
+    'Geist': 'Geist:wght@300;400;500;600;700',
+    'Plus Jakarta Sans': 'Plus+Jakarta+Sans:wght@300;400;500;600;700',
+    'Lato': 'Lato:wght@300;400;700',
+    'Raleway': 'Raleway:wght@300;400;500;600;700',
+    'Poppins': 'Poppins:wght@300;400;500;600;700',
+    'JetBrains Mono': 'JetBrains+Mono:wght@300;400;500;600;700',
+    'Fira Code': 'Fira+Code:wght@300;400;500;600;700',
+    'Geist Mono': 'Geist+Mono:wght@300;400;500;600;700',
+    'Source Code Pro': 'Source+Code+Pro:wght@300;400;500;600;700',
+    'Inconsolata': 'Inconsolata:wght@300;400;500;600;700',
+    'IBM Plex Mono': 'IBM+Plex+Mono:wght@300;400;500;600;700',
+}
+
+export function loadFont(name: string): void {
+    if (typeof document === 'undefined') return
+    const family = GF_MAP[name]
+    if (!family) return
+    const id = `gf-${name.replace(/\s+/g, '-').toLowerCase()}`
+    if (document.getElementById(id)) return
+    const link = document.createElement('link')
+    link.id = id
+    link.rel = 'stylesheet'
+    link.href = `https://fonts.googleapis.com/css2?family=${family}&display=swap`
+    document.head.appendChild(link)
+}
 
 export function applyThemeStyles(state: ThemeCtx): void {
     if (typeof document === 'undefined') return
@@ -126,6 +180,10 @@ export function applyThemeStyles(state: ThemeCtx): void {
 
     root.classList.toggle('dark', state.theme === 'dark')
     localStorage.setItem('gulp:theme', state.theme)
+
+    loadFont(state.fontBasic)
+    loadFont(state.fontMarkdown)
+    loadFont(state.fontCode)
 
     // Apply Dynamic Sizing (1rem = fontSize)
     root.style.fontSize = `${state.fontSize}px`
@@ -139,6 +197,16 @@ export function applyThemeStyles(state: ThemeCtx): void {
     localStorage.setItem('gulp:fontBasicVal', state.fontBasic)
     localStorage.setItem('gulp:fontMarkdownVal', state.fontMarkdown)
     localStorage.setItem('gulp:fontCodeVal', state.fontCode)
+
+    // Keep BlockNote in sync with markdown font + base size
+    const bnId = 'bn-font-sync'
+    let bnEl = document.getElementById(bnId) as HTMLStyleElement | null
+    if (!bnEl) {
+        bnEl = document.createElement('style')
+        bnEl.id = bnId
+        document.head.appendChild(bnEl)
+    }
+    bnEl.textContent = `.bn-editor .ProseMirror, .bn-editor .ProseMirror p { font-family: ${formatFont(state.fontMarkdown, 'sans-serif')}; font-size: ${state.fontSize}px; }`
 
     // Apply Dynamic Weights
     const w = state.fontWeight
@@ -178,10 +246,6 @@ if (import.meta.hot) {
     import.meta.hot.dispose(() => {
         _unsub()
     })
-}
-
-export function ThemeProvider({children}: { children: ReactNode }) {
-    return <>{children}</>
 }
 
 export function useTheme(): ThemeCtx {

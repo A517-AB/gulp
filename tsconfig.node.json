@@ -13,10 +13,10 @@
         "./electron/*"
       ],
       "@jules": [
-        "./electron/ipc/dist/index.d.ts"
+        "./dist-jules/"
       ],
       "@jules/*": [
-        "./electron/ipc/dist/*"
+        "./dist-jules/*"
       ]
     },
 
