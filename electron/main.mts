@@ -146,6 +146,9 @@ ipcMain.on("window.quit", () => {
 // ── lifecycle ─────────────────────────────────────────────────────────────────
 app.setAppUserModelId("com.last.app");
 
+// Fix 60-second startup delay on Windows caused by WPAD (Web Proxy Auto-Discovery) timing out
+app.commandLine.appendSwitch("no-proxy-server");
+
 void app.whenReady().then(() => {
   const t0 = performance.now();
   const t = (label: string) => {
