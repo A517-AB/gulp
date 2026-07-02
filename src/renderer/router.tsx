@@ -92,7 +92,13 @@ const electronRoutes: AppRoute[] = [
 
 // ── web ───────────────────────────────────────────────────────────────────────
 // keeping the web idea for just backup, don't remove or fickle or didle iwth
-const webRoutes: AppRoute[] = []
+const webRoutes: AppRoute[] = [
+    {
+        path: 'fleet',
+        lazy: () => import('@renderer/pages/web/fleet/FleetPage').then(m => ({Component: m.default})),
+        handle: {title: 'Fleet', inNav: true}
+    },
+]
 
 // ── nav export ────────────────────────────────────────────────────────────────
 

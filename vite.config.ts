@@ -1,3 +1,4 @@
+import path from "node:path";
 import {defineConfig} from 'vite'
 import react, {reactCompilerPreset} from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
@@ -27,12 +28,12 @@ export default defineConfig({
         // not dist-jules/index.mjs (the Node build, which imports node:fs/node:crypto and
         // gets externalized/crashes in the browser). tsconfig-paths still points @jules's
         // *types* at the plain dist-jules dir (index.d.ts) since it's a superset of browser.d.ts.
-        {find: '@jules', replacement: resolve(__dirname, 'dist-jules/browser.mjs')},
+        {find: '@jules', replacement: path.resolve(__dirname, 'dist-jules/browser.mjs')},
 
 
         {find: 'node:path', replacement: 'path-browserify'},
-        {find: 'react', replacement: resolve(__dirname, 'node_modules/react')},
-        {find: 'react-dom', replacement: resolve(__dirname, 'node_modules/react-dom')},
+        {find: 'react', replacement: path.resolve(__dirname, 'node_modules/react')},
+        {find: 'react-dom', replacement: path.resolve(__dirname, 'node_modules/react-dom')},
         // 2026-06-22: For later, not for dev
         // { find: '@syncfusion/ej2-gantt',            replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-gantt/dist-jules/es6/ej2-gantt.es5.js' },
         // { find: '@syncfusion/ej2-react-gantt',       replacement: 'D:/synco/JavaScript - EJ2/32.1.19/Web (Essential JS 2)/JavaScript/ej2-react-gantt/dist-jules/es6/ej2-react-gantt.es5.js' },
@@ -77,8 +78,8 @@ export default defineConfig({
       emptyOutDir: !keepVendors && !isNotif,
     rolldownOptions: {
       input: isNotif
-        ? { notification: resolve(__dirname, 'notification.html') }
-        : { index:        resolve(__dirname, 'index.html') },
+        ? { notification: path.resolve(__dirname, 'notification.html') }
+        : { index:        path.resolve(__dirname, 'index.html') },
       output: isNotif ? {} : {
         manualChunks(id: string): string | undefined {
           if (id.includes('node_modules/react')) return 'vendor-react'
@@ -116,7 +117,7 @@ export default defineConfig({
                   // main is Node — @jules must be the node source (disk cache),
                   // NOT the renderer's browser.mjs. Scoped to this build only.
                   alias: [
-                      {find: '@jules', replacement: resolve(__dirname, 'electron/ipc/Jules/index.ts')},
+                      {find: '@jules', replacement: path.resolve(__dirname, 'electron/ipc/Jules/index.ts')},
                   ],
               },
             build: {
